@@ -1,0 +1,27 @@
+{
+  "name": "casper-rwa-court-agents",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "valuation-a": "tsx valuation-agent-a/server.ts",
+    "valuation-b": "tsx valuation-agent-b/server.ts",
+    "orchestrator": "tsx orchestrator/index.ts",
+    "test-agents": "concurrently \"npm run valuation-a\" \"npm run valuation-b\" \"sleep 2 && npm run orchestrator\"",
+    "dev": "concurrently \"npm run valuation-a\" \"npm run valuation-b\""
+  },
+  "dependencies": {
+    "axios": "^1.7.0",
+    "casper-js-sdk": "^5.0.12",
+    "dotenv": "^16.4.0",
+    "express": "^4.21.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "concurrently": "^9.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,8 @@
+[[contracts]]
+fqn = "voting::VotingContract"
+
+[[contracts]]
+fqn = "escrow::EscrowContract"
+
+[[contracts]]
+fqn = "reputation::ReputationRegistry"

@@ -1,0 +1,27 @@
+# Private keys — NEVER commit these
+keys/
+*.pem
+
+# Rust
+target/
+*.wasm
+Cargo.lock
+
+# Node
+node_modules/
+dist/
+.turbo/
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# Vectra index
+deliberation/precedents/index/
+
+# OS
+.DS_Store
