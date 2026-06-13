@@ -6,15 +6,25 @@
   "scripts": {
     "valuation-a": "tsx valuation-agent-a/server.ts",
     "valuation-b": "tsx valuation-agent-b/server.ts",
+    "juror-evidence": "tsx evidence-analyst/server.ts",
+    "juror-market": "tsx market-data-interpreter/server.ts",
+    "juror-precedent": "tsx precedent-researcher/server.ts",
     "orchestrator": "tsx orchestrator/index.ts",
-    "test-agents": "concurrently \"npm run valuation-a\" \"npm run valuation-b\" \"sleep 2 && npm run orchestrator\"",
-    "dev": "concurrently \"npm run valuation-a\" \"npm run valuation-b\""
+    "test-agents": "concurrently \"npm run valuation-a\" \"npm run valuation-b\" \"npm run juror-evidence\" \"npm run juror-market\" \"npm run juror-precedent\" \"sleep 4 && npm run orchestrator\"",
+    "dev": "concurrently \"npm run valuation-a\" \"npm run valuation-b\" \"npm run juror-evidence\" \"npm run juror-market\" \"npm run juror-precedent\""
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@types/cors": "^2.8.19",
+    "@types/ws": "^8.18.1",
     "axios": "^1.7.0",
     "casper-js-sdk": "^5.0.12",
+    "cors": "^2.8.6",
     "dotenv": "^16.4.0",
     "express": "^4.21.0",
+    "groq-sdk": "^1.2.1",
+    "vectra": "^0.12.3",
+    "ws": "^8.21.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {

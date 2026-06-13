@@ -1,5 +1,7 @@
 import express from 'express';
 import { z } from 'zod';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { simulatedX402Middleware } from './x402-middleware.js';
 import type { ValuationResult } from './types.js';
 
@@ -9,7 +11,12 @@ const COMPARABLE_SALES = [
   { location: 'Miami', area: 'downtown', spots: 120, price_per_spot: 22800, date: '2025-09' },
   { location: 'Miami', area: 'brickell', spots: 80, price_per_spot: 28000, date: '2026-01' },
   { location: 'Miami', area: 'midtown', spots: 60, price_per_spot: 19500, date: '2025-10' },
-  { location: 'NYC', area: 'midtown', spots: 200, price_per_spot: 85000, date: '2022-12' },
+  { location: 'Miami', area: 'wynwood', spots: 110, price_per_spot: 21500, date: '2026-02' },
+  { location: 'Miami', area: 'coralgables', spots: 45, price_per_spot: 31000, date: '2025-12' },
+  { location: 'Miami', area: 'downtown', spots: 150, price_per_spot: 23500, date: '2026-03' },
+  { location: 'Miami', area: 'brickell', spots: 90, price_per_spot: 29500, date: '2025-08' },
+  { location: 'Miami', area: 'wynwood', spots: 75, price_per_spot: 20000, date: '2026-01' },
+  { location: 'NYC', area: 'midtown', spots: 200, price_per_spot: 95000, date: '2026-01' },
   { location: 'LA', area: 'beverly', spots: 75, price_per_spot: 58000, date: '2026-02' },
 ];
 
@@ -107,44 +114,37 @@ export function createAgentServer(config: AgentConfig) {
     amountCSPR: '0.01',
   }));
 
-  // MCP JSON-RPC endpoint
+  // MCP endpoint setup via SDK
   app.post('/mcp', async (req, res) => {
-    const { method, params, id } = req.body;
-
-    if (method === 'tools/call' && params?.name === 'assess_asset_autonomously') {
-      const { asset_id, location, spot_count } = params.arguments;
-      const result = autonomousRoute(config.name, config.methodPreference, asset_id, location, spot_count);
-
-      return res.json({
-        jsonrpc: '2.0',
-        id,
-        result: { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] },
+    try {
+      const mcpServer = new McpServer({
+        name: config.name,
+        version: '1.0.0',
       });
-    }
 
-    if (method === 'tools/list') {
-      return res.json({
-        jsonrpc: '2.0',
-        id,
-        result: {
-          tools: [{
-            name: 'assess_asset_autonomously',
-            description: 'Autonomously assess a parking asset using the best available method',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                asset_id: { type: 'string' },
-                location: { type: 'string' },
-                spot_count: { type: 'number' },
-              },
-              required: ['asset_id', 'location', 'spot_count'],
-            },
-          }],
+      mcpServer.tool(
+        'assess_asset_autonomously',
+        'Autonomously assess a parking asset using the best available method',
+        {
+          asset_id: z.string(),
+          location: z.string(),
+          spot_count: z.number(),
         },
-      });
-    }
+        async ({ asset_id, location, spot_count }) => {
+          const result = autonomousRoute(config.name, config.methodPreference, asset_id, location, spot_count);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+      );
 
-    return res.status(404).json({ jsonrpc: '2.0', id, error: { code: -32601, message: 'Method not found' } });
+      const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+      await mcpServer.connect(transport);
+      await transport.handleRequest(req, res, req.body);
+    } catch (err: any) {
+      console.error(`[Express] Error in /mcp: ${err.message}`, err);
+      res.status(500).json({ error: err.message });
+    }
   });
 
   app.get('/health', (_, res) => {

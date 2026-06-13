@@ -25,3 +25,6 @@ deliberation/precedents/index/
 
 # OS
 .DS_Store
+
+deploy-*.json
+test_transfer.json

@@ -4,17 +4,23 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 import axios from 'axios';
+import { fetchWithX402 } from '../shared/x402-client';
+import { getCasperMcpClient } from '../shared/casper-mcp-client';
+import { emitEvent } from '../websocket-server';
 import { execSync } from 'child_process';
 import fs from 'fs';
 
 const CSPR_CLOUD_URL = process.env.CSPRCLOUD_BASE_URL || 'https://api.cspr.cloud/v1';
 const CSPR_CLOUD_KEY = process.env.CSPRCLOUD_API_KEY || '';
 
-// Agent reputation scores — in production these come from the on-chain ReputationRegistry
-const AGENT_REPUTATIONS: Record<string, number> = {
-  'Agent-A': parseInt(process.env.AGENT_A_REPUTATION || '750', 10),
-  'Agent-B': parseInt(process.env.AGENT_B_REPUTATION || '720', 10),
-};
+// Helper: Fetch on-chain reputation (Stub for now, falls back to env vars)
+async function fetchOnChainReputation(agentId: string): Promise<number> {
+  // TODO: Use casper-js-sdk to query the ReputationRegistry contract state using REPUTATION_CONTRACT_HASH
+  const envKey = `${agentId.replace('-', '_').toUpperCase()}_REPUTATION`;
+  const fallback = parseInt(process.env[envKey] || '700', 10);
+  console.log(`  [ReputationRegistry] ⚠️ Querying on-chain reputation for ${agentId}. Falling back to env var ${envKey}: ${fallback}`);
+  return fallback;
+}
 
 // Helper: Execute and broadcast Casper Native Transfer via CSPR.cloud
 async function executeCasperTransfer(targetPublicKeyHex: string, amountMotes: number, transferId: number): Promise<string> {
@@ -96,16 +102,38 @@ async function fetchWithX402(url: string, payload: any, agentLabel: string) {
       })).toString('base64');
 
       const retry = await axios.post(url, payload, {
-        headers: { 'x-payment-proof': proof },
+        headers: { 
+          'x-payment-proof': proof,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json, text/event-stream'
+        },
       });
+      
+      let data = retry.data;
+      if (typeof data === 'string') {
+        const lines = data.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].startsWith('event: message') && i + 1 < lines.length && lines[i+1].startsWith('data: ')) {
+            const raw = lines[i+1].substring(6);
+            try {
+              data = JSON.parse(raw);
+            } catch (err: any) {
+              console.log(`  [DEBUG] Failed to parse: >>>${raw}<<< Error: ${err.message}`);
+              throw err;
+            }
+            break;
+          }
+        }
+      }
+      
       console.log(`  [x402] ✅ Payment accepted, response received`);
-      return retry.data;
+      return data;
     }
     throw error;
   }
 }
 
-// Helper: Query CSPR.cloud for real blockchain data
+// Helper: Query CSPR.cloud for real blockchain data via MCP (with REST fallback)
 async function fetchCasperAccountInfo(publicKey: string) {
   if (!CSPR_CLOUD_KEY) {
     console.log(`  [cspr.cloud] No API key configured, skipping`);
@@ -113,13 +141,23 @@ async function fetchCasperAccountInfo(publicKey: string) {
   }
 
   try {
-    const res = await axios.get(`${CSPR_CLOUD_URL}/accounts/${publicKey}`, {
-      headers: { Authorization: CSPR_CLOUD_KEY },
+    const client = await getCasperMcpClient();
+    const res = await client.callTool({
+      name: 'GetAccountBalance',
+      arguments: { public_key: publicKey }
     });
-    return res.data;
-  } catch (e: any) {
-    console.log(`  [cspr.cloud] Account lookup failed: ${e.response?.status || e.message}`);
-    return null;
+    // @ts-ignore
+    return { data: { balance: res.content[0].text } };
+  } catch (mcpError: any) {
+    try {
+      const res = await axios.get(`${CSPR_CLOUD_URL}/accounts/${publicKey}`, {
+        headers: { Authorization: CSPR_CLOUD_KEY },
+      });
+      return res.data;
+    } catch (e: any) {
+      console.log(`  [cspr.cloud] Account lookup failed: ${e.response?.status || e.message}`);
+      return null;
+    }
   }
 }
 
@@ -127,18 +165,31 @@ async function fetchLatestBlock() {
   if (!CSPR_CLOUD_KEY) return null;
 
   try {
-    const res = await axios.get(`${CSPR_CLOUD_URL}/blocks?page=1&page_size=1&order_direction=DESC`, {
-      headers: { Authorization: CSPR_CLOUD_KEY },
+    const client = await getCasperMcpClient();
+    const res = await client.callTool({
+      name: 'GetLatestBlock',
+      arguments: {}
     });
-    return res.data?.data?.[0] || null;
-  } catch (e: any) {
-    console.log(`  [cspr.cloud] Block fetch failed: ${e.response?.status || e.message}`);
-    return null;
+    // @ts-ignore
+    const data = JSON.parse(res.content[0].text);
+    return { block_height: data.block_height || 'latest', timestamp: data.timestamp || new Date().toISOString() };
+  } catch (mcpError: any) {
+    try {
+      const res = await axios.get(`${CSPR_CLOUD_URL}/blocks?page=1&page_size=1&order_direction=DESC`, {
+        headers: { Authorization: CSPR_CLOUD_KEY },
+      });
+      return res.data?.data?.[0] || null;
+    } catch (e: any) {
+      console.log(`  [cspr.cloud] Block fetch failed: ${e.response?.status || e.message}`);
+      return null;
+    }
   }
 }
 
 // Main dispute resolution pipeline
 export async function runDisputeResolution(disputeId: string, assetId: string, location: string, spotCount: number) {
+  emitEvent('dispute_started', { disputeId, assetId, location, spotCount });
+
   console.log(`\n${'='.repeat(60)}`);
   console.log(`⚖️  CASPER RWA COURT — DISPUTE #${disputeId}`);
   console.log(`${'='.repeat(60)}`);
@@ -181,6 +232,7 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     const res = await fetchWithX402('http://localhost:3001/mcp', mcpPayload, 'Agent-A');
     resultA = JSON.parse(res.result.content[0].text);
     console.log(`  📊 Agent-A verdict: $${resultA.estimated_value.toLocaleString()} via ${resultA.method}`);
+    emitEvent('valuation_result', { agent: 'Agent-A', result: resultA });
   } catch (e: any) {
     console.error(`  ❌ Agent-A failed: ${e.message}`);
   }
@@ -191,6 +243,7 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     const res = await fetchWithX402('http://localhost:3002/mcp', mcpPayload, 'Agent-B');
     resultB = JSON.parse(res.result.content[0].text);
     console.log(`  📊 Agent-B verdict: $${resultB.estimated_value.toLocaleString()} via ${resultB.method}`);
+    emitEvent('valuation_result', { agent: 'Agent-B', result: resultB });
   } catch (e: any) {
     console.error(`  ❌ Agent-B failed: ${e.message}`);
   }
@@ -200,72 +253,130 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     return;
   }
 
-  // Step 3: Reputation-weighted deliberation
-  console.log(`\n--- Step 3: Reputation-Weighted Deliberation ---`);
-  const repA = AGENT_REPUTATIONS['Agent-A'];
-  const repB = AGENT_REPUTATIONS['Agent-B'];
-  const totalRep = repA + repB;
+  // Step 3: Summon Jurors for Deliberation (Round 1)
+  console.log(`\n--- Step 3: Juror Deliberation (Round 1) ---`);
+  
+  const jurorPorts = [
+    { name: 'Evidence Analyst', port: 3003, rep: await fetchOnChainReputation('Agent-C') },
+    { name: 'Market Data Interpreter', port: 3004, rep: await fetchOnChainReputation('Agent-D') },
+    { name: 'Precedent Researcher', port: 3005, rep: await fetchOnChainReputation('Agent-E') },
+  ];
 
-  console.log(`  Agent-A reputation: ${repA}/1000 (weight: ${((repA / totalRep) * 100).toFixed(1)}%)`);
-  console.log(`  Agent-B reputation: ${repB}/1000 (weight: ${((repB / totalRep) * 100).toFixed(1)}%)`);
+  const jurorArgs = {
+    dispute_id: disputeId,
+    asset_id: assetId,
+    location,
+    spot_count: spotCount,
+    valuation_a: resultA.estimated_value,
+    valuation_b: resultB.estimated_value,
+  };
 
-  const weightedValue = Math.round(
-    (resultA.estimated_value * repA + resultB.estimated_value * repB) / totalRep
-  );
+  const jurorMcpPayload = {
+    jsonrpc: '2.0',
+    id: 2,
+    method: 'tools/call',
+    params: {
+      name: 'deliberate',
+      arguments: jurorArgs,
+    },
+  };
 
-  const divergence = Math.abs(resultA.estimated_value - resultB.estimated_value);
-  const divergencePct = ((divergence / Math.min(resultA.estimated_value, resultB.estimated_value)) * 100).toFixed(1);
+  const round1Results = await Promise.all(jurorPorts.map(async (juror) => {
+    try {
+      const res = await fetchWithX402(`http://localhost:${juror.port}/mcp`, jurorMcpPayload, juror.name);
+      const rawText = res.result?.content?.[0]?.text;
+      console.log(`  [DEBUG] Juror ${juror.name} rawText: >>>${rawText}<<<`);
+      const verdict = JSON.parse(rawText);
+      console.log(`  👨‍⚖️ ${juror.name} (Rep: ${juror.rep}): Voted ${verdict.vote} | ${verdict.reasoning}`);
+      emitEvent('juror_vote', { juror: juror.name, round: 1, verdict, rep: juror.rep });
+      return { juror, verdict };
+    } catch (e: any) {
+      console.error(`  ❌ ${juror.name} failed: ${e.message}`);
+      return null;
+    }
+  }));
 
-  console.log(`\n  Agent-A: $${resultA.estimated_value.toLocaleString()} (${resultA.method})`);
-  console.log(`  Agent-B: $${resultB.estimated_value.toLocaleString()} (${resultB.method})`);
-  console.log(`  Divergence: $${divergence.toLocaleString()} (${divergencePct}%)`);
-  console.log(`  Reputation-weighted value: $${weightedValue.toLocaleString()}`);
+  const validRound1 = round1Results.filter(r => r !== null);
+  const peerReasoning = validRound1.map(r => `${r!.juror.name} voted ${r!.verdict.vote} because: ${r!.verdict.reasoning}`);
 
-  // Verdict decision based on divergence thresholds
-  let verdict: string;
+  // Step 4: Multi-Round Deliberation Engine (Round 2)
+  console.log(`\n--- Step 4: Juror Deliberation (Round 2 - Peer Review) ---`);
+  
+  const round2Args = { ...jurorArgs, peer_reasoning: peerReasoning };
+  const jurorMcpPayload2 = {
+    jsonrpc: '2.0',
+    id: 3,
+    method: 'tools/call',
+    params: { name: 'deliberate', arguments: round2Args },
+  };
+
+  const round2Results = await Promise.all(jurorPorts.map(async (juror) => {
+    try {
+      const res = await fetchWithX402(`http://localhost:${juror.port}/mcp`, jurorMcpPayload2, juror.name);
+      const verdict = JSON.parse(res.result.content[0].text);
+      console.log(`  👨‍⚖️ ${juror.name}: Final Vote ${verdict.vote} | ${verdict.reasoning}`);
+      emitEvent('juror_vote', { juror: juror.name, round: 2, verdict, rep: juror.rep });
+      return { juror, verdict };
+    } catch (e: any) {
+      console.error(`  ❌ ${juror.name} failed: ${e.message}`);
+      return null;
+    }
+  }));
+
+  const validRound2 = round2Results.filter(r => r !== null);
+
+  // Step 5: Reputation-Weighted Vote Tally
+  console.log(`\n--- Step 5: Reputation-Weighted Vote Tally ---`);
+  let scoreA = 0;
+  let scoreB = 0;
+  let scoreSplit = 0;
+  let totalRep = 0;
+
+  for (const r of validRound2) {
+    const { juror, verdict } = r!;
+    totalRep += juror.rep;
+    if (verdict.vote === 'A') scoreA += juror.rep;
+    else if (verdict.vote === 'B') scoreB += juror.rep;
+    else scoreSplit += juror.rep;
+  }
+
+  let finalVerdict: string;
   let verdictIndex: number;
   let finalValue: number;
 
-  if (parseFloat(divergencePct) < 10) {
-    verdict = 'SplitFifty';
-    verdictIndex = 1;
-    finalValue = weightedValue;
-    console.log(`\n  📋 Low divergence — both methods credible. Splitting.`);
-  } else if (parseFloat(divergencePct) < 30) {
-    verdict = 'SplitFifty';
-    verdictIndex = 1;
-    finalValue = weightedValue;
-    console.log(`\n  📋 Moderate divergence — using reputation-weighted average.`);
+  if (scoreA >= scoreB && scoreA >= scoreSplit) {
+    finalVerdict = 'FullRefund';
+    verdictIndex = 0;
+    finalValue = resultA.estimated_value;
+    console.log(`  📋 Verdict: FullRefund (Favoring Comps/Agent A) - Weight: ${scoreA}`);
+  } else if (scoreB >= scoreA && scoreB >= scoreSplit) {
+    finalVerdict = 'FullRelease';
+    verdictIndex = 2;
+    finalValue = resultB.estimated_value;
+    console.log(`  📋 Verdict: FullRelease (Favoring DCF/Agent B) - Weight: ${scoreB}`);
   } else {
-    // High divergence — lean on the agent with higher reputation
-    if (repA > repB) {
-      verdict = 'FullRefund';
-      verdictIndex = 0;
-      finalValue = resultA.estimated_value;
-      console.log(`\n  📋 High divergence — Agent-A has stronger reputation. Favoring comps.`);
-    } else {
-      verdict = 'FullRelease';
-      verdictIndex = 2;
-      finalValue = resultB.estimated_value;
-      console.log(`\n  📋 High divergence — Agent-B has stronger reputation. Favoring DCF.`);
-    }
+    finalVerdict = 'SplitFifty';
+    verdictIndex = 1;
+    finalValue = Math.round((resultA.estimated_value + resultB.estimated_value) / 2);
+    console.log(`  📋 Verdict: SplitFifty - Weight: ${scoreSplit}`);
   }
 
   console.log(`\n${'─'.repeat(60)}`);
-  console.log(`⚖️  VERDICT: ${verdict}`);
+  console.log(`⚖️  VERDICT: ${finalVerdict}`);
   console.log(`💵 Final Assessed Value: $${finalValue.toLocaleString()}`);
   console.log(`${'─'.repeat(60)}`);
 
-  // Step 4: On-chain settlement summary
-  console.log(`\n--- Step 4: Casper Blockchain Settlement ---`);
+  emitEvent('final_verdict', { disputeId, finalVerdict, finalValue, scoreA, scoreB, scoreSplit });
+
+  console.log(`\n--- Step 6: Casper Blockchain Settlement ---`);
   const votingHash = process.env.VOTING_CONTRACT_HASH;
   const escrowHash = process.env.ESCROW_CONTRACT_HASH;
   const reputationHash = process.env.REPUTATION_CONTRACT_HASH;
 
   if (votingHash) {
-    console.log(`  📝 VotingContract (${votingHash.slice(0, 16)}...): cast_vote(${disputeId}, ${verdictIndex}, ${repA})`);
+    console.log(`  📝 VotingContract (${votingHash.slice(0, 16)}...): cast_vote(${disputeId}, ${verdictIndex}, weight)`);
   } else {
-    console.log(`  📝 VotingContract: [PENDING DEPLOY] cast_vote(${disputeId}, verdict=${verdictIndex}, weight=${repA})`);
+    console.log(`  📝 VotingContract: [PENDING DEPLOY] cast_vote(${disputeId}, verdict=${verdictIndex}, weight)`);
   }
 
   if (escrowHash) {
@@ -280,10 +391,9 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     console.log(`  🏆 ReputationRegistry: [PENDING DEPLOY] retroactive update queued`);
   }
 
-  // Execute a real Native Transfer to fulfill hackathon eligibility criteria
   const deployerKeyPath = process.env.DEPLOYER_PRIVATE_KEY;
   if (deployerKeyPath) {
-    console.log(`\n--- Step 5: Executing Real On-Chain Native Transfer ---`);
+    console.log(`\n--- Step 7: Executing Real On-Chain Native Transfer ---`);
     try {
       const targetPublicKeyHex = process.env.AGENT_A_PUBLIC_KEY || process.env.DEPLOYER_PUBLIC_KEY;
       const amountMotes = 2500000000; // 2.5 CSPR
@@ -302,10 +412,36 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
 
   console.log(`\n✅ Dispute #${disputeId} resolution complete.\n`);
 
-  return { verdict, verdictIndex, finalValue, weightedValue, divergencePct };
+  return { verdict: finalVerdict, verdictIndex, finalValue };
 }
+
+import express from 'express';
+import cors from 'cors';
 
 // Run if executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  runDisputeResolution('DISP-001', 'PARKING-MIAMI-001', 'Miami', 100);
+  const app = express();
+  app.use(cors());
+  app.use(express.json());
+
+  app.post('/api/disputes/start', async (req, res) => {
+    try {
+      const disputeId = `DISP-${Math.floor(Math.random() * 1000)}`;
+      
+      // Start dispute asynchronously so we can return success immediately
+      // The frontend will receive logs via WebSocket
+      setTimeout(() => {
+        runDisputeResolution(disputeId, 'PARKING-MIAMI-001', 'Miami', 60);
+      }, 100);
+      
+      res.json({ success: true, disputeId });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  const PORT = process.env.ORCHESTRATOR_API_PORT || 3011;
+  app.listen(PORT, () => {
+    console.log(`🚀 Orchestrator API running on http://localhost:${PORT}`);
+  });
 }
