@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { simulatedX402Middleware } from './x402-middleware.js';
+import { getComparableSales } from './rentcast-client.js';
 import type { ValuationResult } from './types.js';
 
 // Mock market data that each agent instance can query
@@ -26,7 +27,7 @@ const DCF_DATA: Record<string, { daily_rate: number; occupancy: number; operatin
   'la': { daily_rate: 40, occupancy: 0.80, operating_expenses: 80000, cap_rate: 0.055 },
 };
 
-export function calcCompsValue(agentName: string, assetId: string, location: string, spotCount: number): ValuationResult {
+export async function calcCompsValue(agentName: string, assetId: string, location: string, spotCount: number): Promise<ValuationResult> {
   const city = location.toLowerCase().split(',')[0].trim();
   const comps = COMPARABLE_SALES.filter(c => c.location.toLowerCase() === city);
 
@@ -34,7 +35,26 @@ export function calcCompsValue(agentName: string, assetId: string, location: str
     throw new Error(`No comparable sales data for ${city}`);
   }
 
-  const avgPps = comps.reduce((sum, c) => sum + c.price_per_spot, 0) / comps.length;
+  let avgPps: number;
+  let dataSource = 'Mock Data';
+  let compsCount = comps.length;
+
+  try {
+    const realComps = await getComparableSales(city);
+    if (realComps && realComps.length > 0) {
+      // RentCast property price avg. (Assuming price / 100 for a single spot equivalent for demo)
+      const avgPrice = realComps.reduce((sum: number, c: any) => sum + (c.price || 0), 0) / realComps.length;
+      avgPps = avgPrice > 0 ? (avgPrice / 20) : (comps.reduce((sum, c) => sum + c.price_per_spot, 0) / comps.length); // fallback heuristics
+      dataSource = 'RentCast API';
+      compsCount = realComps.length;
+    } else {
+      avgPps = comps.reduce((sum, c) => sum + c.price_per_spot, 0) / comps.length;
+    }
+  } catch (err: any) {
+    console.log(`[${agentName}] RentCast API unavailable or rate limited, falling back to mock data.`);
+    avgPps = comps.reduce((sum, c) => sum + c.price_per_spot, 0) / comps.length;
+  }
+
   const estimated = Math.round(avgPps * spotCount);
 
   return {
@@ -42,14 +62,14 @@ export function calcCompsValue(agentName: string, assetId: string, location: str
     method: 'comparable_sales',
     asset_id: assetId,
     estimated_value: estimated,
-    confidence: Math.min(0.92, 0.70 + comps.length * 0.05),
+    confidence: Math.min(0.92, 0.70 + compsCount * 0.05),
     per_spot_value: Math.round(avgPps),
-    reasoning: `Analyzed ${comps.length} comparable sales in ${city}. Avg price/spot: $${Math.round(avgPps)}. Est: ${spotCount} spots × $${Math.round(avgPps)} = $${estimated}.`,
+    reasoning: `Analyzed ${compsCount} comparable sales in ${city} (Source: ${dataSource}). Avg price/spot: $${Math.round(avgPps)}. Est: ${spotCount} spots × $${Math.round(avgPps)} = $${estimated}.`,
     timestamp: Date.now(),
   };
 }
 
-export function calcDcfValue(agentName: string, assetId: string, location: string, spotCount: number): ValuationResult {
+export async function calcDcfValue(agentName: string, assetId: string, location: string, spotCount: number): Promise<ValuationResult> {
   const city = location.toLowerCase().split(',')[0].trim();
   const data = DCF_DATA[city] || DCF_DATA['miami'];
 
@@ -70,7 +90,7 @@ export function calcDcfValue(agentName: string, assetId: string, location: strin
 }
 
 // The autonomous method router — this is what makes each agent "intelligent"
-export function autonomousRoute(agentName: string, preference: 'comps' | 'dcf', assetId: string, location: string, spotCount: number): ValuationResult {
+export async function autonomousRoute(agentName: string, preference: 'comps' | 'dcf', assetId: string, location: string, spotCount: number): Promise<ValuationResult> {
   const city = location.toLowerCase().split(',')[0].trim();
   const comps = COMPARABLE_SALES.filter(c => c.location.toLowerCase() === city);
   const hasRecentComps = comps.some(c => {
@@ -83,13 +103,13 @@ export function autonomousRoute(agentName: string, preference: 'comps' | 'dcf', 
 
   if (preference === 'comps' && hasRecentComps) {
     chosenMethod = 'comparable_sales (data available)';
-    result = calcCompsValue(agentName, assetId, location, spotCount);
+    result = await calcCompsValue(agentName, assetId, location, spotCount);
   } else if (preference === 'comps' && !hasRecentComps) {
     chosenMethod = 'dcf (comps data stale, pivoting)';
-    result = calcDcfValue(agentName, assetId, location, spotCount);
+    result = await calcDcfValue(agentName, assetId, location, spotCount);
   } else {
     chosenMethod = 'dcf (preferred method)';
-    result = calcDcfValue(agentName, assetId, location, spotCount);
+    result = await calcDcfValue(agentName, assetId, location, spotCount);
   }
 
   console.log(`[${agentName}] Autonomy decision: ${chosenMethod}`);
@@ -131,7 +151,7 @@ export function createAgentServer(config: AgentConfig) {
           spot_count: z.number(),
         },
         async ({ asset_id, location, spot_count }) => {
-          const result = autonomousRoute(config.name, config.methodPreference, asset_id, location, spot_count);
+          const result = await autonomousRoute(config.name, config.methodPreference, asset_id, location, spot_count);
           return {
             content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
           };
