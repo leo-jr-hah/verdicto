@@ -40,7 +40,10 @@ export const DeliberationView: React.FC = () => {
         addLog(data.payload.agent, `Submitted valuation evidence: $${data.payload.result.estimated_value.toLocaleString()} (Method: ${data.payload.result.method})`, 'evidence');
       }
       else if (data.type === 'juror_vote') {
-        addLog(data.payload.juror, `Round ${data.payload.round} vote: ${data.payload.verdict.vote} (Confidence/Rep: ${data.payload.rep})`, 'juror');
+        const readableVote = data.payload.verdict.vote === 'FullRefund' ? 'a full refund' : 
+                             data.payload.verdict.vote === 'SplitFifty' ? 'a 50/50 split' : 
+                             data.payload.verdict.vote === 'FullRelease' ? 'a full release to the treasury' : data.payload.verdict.vote;
+        addLog(data.payload.juror, `Recommends ${readableVote} (Round ${data.payload.round}).\nReasoning: "${data.payload.verdict.reasoning}"`, 'juror');
       }
       else if (data.type === 'final_verdict') {
         setStatus('settled');
@@ -118,8 +121,8 @@ export const DeliberationView: React.FC = () => {
             />
           </div>
           {status === 'idle' && (
-            <button onClick={startDemo} style={{ background: '#fff', color: '#000', border: 'none', padding: '0.25rem 1rem', fontSize: '0.8rem', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', borderRadius: '4px' }}>
-              Trigger Dispute
+            <button onClick={startDemo} style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 0 10px rgba(255,59,59,0.3)' }}>
+              Start New Dispute
             </button>
           )}
         </div>
@@ -211,14 +214,21 @@ export const DeliberationView: React.FC = () => {
           <h3 style={{ fontSize: '0.85rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem', borderBottom: '1px solid #222', paddingBottom: '0.5rem' }}>Active Agents</h3>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {['Comps Specialist', 'DCF Specialist', 'Evidence Analyst', 'Market Data Interpreter', 'Precedent Researcher'].map((agent) => (
-              <div key={agent} style={{ padding: '0.75rem', border: '1px solid #222', backgroundColor: '#0a0a0a' }}>
+            {[
+              { name: 'Comps Specialist', type: 'Valuation', desc: 'Analyzes recent property sales via RentCast API.' },
+              { name: 'DCF Specialist', type: 'Valuation', desc: 'Calculates NPV using FRED mortgage rates.' },
+              { name: 'Evidence Analyst', type: 'Juror (LLM)', desc: 'Validates raw data points and comps.' },
+              { name: 'Market Data Interpreter', type: 'Juror (LLM)', desc: 'Provides macro-economic context.' },
+              { name: 'Precedent Researcher', type: 'Juror (LLM)', desc: 'Searches Vectra RAG for historical cases.' }
+            ].map((agent) => (
+              <div key={agent.name} style={{ padding: '1rem', border: '1px solid #222', backgroundColor: '#0a0a0a', borderRadius: '6px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{agent}</div>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: status === 'idle' ? '#444' : '#10B981' }}></div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{agent.name}</div>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: status === 'idle' ? '#444' : '#10B981', boxShadow: status === 'idle' ? 'none' : '0 0 8px #10B981' }}></div>
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#666', display: 'flex', justifyContent: 'space-between' }}>
-                  <span>State: {status === 'idle' ? 'Idle' : 'Listening'}</span>
+                <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '0.75rem', lineHeight: 1.4 }}>{agent.desc}</div>
+                <div style={{ fontSize: '0.75rem', color: '#666', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ padding: '2px 6px', background: '#222', borderRadius: '4px', fontSize: '0.65rem', textTransform: 'uppercase' }}>{agent.type}</span>
                   <span>Rep: 90+</span>
                 </div>
               </div>
