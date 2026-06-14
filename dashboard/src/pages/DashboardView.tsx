@@ -86,6 +86,20 @@ export const DashboardView: React.FC = () => {
               </div>
               <div style={{ height: '4px', background: '#10B981', borderRadius: '2px', width: '100%' }}></div>
             </div>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>RentCast API (Comps)</span>
+                <span style={{ color: '#10B981', fontWeight: 600 }}>Active</span>
+              </div>
+              <div style={{ height: '4px', background: '#10B981', borderRadius: '2px', width: '100%' }}></div>
+            </div>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>FRED API (Mortgage Rates)</span>
+                <span style={{ color: '#10B981', fontWeight: 600 }}>Active</span>
+              </div>
+              <div style={{ height: '4px', background: '#10B981', borderRadius: '2px', width: '100%' }}></div>
+            </div>
           </div>
         </div>
       </div>

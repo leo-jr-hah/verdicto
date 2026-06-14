@@ -39,7 +39,7 @@ export const ArchitectureView: React.FC = () => {
           <div className="enterprise-card" style={{ width: '300px', textAlign: 'center', background: 'var(--bg-surface)' }}>
             <Calculator style={{ margin: '0 auto 0.5rem', color: 'var(--text-tertiary)' }} size={24} />
             <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Valuation Swarm</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Deterministic Data APIs</p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>RentCast & FRED Data APIs</p>
           </div>
 
           {/* Juror Agents */}
