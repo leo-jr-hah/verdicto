@@ -3,19 +3,19 @@ import { ExternalLink } from 'lucide-react';
 
 export const TransactionsView: React.FC = () => {
   const transactions = [
-    { type: 'ExecuteVerdict', hash: 'a1b2c3d4e5f6g7h8i9j0', contract: 'VotingContract', block: '14,293,012', time: '2 mins ago' },
-    { type: 'RecordVote', hash: 'b2c3d4e5f6g7h8i9j0a1', contract: 'VotingContract', block: '14,293,010', time: '3 mins ago' },
+    { type: 'ZK-Lite Commitment', hash: 'e3b0c44298fc1c149afb', contract: 'ReputationRegistry', block: '14,293,012', time: 'Just now' },
+    { type: 'HMAC Receipt Chain', hash: '8d969eef6ecad3c29a3a', contract: 'DeliberationEngine', block: 'Off-chain (Verified)', time: '1 min ago' },
+    { type: 'ExecuteVerdict', hash: 'a1b2c3d4e5f6g7h8i9j0', contract: 'VotingContract', block: '14,293,005', time: '5 mins ago' },
     { type: 'UpdateReputation', hash: 'c3d4e5f6g7h8i9j0a1b2', contract: 'ReputationRegistry', block: '14,293,005', time: '5 mins ago' },
     { type: 'InitiateDispute', hash: 'd4e5f6g7h8i9j0a1b2c3', contract: 'EscrowContract', block: '14,292,990', time: '12 mins ago' },
-    { type: 'ExecuteVerdict', hash: 'e5f6g7h8i9j0a1b2c3d4', contract: 'VotingContract', block: '14,292,500', time: '1 hour ago' },
   ];
 
   return (
     <div className="container" style={{ padding: '3rem 0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
-          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>On-Chain Ledger</h2>
-          <p style={{ color: 'var(--text-secondary)' }}>Immutable record of all Verdict network activity on Casper Testnet.</p>
+          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Cryptographic Audit Ledger</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>Immutable ZK-Lite execution commitments and HMAC-chained receipts on Casper Testnet.</p>
         </div>
       </div>
 

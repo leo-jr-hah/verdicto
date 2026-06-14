@@ -37,30 +37,32 @@ export const ReputationView: React.FC = () => {
             <tr style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-tertiary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Agent Identity</th>
               <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Role</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Disputes Handled</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Divergence %</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Reputation Score</th>
+              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>IETF Tier</th>
+              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Exec Determinism</th>
+              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>IETF Trust Score</th>
             </tr>
           </thead>
           <tbody>
             {[
-              { id: 'Evidence Analyst', role: 'Juror (LLM)', count: 423, div: '2.1%', rep: 98 },
-              { id: 'Precedent Researcher', role: 'Juror (LLM+RAG)', count: 410, div: '3.4%', rep: 96 },
-              { id: 'Market Data Interpreter', role: 'Juror (LLM)', count: 395, div: '4.2%', rep: 95 },
-              { id: 'Comps Specialist', role: 'Valuation', count: 850, div: '1.2%', rep: 99 },
-              { id: 'DCF Specialist', role: 'Valuation', count: 850, div: '1.5%', rep: 98 },
+              { id: 'Evidence Analyst', role: 'Juror (LLM)', tier: 'Platinum', det: '99%', rep: 980 },
+              { id: 'Precedent Researcher', role: 'Juror (LLM+RAG)', tier: 'Platinum', det: '96%', rep: 965 },
+              { id: 'Market Data Interpreter', role: 'Juror (LLM)', tier: 'Platinum', det: '95%', rep: 950 },
+              { id: 'Comps Specialist', role: 'Valuation', tier: 'Gold', det: '98%', rep: 890 },
+              { id: 'DCF Specialist', role: 'Valuation', tier: 'Gold', det: '99%', rep: 885 },
             ].map((a, i) => (
               <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '1.25rem 1.5rem', fontWeight: 500 }}>{a.id}</td>
                 <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>{a.role}</td>
-                <td style={{ padding: '1.25rem 1.5rem' }}>{a.count}</td>
-                <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>{a.div}</td>
+                <td style={{ padding: '1.25rem 1.5rem' }}>
+                  <span style={{ padding: '4px 8px', background: a.tier === 'Platinum' ? 'rgba(229, 231, 235, 0.1)' : 'rgba(252, 211, 77, 0.1)', color: a.tier === 'Platinum' ? '#E5E7EB' : '#FCD34D', borderRadius: '4px', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>{a.tier}</span>
+                </td>
+                <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>{a.det}</td>
                 <td style={{ padding: '1.25rem 1.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <div style={{ width: '100px', height: '6px', background: 'var(--bg-surface-alt)', borderRadius: '3px', overflow: 'hidden' }}>
-                      <div style={{ width: `${a.rep}%`, height: '100%', background: 'var(--primary)' }}></div>
+                      <div style={{ width: `${(a.rep / 1000) * 100}%`, height: '100%', background: 'var(--primary)' }}></div>
                     </div>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{a.rep}</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{a.rep}/1000</span>
                   </div>
                 </td>
               </tr>
