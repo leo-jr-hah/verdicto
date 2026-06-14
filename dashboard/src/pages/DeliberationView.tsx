@@ -16,14 +16,15 @@ export const DeliberationView: React.FC = () => {
   const [activeDispute, setActiveDispute] = useState<any>(null);
   const [verdict, setVerdict] = useState<any>(null);
   const [filterText, setFilterText] = useState('');
+  const [autoScroll, setAutoScroll] = useState(true);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:3010');
     
     ws.onopen = () => {
-      addLog('SYS', 'Establishing secure link to Orchestrator...', 'system');
-      setTimeout(() => addLog('SYS', 'Connection established. Awaiting proceedings.', 'system'), 500);
+      addLog('System', 'Connecting to Orchestrator...', 'system');
+      setTimeout(() => addLog('System', 'Connection established. Ready.', 'system'), 500);
     };
 
     ws.onmessage = (event) => {
@@ -33,18 +34,18 @@ export const DeliberationView: React.FC = () => {
         setStatus('deliberating');
         setActiveDispute(data.payload);
         setVerdict(null);
-        addLog('ORCHESTRATOR', `CASE OPENED: Dispute #${data.payload.disputeId} | Asset: ${data.payload.assetId}`, 'system');
+        addLog('Orchestrator', `Dispute #${data.payload.disputeId} initiated for asset: ${data.payload.assetId}`, 'system');
       } 
       else if (data.type === 'valuation_result') {
-        addLog(data.payload.agent.toUpperCase(), `EVIDENCE SUBMITTED: Valuation $${data.payload.result.estimated_value.toLocaleString()} [Method: ${data.payload.result.method}]`, 'evidence');
+        addLog(data.payload.agent, `Submitted valuation evidence: $${data.payload.result.estimated_value.toLocaleString()} (Method: ${data.payload.result.method})`, 'evidence');
       }
       else if (data.type === 'juror_vote') {
-        addLog(data.payload.juror.toUpperCase(), `RND ${data.payload.round} DELIBERATION: Voted ${data.payload.verdict.vote} (Confidence/Rep: ${data.payload.rep})`, 'juror');
+        addLog(data.payload.juror, `Round ${data.payload.round} vote: ${data.payload.verdict.vote} (Confidence/Rep: ${data.payload.rep})`, 'juror');
       }
       else if (data.type === 'final_verdict') {
         setStatus('settled');
         setVerdict(data.payload);
-        addLog('ORCHESTRATOR', `PROCEEDING CONCLUDED. FINAL VERDICT: ${data.payload.finalVerdict.toUpperCase()}`, 'verdict');
+        addLog('Orchestrator', `Dispute resolved. Final Verdict Issued: ${data.payload.finalVerdict}`, 'verdict');
       }
     };
 
@@ -52,8 +53,10 @@ export const DeliberationView: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs]);
+    if (autoScroll) {
+      logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [logs, autoScroll]);
 
   const addLog = (source: string, content: string, category: LogEntry['category']) => {
     setLogs(prev => [...prev, {
@@ -67,10 +70,10 @@ export const DeliberationView: React.FC = () => {
 
   const startDemo = async () => {
     try {
-      addLog('SYS', 'Manually triggering Dispute Resolution protocol...', 'system');
+      addLog('System', 'Initiating demo dispute...', 'system');
       await fetch('http://localhost:3011/api/disputes/start', { method: 'POST' });
     } catch (e) {
-      addLog('SYS_ERR', 'Failed to connect to Orchestrator API endpoint.', 'system');
+      addLog('Error', 'Failed to connect to Orchestrator API endpoint. Ensure backend is running.', 'system');
     }
   };
 
@@ -91,15 +94,15 @@ export const DeliberationView: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 2rem', borderBottom: '1px solid #333', backgroundColor: '#0a0a0a' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
           <div>
-            <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Terminal Status</div>
+            <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Status</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: status === 'deliberating' ? 'var(--primary)' : '#10B981', fontWeight: 600 }}>
               <Activity size={14} className={status === 'deliberating' ? "animate-pulse" : ""} />
-              {status === 'idle' ? 'STANDBY' : status === 'deliberating' ? 'ACTIVE PROCEEDING' : 'CASE CLOSED'}
+              {status === 'idle' ? 'Standby' : status === 'deliberating' ? 'In Progress' : 'Resolved'}
             </div>
           </div>
           <div>
             <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Network</div>
-            <div style={{ fontWeight: 600 }}>CASPER TESTNET</div>
+            <div style={{ fontWeight: 600 }}>Casper Testnet</div>
           </div>
         </div>
         
@@ -115,8 +118,8 @@ export const DeliberationView: React.FC = () => {
             />
           </div>
           {status === 'idle' && (
-            <button onClick={startDemo} style={{ background: '#fff', color: '#000', border: 'none', padding: '0.25rem 1rem', fontSize: '0.8rem', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer' }}>
-              TRIGGER DISPUTE
+            <button onClick={startDemo} style={{ background: '#fff', color: '#000', border: 'none', padding: '0.25rem 1rem', fontSize: '0.8rem', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', borderRadius: '4px' }}>
+              Trigger Dispute
             </button>
           )}
         </div>
@@ -162,9 +165,14 @@ export const DeliberationView: React.FC = () => {
 
         {/* Center Panel: Transcript/Logs */}
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#000' }}>
-          <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #222', fontSize: '0.75rem', color: '#666', display: 'flex', justifyContent: 'space-between' }}>
-            <span>LIVE PROCEEDING TRANSCRIPT</span>
-            <span>AUTO-SCROLL: ON</span>
+          <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #222', fontSize: '0.75rem', color: '#666', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Deliberation Log</span>
+            <button 
+              onClick={() => setAutoScroll(!autoScroll)} 
+              style={{ background: 'none', border: 'none', color: autoScroll ? '#10B981' : '#666', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'inherit' }}
+            >
+              Auto-Scroll: {autoScroll ? 'On' : 'Off'}
+            </button>
           </div>
           
           <div style={{ flexGrow: 1, overflowY: 'auto', padding: '1rem 1.5rem', fontSize: '0.85rem', lineHeight: 1.6 }}>
@@ -207,8 +215,8 @@ export const DeliberationView: React.FC = () => {
                   <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: status === 'idle' ? '#444' : '#10B981' }}></div>
                 </div>
                 <div style={{ fontSize: '0.7rem', color: '#666', display: 'flex', justifyContent: 'space-between' }}>
-                  <span>STATE: {status === 'idle' ? 'IDLE' : 'LISTENING'}</span>
-                  <span>REP: 90+</span>
+                  <span>State: {status === 'idle' ? 'Idle' : 'Listening'}</span>
+                  <span>Rep: 90+</span>
                 </div>
               </div>
             ))}
