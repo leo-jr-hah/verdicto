@@ -7,6 +7,7 @@ import axios from 'axios';
 import { getCasperMcpClient } from '../shared/casper-mcp-client';
 import { emitEvent } from '../websocket-server';
 import { computeAggregateTrust } from '../shared/trust-framework';
+import { createDeliberationReceipt, DeliberationReceipt, verifyReceiptChain } from '../shared/audit-trail';
 import { execSync } from 'child_process';
 import fs from 'fs';
 
@@ -283,6 +284,9 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     valuation_b: resultB.estimated_value,
   };
 
+  let receiptChain: DeliberationReceipt[] = [];
+  let previousReceiptId = 'genesis';
+
   const jurorMcpPayload = {
     jsonrpc: '2.0',
     id: 2,
@@ -297,10 +301,26 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     try {
       const res = await fetchWithX402(`http://localhost:${juror.port}/mcp`, jurorMcpPayload, juror.name);
       const rawText = res.result?.content?.[0]?.text;
-      console.log(`  [DEBUG] Juror ${juror.name} rawText: >>>${rawText}<<<`);
       const verdict = JSON.parse(rawText);
       console.log(`  👨‍⚖️ ${juror.name} (Rep: ${juror.rep}): Voted ${verdict.vote} | ${verdict.reasoning}`);
       emitEvent('juror_vote', { juror: juror.name, round: 1, verdict, rep: juror.rep });
+      
+      // Cryptographic Audit Trail
+      const secret = process.env[`AGENT_${juror.name.includes('C') ? 'C' : juror.name.includes('D') ? 'D' : 'E'}_PRIVATE_KEY`] || 'secret';
+      const receipt = createDeliberationReceipt(
+        secret,
+        disputeId,
+        juror.pk,
+        1,
+        JSON.stringify(jurorArgs),
+        verdict.vote,
+        verdict.reasoning,
+        previousReceiptId
+      );
+      receiptChain.push(receipt);
+      previousReceiptId = receipt.receiptId;
+      console.log(`  📜 [Audit] Receipt Generated: ${receipt.receiptId.slice(0,8)}... -> Hash: ${receipt.signature.slice(0, 16)}...`);
+      
       return { juror, verdict };
     } catch (e: any) {
       console.error(`  ❌ ${juror.name} failed: ${e.message}`);
@@ -328,6 +348,23 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
       const verdict = JSON.parse(res.result.content[0].text);
       console.log(`  👨‍⚖️ ${juror.name}: Final Vote ${verdict.vote} | ${verdict.reasoning}`);
       emitEvent('juror_vote', { juror: juror.name, round: 2, verdict, rep: juror.rep });
+      
+      // Cryptographic Audit Trail
+      const secret = process.env[`AGENT_${juror.name.includes('C') ? 'C' : juror.name.includes('D') ? 'D' : 'E'}_PRIVATE_KEY`] || 'secret';
+      const receipt = createDeliberationReceipt(
+        secret,
+        disputeId,
+        juror.pk,
+        2,
+        JSON.stringify(round2Args),
+        verdict.vote,
+        verdict.reasoning,
+        previousReceiptId
+      );
+      receiptChain.push(receipt);
+      previousReceiptId = receipt.receiptId;
+      console.log(`  📜 [Audit] Receipt Generated: ${receipt.receiptId.slice(0,8)}... -> Hash: ${receipt.signature.slice(0, 16)}...`);
+      
       return { juror, verdict };
     } catch (e: any) {
       console.error(`  ❌ ${juror.name} failed: ${e.message}`);
@@ -336,6 +373,14 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
   }));
 
   const validRound2 = round2Results.filter(r => r !== null);
+  
+  console.log(`\n  [Audit] Verifying Deliberation Cryptographic Chain...`);
+  const isChainValid = verifyReceiptChain(receiptChain, 'juror-group');
+  if (isChainValid) {
+    console.log(`  ✅ Chain Valid! ${receiptChain.length} cryptographic receipts secured.`);
+  } else {
+    console.log(`  ❌ Chain Invalid! Tampering detected.`);
+  }
 
   // Step 5: Reputation-Weighted Vote Tally
   console.log(`\n--- Step 5: Reputation-Weighted Vote Tally ---`);
