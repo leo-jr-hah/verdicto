@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Activity, Search } from 'lucide-react';
+import { Activity, Search, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type LogEntry = {
@@ -151,10 +151,13 @@ export const DeliberationView: React.FC = () => {
               </div>
               
               {verdict && (
-                <div style={{ marginTop: '2rem', padding: '1rem', border: '1px solid var(--primary)', backgroundColor: 'rgba(255,59,59,0.05)' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--primary)', marginBottom: '0.5rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Final Verdict Issued</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem' }}>{verdict.finalVerdict.replace(/([A-Z])/g, ' $1').trim()}</div>
-                  <div style={{ fontSize: '0.85rem', color: '#999' }}>Value: ${verdict.finalValue.toLocaleString()}</div>
+                <div style={{ marginTop: '2rem', padding: '1.5rem', border: '1px solid #333', backgroundColor: '#111', borderRadius: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10B981', marginBottom: '0.5rem' }}>
+                    <CheckCircle2 size={16} />
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Resolution Details</span>
+                  </div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem', color: '#fff' }}>{verdict.finalVerdict.replace(/([A-Z])/g, ' $1').trim()}</div>
+                  <div style={{ fontSize: '0.85rem', color: '#888' }}>Assessed Value: ${verdict.finalValue.toLocaleString()}</div>
                 </div>
               )}
             </div>

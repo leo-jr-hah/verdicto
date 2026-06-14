@@ -1,12 +1,12 @@
 import React from 'react';
-import { Activity, Shield, Database, Scale } from 'lucide-react';
+import { Users, FileText, BarChart3, Server } from 'lucide-react';
 
 export const DashboardView: React.FC = () => {
   const metrics = [
-    { title: 'Total Value Assessed', value: '$14.2M', change: '+12%', icon: Database },
-    { title: 'Active Agents', value: '12', change: 'Stable', icon: Activity },
-    { title: 'Disputes Resolved', value: '1,429', change: '+34', icon: Scale },
-    { title: 'Network Uptime', value: '99.99%', change: 'Casper Testnet', icon: Shield },
+    { title: 'Total Value Assessed', value: '$14.2M', change: '+12%', icon: BarChart3 },
+    { title: 'Active Agents', value: '12', change: 'Stable', icon: Users },
+    { title: 'Disputes Resolved', value: '1,429', change: '+34', icon: FileText },
+    { title: 'Network Uptime', value: '99.99%', change: 'Casper Testnet', icon: Server },
   ];
 
   return (

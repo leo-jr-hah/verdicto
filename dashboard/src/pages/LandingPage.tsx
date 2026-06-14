@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, Shield, Database, Scale, Network, CheckCircle2 } from 'lucide-react';
+import { FileText, Calculator, Users, CheckSquare, Award, Shield } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
   return (
@@ -22,15 +22,6 @@ export const LandingPage: React.FC = () => {
           <Link to="/architecture" className="btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>View Architecture</Link>
         </div>
 
-        {/* Hero Visual - Abstract Network */}
-        <div style={{ marginTop: '5rem', position: 'relative', height: '300px', width: '100%', maxWidth: '900px', margin: '5rem auto 0', background: 'var(--bg-surface)', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', inset: 0, opacity: 0.05, backgroundImage: 'radial-gradient(var(--primary) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-          <Network size={120} strokeWidth={1} style={{ color: 'var(--text-tertiary)', opacity: 0.5 }} />
-          {/* Decorative nodes */}
-          <div style={{ position: 'absolute', top: '20%', left: '30%', width: '12px', height: '12px', background: 'var(--primary)', borderRadius: '50%', boxShadow: '0 0 20px var(--primary)' }}></div>
-          <div style={{ position: 'absolute', bottom: '30%', right: '25%', width: '16px', height: '16px', background: 'var(--text-primary)', borderRadius: '50%' }}></div>
-          <div style={{ position: 'absolute', top: '40%', right: '40%', width: '8px', height: '8px', background: 'var(--text-secondary)', borderRadius: '50%' }}></div>
-        </div>
       </section>
 
       {/* Section 2 - Problem */}
@@ -73,11 +64,11 @@ export const LandingPage: React.FC = () => {
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1.5rem' }}>
             {[
-              { step: '01', title: 'Asset Submitted', icon: Database },
-              { step: '02', title: 'Agents Evaluate', icon: Activity },
-              { step: '03', title: 'Jurors Deliberate', icon: Scale },
-              { step: '04', title: 'Verdict Recorded', icon: Shield },
-              { step: '05', title: 'Reputation Updated', icon: CheckCircle2 }
+              { step: '01', title: 'Asset Submitted', icon: FileText },
+              { step: '02', title: 'Agents Evaluate', icon: Calculator },
+              { step: '03', title: 'Jurors Deliberate', icon: Users },
+              { step: '04', title: 'Verdict Recorded', icon: CheckSquare },
+              { step: '05', title: 'Reputation Updated', icon: Award }
             ].map((item, idx) => (
               <div key={idx} style={{ position: 'relative' }}>
                 <div style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '1rem' }}>STEP {item.step}</div>

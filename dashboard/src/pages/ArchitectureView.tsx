@@ -1,5 +1,5 @@
 import React from 'react';
-import { Database, Activity, Scale, Server } from 'lucide-react';
+import { Database, Calculator, Users, Server } from 'lucide-react';
 
 export const ArchitectureView: React.FC = () => {
   return (
@@ -37,14 +37,14 @@ export const ArchitectureView: React.FC = () => {
         <div style={{ display: 'flex', gap: '2rem' }}>
           {/* Valuation Agents */}
           <div className="enterprise-card" style={{ width: '300px', textAlign: 'center', background: 'var(--bg-surface)' }}>
-            <Activity style={{ margin: '0 auto 0.5rem', color: 'var(--text-tertiary)' }} size={24} />
+            <Calculator style={{ margin: '0 auto 0.5rem', color: 'var(--text-tertiary)' }} size={24} />
             <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Valuation Swarm</h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Deterministic Data APIs</p>
           </div>
 
           {/* Juror Agents */}
           <div className="enterprise-card" style={{ width: '300px', textAlign: 'center', background: 'var(--bg-surface)' }}>
-            <Scale style={{ margin: '0 auto 0.5rem', color: 'var(--text-tertiary)' }} size={24} />
+            <Users style={{ margin: '0 auto 0.5rem', color: 'var(--text-tertiary)' }} size={24} />
             <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Juror Swarm</h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Groq LLM via MCP Server</p>
           </div>

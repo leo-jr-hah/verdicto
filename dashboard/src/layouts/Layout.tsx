@@ -6,12 +6,12 @@ export const Layout: React.FC = () => {
   const location = useLocation();
 
   const navLinks = [
-    { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Disputes', path: '/disputes' },
-    { name: 'Deliberation', path: '/deliberation' },
-    { name: 'Reputation', path: '/reputation' },
-    { name: 'Transactions', path: '/transactions' },
-    { name: 'Architecture', path: '/architecture' },
+    { name: 'Overview', path: '/dashboard' },
+    { name: 'Cases', path: '/disputes' },
+    { name: 'Live Court', path: '/deliberation' },
+    { name: 'Agents', path: '/reputation' },
+    { name: 'Ledger', path: '/transactions' },
+    { name: 'System Map', path: '/architecture' },
   ];
 
   const isActive = (path: string) => {
