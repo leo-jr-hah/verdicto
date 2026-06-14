@@ -4,6 +4,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { simulatedX402Middleware } from './x402-middleware.js';
 import { getComparableSales } from './rentcast-client.js';
+import { getMortgageRate } from './fred-client.js';
 import type { ValuationResult } from './types.js';
 
 // Mock market data that each agent instance can query
@@ -73,9 +74,21 @@ export async function calcDcfValue(agentName: string, assetId: string, location:
   const city = location.toLowerCase().split(',')[0].trim();
   const data = DCF_DATA[city] || DCF_DATA['miami'];
 
+  let capRate = data.cap_rate;
+  let dataSource = 'Mock Data';
+
+  try {
+    const mortgageRate = await getMortgageRate();
+    // Asset cap rate = mortgage rate + 2% risk spread
+    capRate = mortgageRate + 0.02;
+    dataSource = 'FRED API';
+  } catch (err: any) {
+    console.log(`[${agentName}] FRED API unavailable, falling back to mock cap rate.`);
+  }
+
   const annualRevenue = data.daily_rate * spotCount * data.occupancy * 365;
   const noi = annualRevenue - data.operating_expenses;
-  const estimated = Math.round(noi / data.cap_rate);
+  const estimated = Math.round(noi / capRate);
 
   return {
     agent: agentName,
@@ -84,7 +97,7 @@ export async function calcDcfValue(agentName: string, assetId: string, location:
     estimated_value: estimated,
     confidence: 0.78,
     per_spot_value: Math.round(estimated / spotCount),
-    reasoning: `DCF analysis: daily rate $${data.daily_rate}, occupancy ${data.occupancy * 100}%, NOI $${Math.round(noi)}, cap rate ${data.cap_rate * 100}%. Valuation: $${estimated}.`,
+    reasoning: `DCF analysis (Source: ${dataSource}): daily rate $${data.daily_rate}, occupancy ${data.occupancy * 100}%, NOI $${Math.round(noi)}, cap rate ${(capRate * 100).toFixed(2)}%. Valuation: $${estimated}.`,
     timestamp: Date.now(),
   };
 }
