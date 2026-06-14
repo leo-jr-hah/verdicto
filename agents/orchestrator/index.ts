@@ -8,6 +8,7 @@ import { getCasperMcpClient } from '../shared/casper-mcp-client';
 import { emitEvent } from '../websocket-server';
 import { computeAggregateTrust } from '../shared/trust-framework';
 import { createDeliberationReceipt, DeliberationReceipt, verifyReceiptChain } from '../shared/audit-trail';
+import { createExecutionCommitment, storeCommitmentOnCasper } from '../shared/verifiable-execution';
 import { execSync } from 'child_process';
 import fs from 'fs';
 
@@ -429,6 +430,15 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
   const votingHash = process.env.VOTING_CONTRACT_HASH;
   const escrowHash = process.env.ESCROW_CONTRACT_HASH;
   const reputationHash = process.env.REPUTATION_CONTRACT_HASH;
+
+  // ZK-Lite Execution Commitment
+  console.log(`\n  [ZK-Lite] Generating Verifiable Execution Commitment...`);
+  const executionCommitment = createExecutionCommitment(
+    JSON.stringify({ disputeId, assetId, location, spotCount }),
+    { finalVerdict, finalValue, scoreA, scoreB, scoreSplit },
+    block ? block.block_height : 'latest'
+  );
+  await storeCommitmentOnCasper(executionCommitment, reputationHash || '0xmockreputation');
 
   if (votingHash) {
     console.log(`  📝 VotingContract (${votingHash.slice(0, 16)}...): cast_vote(${disputeId}, ${verdictIndex}, weight)`);
