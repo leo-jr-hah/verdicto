@@ -15,6 +15,7 @@ export const DeliberationView: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'deliberating' | 'settled'>('idle');
   const [activeDispute, setActiveDispute] = useState<any>(null);
   const [verdict, setVerdict] = useState<any>(null);
+  const [filterText, setFilterText] = useState('');
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -78,7 +79,7 @@ export const DeliberationView: React.FC = () => {
     switch (category) {
       case 'system': return 'var(--text-tertiary)';
       case 'evidence': return '#10B981'; // Green
-      case 'juror': return 'var(--text-primary)';
+      case 'juror': return '#D1D5DB'; // Light gray instead of global dark text-primary
       case 'verdict': return 'var(--primary)';
       default: return 'var(--text-secondary)';
     }
@@ -105,7 +106,13 @@ export const DeliberationView: React.FC = () => {
         <div style={{ display: 'flex', gap: '1rem' }}>
           <div style={{ position: 'relative' }}>
             <Search size={14} style={{ position: 'absolute', left: '8px', top: '8px', color: '#666' }} />
-            <input type="text" placeholder="Filter transcripts..." style={{ background: '#111', border: '1px solid #333', color: '#fff', padding: '0.25rem 0.5rem 0.25rem 2rem', fontSize: '0.8rem', fontFamily: 'inherit', width: '200px' }} disabled />
+            <input 
+              type="text" 
+              placeholder="Filter transcripts..." 
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+              style={{ background: '#111', border: '1px solid #333', color: '#fff', padding: '0.25rem 0.5rem 0.25rem 2rem', fontSize: '0.8rem', fontFamily: 'inherit', width: '200px' }} 
+            />
           </div>
           {status === 'idle' && (
             <button onClick={startDemo} style={{ background: '#fff', color: '#000', border: 'none', padding: '0.25rem 1rem', fontSize: '0.8rem', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer' }}>
@@ -124,26 +131,26 @@ export const DeliberationView: React.FC = () => {
           {activeDispute ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div>
-                <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem' }}>DISPUTE_ID</div>
+                <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Dispute ID</div>
                 <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--primary)' }}>#{activeDispute.disputeId}</div>
               </div>
               <div>
-                <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem' }}>ASSET_REF</div>
+                <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Asset Reference</div>
                 <div style={{ fontSize: '0.9rem' }}>{activeDispute.assetId}</div>
               </div>
               <div>
-                <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem' }}>LOCATION</div>
+                <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Location</div>
                 <div style={{ fontSize: '0.9rem' }}>{activeDispute.location}</div>
               </div>
               <div>
-                <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem' }}>ASSET_METRICS</div>
+                <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Asset Metrics</div>
                 <div style={{ fontSize: '0.9rem' }}>Spots: {activeDispute.spotCount}</div>
               </div>
               
               {verdict && (
                 <div style={{ marginTop: '2rem', padding: '1rem', border: '1px solid var(--primary)', backgroundColor: 'rgba(255,59,59,0.05)' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--primary)', marginBottom: '0.5rem', fontWeight: 600 }}>FINAL_VERDICT_ISSUED</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem' }}>{verdict.finalVerdict}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--primary)', marginBottom: '0.5rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Final Verdict Issued</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem' }}>{verdict.finalVerdict.replace(/([A-Z])/g, ' $1').trim()}</div>
                   <div style={{ fontSize: '0.85rem', color: '#999' }}>Value: ${verdict.finalValue.toLocaleString()}</div>
                 </div>
               )}
@@ -162,7 +169,10 @@ export const DeliberationView: React.FC = () => {
           
           <div style={{ flexGrow: 1, overflowY: 'auto', padding: '1rem 1.5rem', fontSize: '0.85rem', lineHeight: 1.6 }}>
             <AnimatePresence initial={false}>
-              {logs.map((log) => (
+              {logs.filter(log => 
+                log.content.toLowerCase().includes(filterText.toLowerCase()) || 
+                log.type.toLowerCase().includes(filterText.toLowerCase())
+              ).map((log) => (
                 <motion.div 
                   key={log.id}
                   initial={{ opacity: 0, x: -5 }}
@@ -190,7 +200,7 @@ export const DeliberationView: React.FC = () => {
           <h3 style={{ fontSize: '0.85rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem', borderBottom: '1px solid #222', paddingBottom: '0.5rem' }}>Active Agents</h3>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {['COMPS_SPECIALIST', 'DCF_SPECIALIST', 'EVIDENCE_ANALYST', 'MARKET_DATA_INT', 'PRECEDENT_RES'].map((agent) => (
+            {['Comps Specialist', 'DCF Specialist', 'Evidence Analyst', 'Market Data Interpreter', 'Precedent Researcher'].map((agent) => (
               <div key={agent} style={{ padding: '0.75rem', border: '1px solid #222', backgroundColor: '#0a0a0a' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                   <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{agent}</div>
