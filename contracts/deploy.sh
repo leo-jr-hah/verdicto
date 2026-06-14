@@ -23,24 +23,11 @@ function deploy_wasm() {
     --output "${NAME}_deploy.json"
 
   echo "Broadcasting $NAME..."
-  DEPLOY_JSON=$(cat "${NAME}_deploy.json")
-  
-  PAYLOAD=$(cat <<EOF
-{
-  "jsonrpc": "2.0",
-  "id": "$(date +%s)",
-  "method": "account_put_deploy",
-  "params": [
-    $DEPLOY_JSON
-  ]
-}
-EOF
-  )
-
-  curl -s -X POST $RPC_URL \
-    -H "Content-Type: application/json" \
-    -H "Authorization: $CSPRCLOUD_API_KEY" \
-    -d "$PAYLOAD" | grep -o '"deploy_hash":"[^"]*"' || echo "Failed to get deploy hash"
+  casper-client send-deploy \
+    --node-address https://node.testnet.casper.network/rpc \
+    -i "${NAME}_deploy.json" > "${NAME}_broadcast.json"
+    
+  cat "${NAME}_broadcast.json" | grep -o '"deploy_hash": "[^"]*"' || echo "Failed to get deploy hash"
 }
 
 deploy_wasm "VotingContract" "wasm/VotingContract.wasm"

@@ -1,8 +1,8 @@
 {
-  "hash": "7193827d438db680005480ecf18b2b3b9feaa1d0c608a4d45848f3a66ee800dc",
+  "hash": "30da84e6d0db566b5d8ba4a93cc392bd2268bff6c24c1c0e5cb16a4f51038942",
   "header": {
     "account": "02039cd256da1f2e13fc24a6f2ad1c15166f45070befa52bc2da46bbe194e7381010",
-    "timestamp": "2026-06-13T15:14:35.508Z",
+    "timestamp": "2026-06-13T23:11:28.517Z",
     "ttl": "30m",
     "gas_price": 1,
     "body_hash": "af57a90091a9cce571caae88788d8f57b2133f1bc2cd9e7937714316fc7739b4",
@@ -58,7 +58,7 @@
   "approvals": [
     {
       "signer": "02039cd256da1f2e13fc24a6f2ad1c15166f45070befa52bc2da46bbe194e7381010",
-      "signature": "02bb159f65bfbf02db6308de98c07aa79c9f2d74e8fff63157d9224a20d05bc36830d3e7985f4e193a3c47fb8aae2e96c1197ef6a4c8aaf7d3a94367264ebc5c1f"
+      "signature": "021c107b2497d9f063c317e97064beb09d5b0392fe8a39a8c8c6a0c01f90df11691f4727385e262cc7c5c7e2c26f6e3789705ec0b9c4548725752cd7883d547a54"
     }
   ]
 }

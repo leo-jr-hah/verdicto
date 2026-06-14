@@ -1,0 +1,16 @@
+
+#################################### WARNING ####################################
+#                                                                               #
+#       send-deploy subcommand is deprecated in favor of send-transaction       #
+#                    and will be removed in a future release                    #
+#                                                                               #
+#################################################################################
+
+{
+  "jsonrpc": "2.0",
+  "id": 2399481760970191086,
+  "result": {
+    "api_version": "2.0.0",
+    "deploy_hash": "83bf2bab33200e60b092847abc38ea5d0301327fae43fc2d3555fec5be120d3a"
+  }
+}

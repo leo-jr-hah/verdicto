@@ -4,7 +4,6 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 import axios from 'axios';
-import { fetchWithX402 } from '../shared/x402-client';
 import { getCasperMcpClient } from '../shared/casper-mcp-client';
 import { emitEvent } from '../websocket-server';
 import { execSync } from 'child_process';
