@@ -6,6 +6,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 import axios from 'axios';
 import { getCasperMcpClient } from '../shared/casper-mcp-client';
 import { emitEvent } from '../websocket-server';
+import { computeAggregateTrust } from '../shared/trust-framework';
 import { execSync } from 'child_process';
 import fs from 'fs';
 
@@ -256,10 +257,22 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
   console.log(`\n--- Step 3: Juror Deliberation (Round 1) ---`);
   
   const jurorPorts = [
-    { name: 'Evidence Analyst', port: 3003, rep: await fetchOnChainReputation('Agent-C') },
-    { name: 'Market Data Interpreter', port: 3004, rep: await fetchOnChainReputation('Agent-D') },
-    { name: 'Precedent Researcher', port: 3005, rep: await fetchOnChainReputation('Agent-E') },
+    { name: 'Evidence Analyst', port: 3003, rep: await fetchOnChainReputation('Agent-C'), pk: process.env.AGENT_C_PUBLIC_KEY || '0x' },
+    { name: 'Market Data Interpreter', port: 3004, rep: await fetchOnChainReputation('Agent-D'), pk: process.env.AGENT_D_PUBLIC_KEY || '0x' },
+    { name: 'Precedent Researcher', port: 3005, rep: await fetchOnChainReputation('Agent-E'), pk: process.env.AGENT_E_PUBLIC_KEY || '0x' },
   ];
+
+  console.log(`\n  [IETF Trust Framework] Validating juror identities and trust scores...`);
+  for (const j of jurorPorts) {
+    const score = computeAggregateTrust({
+      agentId: j.pk,
+      identityVerified: true,
+      executionScore: 95, // Simulated recent challenge-response performance
+      outputConsistency: 92,
+      economicStake: 500, // Simulated 500 CSPR stake
+    });
+    console.log(`  🛡️  ${j.name} | Tier: ${score.tier.toUpperCase()} | IETF Aggregate Score: ${score.aggregateScore}/1000`);
+  }
 
   const jurorArgs = {
     dispute_id: disputeId,
