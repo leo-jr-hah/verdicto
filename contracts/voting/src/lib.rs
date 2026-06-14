@@ -197,3 +197,41 @@ mod tests {
         assert_eq!(contract.get_verdict(1), 255);
     }
 }
+
+#[odra::module]
+pub struct CollusionResistance {
+    honesty_deposits: Mapping<Address, U256>,
+    whistleblower_rewards: Mapping<Address, U256>,
+    slashed_agents: Mapping<Address, bool>,
+}
+
+#[odra::module]
+impl CollusionResistance {
+    pub fn deposit_honesty(&mut self) {
+        let caller = self.env().caller();
+        let amount = self.env().attached_value();
+        let current = self.honesty_deposits.get(&caller).unwrap_or_default();
+        self.honesty_deposits.set(&caller, current + amount);
+    }
+
+    pub fn report_collusion(&mut self, reporter: Address, colluders: Vec<Address>, evidence: String) {
+        let is_valid = self.verify_collusion_evidence(&evidence);
+        
+        if is_valid {
+            for colluder in colluders {
+                let deposit = self.honesty_deposits.get(&colluder).unwrap_or_default();
+                self.honesty_deposits.set(&colluder, U256::zero());
+                self.slashed_agents.set(&colluder, true);
+                
+                let current_reward = self.whistleblower_rewards.get(&reporter).unwrap_or_default();
+                self.whistleblower_rewards.set(&reporter, current_reward + deposit / 2);
+            }
+        }
+    }
+
+    fn verify_collusion_evidence(&self, evidence: &String) -> bool {
+        // Simplified verification. In prod: ZK proof verification.
+        evidence.contains("collusion_proof_valid")
+    }
+}
+
