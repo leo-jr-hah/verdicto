@@ -11,48 +11,45 @@ export const LandingPage: React.FC = () => {
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--primary)', display: 'inline-block' }}></span>
           <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Casper Testnet Live</span>
         </div>
-        <h1 style={{ fontSize: '4.5rem', maxWidth: '900px', margin: '0 auto', lineHeight: 1.1, marginBottom: '1.5rem', letterSpacing: '-0.03em' }}>
-          Agentic Trust Infrastructure<br />for Real World Assets
+        <h1 style={{ fontSize: '4.5rem', maxWidth: '1000px', margin: '0 auto', lineHeight: 1.1, marginBottom: '1.5rem', letterSpacing: '-0.03em' }}>
+          AI-Powered Dispute Resolution<br />for Tokenized Assets
         </h1>
-        <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '650px', margin: '0 auto 3rem', lineHeight: 1.6 }}>
-          Autonomous agents verify, evaluate, deliberate, and certify tokenized assets natively on the Casper Network.
+        <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '750px', margin: '0 auto 3rem', lineHeight: 1.6 }}>
+          When two parties disagree on a $2.4M parking garage, 3 AI jurors analyze evidence and render a verdict — on the Casper blockchain, in under 60 seconds.
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <Link to="/deliberation" className="btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>Launch Demo</Link>
-          <Link to="/architecture" className="btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>View Architecture</Link>
+          <Link to="/deliberation" className="btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>Start Demo</Link>
+          <a href="https://testnet.cspr.live" target="_blank" rel="noreferrer" className="btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>View on Explorer</a>
         </div>
 
       </section>
 
-      {/* Section 2 - Problem */}
+      {/* Section 2 - Why Trust This? */}
       <section className="container" style={{ padding: '6rem 0', borderTop: '1px solid var(--border-color)' }}>
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-          <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>The Trust Bottleneck</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>Why autonomous agents cannot trust Real World Assets today.</p>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255, 59, 59, 0.1)', color: 'var(--primary)', padding: '0.5rem 1rem', borderRadius: '999px', marginBottom: '1rem' }}>
+            <Shield size={16} /> <span style={{ fontSize: '0.85rem', fontWeight: 600, letterSpacing: '0.05em' }}>RESEARCH-BACKED SECURITY</span>
+          </div>
+          <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Why Trust This?</h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>Cryptographic mechanisms ensure tamper-proof agent execution.</p>
         </div>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-          <div className="enterprise-card" style={{ background: 'var(--bg-surface)' }}>
-            <h3 style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--text-tertiary)' }}></div>
-              Current State
-            </h3>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <li style={{ padding: '1rem', background: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-secondary)' }}>Centralized Oracle Dependency</li>
-              <li style={{ padding: '1rem', background: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-secondary)' }}>Opaque Valuation Methodologies</li>
-              <li style={{ padding: '1rem', background: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-secondary)' }}>Manual Dispute Resolution</li>
-            </ul>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+          <div className="enterprise-card" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-surface)' }}>
+            <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>IETF Trust Scoring</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>5-dimension draft standard model verifying ECDSA identity and challenge-response agent determinism.</p>
           </div>
-          <div className="enterprise-card" style={{ border: '1px solid var(--primary)' }}>
-            <h3 style={{ color: 'var(--primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)' }}></div>
-              Casper RWA Court
-            </h3>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <li style={{ padding: '1rem', background: 'rgba(255, 59, 59, 0.05)', border: '1px solid rgba(255, 59, 59, 0.2)', borderRadius: '6px', fontWeight: 500 }}>Multi-Agent Validation Swarms</li>
-              <li style={{ padding: '1rem', background: 'rgba(255, 59, 59, 0.05)', border: '1px solid rgba(255, 59, 59, 0.2)', borderRadius: '6px', fontWeight: 500 }}>Transparent On-Chain Reasoning</li>
-              <li style={{ padding: '1rem', background: 'rgba(255, 59, 59, 0.05)', border: '1px solid rgba(255, 59, 59, 0.2)', borderRadius: '6px', fontWeight: 500 }}>Autonomous Cryptoeconomic Settlement</li>
-            </ul>
+          <div className="enterprise-card" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-surface)' }}>
+            <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Cryptographic Receipts</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>HMAC-SHA256 chaining creating an immutable, verifiable audit trail of all juror reasoning steps.</p>
+          </div>
+          <div className="enterprise-card" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-surface)' }}>
+            <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>ZK-Lite Execution</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>Lightweight hash commitments anchored to the Casper testnet block height proving temporal execution.</p>
+          </div>
+          <div className="enterprise-card" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-surface)' }}>
+            <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Collusion Resistance</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>Game-theoretic Odra contracts with whistleblower rewards and automated honesty deposit slashing.</p>
           </div>
         </div>
       </section>
