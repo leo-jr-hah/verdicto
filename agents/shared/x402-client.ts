@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { executeCasperTransfer } from '../orchestrator';
 
 export async function fetchWithX402(url: string, payload: any, agentLabel: string) {
   try {

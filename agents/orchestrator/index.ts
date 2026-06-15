@@ -4,11 +4,11 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 import axios from 'axios';
-import { getCasperMcpClient } from '../shared/casper-mcp-client';
-import { emitEvent } from '../websocket-server';
-import { computeAggregateTrust } from '../shared/trust-framework';
-import { createDeliberationReceipt, DeliberationReceipt, verifyReceiptChain } from '../shared/audit-trail';
-import { createExecutionCommitment, storeCommitmentOnCasper } from '../shared/verifiable-execution';
+import { getCasperMcpClient } from '../shared/casper-mcp-client.js';
+import { emitEvent } from '../websocket-server.js';
+import { computeAggregateTrust } from '../shared/trust-framework.js';
+import { createDeliberationReceipt, DeliberationReceipt, verifyReceiptChain } from '../shared/audit-trail.js';
+import { createExecutionCommitment, storeCommitmentOnCasper } from '../shared/verifiable-execution.js';
 import { execSync } from 'child_process';
 import fs from 'fs';
 
@@ -505,6 +505,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });
     }
+  });
+
+  app.get('/health', (_, res) => {
+    res.json({ status: 'ok', service: 'orchestrator', timestamp: new Date().toISOString() });
   });
 
   const PORT = process.env.ORCHESTRATOR_API_PORT || 3011;

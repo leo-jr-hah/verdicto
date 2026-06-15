@@ -200,8 +200,8 @@ mod tests {
 
 #[odra::module]
 pub struct CollusionResistance {
-    honesty_deposits: Mapping<Address, U256>,
-    whistleblower_rewards: Mapping<Address, U256>,
+    honesty_deposits: Mapping<Address, u64>,
+    whistleblower_rewards: Mapping<Address, u64>,
     slashed_agents: Mapping<Address, bool>,
 }
 
@@ -209,7 +209,7 @@ pub struct CollusionResistance {
 impl CollusionResistance {
     pub fn deposit_honesty(&mut self) {
         let caller = self.env().caller();
-        let amount = self.env().attached_value();
+        let amount: u64 = self.env().attached_value().as_u64();
         let current = self.honesty_deposits.get(&caller).unwrap_or_default();
         self.honesty_deposits.set(&caller, current + amount);
     }
@@ -220,7 +220,7 @@ impl CollusionResistance {
         if is_valid {
             for colluder in colluders {
                 let deposit = self.honesty_deposits.get(&colluder).unwrap_or_default();
-                self.honesty_deposits.set(&colluder, U256::zero());
+                self.honesty_deposits.set(&colluder, 0);
                 self.slashed_agents.set(&colluder, true);
                 
                 let current_reward = self.whistleblower_rewards.get(&reporter).unwrap_or_default();
