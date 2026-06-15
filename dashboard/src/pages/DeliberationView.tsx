@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Activity, Search, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type LogEntry = {
@@ -15,7 +15,6 @@ export const DeliberationView: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'deliberating' | 'settled'>('idle');
   const [activeDispute, setActiveDispute] = useState<any>(null);
   const [verdict, setVerdict] = useState<any>(null);
-  const [filterText, setFilterText] = useState('');
   const [autoScroll, setAutoScroll] = useState(true);
   const [showScenario, setShowScenario] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
@@ -145,36 +144,37 @@ export const DeliberationView: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        {/* Terminal Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
-          <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Live Court Dashboard</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Observe autonomous AI agents resolving real-world disputes natively on Casper.</p>
+          <h2 style={{ fontSize: '2rem', marginBottom: '0.25rem', fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Live Court Dashboard</h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Observe autonomous AI agents resolving real-world disputes natively on Casper.</p>
         </div>
-        {status === 'idle' && (
-          <button onClick={() => setShowScenario(true)} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem', padding: '0.75rem 1.5rem' }}>
-            Start New Dispute
+        {(status === 'idle' || status === 'settled') && (
+          <button onClick={() => { setLogs([]); setVerdict(null); setStatus('idle'); setShowScenario(true); }} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', padding: '0.6rem 1.25rem' }}>
+            {status === 'settled' ? 'Run Another Dispute' : 'Start New Dispute'}
           </button>
         )}
       </div>
 
       {/* Top Stats Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
-        <div className="enterprise-card" style={{ background: 'var(--bg-main)' }}>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Active Dispute</div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{activeDispute ? `#${activeDispute.disputeId}` : 'None'}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div className="enterprise-card" style={{ background: 'var(--bg-main)', padding: '1.25rem' }}>
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Active Dispute</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{activeDispute ? `#${activeDispute.disputeId}` : 'None'}</div>
         </div>
-        <div className="enterprise-card" style={{ background: 'var(--bg-main)' }}>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Asset Value</div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{activeDispute ? `$2.4M` : '-'}</div>
+        <div className="enterprise-card" style={{ background: 'var(--bg-main)', padding: '1.25rem' }}>
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Asset Value</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{activeDispute ? `$2.4M` : '-'}</div>
         </div>
-        <div className="enterprise-card" style={{ background: 'var(--bg-main)' }}>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Assigned Jurors</div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{activeDispute ? '3' : '0'}</div>
+        <div className="enterprise-card" style={{ background: 'var(--bg-main)', padding: '1.25rem' }}>
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Assigned Jurors</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{activeDispute ? '3' : '0'}</div>
         </div>
-        <div className="enterprise-card" style={{ background: 'var(--bg-main)' }}>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Status</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.5rem', fontWeight: 700, color: status === 'deliberating' ? '#10B981' : 'var(--text-primary)', marginTop: '0.5rem' }}>
-            {status === 'deliberating' && <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#10B981' }} className="animate-pulse"></span>}
+        <div className="enterprise-card" style={{ background: 'var(--bg-main)', padding: '1.25rem' }}>
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Status</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', fontWeight: 700, color: status === 'deliberating' ? '#10B981' : 'var(--text-primary)', marginTop: '0.25rem' }}>
+            {status === 'deliberating' && <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10B981' }} className="animate-pulse"></span>}
             {status === 'idle' ? 'Standby' : status === 'deliberating' ? 'In Progress' : 'Resolved'}
           </div>
         </div>
@@ -184,41 +184,55 @@ export const DeliberationView: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
         
         {/* Left Column: Log / Timeline */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           
-          <div className="enterprise-card" style={{ background: 'var(--bg-main)' }}>
-            <h4 style={{ marginBottom: '1rem', fontSize: '1.25rem', paddingBottom: '0.75rem', color: 'var(--text-primary)' }}>Case Background</h4>
-            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '1rem' }}>
+          <div className="enterprise-card" style={{ background: 'var(--bg-main)', padding: '1.25rem' }}>
+            <h4 style={{ marginBottom: '0.5rem', fontSize: '1rem', color: 'var(--text-primary)' }}>Case Background</h4>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5, fontSize: '0.9rem' }}>
               The Buyer purchased $50,000 in tokenized shares. The local market crashed. The property manager claims the garage is still worth $2.4M and refuses a partial refund to the treasury. The Buyer has requested immediate AI arbitration to assess real market value via RentCast and FRED data.
             </p>
           </div>
 
-          <div className="enterprise-card" style={{ background: 'var(--bg-main)', flexGrow: 1, height: '400px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface)' }}>
-              <h4 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', margin: 0 }}>Deliberation Activity</h4>
-              <button onClick={() => setAutoScroll(!autoScroll)} style={{ background: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.5rem 1rem', color: autoScroll ? '#10B981' : 'var(--text-tertiary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>Auto-Scroll {autoScroll ? 'On' : 'Off'}</button>
+          {verdict && (
+            <div className="enterprise-card" style={{ border: '2px solid var(--primary)', backgroundColor: 'var(--bg-main)', padding: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', marginBottom: '0.75rem' }}>
+                <CheckCircle2 size={20} />
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Final AI Verdict</span>
+              </div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
+                {verdict.finalVerdict === 'FullRefund' ? '100% Refund Granted' : 
+                 verdict.finalVerdict === 'SplitFifty' ? '50/50 Settlement Reached' : 
+                 'Full Release to Treasury'}
+              </div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                <strong>Explanation:</strong> Based on the RentCast market APIs and FRED mortgage rates, the 3 AI agents determined that the property manager severely over-reported the valuation. The true assessed value is <strong>${verdict.finalValue.toLocaleString()}</strong>. The Odra smart contract will now automatically route the funds back to the token holders.
+              </div>
             </div>
-            <div style={{ flexGrow: 1, overflowY: 'auto', padding: '1.5rem' }}>
+          )}
+
+          <div className="enterprise-card" style={{ background: 'var(--bg-main)', flexGrow: 1, minHeight: '300px', maxHeight: '40vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface)' }}>
+              <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)', margin: 0 }}>Deliberation Activity</h4>
+              <button onClick={() => setAutoScroll(!autoScroll)} style={{ background: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.25rem 0.75rem', color: autoScroll ? '#10B981' : 'var(--text-tertiary)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>Auto-Scroll {autoScroll ? 'On' : 'Off'}</button>
+            </div>
+            <div style={{ flexGrow: 1, overflowY: 'auto', padding: '1.25rem' }}>
               <AnimatePresence initial={false}>
-                {logs.filter(log => 
-                  log.content.toLowerCase().includes(filterText.toLowerCase()) || 
-                  log.type.toLowerCase().includes(filterText.toLowerCase())
-                ).map((log) => (
+                {logs.map((log) => (
                   <motion.div 
                     key={log.id}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    style={{ marginBottom: '1.5rem', display: 'flex', gap: '1.5rem' }}
+                    style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}
                   >
-                    <div style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', flexShrink: 0, width: '65px', paddingTop: '2px', fontWeight: 500 }}>
+                    <div style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', flexShrink: 0, width: '60px', paddingTop: '2px', fontWeight: 500 }}>
                       {new Date(log.timestamp).toISOString().substr(11, 8)}
                     </div>
-                    <div style={{ flexGrow: 1, borderLeft: '2px solid var(--border-color)', paddingLeft: '1.5rem', position: 'relative' }}>
-                      <div style={{ position: 'absolute', left: '-5px', top: '6px', width: '8px', height: '8px', borderRadius: '50%', background: getLogColor(log.category) }}></div>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem', fontSize: '1rem' }}>
+                    <div style={{ flexGrow: 1, borderLeft: '2px solid var(--border-color)', paddingLeft: '1rem', position: 'relative' }}>
+                      <div style={{ position: 'absolute', left: '-5px', top: '5px', width: '8px', height: '8px', borderRadius: '50%', background: getLogColor(log.category) }}></div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem', fontSize: '0.85rem' }}>
                         {log.type}
                       </div>
-                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, wordBreak: 'break-word' }}>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5, wordBreak: 'break-word' }}>
                         {log.content}
                       </div>
                     </div>
@@ -228,47 +242,30 @@ export const DeliberationView: React.FC = () => {
               <div ref={logsEndRef} />
             </div>
           </div>
-
-          {verdict && (
-            <div className="enterprise-card" style={{ border: '2px solid var(--primary)', backgroundColor: 'var(--bg-main)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)', marginBottom: '1.25rem' }}>
-                <CheckCircle2 size={24} />
-                <span style={{ fontSize: '1.1rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Final AI Verdict</span>
-              </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-primary)' }}>
-                {verdict.finalVerdict === 'FullRefund' ? '100% Refund Granted' : 
-                 verdict.finalVerdict === 'SplitFifty' ? '50/50 Settlement Reached' : 
-                 'Full Release to Treasury'}
-              </div>
-              <div style={{ fontSize: '1rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                <strong>Explanation:</strong> Based on the RentCast market APIs and FRED mortgage rates, the 3 AI agents determined that the property manager severely over-reported the valuation. The true assessed value is <strong>${verdict.finalValue.toLocaleString()}</strong>. The Odra smart contract will now automatically route the funds back to the token holders.
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Right Column: Agents Sidebar */}
         <div className="enterprise-card" style={{ background: 'var(--bg-main)', padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface)' }}>
-            <h4 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', margin: 0 }}>Team Collaboration</h4>
+          <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface)' }}>
+            <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)', margin: 0 }}>Team Collaboration</h4>
           </div>
-          <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {[
               { name: 'Comps Specialist', type: 'Valuation', desc: 'Analyzes recent property sales via RentCast API.' },
               { name: 'DCF Specialist', type: 'Valuation', desc: 'Calculates NPV using FRED mortgage rates.' },
               { name: 'Evidence Analyst', type: 'Juror (LLM)', desc: 'Validates raw data points and comps.' },
               { name: 'Data Interpreter', type: 'Juror (LLM)', desc: 'Provides macro-economic context.' },
               { name: 'Case Researcher', type: 'Juror (RAG)', desc: 'Searches Vectra RAG for historical precedents.' }
-            ].map((agent, idx) => (
-              <div key={agent.name} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'var(--bg-surface-alt)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: '1rem' }}>
+            ].map((agent) => (
+              <div key={agent.name} title={agent.desc} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'help' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'var(--bg-surface-alt)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
                   {agent.name.substring(0, 2).toUpperCase()}
                 </div>
                 <div style={{ flexGrow: 1 }}>
-                  <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>{agent.name}</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>{agent.type}</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>{agent.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{agent.type}</div>
                 </div>
-                <div style={{ padding: '6px 12px', background: status === 'idle' ? 'var(--bg-surface-alt)' : status === 'settled' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(252, 211, 77, 0.1)', color: status === 'idle' ? 'var(--text-secondary)' : status === 'settled' ? '#10B981' : '#F59E0B', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600, border: '1px solid var(--border-color)' }}>
+                <div style={{ padding: '4px 8px', background: status === 'idle' ? 'var(--bg-surface-alt)' : status === 'settled' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(252, 211, 77, 0.1)', color: status === 'idle' ? 'var(--text-secondary)' : status === 'settled' ? '#10B981' : '#F59E0B', borderRadius: '999px', fontSize: '0.65rem', fontWeight: 600, border: '1px solid var(--border-color)' }}>
                   {status === 'idle' ? 'Standby' : status === 'deliberating' ? 'In Progress' : 'Completed'}
                 </div>
               </div>
