@@ -13,7 +13,7 @@ type LogEntry = {
 export const DeliberationView: React.FC = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [status, setStatus] = useState<'idle' | 'deliberating' | 'settled'>('idle');
-  const [activeDispute, setActiveDispute] = useState<any>(null);
+  const [, setActiveDispute] = useState<any>(null);
   const [verdict, setVerdict] = useState<any>(null);
   const [autoScroll, setAutoScroll] = useState(true);
   const [showScenario, setShowScenario] = useState(false);
@@ -157,31 +157,10 @@ export const DeliberationView: React.FC = () => {
         )}
       </div>
 
-      {/* Top Stats Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-        <div className="enterprise-card" style={{ background: 'var(--bg-main)', padding: '1.25rem' }}>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Active Dispute</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{activeDispute ? `#${activeDispute.disputeId}` : 'None'}</div>
-        </div>
-        <div className="enterprise-card" style={{ background: 'var(--bg-main)', padding: '1.25rem' }}>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Asset Value</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{activeDispute ? `$2.4M` : '-'}</div>
-        </div>
-        <div className="enterprise-card" style={{ background: 'var(--bg-main)', padding: '1.25rem' }}>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Assigned Jurors</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{activeDispute ? '3' : '0'}</div>
-        </div>
-        <div className="enterprise-card" style={{ background: 'var(--bg-main)', padding: '1.25rem' }}>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Status</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', fontWeight: 700, color: status === 'deliberating' ? '#10B981' : 'var(--text-primary)', marginTop: '0.25rem' }}>
-            {status === 'deliberating' && <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10B981' }} className="animate-pulse"></span>}
-            {status === 'idle' ? 'Standby' : status === 'deliberating' ? 'In Progress' : 'Resolved'}
-          </div>
-        </div>
-      </div>
+      {/* Top Stats Row Removed to match clean one-page layout */}
 
       {/* Main Layout Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', alignItems: 'start', marginTop: '1rem' }}>
         
         {/* Left Column: Log / Timeline */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -210,10 +189,10 @@ export const DeliberationView: React.FC = () => {
             </div>
           )}
 
-          <div className="enterprise-card" style={{ background: 'var(--bg-main)', flexGrow: 1, minHeight: '300px', maxHeight: '40vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+          <div className="enterprise-card" style={{ background: 'var(--bg-main)', flexGrow: 1, minHeight: '300px', maxHeight: '55vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface)' }}>
               <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)', margin: 0 }}>Deliberation Activity</h4>
-              <button onClick={() => setAutoScroll(!autoScroll)} style={{ background: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.25rem 0.75rem', color: autoScroll ? '#10B981' : 'var(--text-tertiary)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>Auto-Scroll {autoScroll ? 'On' : 'Off'}</button>
+              <button onClick={() => setAutoScroll(!autoScroll)} style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.25rem 0.75rem', color: autoScroll ? '#10B981' : 'var(--text-tertiary)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>Auto-Scroll {autoScroll ? 'On' : 'Off'}</button>
             </div>
             <div style={{ flexGrow: 1, overflowY: 'auto', padding: '1.25rem' }}>
               <AnimatePresence initial={false}>
