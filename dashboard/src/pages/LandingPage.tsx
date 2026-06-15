@@ -78,7 +78,33 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Section 4 - Agent Network */}
+      {/* Section 4 - Enterprise Use Cases */}
+      <section className="container" style={{ padding: '6rem 0', borderBottom: '1px solid var(--border-color)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', padding: '0.5rem 1rem', borderRadius: '999px', marginBottom: '1rem' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, letterSpacing: '0.05em' }}>WHO IS THIS FOR?</span>
+          </div>
+          <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Enterprise Use Cases</h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>Resolving Web3's most complex physical-world disputes.</p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
+          <div className="enterprise-card" style={{ background: 'var(--bg-surface)' }}>
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Tokenization Platforms</h3>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>Platforms like RealT or Lofty can integrate the court to automatically resolve disputes between token holders and property managers without hiring real-world legal teams.</p>
+          </div>
+          <div className="enterprise-card" style={{ background: 'var(--bg-surface)' }}>
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>DeFi Lending Protocols</h3>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>Protocols accepting real-world collateral can use the AI jury to autonomously trigger liquidation events if the property's real-time market value falls below a certain threshold.</p>
+          </div>
+          <div className="enterprise-card" style={{ background: 'var(--bg-surface)' }}>
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>DAO Treasuries</h3>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>DAOs funding physical-world infrastructure projects can use the court to verify that milestones were actually completed before unlocking the next tranche of USDC payments.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 5 - Agent Network */}
       <section className="container" style={{ padding: '6rem 0', borderBottom: '1px solid var(--border-color)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
           <div>
