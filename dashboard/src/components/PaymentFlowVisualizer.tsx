@@ -76,150 +76,153 @@ const Tooltip: React.FC<{ text: string; children: React.ReactNode }> = ({ text, 
 /* ─────────── Architecture Flow Diagram ─────────── */
 const FlowDiagram: React.FC = () => {
   const nodes = [
-    { id: 'user', label: 'User / dApp', sub: 'REST API', icon: User, x: 80, y: 200, color: '#3B82F6', desc: 'End user initiating the dispute via REST API.' },
-    { id: 'orchestrator', label: 'Orchestrator', sub: 'Coordinator', icon: Zap, x: 280, y: 200, color: '#8B5CF6', desc: 'Central coordinator dispatching valuation tasks and collecting votes.' },
-    { id: 'agent-a', label: 'Comps Specialist', sub: 'Agent A', icon: Shield, x: 540, y: 100, color: '#EC4899', desc: 'Estimates asset value using comparable sales. Protected by x402 payment wall.' },
-    { id: 'agent-b', label: 'DCF Specialist', sub: 'Agent B', icon: Shield, x: 540, y: 300, color: '#F59E0B', desc: 'Estimates asset value using discounted cash flows. Protected by x402 payment wall.' },
-    { id: 'jurors', label: 'Juror Pool', sub: 'DAO Voting', icon: Shield, x: 800, y: 200, color: '#10B981', desc: 'Decentralized jury voting on the final verdict.' },
-    { id: 'chain', label: 'Casper Chain', sub: 'L1 Settlement', icon: DollarSign, x: 930, y: 200, color: '#EF4444', desc: 'Layer-1 Casper testnet for immutable transaction recording.' },
+    { id: 'user', label: 'User / dApp', sub: 'REST API', icon: User, x: 80, y: 200, color: '#3B82F6', desc: 'End user initiating the dispute via REST API.', align: 'left', valign: 'top' },
+    { id: 'orchestrator', label: 'Orchestrator', sub: 'Coordinator', icon: Zap, x: 280, y: 200, color: '#8B5CF6', desc: 'Central coordinator dispatching valuation tasks and collecting votes.', align: 'center', valign: 'top' },
+    { id: 'agent-a', label: 'Comps Specialist', sub: 'Agent A', icon: Shield, x: 540, y: 100, color: '#EC4899', desc: 'Estimates asset value using comparable sales. Protected by x402 payment wall.', align: 'center', valign: 'bottom' },
+    { id: 'agent-b', label: 'DCF Specialist', sub: 'Agent B', icon: Shield, x: 540, y: 300, color: '#F59E0B', desc: 'Estimates asset value using discounted cash flows. Protected by x402 payment wall.', align: 'center', valign: 'top' },
+    { id: 'jurors', label: 'Juror Pool', sub: 'DAO Voting', icon: Shield, x: 800, y: 200, color: '#10B981', desc: 'Decentralized jury voting on the final verdict.', align: 'center', valign: 'top' },
+    { id: 'chain', label: 'Casper Chain', sub: 'L1 Settlement', icon: DollarSign, x: 930, y: 200, color: '#EF4444', desc: 'Layer-1 Casper testnet for immutable transaction recording.', align: 'right', valign: 'top' },
   ];
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '400px', background: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden' }}>
-      <style>
-        {`
-          .animated-flow-line {
-            stroke: var(--text-tertiary);
-            stroke-width: 2;
-            fill: none;
-            stroke-dasharray: 6 6;
-            animation: flowLineAnim 1s linear infinite;
-            opacity: 0.5;
-          }
-          .animated-flow-line.highlight {
-            stroke: var(--primary);
-            opacity: 0.8;
-          }
-          @keyframes flowLineAnim {
-            from { stroke-dashoffset: 12; }
-            to { stroke-dashoffset: 0; }
-          }
-          .node-hover-wrapper {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 10;
-          }
-          .node-card {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            width: 130px;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.2s ease;
-            cursor: help;
-          }
-          .node-hover-wrapper:hover .node-card {
-            box-shadow: var(--shadow-md);
-            border-color: var(--text-secondary);
-            transform: translateY(-2px);
-          }
-          .node-tooltip {
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-top: 0.5rem;
-            background: var(--text-primary);
-            color: var(--bg-main);
-            padding: 0.75rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            line-height: 1.4;
-            width: 200px;
-            text-align: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-lg);
-            pointer-events: none;
-            z-index: 20;
-          }
-          .node-hover-wrapper:hover .node-tooltip {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(4px);
-          }
-          .node-tooltip::before {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 6px solid transparent;
-            border-bottom-color: var(--text-primary);
-          }
-        `}
-      </style>
+    <div style={{ width: '100%', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+      <div style={{ position: 'relative', minWidth: '1000px', height: '400px', background: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden' }}>
+        <style>
+          {`
+            .animated-flow-line {
+              stroke: var(--text-tertiary);
+              stroke-width: 2;
+              fill: none;
+              stroke-dasharray: 6 6;
+              animation: flowLineAnim 1s linear infinite;
+              opacity: 0.5;
+            }
+            .animated-flow-line.highlight {
+              stroke: var(--primary);
+              opacity: 0.8;
+            }
+            @keyframes flowLineAnim {
+              from { stroke-dashoffset: 12; }
+              to { stroke-dashoffset: 0; }
+            }
+            .node-hover-wrapper {
+              position: absolute;
+              transform: translate(-50%, -50%);
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              z-index: 10;
+            }
+            .node-card {
+              background: var(--bg-surface);
+              border: 1px solid var(--border-color);
+              border-radius: 8px;
+              padding: 0.75rem 1rem;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 0.5rem;
+              width: 130px;
+              box-shadow: var(--shadow-sm);
+              transition: all 0.2s ease;
+              cursor: help;
+            }
+            .node-hover-wrapper:hover .node-card {
+              box-shadow: var(--shadow-md);
+              border-color: var(--text-secondary);
+              transform: translateY(-2px);
+            }
+            .node-tooltip {
+              position: absolute;
+              background: var(--text-primary);
+              color: var(--bg-main);
+              padding: 0.75rem;
+              border-radius: 6px;
+              font-size: 0.75rem;
+              line-height: 1.4;
+              width: 200px;
+              opacity: 0;
+              visibility: hidden;
+              transition: all 0.2s ease;
+              box-shadow: var(--shadow-lg);
+              pointer-events: none;
+              z-index: 20;
+            }
+            .node-hover-wrapper:hover .node-tooltip {
+              opacity: 1;
+              visibility: visible;
+            }
+          `}
+        </style>
 
-      {/* SVG Background Layer */}
-      <svg viewBox="0 0 1000 400" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="xMidYMid meet">
-        {/* Paths */}
-        <path d="M 80 200 L 280 200" className="animated-flow-line" />
-        <path d="M 280 200 C 380 200, 420 100, 540 100" className="animated-flow-line highlight" />
-        <path d="M 280 200 C 380 200, 420 300, 540 300" className="animated-flow-line highlight" />
-        <path d="M 540 100 C 660 100, 700 200, 800 200" className="animated-flow-line" />
-        <path d="M 540 300 C 660 300, 700 200, 800 200" className="animated-flow-line" />
-        <path d="M 800 200 L 930 200" className="animated-flow-line" />
-        
-        {/* Labels */}
-        <rect x="150" y="184" width="60" height="18" fill="var(--bg-main)" rx="4" />
-        <text x="180" y="196" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">REST API</text>
-        
-        <rect x="360" y="134" width="80" height="18" fill="var(--bg-main)" rx="4" />
-        <text x="400" y="146" textAnchor="middle" fontSize="10" fill="var(--primary)" fontWeight="600">x402 Payment</text>
-        
-        <rect x="360" y="264" width="80" height="18" fill="var(--bg-main)" rx="4" />
-        <text x="400" y="276" textAnchor="middle" fontSize="10" fill="var(--primary)" fontWeight="600">x402 Payment</text>
-        
-        <rect x="650" y="134" width="60" height="18" fill="var(--bg-main)" rx="4" />
-        <text x="680" y="146" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">Report</text>
-        
-        <rect x="650" y="264" width="60" height="18" fill="var(--bg-main)" rx="4" />
-        <text x="680" y="276" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">Report</text>
-        
-        <rect x="830" y="184" width="60" height="18" fill="var(--bg-main)" rx="4" />
-        <text x="860" y="196" textAnchor="middle" fontSize="10" fill="#10B981" fontWeight="600">Settle</text>
-      </svg>
+        {/* SVG Background Layer */}
+        <svg viewBox="0 0 1000 400" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="xMidYMid meet">
+          {/* Paths */}
+          <path d="M 80 200 L 280 200" className="animated-flow-line" />
+          <path d="M 280 200 C 380 200, 420 100, 540 100" className="animated-flow-line highlight" />
+          <path d="M 280 200 C 380 200, 420 300, 540 300" className="animated-flow-line highlight" />
+          <path d="M 540 100 C 660 100, 700 200, 800 200" className="animated-flow-line" />
+          <path d="M 540 300 C 660 300, 700 200, 800 200" className="animated-flow-line" />
+          <path d="M 800 200 L 930 200" className="animated-flow-line" />
+          
+          {/* Labels */}
+          <rect x="145" y="184" width="70" height="18" fill="var(--bg-main)" rx="4" />
+          <text x="180" y="196" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">REST API</text>
+          
+          <rect x="350" y="134" width="100" height="18" fill="var(--bg-main)" rx="4" />
+          <text x="400" y="146" textAnchor="middle" fontSize="10" fill="var(--primary)" fontWeight="600">x402 Payment</text>
+          
+          <rect x="350" y="264" width="100" height="18" fill="var(--bg-main)" rx="4" />
+          <text x="400" y="276" textAnchor="middle" fontSize="10" fill="var(--primary)" fontWeight="600">x402 Payment</text>
+          
+          <rect x="645" y="134" width="70" height="18" fill="var(--bg-main)" rx="4" />
+          <text x="680" y="146" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">Report</text>
+          
+          <rect x="645" y="264" width="70" height="18" fill="var(--bg-main)" rx="4" />
+          <text x="680" y="276" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">Report</text>
+          
+          <rect x="825" y="184" width="70" height="18" fill="var(--bg-main)" rx="4" />
+          <text x="860" y="196" textAnchor="middle" fontSize="10" fill="#10B981" fontWeight="600">Settle</text>
+        </svg>
 
-      {/* HTML Nodes Layer */}
-      {nodes.map(node => (
-        <div key={node.id} className="node-hover-wrapper" style={{ left: `${(node.x / 1000) * 100}%`, top: `${(node.y / 400) * 100}%` }}>
-          <div className="node-card">
-            <div style={{ 
-              width: 36, height: 36, borderRadius: '8px', 
-              background: `${node.color}15`, color: node.color, 
-              display: 'flex', alignItems: 'center', justifyContent: 'center' 
+        {/* HTML Nodes Layer */}
+        {nodes.map(node => (
+          <div key={node.id} className="node-hover-wrapper" style={{ left: `${(node.x / 1000) * 100}%`, top: `${(node.y / 400) * 100}%` }}>
+            <div className="node-card">
+              <div style={{ 
+                width: 36, height: 36, borderRadius: '8px', 
+                background: `${node.color}15`, color: node.color, 
+                display: 'flex', alignItems: 'center', justifyContent: 'center' 
+              }}>
+                <node.icon size={18} />
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>{node.label}</div>
+                <div style={{ fontSize: '0.6rem', color: 'var(--text-tertiary)', marginTop: '2px' }}>{node.sub}</div>
+              </div>
+            </div>
+            
+            <div className="node-tooltip" style={{
+              ...(node.valign === 'top' ? { bottom: '100%', marginBottom: '8px', transformOrigin: 'bottom center' } : { top: '100%', marginTop: '8px', transformOrigin: 'top center' }),
+              ...(node.align === 'center' ? { left: '50%', transform: 'translateX(-50%)', textAlign: 'center' as const } : 
+                  node.align === 'left' ? { left: '0', textAlign: 'left' as const } : 
+                  { right: '0', textAlign: 'right' as const })
             }}>
-              <node.icon size={18} />
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>{node.label}</div>
-              <div style={{ fontSize: '0.6rem', color: 'var(--text-tertiary)', marginTop: '2px' }}>{node.sub}</div>
+              {node.desc}
+              <div style={{
+                position: 'absolute',
+                ...(node.valign === 'top' ? { top: '100%', borderTopColor: 'var(--text-primary)' } : { bottom: '100%', borderBottomColor: 'var(--text-primary)' }),
+                ...(node.align === 'center' ? { left: '50%', transform: 'translateX(-50%)' } : 
+                    node.align === 'left' ? { left: '20px' } : 
+                    { right: '20px' }),
+                borderWidth: '6px',
+                borderStyle: 'solid',
+                borderColor: 'transparent',
+              }} />
             </div>
           </div>
-          <div className="node-tooltip">
-            {node.desc}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
