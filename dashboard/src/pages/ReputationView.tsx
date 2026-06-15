@@ -50,8 +50,11 @@ export const ReputationView: React.FC = () => {
               { id: 'Comps Specialist', role: 'Valuation', tier: 'Gold', det: 'Passed', desc: 'Analyzes recent property sales via RentCast API.' },
               { id: 'DCF Specialist', role: 'Valuation', tier: 'Gold', det: 'Passed', desc: 'Calculates NPV using FRED mortgage rates.' },
             ].map((a, i) => (
-              <tr key={i} title={a.desc} style={{ borderBottom: '1px solid var(--border-color)', cursor: 'help' }}>
-                <td style={{ padding: '1.25rem 1.5rem', fontWeight: 500 }}>{a.id}</td>
+              <tr key={i} className="agent-row" style={{ borderBottom: '1px solid var(--border-color)' }}>
+                <td style={{ padding: '1.25rem 1.5rem' }}>
+                  <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{a.id}</div>
+                  <div className="agent-desc">{a.desc}</div>
+                </td>
                 <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>{a.role}</td>
                 <td style={{ padding: '1.25rem 1.5rem' }}>
                   <span style={{ padding: '4px 8px', background: a.tier === 'Platinum' ? 'rgba(229, 231, 235, 0.1)' : 'rgba(252, 211, 77, 0.1)', color: a.tier === 'Platinum' ? '#E5E7EB' : '#FCD34D', borderRadius: '4px', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>{a.tier}</span>

@@ -195,15 +195,16 @@ export const DeliberationView: React.FC = () => {
                 { name: 'Data Interpreter', type: 'Juror (LLM)', desc: 'Provides macro-economic context.' },
                 { name: 'Case Researcher', type: 'Juror (RAG)', desc: 'Searches Vectra RAG for historical precedents.' }
               ].map((agent) => (
-                <div key={agent.name} title={agent.desc} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'help' }}>
+                <div key={agent.name} className="agent-row" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'default' }}>
                   <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--bg-surface-alt)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: 'var(--text-tertiary)', fontSize: '0.75rem', flexShrink: 0 }}>
                     {agent.name.substring(0, 2).toUpperCase()}
                   </div>
                   <div style={{ flexGrow: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agent.name}</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>{agent.type}</div>
+                    <div className="agent-desc">{agent.desc}</div>
                   </div>
-                  <div style={{ padding: '2px 6px', background: status === 'idle' ? 'var(--bg-surface-alt)' : status === 'settled' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(252, 211, 77, 0.1)', color: status === 'idle' ? 'var(--text-secondary)' : status === 'settled' ? '#10B981' : '#F59E0B', borderRadius: '999px', fontSize: '0.6rem', fontWeight: 600, border: '1px solid var(--border-color)', whiteSpace: 'nowrap' }}>
+                  <div style={{ padding: '2px 6px', background: status === 'idle' ? 'var(--bg-surface-alt)' : status === 'settled' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(252, 211, 77, 0.1)', color: status === 'idle' ? 'var(--text-secondary)' : status === 'settled' ? '#10B981' : '#F59E0B', borderRadius: '999px', fontSize: '0.6rem', fontWeight: 600, border: '1px solid var(--border-color)', whiteSpace: 'nowrap', marginTop: '2px' }}>
                     {status === 'idle' ? 'Standby' : status === 'deliberating' ? 'In Progress' : 'Completed'}
                   </div>
                 </div>
