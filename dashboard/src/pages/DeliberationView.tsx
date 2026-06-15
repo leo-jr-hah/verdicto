@@ -236,9 +236,6 @@ export const DeliberationView: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface)' }}>
             <h4 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', margin: 0 }}>Deliberation Activity</h4>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              {!autoScroll && (
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Auto-scroll paused</span>
-              )}
               <button onClick={() => { setAutoScroll(!autoScroll); if(!autoScroll && scrollContainerRef.current) scrollContainerRef.current.scrollTo({ top: scrollContainerRef.current.scrollHeight, behavior: 'smooth' }); }} style={{ background: autoScroll ? 'rgba(16, 185, 129, 0.1)' : 'transparent', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.35rem 0.75rem', color: autoScroll ? '#10B981' : 'var(--text-tertiary)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, transition: 'all 0.2s' }}>
                 Auto-Scroll {autoScroll ? 'On' : 'Off'}
               </button>
