@@ -17,6 +17,7 @@ export const DeliberationView: React.FC = () => {
   const [verdict, setVerdict] = useState<any>(null);
   const [filterText, setFilterText] = useState('');
   const [autoScroll, setAutoScroll] = useState(true);
+  const [showScenario, setShowScenario] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -93,6 +94,57 @@ export const DeliberationView: React.FC = () => {
 
   return (
     <div style={{ backgroundColor: '#000000', color: '#FFFFFF', minHeight: 'calc(100vh - 72px)', fontFamily: "'JetBrains Mono', 'Courier New', Courier, monospace" }}>
+      
+      {/* Interactive Scenario Modal */}
+      <AnimatePresence>
+        {showScenario && (
+          <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', backdropFilter: 'blur(4px)' }}>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              style={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '12px', padding: '3rem', maxWidth: '650px', width: '100%', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}
+            >
+              <button 
+                onClick={() => setShowScenario(false)}
+                style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '1.2rem' }}
+              >
+                ✕
+              </button>
+              
+              <div style={{ marginBottom: '2.5rem' }}>
+                <span style={{ padding: '6px 12px', background: 'rgba(255, 59, 59, 0.1)', color: 'var(--primary)', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Interactive Scenario</span>
+                <h2 style={{ fontSize: '2rem', margin: '1rem 0', fontFamily: 'var(--font-sans)', letterSpacing: '-0.02em' }}>The Miami Parking Garage Dispute</h2>
+                <p style={{ color: '#888', lineHeight: 1.6, fontFamily: 'var(--font-sans)', fontSize: '1.1rem' }}>You are observing a real-time autonomous dispute resolution on the Casper blockchain.</p>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '3rem', fontFamily: 'var(--font-sans)' }}>
+                <div style={{ padding: '1.5rem', background: '#0a0a0a', border: '1px solid #222', borderRadius: '8px' }}>
+                  <h4 style={{ color: '#fff', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem' }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#EF4444' }}></div>
+                    The Conflict (The Problem)
+                  </h4>
+                  <p style={{ color: '#aaa', fontSize: '0.95rem', lineHeight: 1.6 }}>A buyer purchased $50k in tokenized shares of a Miami garage valued at $2.4M. The local market crashed, and RentCast data shows it's now worth $1.8M. The platform refuses a partial refund.</p>
+                </div>
+                
+                <div style={{ padding: '1.5rem', background: '#0a0a0a', border: '1px solid #222', borderRadius: '8px' }}>
+                  <h4 style={{ color: '#fff', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem' }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981' }}></div>
+                    The Casper Court Solution
+                  </h4>
+                  <p style={{ color: '#aaa', fontSize: '0.95rem', lineHeight: 1.6 }}>Instead of spending 14 months and $20,000 on human lawyers, 3 specialized AI Jurors will evaluate the market APIs, deliberate, and trigger the escrow contract in 60 seconds. Total cost: $0.10.</p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', fontFamily: 'var(--font-sans)' }}>
+                <button onClick={() => setShowScenario(false)} style={{ padding: '0.85rem 1.5rem', background: 'transparent', color: '#fff', border: '1px solid #333', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem' }}>Cancel</button>
+                <button onClick={() => { setShowScenario(false); startDemo(); }} style={{ padding: '0.85rem 1.5rem', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem', boxShadow: '0 0 20px rgba(255, 59, 59, 0.4)' }}>Submit Case to AI Jury</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Terminal Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 2rem', borderBottom: '1px solid #333', backgroundColor: '#0a0a0a' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
@@ -121,7 +173,7 @@ export const DeliberationView: React.FC = () => {
             />
           </div>
           {status === 'idle' && (
-            <button onClick={startDemo} style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 0 10px rgba(255,59,59,0.3)' }}>
+            <button onClick={() => setShowScenario(true)} style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 0 10px rgba(255,59,59,0.3)' }}>
               Start New Dispute
             </button>
           )}
