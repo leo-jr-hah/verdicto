@@ -75,363 +75,151 @@ const Tooltip: React.FC<{ text: string; children: React.ReactNode }> = ({ text, 
 
 /* ─────────── Architecture Flow Diagram ─────────── */
 const FlowDiagram: React.FC = () => {
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
-
   const nodes = [
-    { id: 'user', label: 'User / dApp', sub: 'REST API', icon: User, color: '#3B82F6', desc: 'End user or decentralized application initiating the dispute resolution process via REST API or on-chain trigger.' },
-    { id: 'orchestrator', label: 'Orchestrator', sub: 'Coordination', icon: Zap, color: '#8B5CF6', desc: 'Central coordinator that dispatches valuation tasks to specialist agents, collects votes from jurors, and executes final verdicts on-chain.' },
-    { id: 'agent-a', label: 'Comps Specialist', sub: 'Comparable Sales', icon: Shield, color: '#EC4899', desc: 'Agent A — estimates asset value using comparable sales method. Protected by x402 micropayment wall (0.01 CSPR per request).' },
-    { id: 'agent-b', label: 'DCF Specialist', sub: 'Discounted CF', icon: Shield, color: '#F59E0B', desc: 'Agent B — estimates asset value using discounted cash-flow analysis. Protected by x402 micropayment wall (0.01 CSPR per request).' },
-    { id: 'jurors', label: 'Juror Pool', sub: 'DAO Voting', icon: Shield, color: '#10B981', desc: 'Decentralized jury (Evidence Analyst, Market Interpreter, Precedent Researcher) that votes on the final verdict after reviewing evidence from both agents.' },
-    { id: 'chain', label: 'Casper Chain', sub: 'L1 Settlement', icon: DollarSign, color: '#EF4444', desc: 'Layer-1 Casper testnet where settlement payments (2.5 CSPR), HMAC receipt chains, and ZK-Lite execution commitments are committed on-chain.' },
+    { id: 'user', label: 'User / dApp', sub: 'REST API', icon: User, x: 80, y: 200, color: '#3B82F6', desc: 'End user initiating the dispute via REST API.' },
+    { id: 'orchestrator', label: 'Orchestrator', sub: 'Coordinator', icon: Zap, x: 280, y: 200, color: '#8B5CF6', desc: 'Central coordinator dispatching valuation tasks and collecting votes.' },
+    { id: 'agent-a', label: 'Comps Specialist', sub: 'Agent A', icon: Shield, x: 540, y: 100, color: '#EC4899', desc: 'Estimates asset value using comparable sales. Protected by x402 payment wall.' },
+    { id: 'agent-b', label: 'DCF Specialist', sub: 'Agent B', icon: Shield, x: 540, y: 300, color: '#F59E0B', desc: 'Estimates asset value using discounted cash flows. Protected by x402 payment wall.' },
+    { id: 'jurors', label: 'Juror Pool', sub: 'DAO Voting', icon: Shield, x: 800, y: 200, color: '#10B981', desc: 'Decentralized jury voting on the final verdict.' },
+    { id: 'chain', label: 'Casper Chain', sub: 'L1 Settlement', icon: DollarSign, x: 930, y: 200, color: '#EF4444', desc: 'Layer-1 Casper testnet for immutable transaction recording.' },
   ];
 
   return (
-    <div style={{
-      background: 'linear-gradient(180deg, rgba(30,27,46,0.8) 0%, rgba(20,18,32,0.9) 100%)',
-      borderRadius: '12px',
-      border: '1px solid rgba(255,255,255,0.08)',
-      padding: '32px 24px',
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* Background grid pattern */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)',
-        backgroundSize: '24px 24px',
-        opacity: 0.5,
-      }} />
+    <div style={{ position: 'relative', width: '100%', height: '400px', background: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden' }}>
+      <style>
+        {`
+          .animated-flow-line {
+            stroke: var(--text-tertiary);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 6 6;
+            animation: flowLineAnim 1s linear infinite;
+            opacity: 0.5;
+          }
+          .animated-flow-line.highlight {
+            stroke: var(--primary);
+            opacity: 0.8;
+          }
+          @keyframes flowLineAnim {
+            from { stroke-dashoffset: 12; }
+            to { stroke-dashoffset: 0; }
+          }
+          .node-hover-wrapper {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+          }
+          .node-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            width: 130px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+            cursor: help;
+          }
+          .node-hover-wrapper:hover .node-card {
+            box-shadow: var(--shadow-md);
+            border-color: var(--text-secondary);
+            transform: translateY(-2px);
+          }
+          .node-tooltip {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 0.5rem;
+            background: var(--text-primary);
+            color: var(--bg-main);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            width: 200px;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-lg);
+            pointer-events: none;
+            z-index: 20;
+          }
+          .node-hover-wrapper:hover .node-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(4px);
+          }
+          .node-tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-bottom-color: var(--text-primary);
+          }
+        `}
+      </style>
 
-      {/* Title */}
-      <div style={{
-        position: 'relative',
-        fontSize: '0.65rem',
-        fontWeight: 600,
-        color: 'rgba(255,255,255,0.45)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.12em',
-        marginBottom: '28px',
-        textAlign: 'center',
-      }}>
-        Payment Flow Architecture
-      </div>
+      {/* SVG Background Layer */}
+      <svg viewBox="0 0 1000 400" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="xMidYMid meet">
+        {/* Paths */}
+        <path d="M 80 200 L 280 200" className="animated-flow-line" />
+        <path d="M 280 200 C 380 200, 420 100, 540 100" className="animated-flow-line highlight" />
+        <path d="M 280 200 C 380 200, 420 300, 540 300" className="animated-flow-line highlight" />
+        <path d="M 540 100 C 660 100, 700 200, 800 200" className="animated-flow-line" />
+        <path d="M 540 300 C 660 300, 700 200, 800 200" className="animated-flow-line" />
+        <path d="M 800 200 L 930 200" className="animated-flow-line" />
+        
+        {/* Labels */}
+        <rect x="150" y="184" width="60" height="18" fill="var(--bg-main)" rx="4" />
+        <text x="180" y="196" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">REST API</text>
+        
+        <rect x="360" y="134" width="80" height="18" fill="var(--bg-main)" rx="4" />
+        <text x="400" y="146" textAnchor="middle" fontSize="10" fill="var(--primary)" fontWeight="600">x402 Payment</text>
+        
+        <rect x="360" y="264" width="80" height="18" fill="var(--bg-main)" rx="4" />
+        <text x="400" y="276" textAnchor="middle" fontSize="10" fill="var(--primary)" fontWeight="600">x402 Payment</text>
+        
+        <rect x="650" y="134" width="60" height="18" fill="var(--bg-main)" rx="4" />
+        <text x="680" y="146" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">Report</text>
+        
+        <rect x="650" y="264" width="60" height="18" fill="var(--bg-main)" rx="4" />
+        <text x="680" y="276" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">Report</text>
+        
+        <rect x="830" y="184" width="60" height="18" fill="var(--bg-main)" rx="4" />
+        <text x="860" y="196" textAnchor="middle" fontSize="10" fill="#10B981" fontWeight="600">Settle</text>
+      </svg>
 
-      {/* Main flow container */}
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        {/* Row 1: User → Orchestrator → Agents */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '24px',
-          marginBottom: '20px',
-        }}>
-          {/* User */}
-          <Tooltip text={nodes[0].desc}>
-            <div
-              onMouseEnter={() => setHoveredNode('user')}
-              onMouseLeave={() => setHoveredNode(null)}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-                transform: hoveredNode === 'user' ? 'scale(1.08)' : 'scale(1)',
-              }}
-            >
-              <div style={{
-                width: 52,
-                height: 52,
-                borderRadius: '50%',
-                background: `linear-gradient(135deg, ${nodes[0].color}dd, ${nodes[0].color})`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                border: `2px solid ${hoveredNode === 'user' ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)'}`,
-                boxShadow: hoveredNode === 'user' ? `0 0 24px ${nodes[0].color}66` : `0 0 12px ${nodes[0].color}33`,
-              }}>
-                <User size={20} />
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7rem', fontWeight: 600, color: hoveredNode === 'user' ? nodes[0].color : 'var(--text-primary)' }}>
-                  {nodes[0].label}
-                </div>
-                <div style={{ fontSize: '0.58rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
-                  {nodes[0].sub}
-                </div>
-              </div>
+      {/* HTML Nodes Layer */}
+      {nodes.map(node => (
+        <div key={node.id} className="node-hover-wrapper" style={{ left: `${(node.x / 1000) * 100}%`, top: `${(node.y / 400) * 100}%` }}>
+          <div className="node-card">
+            <div style={{ 
+              width: 36, height: 36, borderRadius: '8px', 
+              background: `${node.color}15`, color: node.color, 
+              display: 'flex', alignItems: 'center', justifyContent: 'center' 
+            }}>
+              <node.icon size={18} />
             </div>
-          </Tooltip>
-
-          {/* Arrow: User → Orchestrator */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-            <div style={{ width: '60px', height: '2px', background: `linear-gradient(90deg, transparent, ${nodes[0].color}88, transparent)` }} />
-            <div style={{ fontSize: '0.6rem', fontWeight: 600, color: nodes[0].color }}>Submit Dispute</div>
-            <div style={{ fontSize: '0.55rem', color: 'var(--text-tertiary)' }}>REST API / POST</div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>{node.label}</div>
+              <div style={{ fontSize: '0.6rem', color: 'var(--text-tertiary)', marginTop: '2px' }}>{node.sub}</div>
+            </div>
           </div>
-
-          {/* Orchestrator */}
-          <Tooltip text={nodes[1].desc}>
-            <div
-              onMouseEnter={() => setHoveredNode('orchestrator')}
-              onMouseLeave={() => setHoveredNode(null)}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-                transform: hoveredNode === 'orchestrator' ? 'scale(1.08)' : 'scale(1)',
-              }}
-            >
-              <div style={{
-                width: 52,
-                height: 52,
-                borderRadius: '50%',
-                background: `linear-gradient(135deg, ${nodes[1].color}dd, ${nodes[1].color})`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                border: `2px solid ${hoveredNode === 'orchestrator' ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)'}`,
-                boxShadow: hoveredNode === 'orchestrator' ? `0 0 24px ${nodes[1].color}66` : `0 0 12px ${nodes[1].color}33`,
-              }}>
-                <Zap size={20} />
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7rem', fontWeight: 600, color: hoveredNode === 'orchestrator' ? nodes[1].color : 'var(--text-primary)' }}>
-                  {nodes[1].label}
-                </div>
-                <div style={{ fontSize: '0.58rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
-                  {nodes[1].sub}
-                </div>
-              </div>
-            </div>
-          </Tooltip>
-
-          {/* Arrow: Orchestrator → Agents */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-            <div style={{ width: '60px', height: '2px', background: `linear-gradient(90deg, transparent, ${nodes[2].color}88, transparent)` }} />
-            <div style={{ fontSize: '0.6rem', fontWeight: 600, color: nodes[2].color }}>x402 Payment</div>
-            <div style={{ fontSize: '0.55rem', color: 'var(--text-tertiary)' }}>0.01 CSPR/request</div>
+          <div className="node-tooltip">
+            {node.desc}
           </div>
-
-          {/* Agent A */}
-          <Tooltip text={nodes[2].desc}>
-            <div
-              onMouseEnter={() => setHoveredNode('agent-a')}
-              onMouseLeave={() => setHoveredNode(null)}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '6px',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-                transform: hoveredNode === 'agent-a' ? 'scale(1.08)' : 'scale(1)',
-              }}
-            >
-              <div style={{
-                width: 44,
-                height: 44,
-                borderRadius: '50%',
-                background: `linear-gradient(135deg, ${nodes[2].color}dd, ${nodes[2].color})`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                border: `2px solid ${hoveredNode === 'agent-a' ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)'}`,
-                boxShadow: hoveredNode === 'agent-a' ? `0 0 20px ${nodes[2].color}66` : `0 0 10px ${nodes[2].color}33`,
-              }}>
-                <Shield size={16} />
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 600, color: hoveredNode === 'agent-a' ? nodes[2].color : 'var(--text-primary)' }}>
-                  {nodes[2].label}
-                </div>
-                <div style={{ fontSize: '0.55rem', color: 'var(--text-tertiary)', marginTop: 1 }}>
-                  {nodes[2].sub}
-                </div>
-              </div>
-            </div>
-          </Tooltip>
-
-          {/* Agent B */}
-          <Tooltip text={nodes[3].desc}>
-            <div
-              onMouseEnter={() => setHoveredNode('agent-b')}
-              onMouseLeave={() => setHoveredNode(null)}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '6px',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-                transform: hoveredNode === 'agent-b' ? 'scale(1.08)' : 'scale(1)',
-              }}
-            >
-              <div style={{
-                width: 44,
-                height: 44,
-                borderRadius: '50%',
-                background: `linear-gradient(135deg, ${nodes[3].color}dd, ${nodes[3].color})`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                border: `2px solid ${hoveredNode === 'agent-b' ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)'}`,
-                boxShadow: hoveredNode === 'agent-b' ? `0 0 20px ${nodes[3].color}66` : `0 0 10px ${nodes[3].color}33`,
-              }}>
-                <Shield size={16} />
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 600, color: hoveredNode === 'agent-b' ? nodes[3].color : 'var(--text-primary)' }}>
-                  {nodes[3].label}
-                </div>
-                <div style={{ fontSize: '0.55rem', color: 'var(--text-tertiary)', marginTop: 1 }}>
-                  {nodes[3].sub}
-                </div>
-              </div>
-            </div>
-          </Tooltip>
         </div>
-
-        {/* Row 2: Agents → Jurors → Chain */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '24px',
-        }}>
-          {/* Spacer for alignment */}
-          <div style={{ width: '200px' }} />
-
-          {/* Arrow: Agents → Jurors */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-            <div style={{ width: '80px', height: '2px', background: `linear-gradient(90deg, transparent, ${nodes[4].color}88, transparent)` }} />
-            <div style={{ fontSize: '0.6rem', fontWeight: 600, color: nodes[4].color }}>Evidence Reports</div>
-            <div style={{ fontSize: '0.55rem', color: 'var(--text-tertiary)' }}>Valuation Data</div>
-          </div>
-
-          {/* Jurors */}
-          <Tooltip text={nodes[4].desc}>
-            <div
-              onMouseEnter={() => setHoveredNode('jurors')}
-              onMouseLeave={() => setHoveredNode(null)}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-                transform: hoveredNode === 'jurors' ? 'scale(1.08)' : 'scale(1)',
-              }}
-            >
-              <div style={{
-                width: 52,
-                height: 52,
-                borderRadius: '50%',
-                background: `linear-gradient(135deg, ${nodes[4].color}dd, ${nodes[4].color})`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                border: `2px solid ${hoveredNode === 'jurors' ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)'}`,
-                boxShadow: hoveredNode === 'jurors' ? `0 0 24px ${nodes[4].color}66` : `0 0 12px ${nodes[4].color}33`,
-              }}>
-                <Shield size={20} />
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7rem', fontWeight: 600, color: hoveredNode === 'jurors' ? nodes[4].color : 'var(--text-primary)' }}>
-                  {nodes[4].label}
-                </div>
-                <div style={{ fontSize: '0.58rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
-                  {nodes[4].sub}
-                </div>
-              </div>
-            </div>
-          </Tooltip>
-
-          {/* Arrow: Jurors → Chain */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-            <div style={{ width: '60px', height: '2px', background: `linear-gradient(90deg, transparent, ${nodes[5].color}88, transparent)` }} />
-            <div style={{ fontSize: '0.6rem', fontWeight: 600, color: nodes[5].color }}>Settlement</div>
-            <div style={{ fontSize: '0.55rem', color: 'var(--text-tertiary)' }}>2.5 CSPR Transfer</div>
-          </div>
-
-          {/* Chain */}
-          <Tooltip text={nodes[5].desc}>
-            <div
-              onMouseEnter={() => setHoveredNode('chain')}
-              onMouseLeave={() => setHoveredNode(null)}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-                transform: hoveredNode === 'chain' ? 'scale(1.08)' : 'scale(1)',
-              }}
-            >
-              <div style={{
-                width: 52,
-                height: 52,
-                borderRadius: '50%',
-                background: `linear-gradient(135deg, ${nodes[5].color}dd, ${nodes[5].color})`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                border: `2px solid ${hoveredNode === 'chain' ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)'}`,
-                boxShadow: hoveredNode === 'chain' ? `0 0 24px ${nodes[5].color}66` : `0 0 12px ${nodes[5].color}33`,
-              }}>
-                <DollarSign size={20} />
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7rem', fontWeight: 600, color: hoveredNode === 'chain' ? nodes[5].color : 'var(--text-primary)' }}>
-                  {nodes[5].label}
-                </div>
-                <div style={{ fontSize: '0.58rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
-                  {nodes[5].sub}
-                </div>
-              </div>
-            </div>
-          </Tooltip>
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div style={{
-        display: 'flex',
-        gap: '1.5rem',
-        justifyContent: 'center',
-        marginTop: '28px',
-        paddingTop: '20px',
-        borderTop: '1px solid rgba(255,255,255,0.08)',
-        position: 'relative',
-        zIndex: 1,
-      }}>
-        {[
-          { color: '#3B82F6', label: 'API Call' },
-          { color: '#EC4899', label: 'x402 Payment' },
-          { color: '#10B981', label: 'Settlement' },
-          { color: '#EF4444', label: 'On-Chain Commit' },
-        ].map((item, i) => (
-          <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>
-            <span style={{ width: 16, height: 2, background: item.color, display: 'inline-block', borderRadius: 1 }} />
-            {item.label}
-          </span>
-        ))}
-      </div>
+      ))}
     </div>
   );
 };
