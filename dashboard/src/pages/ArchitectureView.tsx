@@ -121,30 +121,31 @@ export const ArchitectureView: React.FC = () => {
   ];
 
   const getNodePosition = (id: string) => {
+    // Left-to-Right Process Flow Layout
     const positions: Record<string, { x: number; y: number }> = {
-      'dashboard': { x: 600, y: 80 },
-      'ws-server': { x: 850, y: 80 },
-      'orchestrator': { x: 600, y: 230 },
-      'valuation-a': { x: 350, y: 150 },
-      'valuation-b': { x: 350, y: 310 },
-      'evidence': { x: 850, y: 150 },
-      'market': { x: 850, y: 240 },
-      'precedent': { x: 850, y: 330 },
-      'casper-chain': { x: 600, y: 400 },
-      'external-apis': { x: 120, y: 230 }
+      'dashboard': { x: 150, y: 200 },
+      'external-apis': { x: 150, y: 500 },
+      'ws-server': { x: 400, y: 100 },
+      'orchestrator': { x: 400, y: 300 },
+      'evidence': { x: 750, y: 100 },
+      'market': { x: 750, y: 200 },
+      'precedent': { x: 750, y: 300 },
+      'valuation-a': { x: 750, y: 400 },
+      'valuation-b': { x: 750, y: 500 },
+      'casper-chain': { x: 1050, y: 450 }
     };
-    return positions[id] || { x: 600, y: 230 };
+    return positions[id] || { x: 600, y: 300 };
   };
 
   const selectedNodeData = nodes.find(n => n.id === selectedNode);
 
   const getPath = (sourceId: string, targetId: string, sx: number, sy: number, tx: number, ty: number) => {
-    if (Math.abs(sx - tx) < 10 || Math.abs(sy - ty) < 10) {
-      return `M ${sx} ${sy} L ${tx} ${ty}`;
+    // Custom sweep curve for Orchestrator -> Casper to gracefully bypass the AI agents
+    if (sourceId === 'orchestrator' && targetId === 'casper-chain') {
+      return `M ${sx} ${sy} C ${sx} 600, ${tx} 600, ${tx} ${ty}`;
     }
-    if ((sourceId.startsWith('valuation') && targetId === 'casper-chain') || (targetId.startsWith('valuation') && sourceId === 'casper-chain')) {
-      return `M ${sx} ${sy} C 220 ${sy}, 220 ${ty}, ${tx} ${ty}`;
-    }
+    
+    // Default smooth horizontal S-curve
     const cx = (sx + tx) / 2;
     return `M ${sx} ${sy} C ${cx} ${sy}, ${cx} ${ty}, ${tx} ${ty}`;
   };
@@ -181,7 +182,7 @@ export const ArchitectureView: React.FC = () => {
         <div style={{ 
           position: 'relative', 
           minWidth: '1000px',
-          height: '480px',
+          height: '640px',
           background: 'var(--bg-surface)',
           borderRadius: '12px',
           border: '1px solid var(--border-color)',
@@ -219,7 +220,7 @@ export const ArchitectureView: React.FC = () => {
           }} />
 
           {/* Connection Lines */}
-          <svg viewBox="0 0 1200 480" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} preserveAspectRatio="none">
+          <svg viewBox="0 0 1200 640" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} preserveAspectRatio="none">
             {uniquePaths.map(({ sourceId, targetId }) => {
               const sourceNode = nodes.find(n => n.id === sourceId);
               const targetNode = nodes.find(n => n.id === targetId);
@@ -258,7 +259,7 @@ export const ArchitectureView: React.FC = () => {
                 style={{
                   position: 'absolute',
                   left: `${(pos.x / 1200) * 100}%`,
-                  top: `${(pos.y / 480) * 100}%`,
+                  top: `${(pos.y / 640) * 100}%`,
                   transform: 'translate(-50%, -50%)',
                   zIndex: isSelected || isHovered ? 10 : 1,
                   cursor: 'pointer'
