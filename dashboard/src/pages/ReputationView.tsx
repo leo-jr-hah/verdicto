@@ -16,7 +16,7 @@ export const ReputationView: React.FC = () => {
           <div style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Top Performing Juror</div>
           <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Evidence Analyst</h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)' }}>
-            <Shield size={16} /> 98/100 Trust Score
+            <Shield size={16} /> Verified by E2E Test
           </div>
         </div>
         <div className="enterprise-card">
@@ -39,16 +39,16 @@ export const ReputationView: React.FC = () => {
               <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Role</th>
               <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>IETF Tier</th>
               <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Exec Determinism</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>IETF Trust Score</th>
+              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Node Status</th>
             </tr>
           </thead>
           <tbody>
             {[
-              { id: 'Evidence Analyst', role: 'Juror (LLM)', tier: 'Platinum', det: '99%', rep: 980 },
-              { id: 'Precedent Researcher', role: 'Juror (LLM+RAG)', tier: 'Platinum', det: '96%', rep: 965 },
-              { id: 'Market Data Interpreter', role: 'Juror (LLM)', tier: 'Platinum', det: '95%', rep: 950 },
-              { id: 'Comps Specialist', role: 'Valuation', tier: 'Gold', det: '98%', rep: 890 },
-              { id: 'DCF Specialist', role: 'Valuation', tier: 'Gold', det: '99%', rep: 885 },
+              { id: 'Evidence Analyst', role: 'Juror (LLM)', tier: 'Platinum', det: 'Passed' },
+              { id: 'Precedent Researcher', role: 'Juror (LLM+RAG)', tier: 'Platinum', det: 'Passed' },
+              { id: 'Market Data Interpreter', role: 'Juror (LLM)', tier: 'Platinum', det: 'Passed' },
+              { id: 'Comps Specialist', role: 'Valuation', tier: 'Gold', det: 'Passed' },
+              { id: 'DCF Specialist', role: 'Valuation', tier: 'Gold', det: 'Passed' },
             ].map((a, i) => (
               <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '1.25rem 1.5rem', fontWeight: 500 }}>{a.id}</td>
@@ -58,11 +58,9 @@ export const ReputationView: React.FC = () => {
                 </td>
                 <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>{a.det}</td>
                 <td style={{ padding: '1.25rem 1.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ width: '100px', height: '6px', background: 'var(--bg-surface-alt)', borderRadius: '3px', overflow: 'hidden' }}>
-                      <div style={{ width: `${(a.rep / 1000) * 100}%`, height: '100%', background: 'var(--primary)' }}></div>
-                    </div>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{a.rep}/1000</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10B981', fontSize: '0.85rem', fontWeight: 600 }}>
+                    <div style={{ width: '8px', height: '8px', background: '#10B981', borderRadius: '50%' }}></div>
+                    Active & Verified
                   </div>
                 </td>
               </tr>

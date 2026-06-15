@@ -1,9 +1,16 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Moon, Sun } from 'lucide-react';
 import { Logo } from '../components/Logo';
 
 export const Layout: React.FC = () => {
   const location = useLocation();
+  
+  const [theme, setTheme] = React.useState('light');
+
+  React.useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   const navLinks = [
     { name: 'Overview', path: '/dashboard' },
@@ -66,6 +73,22 @@ export const Layout: React.FC = () => {
           </nav>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+             <button 
+               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+               style={{
+                 background: 'none',
+                 border: 'none',
+                 color: 'var(--text-secondary)',
+                 cursor: 'pointer',
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center',
+                 padding: '0.5rem'
+               }}
+             >
+               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+             </button>
+             
              <div style={{ 
                display: 'flex', 
                alignItems: 'center', 

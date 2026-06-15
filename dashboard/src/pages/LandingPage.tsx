@@ -116,11 +116,11 @@ export const LandingPage: React.FC = () => {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
           {[
-            { name: 'Comps Specialist', type: 'Valuation', rep: 98, status: 'Online' },
-            { name: 'DCF Specialist', type: 'Valuation', rep: 95, status: 'Online' },
-            { name: 'Evidence Analyst', type: 'Juror (LLM)', rep: 92, status: 'Deliberating' }
+            { name: 'Comps Specialist', type: 'Valuation', verified: true, status: 'Online' },
+            { name: 'DCF Specialist', type: 'Valuation', verified: true, status: 'Online' },
+            { name: 'Evidence Analyst', type: 'Juror (LLM)', verified: true, status: 'Deliberating' }
           ].map((agent, i) => (
-            <div key={i} className="enterprise-card">
+            <div key={i} className="enterprise-card" style={{ background: 'var(--bg-surface)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <div className="badge badge-neutral">{agent.type}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: agent.status === 'Online' ? 'var(--text-secondary)' : 'var(--primary)' }}>
@@ -129,8 +129,8 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
               <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{agent.name}</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                <Shield size={14} /> Reputation Score: {agent.rep}/100
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10B981', fontSize: '0.9rem', fontWeight: 600 }}>
+                <Shield size={14} /> Evaluation: Verified
               </div>
             </div>
           ))}
