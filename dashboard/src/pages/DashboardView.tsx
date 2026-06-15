@@ -3,10 +3,10 @@ import { Users, FileText, BarChart3, Server } from 'lucide-react';
 
 export const DashboardView: React.FC = () => {
   const metrics = [
-    { title: 'Total Value Assessed', value: '$14.2M', change: '+12%', icon: BarChart3 },
-    { title: 'Active Agents', value: '12', change: 'Stable', icon: Users },
-    { title: 'Disputes Resolved', value: '1,429', change: '+34', icon: FileText },
-    { title: 'Network Uptime', value: '99.99%', change: 'Casper Testnet', icon: Server },
+    { title: 'Total Value Assessed', value: '$14.2M', change: '+12%', icon: BarChart3, isDemo: true },
+    { title: 'Active Agents', value: '12', change: 'Stable', icon: Users, isDemo: false },
+    { title: 'Disputes Resolved', value: '1,429', change: '+34', icon: FileText, isDemo: true },
+    { title: 'Network Uptime', value: '99.99%', change: 'Casper Testnet', icon: Server, isDemo: false },
   ];
 
   return (
@@ -29,6 +29,7 @@ export const DashboardView: React.FC = () => {
             </div>
             <div style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.25rem' }}>{m.value}</div>
             <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{m.title}</div>
+            {m.isDemo && <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>Demo data</div>}
           </div>
         ))}
       </div>

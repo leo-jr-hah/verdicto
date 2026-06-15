@@ -40,9 +40,9 @@ export const TransactionsView: React.FC = () => {
                 <td style={{ padding: '1.25rem 1.5rem' }}>{tx.block}</td>
                 <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-sans)' }}>{tx.time}</td>
                 <td style={{ padding: '1.25rem 1.5rem' }}>
-                  <a href={`https://testnet.cspr.live/deploy/${tx.hash}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--primary)' }}>
+                  <button onClick={() => alert('Note: This is a simulated execution hash for the hackathon demo. In production, this will link directly to the Casper block explorer.')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--primary)', fontSize: '0.85rem' }}>
                     View <ExternalLink size={14} />
-                  </a>
+                  </button>
                 </td>
               </tr>
             ))}

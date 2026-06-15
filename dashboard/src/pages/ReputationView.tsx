@@ -44,13 +44,13 @@ export const ReputationView: React.FC = () => {
           </thead>
           <tbody>
             {[
-              { id: 'Evidence Analyst', role: 'Juror (LLM)', tier: 'Platinum', det: 'Passed' },
-              { id: 'Precedent Researcher', role: 'Juror (LLM+RAG)', tier: 'Platinum', det: 'Passed' },
-              { id: 'Market Data Interpreter', role: 'Juror (LLM)', tier: 'Platinum', det: 'Passed' },
-              { id: 'Comps Specialist', role: 'Valuation', tier: 'Gold', det: 'Passed' },
-              { id: 'DCF Specialist', role: 'Valuation', tier: 'Gold', det: 'Passed' },
+              { id: 'Evidence Analyst', role: 'Juror (LLM)', tier: 'Platinum', det: 'Passed', desc: 'Validates raw data points and comps.' },
+              { id: 'Precedent Researcher', role: 'Juror (LLM+RAG)', tier: 'Platinum', det: 'Passed', desc: 'Searches Vectra RAG for historical precedents.' },
+              { id: 'Market Data Interpreter', role: 'Juror (LLM)', tier: 'Platinum', det: 'Passed', desc: 'Provides macro-economic context.' },
+              { id: 'Comps Specialist', role: 'Valuation', tier: 'Gold', det: 'Passed', desc: 'Analyzes recent property sales via RentCast API.' },
+              { id: 'DCF Specialist', role: 'Valuation', tier: 'Gold', det: 'Passed', desc: 'Calculates NPV using FRED mortgage rates.' },
             ].map((a, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
+              <tr key={i} title={a.desc} style={{ borderBottom: '1px solid var(--border-color)', cursor: 'help' }}>
                 <td style={{ padding: '1.25rem 1.5rem', fontWeight: 500 }}>{a.id}</td>
                 <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>{a.role}</td>
                 <td style={{ padding: '1.25rem 1.5rem' }}>
