@@ -122,21 +122,46 @@ export const ArchitectureView: React.FC = () => {
 
   const getNodePosition = (id: string) => {
     const positions: Record<string, { x: number; y: number }> = {
-      'dashboard': { x: 50, y: 5 },
-      'ws-server': { x: 20, y: 15 },
-      'orchestrator': { x: 50, y: 25 },
-      'valuation-a': { x: 25, y: 45 },
-      'valuation-b': { x: 75, y: 45 },
-      'evidence': { x: 15, y: 65 },
-      'market': { x: 50, y: 65 },
-      'precedent': { x: 85, y: 65 },
-      'casper-chain': { x: 50, y: 85 },
-      'external-apis': { x: 10, y: 35 }
+      'dashboard': { x: 600, y: 80 },
+      'ws-server': { x: 850, y: 80 },
+      'orchestrator': { x: 600, y: 230 },
+      'valuation-a': { x: 350, y: 150 },
+      'valuation-b': { x: 350, y: 310 },
+      'evidence': { x: 850, y: 150 },
+      'market': { x: 850, y: 240 },
+      'precedent': { x: 850, y: 330 },
+      'casper-chain': { x: 600, y: 400 },
+      'external-apis': { x: 120, y: 230 }
     };
-    return positions[id] || { x: 50, y: 50 };
+    return positions[id] || { x: 600, y: 230 };
   };
 
   const selectedNodeData = nodes.find(n => n.id === selectedNode);
+
+  const getPath = (sourceId: string, targetId: string, sx: number, sy: number, tx: number, ty: number) => {
+    if (Math.abs(sx - tx) < 10 || Math.abs(sy - ty) < 10) {
+      return `M ${sx} ${sy} L ${tx} ${ty}`;
+    }
+    if ((sourceId.startsWith('valuation') && targetId === 'casper-chain') || (targetId.startsWith('valuation') && sourceId === 'casper-chain')) {
+      return `M ${sx} ${sy} C 220 ${sy}, 220 ${ty}, ${tx} ${ty}`;
+    }
+    const cx = (sx + tx) / 2;
+    return `M ${sx} ${sy} C ${cx} ${sy}, ${cx} ${ty}, ${tx} ${ty}`;
+  };
+
+  // Deduplicate edges so animated dashes don't overlap
+  const edges = new Set<string>();
+  const uniquePaths: { sourceId: string; targetId: string }[] = [];
+  nodes.forEach(node => {
+    node.connections.forEach(targetId => {
+      const edgeId1 = `${node.id}-${targetId}`;
+      const edgeId2 = `${targetId}-${node.id}`;
+      if (!edges.has(edgeId1) && !edges.has(edgeId2)) {
+        edges.add(edgeId1);
+        uniquePaths.push({ sourceId: node.id, targetId });
+      }
+    });
+  });
 
   return (
     <div className="container" style={{ padding: '3rem 0' }}>
@@ -152,115 +177,139 @@ export const ArchitectureView: React.FC = () => {
       </div>
 
       {/* Architecture Diagram */}
-      <div style={{ 
-        position: 'relative', 
-        height: '600px',
-        background: 'var(--bg-surface)',
-        borderRadius: '12px',
-        border: '1px solid var(--border-color)',
-        overflow: 'hidden',
-        marginBottom: '2rem'
-      }}>
-        {/* Grid Background */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: `
-            linear-gradient(var(--border-color) 1px, transparent 1px),
-            linear-gradient(90deg, var(--border-color) 1px, transparent 1px)
-          `,
-          backgroundSize: '40px 40px',
-          opacity: 0.2
-        }} />
+      <div style={{ width: '100%', overflowX: 'auto', paddingBottom: '1rem' }}>
+        <div style={{ 
+          position: 'relative', 
+          minWidth: '1000px',
+          height: '480px',
+          background: 'var(--bg-surface)',
+          borderRadius: '12px',
+          border: '1px solid var(--border-color)',
+          overflow: 'hidden',
+          marginBottom: '2rem'
+        }}>
+          <style>
+            {`
+              .system-flow-line {
+                fill: none;
+                stroke-dasharray: 6 6;
+                animation: flowLineAnim 1s linear infinite;
+              }
+              .system-flow-line.highlight {
+                stroke-dasharray: none;
+                animation: none;
+                stroke-width: 3px !important;
+              }
+              @keyframes flowLineAnim {
+                from { stroke-dashoffset: 12; }
+                to { stroke-dashoffset: 0; }
+              }
+            `}
+          </style>
 
-        {/* Connection Lines */}
-        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-          {nodes.map(node => 
-            node.connections.map(targetId => {
-              const source = getNodePosition(node.id);
+          {/* Grid Background */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `
+              radial-gradient(circle at 1px 1px, var(--border-color) 1px, transparent 0)
+            `,
+            backgroundSize: '32px 32px',
+            opacity: 0.4
+          }} />
+
+          {/* Connection Lines */}
+          <svg viewBox="0 0 1200 480" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} preserveAspectRatio="none">
+            {uniquePaths.map(({ sourceId, targetId }) => {
+              const sourceNode = nodes.find(n => n.id === sourceId);
+              const targetNode = nodes.find(n => n.id === targetId);
+              if (!sourceNode || !targetNode) return null;
+              
+              const source = getNodePosition(sourceId);
               const target = getNodePosition(targetId);
-              const isHighlighted = selectedNode === node.id || selectedNode === targetId;
+              const isHighlighted = selectedNode === sourceId || selectedNode === targetId;
               
               return (
-                <line
-                  key={`${node.id}-${targetId}`}
-                  x1={`${source.x}%`}
-                  y1={`${source.y}%`}
-                  x2={`${target.x}%`}
-                  y2={`${target.y}%`}
-                  stroke={isHighlighted ? node.color : 'var(--border-color)'}
-                  strokeWidth={isHighlighted ? 2 : 1}
-                  strokeDasharray={isHighlighted ? 'none' : '4,4'}
-                  opacity={isHighlighted ? 0.8 : 0.3}
+                <path
+                  key={`${sourceId}-${targetId}`}
+                  d={getPath(sourceId, targetId, source.x, source.y, target.x, target.y)}
+                  className={`system-flow-line ${isHighlighted ? 'highlight' : ''}`}
+                  stroke={isHighlighted ? sourceNode.color : 'var(--text-tertiary)'}
+                  strokeWidth="2"
+                  opacity={isHighlighted ? 0.8 : 0.25}
                 />
               );
-            })
-          )}
-        </svg>
+            })}
+          </svg>
 
-        {/* Nodes */}
-        {nodes.map((node, idx) => {
-          const pos = getNodePosition(node.id);
-          const isSelected = selectedNode === node.id;
-          const isHovered = hoveredNode === node.id;
-          const isConnected = selectedNode && node.connections.includes(selectedNode);
-          
-          return (
-            <motion.div
-              key={node.id}
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: idx * 0.1 }}
-              style={{
-                position: 'absolute',
-                left: `${pos.x}%`,
-                top: `${pos.y}%`,
-                transform: 'translate(-50%, -50%)',
-                zIndex: isSelected || isHovered ? 10 : 1,
-                cursor: 'pointer'
-              }}
-              onClick={() => setSelectedNode(isSelected ? null : node.id)}
-              onMouseEnter={() => setHoveredNode(node.id)}
-              onMouseLeave={() => setHoveredNode(null)}
-            >
+          {/* Nodes */}
+          {nodes.map((node, idx) => {
+            const pos = getNodePosition(node.id);
+            const isSelected = selectedNode === node.id;
+            const isHovered = hoveredNode === node.id;
+            const isConnected = selectedNode && (node.connections.includes(selectedNode) || nodes.find(n => n.id === selectedNode)?.connections.includes(node.id));
+            
+            return (
               <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
+                key={node.id}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: idx * 0.05 }}
                 style={{
-                  width: '80px',
-                  height: '80px',
-                  borderRadius: '12px',
-                  background: isSelected || isHovered ? node.color : 'var(--bg-main)',
-                  border: `2px solid ${isSelected || isConnected ? node.color : 'var(--border-color)'}`,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.25rem',
-                  boxShadow: isSelected || isHovered ? `0 0 20px ${node.color}44` : 'var(--shadow-sm)',
-                  transition: 'all 0.2s ease'
+                  position: 'absolute',
+                  left: `${(pos.x / 1200) * 100}%`,
+                  top: `${(pos.y / 480) * 100}%`,
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: isSelected || isHovered ? 10 : 1,
+                  cursor: 'pointer'
                 }}
+                onClick={() => setSelectedNode(isSelected ? null : node.id)}
+                onMouseEnter={() => setHoveredNode(node.id)}
+                onMouseLeave={() => setHoveredNode(null)}
               >
-                <div style={{ color: isSelected || isHovered ? 'white' : node.color }}>
-                  {node.icon}
-                </div>
-                <span style={{ 
-                  fontSize: '0.55rem', 
-                  fontWeight: 600, 
-                  color: isSelected || isHovered ? 'white' : 'var(--text-secondary)',
-                  textAlign: 'center',
-                  lineHeight: 1.2,
-                  maxWidth: '70px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
-                  {node.name}
-                </span>
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{
+                    width: '85px',
+                    height: '85px',
+                    borderRadius: '16px',
+                    background: isSelected || isHovered ? node.color : 'var(--bg-main)',
+                    border: `2px solid ${isSelected || isConnected ? node.color : 'var(--border-color)'}`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.35rem',
+                    boxShadow: isSelected || isHovered ? `0 0 24px ${node.color}55` : 'var(--shadow-sm)',
+                    transition: 'all 0.2s ease',
+                    padding: '0.25rem'
+                  }}
+                >
+                  <div style={{ color: isSelected || isHovered ? 'white' : node.color }}>
+                    {node.icon}
+                  </div>
+                  <span style={{ 
+                    fontSize: '0.6rem', 
+                    fontWeight: 600, 
+                    color: isSelected || isHovered ? 'white' : 'var(--text-secondary)',
+                    textAlign: 'center',
+                    lineHeight: 1.2,
+                    maxWidth: '80px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    whiteSpace: 'normal'
+                  }}>
+                    {node.name}
+                  </span>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Detail Panel */}
