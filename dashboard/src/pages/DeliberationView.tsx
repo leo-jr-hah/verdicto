@@ -205,14 +205,27 @@ export const DeliberationView: React.FC = () => {
                 <div style={{ fontSize: '0.9rem' }}>Spots: {activeDispute.spotCount}</div>
               </div>
               
+              <div style={{ marginTop: '1rem' }}>
+                <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Case Background</div>
+                <div style={{ fontSize: '0.85rem', color: '#aaa', lineHeight: 1.6, padding: '1rem', background: '#111', borderRadius: '4px', border: '1px solid #222' }}>
+                  The Buyer purchased $50,000 in tokenized shares. The local market crashed. The property manager claims the garage is still worth $2.4M and refuses a partial refund to the treasury. The Buyer has requested immediate AI arbitration to assess real market value via RentCast and FRED data.
+                </div>
+              </div>
+              
               {verdict && (
-                <div style={{ marginTop: '2rem', padding: '1.5rem', border: '1px solid #333', backgroundColor: '#111', borderRadius: '4px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10B981', marginBottom: '0.5rem' }}>
+                <div style={{ marginTop: '1rem', padding: '1.5rem', border: '1px solid var(--primary)', backgroundColor: 'rgba(255, 59, 59, 0.05)', borderRadius: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', marginBottom: '1rem' }}>
                     <CheckCircle2 size={16} />
-                    <span style={{ fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Resolution Details</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Final AI Verdict</span>
                   </div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem', color: '#fff' }}>{verdict.finalVerdict.replace(/([A-Z])/g, ' $1').trim()}</div>
-                  <div style={{ fontSize: '0.85rem', color: '#888' }}>Assessed Value: ${verdict.finalValue.toLocaleString()}</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', color: '#fff' }}>
+                    {verdict.finalVerdict === 'FullRefund' ? '100% Refund Granted' : 
+                     verdict.finalVerdict === 'SplitFifty' ? '50/50 Settlement Reached' : 
+                     'Full Release to Treasury'}
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: '#ccc', lineHeight: 1.6 }}>
+                    <strong>Explanation:</strong> Based on the RentCast market APIs and FRED mortgage rates, the 3 AI agents determined that the property manager severely over-reported the $2.4M valuation. The true assessed value is <strong>${verdict.finalValue.toLocaleString()}</strong>. The Odra smart contract will now automatically route the funds back to the token holders.
+                  </div>
                 </div>
               )}
             </div>
@@ -222,8 +235,8 @@ export const DeliberationView: React.FC = () => {
         </div>
 
         {/* Center Panel: Transcript/Logs */}
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#000' }}>
-          <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #222', fontSize: '0.75rem', color: '#666', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#000', minHeight: 0 }}>
+          <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #222', fontSize: '0.75rem', color: '#666', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
             <span>Deliberation Log</span>
             <button 
               onClick={() => setAutoScroll(!autoScroll)} 

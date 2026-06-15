@@ -193,7 +193,7 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
   emitEvent('dispute_started', { disputeId, assetId, location, spotCount });
 
   console.log(`\n${'='.repeat(60)}`);
-  console.log(`⚖️  CASPER RWA COURT — DISPUTE #${disputeId}`);
+  console.log(`⚖️  CASPER RWA COURT: DISPUTE #${disputeId}`);
   console.log(`${'='.repeat(60)}`);
   console.log(`Asset: ${assetId} | Location: ${location} | Spots: ${spotCount}\n`);
 
@@ -251,7 +251,7 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
   }
 
   if (!resultA || !resultB) {
-    console.log(`\n❌ Cannot deliberate — missing agent verdicts.`);
+    console.log(`\n❌ Cannot deliberate: missing agent verdicts.`);
     return;
   }
 

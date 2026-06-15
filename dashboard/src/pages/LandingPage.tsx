@@ -15,7 +15,7 @@ export const LandingPage: React.FC = () => {
           AI-Powered Dispute Resolution<br />for Tokenized Assets
         </h1>
         <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '750px', margin: '0 auto 3rem', lineHeight: 1.6 }}>
-          When two parties disagree on a $2.4M parking garage, 3 AI jurors analyze evidence and render a verdict — on the Casper blockchain, in under 60 seconds.
+          When two parties disagree on a $2.4M parking garage, 3 AI jurors analyze evidence and render a verdict natively on the Casper blockchain, in under 60 seconds.
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
           <Link to="/deliberation" className="btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>Start Demo</Link>
