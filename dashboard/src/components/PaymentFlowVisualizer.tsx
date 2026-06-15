@@ -76,12 +76,12 @@ const Tooltip: React.FC<{ text: string; children: React.ReactNode }> = ({ text, 
 /* ─────────── Architecture Flow Diagram ─────────── */
 const FlowDiagram: React.FC = () => {
   const nodes = [
-    { id: 'user', label: 'User / dApp', sub: 'REST API', icon: User, x: 80, y: 200, color: '#3B82F6', desc: 'End user initiating the dispute via REST API.', align: 'left', valign: 'top' },
-    { id: 'orchestrator', label: 'Orchestrator', sub: 'Coordinator', icon: Zap, x: 280, y: 200, color: '#8B5CF6', desc: 'Central coordinator dispatching valuation tasks and collecting votes.', align: 'center', valign: 'top' },
-    { id: 'agent-a', label: 'Comps Specialist', sub: 'Agent A', icon: Shield, x: 540, y: 100, color: '#EC4899', desc: 'Estimates asset value using comparable sales. Protected by x402 payment wall.', align: 'center', valign: 'bottom' },
-    { id: 'agent-b', label: 'DCF Specialist', sub: 'Agent B', icon: Shield, x: 540, y: 300, color: '#F59E0B', desc: 'Estimates asset value using discounted cash flows. Protected by x402 payment wall.', align: 'center', valign: 'top' },
-    { id: 'jurors', label: 'Juror Pool', sub: 'DAO Voting', icon: Shield, x: 800, y: 200, color: '#10B981', desc: 'Decentralized jury voting on the final verdict.', align: 'center', valign: 'top' },
-    { id: 'chain', label: 'Casper Chain', sub: 'L1 Settlement', icon: DollarSign, x: 930, y: 200, color: '#EF4444', desc: 'Layer-1 Casper testnet for immutable transaction recording.', align: 'right', valign: 'top' },
+    { id: 'user', label: 'User / dApp', sub: 'REST API', icon: User, x: 100, y: 200, color: '#3B82F6', desc: 'End user initiating the dispute via REST API.', align: 'left', valign: 'top' },
+    { id: 'orchestrator', label: 'Orchestrator', sub: 'Coordinator', icon: Zap, x: 350, y: 200, color: '#8B5CF6', desc: 'Central coordinator dispatching valuation tasks and collecting votes.', align: 'center', valign: 'top' },
+    { id: 'agent-a', label: 'Comps Specialist', sub: 'Agent A', icon: Shield, x: 650, y: 100, color: '#EC4899', desc: 'Estimates asset value using comparable sales. Protected by x402 payment wall.', align: 'center', valign: 'bottom' },
+    { id: 'agent-b', label: 'DCF Specialist', sub: 'Agent B', icon: Shield, x: 650, y: 300, color: '#F59E0B', desc: 'Estimates asset value using discounted cash flows. Protected by x402 payment wall.', align: 'center', valign: 'top' },
+    { id: 'jurors', label: 'Juror Pool', sub: 'DAO Voting', icon: Shield, x: 950, y: 200, color: '#10B981', desc: 'Decentralized jury voting on the final verdict.', align: 'center', valign: 'top' },
+    { id: 'chain', label: 'Casper Chain', sub: 'L1 Settlement', icon: DollarSign, x: 1100, y: 200, color: '#EF4444', desc: 'Layer-1 Casper testnet for immutable transaction recording.', align: 'right', valign: 'top' },
   ];
 
   return (
@@ -156,38 +156,38 @@ const FlowDiagram: React.FC = () => {
         </style>
 
         {/* SVG Background Layer */}
-        <svg viewBox="0 0 1000 400" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="xMidYMid meet">
+        <svg viewBox="0 0 1200 400" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="none">
           {/* Paths */}
-          <path d="M 80 200 L 280 200" className="animated-flow-line" />
-          <path d="M 280 200 C 380 200, 420 100, 540 100" className="animated-flow-line highlight" />
-          <path d="M 280 200 C 380 200, 420 300, 540 300" className="animated-flow-line highlight" />
-          <path d="M 540 100 C 660 100, 700 200, 800 200" className="animated-flow-line" />
-          <path d="M 540 300 C 660 300, 700 200, 800 200" className="animated-flow-line" />
-          <path d="M 800 200 L 930 200" className="animated-flow-line" />
+          <path d="M 100 200 L 350 200" className="animated-flow-line" />
+          <path d="M 350 200 C 500 200, 550 100, 650 100" className="animated-flow-line highlight" />
+          <path d="M 350 200 C 500 200, 550 300, 650 300" className="animated-flow-line highlight" />
+          <path d="M 650 100 C 800 100, 850 200, 950 200" className="animated-flow-line" />
+          <path d="M 650 300 C 800 300, 850 200, 950 200" className="animated-flow-line" />
+          <path d="M 950 200 L 1100 200" className="animated-flow-line" />
           
           {/* Labels */}
-          <rect x="145" y="184" width="70" height="18" fill="var(--bg-main)" rx="4" />
-          <text x="180" y="196" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">REST API</text>
+          <rect x="195" y="184" width="60" height="18" fill="var(--bg-main)" rx="4" />
+          <text x="225" y="196" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">REST API</text>
           
-          <rect x="350" y="134" width="100" height="18" fill="var(--bg-main)" rx="4" />
-          <text x="400" y="146" textAnchor="middle" fontSize="10" fill="var(--primary)" fontWeight="600">x402 Payment</text>
+          <rect x="450" y="134" width="100" height="18" fill="var(--bg-main)" rx="4" />
+          <text x="500" y="146" textAnchor="middle" fontSize="10" fill="var(--primary)" fontWeight="600">x402 Payment</text>
           
-          <rect x="350" y="264" width="100" height="18" fill="var(--bg-main)" rx="4" />
-          <text x="400" y="276" textAnchor="middle" fontSize="10" fill="var(--primary)" fontWeight="600">x402 Payment</text>
+          <rect x="450" y="264" width="100" height="18" fill="var(--bg-main)" rx="4" />
+          <text x="500" y="276" textAnchor="middle" fontSize="10" fill="var(--primary)" fontWeight="600">x402 Payment</text>
           
-          <rect x="645" y="134" width="70" height="18" fill="var(--bg-main)" rx="4" />
-          <text x="680" y="146" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">Report</text>
+          <rect x="765" y="134" width="70" height="18" fill="var(--bg-main)" rx="4" />
+          <text x="800" y="146" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">Report</text>
           
-          <rect x="645" y="264" width="70" height="18" fill="var(--bg-main)" rx="4" />
-          <text x="680" y="276" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">Report</text>
+          <rect x="765" y="264" width="70" height="18" fill="var(--bg-main)" rx="4" />
+          <text x="800" y="276" textAnchor="middle" fontSize="10" fill="var(--text-secondary)" fontWeight="600">Report</text>
           
-          <rect x="825" y="184" width="70" height="18" fill="var(--bg-main)" rx="4" />
-          <text x="860" y="196" textAnchor="middle" fontSize="10" fill="#10B981" fontWeight="600">Settle</text>
+          <rect x="995" y="184" width="60" height="18" fill="var(--bg-main)" rx="4" />
+          <text x="1025" y="196" textAnchor="middle" fontSize="10" fill="#10B981" fontWeight="600">Settle</text>
         </svg>
 
         {/* HTML Nodes Layer */}
         {nodes.map(node => (
-          <div key={node.id} className="node-hover-wrapper" style={{ left: `${(node.x / 1000) * 100}%`, top: `${(node.y / 400) * 100}%` }}>
+          <div key={node.id} className="node-hover-wrapper" style={{ left: `${(node.x / 1200) * 100}%`, top: `${(node.y / 400) * 100}%` }}>
             <div className="node-card">
               <div style={{ 
                 width: 36, height: 36, borderRadius: '8px', 
