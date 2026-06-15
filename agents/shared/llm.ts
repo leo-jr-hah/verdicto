@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// shared/ is agents/shared/, .env is at casper-rwa-court/.env (3 levels up)
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const groq = new Groq({

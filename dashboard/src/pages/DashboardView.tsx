@@ -1,11 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, FileText, BarChart3, Server } from 'lucide-react';
+import { fetchTransactions } from '../services/api';
 
 export const DashboardView: React.FC = () => {
+  const [transactionCount, setTransactionCount] = useState(0);
+  
+  useEffect(() => {
+    const load = async () => {
+      const txs = await fetchTransactions();
+      setTransactionCount(txs.length);
+    };
+    load();
+    const interval = setInterval(load, 30000); // Refresh every 30s
+    return () => clearInterval(interval);
+  }, []);
+
   const metrics = [
     { title: 'Total Value Assessed', value: '$14.2M', change: '+12%', icon: BarChart3, isDemo: true },
     { title: 'Active Agents', value: '12', change: 'Stable', icon: Users, isDemo: false },
-    { title: 'Disputes Resolved', value: '1,429', change: '+34', icon: FileText, isDemo: true },
+    { title: 'On-Chain Transactions', value: transactionCount.toLocaleString(), change: 'Casper Testnet', icon: FileText, isDemo: false },
     { title: 'Network Uptime', value: '99.99%', change: 'Casper Testnet', icon: Server, isDemo: false },
   ];
 

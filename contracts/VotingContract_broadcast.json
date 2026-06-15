@@ -8,9 +8,9 @@
 
 {
   "jsonrpc": "2.0",
-  "id": 3054791442880204364,
+  "id": -5650359677619877052,
   "result": {
     "api_version": "2.0.0",
-    "deploy_hash": "f00cbb8f03e468c0750e7ce78bfc7f8a5c337fd520ebc218e969833bdea0fcfb"
+    "deploy_hash": "d8dfce09803b8d8e1af80b21fcc8c831996cdc8284741bed140227627ff430d9"
   }
 }

@@ -3,6 +3,17 @@ import type { Request, Response, NextFunction } from 'express';
 export function simulatedX402Middleware(config: { recipientAddress: string; amountCSPR: string }) {
   return (req: Request, res: Response, next: NextFunction) => {
     const paymentProof = req.headers['payment-signature'] || req.headers['x-payment-proof'];
+    
+    // Bypass x402 for localhost/127.0.0.1 calls (orchestrator to agents)
+    const origin = req.headers.origin || req.headers.referer || '';
+    const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1') || 
+                        req.ip === '127.0.0.1' || req.ip === '::1';
+    
+    if (isLocalhost && !paymentProof) {
+      // Allow local calls without payment for demo/testing
+      (req as any).x402Payment = { valid: true, payer: 'localhost-bypass', local: true };
+      return next();
+    }
 
     if (!paymentProof) {
       // Return true x402 HTTP 402 Payment Required response (V2 standard)

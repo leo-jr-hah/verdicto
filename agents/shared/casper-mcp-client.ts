@@ -3,6 +3,11 @@ import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 
 let casperMcpClient: Client | null = null;
 
+// Contract hashes from .env
+const REPUTATION_CONTRACT_HASH = process.env.REPUTATION_CONTRACT_HASH || '';
+const ESCROW_CONTRACT_HASH = process.env.ESCROW_CONTRACT_HASH || '';
+const VOTING_CONTRACT_HASH = process.env.VOTING_CONTRACT_HASH || '';
+
 export async function getCasperMcpClient(): Promise<Client> {
   if (casperMcpClient) {
     return casperMcpClient;
@@ -30,4 +35,18 @@ export async function getCasperMcpClient(): Promise<Client> {
   await client.connect(transport);
   casperMcpClient = client;
   return client;
+}
+
+// Helper to get contract hash for a specific contract
+export function getContractHash(contractName: 'reputation' | 'escrow' | 'voting'): string {
+  switch (contractName) {
+    case 'reputation':
+      return REPUTATION_CONTRACT_HASH;
+    case 'escrow':
+      return ESCROW_CONTRACT_HASH;
+    case 'voting':
+      return VOTING_CONTRACT_HASH;
+    default:
+      throw new Error(`Unknown contract: ${contractName}`);
+  }
 }
