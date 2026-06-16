@@ -18,7 +18,7 @@ export const ReputationView: React.FC = () => {
   const [agents, setAgents] = useState<AgentReputation[]>([
     {
       agentId: 'evidence',
-      agentName: 'Evidence Analyst',
+      agentName: 'Evidence Reviewer',
       currentScore: 850,
       previousScore: 820,
       history: [
@@ -32,7 +32,7 @@ export const ReputationView: React.FC = () => {
     },
     {
       agentId: 'precedent',
-      agentName: 'Precedent Researcher',
+      agentName: 'Case Researcher',
       currentScore: 790,
       previousScore: 780,
       history: [
@@ -46,7 +46,7 @@ export const ReputationView: React.FC = () => {
     },
     {
       agentId: 'market',
-      agentName: 'Market Interpreter',
+      agentName: 'Trend Analyst',
       currentScore: 760,
       previousScore: 755,
       history: [
@@ -60,7 +60,7 @@ export const ReputationView: React.FC = () => {
     },
     {
       agentId: 'valuation-a',
-      agentName: 'Comps Specialist',
+      agentName: 'Market Analyst',
       currentScore: 720,
       previousScore: 710,
       history: [
@@ -74,7 +74,7 @@ export const ReputationView: React.FC = () => {
     },
     {
       agentId: 'valuation-b',
-      agentName: 'DCF Specialist',
+      agentName: 'Income Analyst',
       currentScore: 710,
       previousScore: 705,
       history: [

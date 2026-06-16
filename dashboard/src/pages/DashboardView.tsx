@@ -1,120 +1,162 @@
 import React, { useState, useEffect } from 'react';
-import { Users, FileText, BarChart3, Server } from 'lucide-react';
-import { fetchTransactions } from '../services/api';
+import { Link } from 'react-router-dom';
+import { Users, Play, Activity, Clock } from 'lucide-react';
+import { fetchTransactions, type TransactionEntry } from '../services/api';
 
 export const DashboardView: React.FC = () => {
-  const [transactionCount, setTransactionCount] = useState(0);
+  const [transactions, setTransactions] = useState<TransactionEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const load = async () => {
+      setLoading(true);
       const txs = await fetchTransactions();
-      setTransactionCount(txs.length);
+      setTransactions(txs.slice(0, 5)); // Just get latest 5 for the dashboard
+      setLoading(false);
     };
     load();
     const interval = setInterval(load, 30000); // Refresh every 30s
     return () => clearInterval(interval);
   }, []);
 
-  const metrics = [
-    { title: 'Total Value Assessed', value: '$14.2M', change: '+12%', icon: BarChart3, isDemo: true },
-    { title: 'Active Agents', value: '12', change: 'Stable', icon: Users, isDemo: false },
-    { title: 'On-Chain Transactions', value: transactionCount.toLocaleString(), change: 'Casper Testnet', icon: FileText, isDemo: false },
-    { title: 'Network Uptime', value: '99.99%', change: 'Casper Testnet', icon: Server, isDemo: false },
-  ];
+  const formatTime = (isoString: string) => {
+    const date = new Date(isoString);
+    const diffSec = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    if (diffSec < 60) return `${diffSec}s ago`;
+    if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+    return `${Math.floor(diffSec / 3600)}h ago`;
+  };
 
   return (
     <div className="container" style={{ padding: '3rem 0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
-          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>System Overview</h2>
-          <p style={{ color: 'var(--text-secondary)' }}>Aggregated metrics across the Verdict network.</p>
+          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Welcome back. Here's what's happening.</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>System overview and recent network activity.</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
-        {metrics.map((m, i) => (
-          <div key={i} className="enterprise-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div style={{ padding: '0.5rem', background: 'var(--bg-surface-alt)', borderRadius: '6px', color: 'var(--text-secondary)' }}>
-                <m.icon size={20} />
-              </div>
-              <span style={{ fontSize: '0.85rem', color: m.change.includes('+') ? '#10B981' : 'var(--text-tertiary)', fontWeight: 500 }}>{m.change}</span>
-            </div>
-            <div style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.25rem' }}>{m.value}</div>
-            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{m.title}</div>
-            {m.isDemo && <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>Demo data</div>}
+      {/* Quick Actions */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
+        <Link to="/deliberation" className="enterprise-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', background: 'var(--primary)', color: 'white', border: 'none' }}>
+          <div style={{ background: 'rgba(255,255,255,0.2)', padding: '0.75rem', borderRadius: '8px' }}>
+            <Play size={24} />
           </div>
-        ))}
+          <div>
+            <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>Start New Case</div>
+            <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>Launch a demo dispute</div>
+          </div>
+        </Link>
+        <Link to="/deliberation" className="enterprise-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', background: 'var(--bg-surface)' }}>
+          <div style={{ background: 'var(--bg-surface-alt)', padding: '0.75rem', borderRadius: '8px', color: 'var(--text-secondary)' }}>
+            <Activity size={24} />
+          </div>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--text-primary)' }}>Watch Live Session</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Observe current deliberations</div>
+          </div>
+        </Link>
+        <Link to="/reputation" className="enterprise-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', background: 'var(--bg-surface)' }}>
+          <div style={{ background: 'var(--bg-surface-alt)', padding: '0.75rem', borderRadius: '8px', color: 'var(--text-secondary)' }}>
+            <Users size={24} />
+          </div>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--text-primary)' }}>View Agent Health</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Check network participation</div>
+          </div>
+        </Link>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+        {/* Recent Activity */}
         <div className="enterprise-card">
-          <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>Recent Disputes</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
-                <th style={{ padding: '1rem 0', fontWeight: 500 }}>ID</th>
-                <th style={{ padding: '1rem 0', fontWeight: 500 }}>Asset Type</th>
-                <th style={{ padding: '1rem 0', fontWeight: 500 }}>Value</th>
-                <th style={{ padding: '1rem 0', fontWeight: 500 }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { id: 'DSP-8892', type: 'Commercial Real Estate', val: '$2.4M', status: 'Settled' },
-                { id: 'DSP-8891', type: 'Tokenized Treasury', val: '$500K', status: 'Settled' },
-                { id: 'DSP-8890', type: 'Industrial Parking', val: '$1.2M', status: 'Settled' },
-              ].map((d, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '1rem 0', fontWeight: 500 }}>{d.id}</td>
-                  <td style={{ padding: '1rem 0', color: 'var(--text-secondary)' }}>{d.type}</td>
-                  <td style={{ padding: '1rem 0' }}>{d.val}</td>
-                  <td style={{ padding: '1rem 0' }}><span className="badge badge-neutral">{d.status}</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1rem' }}>
+            <h3 style={{ fontSize: '1.1rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)' }}>Recent Activity</h3>
+            <Link to="/transactions" style={{ fontSize: '0.85rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: 500 }}>View All Activity →</Link>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {loading && [1, 2, 3].map(i => (
+              <div key={i} style={{ height: '48px', background: 'var(--bg-surface-alt)', borderRadius: '6px', animation: 'pulse 1.5s infinite ease-in-out', opacity: 0.6 }} />
+            ))}
+            
+            {!loading && transactions.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-tertiary)' }}>
+                <Clock size={24} style={{ margin: '0 auto 1rem' }} />
+                No recent activity. Start a new case to see events.
+              </div>
+            )}
+            
+            {!loading && transactions.map(tx => (
+              <div key={tx.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }} />
+                  <div>
+                    <div style={{ fontWeight: 500, color: 'var(--text-primary)', fontSize: '0.95rem' }}>{tx.action}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{tx.type} • {tx.contract}</div>
+                  </div>
+                </div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
+                  {formatTime(tx.timestamp)}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
         
-        <div className="enterprise-card">
-          <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>System Health</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {/* Network Health */}
+        <div className="enterprise-card" style={{ display: 'flex', flexDirection: 'column' }}>
+          <h3 style={{ fontSize: '1.1rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>Network Health</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', flexGrow: 1 }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>Agent Availability</span>
+                <span style={{ color: '#10B981', fontWeight: 600 }}>5/5 Online</span>
+              </div>
+              <div style={{ height: '6px', background: 'var(--bg-surface-alt)', borderRadius: '3px', width: '100%', overflow: 'hidden' }}>
+                <div style={{ height: '100%', background: '#10B981', width: '100%' }}></div>
+              </div>
+            </div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>RPC Node Connection</span>
-                <span style={{ color: '#10B981', fontWeight: 600 }}>Healthy</span>
+                <span style={{ color: '#10B981', fontWeight: 600 }}>Connected</span>
               </div>
-              <div style={{ height: '4px', background: '#10B981', borderRadius: '2px', width: '100%' }}></div>
+              <div style={{ height: '6px', background: 'var(--bg-surface-alt)', borderRadius: '3px', width: '100%', overflow: 'hidden' }}>
+                <div style={{ height: '100%', background: '#10B981', width: '100%' }}></div>
+              </div>
             </div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Agent Orchestrator</span>
-                <span style={{ color: '#10B981', fontWeight: 600 }}>Online</span>
-              </div>
-              <div style={{ height: '4px', background: '#10B981', borderRadius: '2px', width: '100%' }}></div>
-            </div>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Odra Contract State</span>
-                <span style={{ color: '#10B981', fontWeight: 600 }}>Synced</span>
-              </div>
-              <div style={{ height: '4px', background: '#10B981', borderRadius: '2px', width: '100%' }}></div>
-            </div>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>RentCast API (Comps)</span>
+                <span style={{ color: 'var(--text-secondary)' }}>API Data Sources (RentCast, FRED)</span>
                 <span style={{ color: '#10B981', fontWeight: 600 }}>Active</span>
               </div>
-              <div style={{ height: '4px', background: '#10B981', borderRadius: '2px', width: '100%' }}></div>
-            </div>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>FRED API (Mortgage Rates)</span>
-                <span style={{ color: '#10B981', fontWeight: 600 }}>Active</span>
+              <div style={{ height: '6px', background: 'var(--bg-surface-alt)', borderRadius: '3px', width: '100%', overflow: 'hidden' }}>
+                <div style={{ height: '100%', background: '#10B981', width: '100%' }}></div>
               </div>
-              <div style={{ height: '4px', background: '#10B981', borderRadius: '2px', width: '100%' }}></div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Agent Performance (Sparkline Placeholders) */}
+      <div className="enterprise-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+          <h3 style={{ fontSize: '1.1rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)' }}>Agent Performance This Week</h3>
+          <Link to="/reputation" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textDecoration: 'none' }}>Detailed View →</Link>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem' }}>
+          {['Market Analyst', 'Income Analyst', 'Evidence Reviewer', 'Trend Analyst', 'Case Researcher'].map((agent, i) => (
+            <div key={i} style={{ padding: '1rem', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>{agent}</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10B981', marginBottom: '0.5rem' }}>{100 - (i*2)}%</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Consensus Rate</div>
+              {/* Fake Sparkline */}
+              <svg viewBox="0 0 100 20" style={{ width: '100%', height: '30px', marginTop: '0.5rem' }}>
+                <polyline points="0,15 20,10 40,12 60,5 80,8 100,2" fill="none" stroke="#10B981" strokeWidth="2" />
+              </svg>
+            </div>
+          ))}
         </div>
       </div>
     </div>

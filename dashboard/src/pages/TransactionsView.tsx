@@ -80,7 +80,16 @@ export const TransactionsView: React.FC = () => {
 
   const filteredTransactions = filterType === 'all' 
     ? transactions 
-    : transactions.filter(t => t.type.toLowerCase().includes(filterType.toLowerCase()));
+    : transactions.filter(t => {
+        const typeLower = t.type.toLowerCase();
+        const filterLower = filterType.toLowerCase();
+        // Map filter names to transaction types
+        if (filterLower === 'zk-lite') return typeLower.includes('zk-lite');
+        if (filterLower === 'hmac') return typeLower.includes('hmac');
+        if (filterLower === 'payment') return typeLower.includes('payment') || typeLower.includes('x402');
+        if (filterLower === 'verdict') return typeLower.includes('verdict') || typeLower.includes('execute');
+        return typeLower.includes(filterLower);
+      });
 
   return (
     <div className="container" style={{ padding: '3rem 0' }}>
@@ -208,25 +217,30 @@ export const TransactionsView: React.FC = () => {
       {filteredTransactions.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: selectedTx ? '2fr 1fr' : '1fr', gap: '1.5rem' }}>
           {/* Transaction Table */}
-          <div className="enterprise-card" style={{ padding: 0, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-tertiary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Action</th>
-                  <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Transaction Hash</th>
-                  <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Target</th>
-                  <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Block Height</th>
-                  <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Timestamp</th>
-                  <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Explorer</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTransactions.map((tx, idx) => (
-                  <motion.tr 
-                    key={tx.id} 
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
+          <div className="enterprise-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '600px' }}>
+            <div style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Action</th>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Transaction Hash</th>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Target</th>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Block Height</th>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Timestamp</th>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Explorer</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+            <div style={{ overflowY: 'auto', flex: 1 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <tbody>
+                  {filteredTransactions.map((tx, idx) => (
+                    <motion.tr 
+                      key={tx.id} 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05 }}
                     style={{ 
                       borderBottom: '1px solid var(--border-color)', 
                       fontFamily: "'JetBrains Mono', monospace", 
@@ -268,6 +282,7 @@ export const TransactionsView: React.FC = () => {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* Detail Panel */}

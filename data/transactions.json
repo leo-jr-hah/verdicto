@@ -1,5 +1,105 @@
 [
   {
+    "id": "tx-1781623979309-h4pemp",
+    "type": "Native Transfer",
+    "action": "Dispute DISP-109 settlement payment",
+    "hash": "de209082fcd76b04bb28e06d98aa6dd7c847e4e11229e148d3e8c67a47a45e63",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-16T15:32:59.309Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/de209082fcd76b04bb28e06d98aa6dd7c847e4e11229e148d3e8c67a47a45e63",
+    "metadata": {
+      "disputeId": "DISP-109",
+      "amount": "2.5 CSPR",
+      "target": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
+    }
+  },
+  {
+    "id": "tx-1781623978239-kv1gkc",
+    "type": "ZK-Lite Commitment",
+    "action": "Dispute DISP-109 execution commitment",
+    "hash": "mock_deploy_8403795b",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-16T15:32:58.239Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/mock_deploy_8403795b",
+    "metadata": {
+      "disputeId": "DISP-109",
+      "executionCommitment": {
+        "commitment": "8403795b1e4c8fe90c4f5b0615ef4dbf391c8a8f59f04bc1305e584777b3c91a",
+        "agentStateHash": "6370f89282699f08b6330e55deea3daa17d71827f39886a19c6a59104d49f769",
+        "inputHash": "b00c0bcce3c414c6db6b8b3fb060f6e40fade83d94921d212927bba097826c1d",
+        "timestamp": 1781623978070,
+        "blockHeight": 0
+      }
+    }
+  },
+  {
+    "id": "tx-1781623978069-75gv9h",
+    "type": "HMAC Receipt Chain",
+    "action": "Deliberation audit trail for DISP-109",
+    "hash": "16af3d1e-01d2-42e7-8a8a-eff2efa5e427",
+    "contract": "AuditTrail",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-16T15:32:58.069Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/16af3d1e-01d2-42e7-8a8a-eff2efa5e427",
+    "metadata": {
+      "disputeId": "DISP-109",
+      "receiptCount": 6,
+      "chainValid": true
+    }
+  },
+  {
+    "id": "tx-1781554552243-h0uens",
+    "type": "Native Transfer",
+    "action": "Dispute DISP-255 settlement payment",
+    "hash": "cebebf6cba52fffc3684d9120482372e8d1d160de5b88d31d781bb872b471dc8",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-15T20:15:52.243Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/cebebf6cba52fffc3684d9120482372e8d1d160de5b88d31d781bb872b471dc8",
+    "metadata": {
+      "disputeId": "DISP-255",
+      "amount": "2.5 CSPR",
+      "target": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
+    }
+  },
+  {
+    "id": "tx-1781554551531-kg91ej",
+    "type": "ZK-Lite Commitment",
+    "action": "Dispute DISP-255 execution commitment",
+    "hash": "mock_deploy_3ff1c062",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-15T20:15:51.531Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/mock_deploy_3ff1c062",
+    "metadata": {
+      "disputeId": "DISP-255",
+      "executionCommitment": {
+        "commitment": "3ff1c062530f0d0dbd8fd35d2f98a068ab31249cf1bcfff25def32529a272ae4",
+        "agentStateHash": "6370f89282699f08b6330e55deea3daa17d71827f39886a19c6a59104d49f769",
+        "inputHash": "52588331f5c4c65a27a6c01973459b9ab44c3c254ccb486ae53ecc7478232b28",
+        "timestamp": 1781554551530,
+        "blockHeight": 0
+      }
+    }
+  },
+  {
+    "id": "tx-1781554551528-u1tpr8",
+    "type": "HMAC Receipt Chain",
+    "action": "Deliberation audit trail for DISP-255",
+    "hash": "b73465cc-19bf-4048-beea-75738716a940",
+    "contract": "AuditTrail",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-15T20:15:51.528Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/b73465cc-19bf-4048-beea-75738716a940",
+    "metadata": {
+      "disputeId": "DISP-255",
+      "receiptCount": 6,
+      "chainValid": true
+    }
+  },
+  {
     "id": "tx-1781550925574-k4abfn",
     "type": "Native Transfer",
     "action": "Dispute DISP-921 settlement payment",

@@ -1,24 +1,57 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
+import { Joyride } from 'react-joyride';
 import { Logo } from '../components/Logo';
+import { ConnectionStatus } from '../components/ConnectionStatus';
 
 export const Layout: React.FC = () => {
   const location = useLocation();
-  
+
   const [theme, setTheme] = React.useState('light');
+  const [runTour, setRunTour] = React.useState(false);
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  // React.useEffect(() => {
+  //   const hasSeenTour = localStorage.getItem('verdict_has_seen_tour');
+  //   if (!hasSeenTour) {
+  //     setRunTour(true);
+  //   }
+  // }, []);
+
+  const handleJoyrideEvent = (data: any) => {
+    const { status } = data;
+    if (['finished', 'skipped'].includes(status)) {
+      setRunTour(false);
+      localStorage.setItem('verdict_has_seen_tour', 'true');
+    }
+  };
+
+  const tourSteps = [
+    {
+      target: '.tour-step-1',
+      content: 'Welcome to Verdict! We resolve complex real-world asset disputes using AI.',
+      disableBeacon: true,
+    },
+    {
+      target: '.tour-step-2',
+      content: 'You can start a new case or watch a live deliberation session right from your Dashboard.',
+    },
+    {
+      target: '.tour-step-3',
+      content: 'Our network of independent AI agents analyzes data and reaches consensus on a fair valuation.',
+    }
+  ];
+
   const navLinks = [
-    { name: 'Overview', path: '/dashboard' },
-    { name: 'Cases', path: '/disputes' },
-    { name: 'Live Court', path: '/deliberation' },
-    { name: 'Agents', path: '/reputation' },
-    { name: 'Ledger', path: '/transactions' },
-    { name: 'System Map', path: '/architecture' },
+    { name: 'Dashboard', path: '/dashboard' },
+    { name: 'Live Session', path: '/deliberation' },
+    { name: 'Network', path: '/reputation' },
+    { name: 'Activity', path: '/transactions' },
+    { name: 'How It Works', path: '/architecture' },
   ];
 
   const isActive = (path: string) => {
@@ -27,35 +60,47 @@ export const Layout: React.FC = () => {
 
   return (
     <div className="app-container">
+      <Joyride
+        steps={tourSteps}
+        run={runTour}
+        continuous={true}
+        onEvent={handleJoyrideEvent}
+        options={{
+          primaryColor: '#6366f1',
+          textColor: '#333',
+          zIndex: 1000,
+        }}
+      />
       {/* Top Navigation */}
-      <header style={{ 
-        borderBottom: '1px solid var(--border-color)', 
+      <header style={{
+        borderBottom: '1px solid var(--border-color)',
         backgroundColor: 'var(--bg-main)',
         position: 'sticky',
         top: 0,
         zIndex: 50
       }}>
-        <div className="container" style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          height: '72px' 
+        <div className="container" style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          height: '72px'
         }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Link to="/" className="tour-step-1" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <Logo width={32} height={32} />
-            <span style={{ 
-              fontFamily: 'var(--font-display)', 
-              fontWeight: 700, 
+            <span style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
               fontSize: '1.25rem',
               letterSpacing: '-0.02em'
             }}>VERDICT</span>
           </Link>
-          
+
           <nav style={{ display: 'flex', gap: '2rem' }}>
-            {navLinks.map((link) => (
-              <Link 
-                key={link.name} 
+            {navLinks.map((link, idx) => (
+              <Link
+                key={link.name}
                 to={link.path}
+                className={idx === 0 ? 'tour-step-2' : idx === 2 ? 'tour-step-3' : ''}
                 style={{
                   fontSize: '0.9rem',
                   fontWeight: 500,
@@ -73,37 +118,23 @@ export const Layout: React.FC = () => {
           </nav>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-             <button 
-               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-               style={{
-                 background: 'none',
-                 border: 'none',
-                 color: 'var(--text-secondary)',
-                 cursor: 'pointer',
-                 display: 'flex',
-                 alignItems: 'center',
-                 justifyContent: 'center',
-                 padding: '0.5rem'
-               }}
-             >
-               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-             </button>
-             
-             <div style={{ 
-               display: 'flex', 
-               alignItems: 'center', 
-               gap: '0.5rem', 
-               padding: '0.5rem 1rem', 
-               fontSize: '0.85rem',
-               fontWeight: 600,
-               color: 'var(--text-secondary)',
-               background: 'var(--bg-surface)',
-               border: '1px solid var(--border-color)',
-               borderRadius: '999px'
-             }}>
-               <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10B981', boxShadow: '0 0 8px rgba(16, 185, 129, 0.4)' }}></span>
-               Casper Testnet
-             </div>
+            <button
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0.5rem'
+              }}
+            >
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            </button>
+
+            <ConnectionStatus />
           </div>
         </div>
       </header>
@@ -114,15 +145,15 @@ export const Layout: React.FC = () => {
       </main>
 
       {/* Enterprise Footer */}
-      <footer style={{ 
-        borderTop: '1px solid var(--border-color)', 
+      <footer style={{
+        borderTop: '1px solid var(--border-color)',
         backgroundColor: 'var(--bg-surface)',
         padding: '4rem 0'
       }}>
         <div className="container">
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1.5fr 1fr 1fr 1fr', 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1.5fr 1fr 1fr 1fr',
             gap: '4rem',
             marginBottom: '4rem'
           }}>
@@ -136,7 +167,7 @@ export const Layout: React.FC = () => {
                 Autonomous agents verify, evaluate, deliberate, and certify tokenized assets natively on the Casper Network.
               </p>
             </div>
-            
+
             <div>
               <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>Developers</h4>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -163,11 +194,11 @@ export const Layout: React.FC = () => {
               </ul>
             </div>
           </div>
-          
-          <div style={{ 
-            borderTop: '1px solid var(--border-color)', 
-            paddingTop: '2rem', 
-            display: 'flex', 
+
+          <div style={{
+            borderTop: '1px solid var(--border-color)',
+            paddingTop: '2rem',
+            display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
