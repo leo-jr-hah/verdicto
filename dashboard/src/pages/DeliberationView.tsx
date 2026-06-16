@@ -254,14 +254,15 @@ export const DeliberationView: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div style={{ 
+      <div className="deliberation-tabs" style={{ 
         display: 'flex', 
         gap: '0.5rem', 
         marginBottom: '1.5rem',
         padding: '0.5rem',
         background: 'var(--bg-surface)',
         borderRadius: '8px',
-        border: '1px solid var(--border-color)'
+        border: '1px solid var(--border-color)',
+        overflowX: 'auto'
       }}>
         {[
           { id: 'session', label: 'Session', icon: Activity },
@@ -271,6 +272,7 @@ export const DeliberationView: React.FC = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
+            className="deliberation-tab"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -284,11 +286,13 @@ export const DeliberationView: React.FC = () => {
               fontSize: '0.85rem',
               fontWeight: activeTab === tab.id ? 600 : 400,
               transition: 'all 0.2s ease',
-              boxShadow: activeTab === tab.id ? 'var(--shadow-sm)' : 'none'
+              boxShadow: activeTab === tab.id ? 'var(--shadow-sm)' : 'none',
+              whiteSpace: 'nowrap'
             }}
           >
             <tab.icon size={16} />
-            {tab.label}
+            <span className="hide-on-mobile">{tab.label}</span>
+            <span className="show-on-mobile">{tab.id === 'session' ? 'Session' : tab.id === 'evidence' ? 'Evidence' : 'Payments'}</span>
           </button>
         ))}
       </div>
@@ -341,7 +345,11 @@ export const DeliberationView: React.FC = () => {
               </div>
 
               {/* Layout Split: Agents (25%) / Live Log (75%) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '1.5rem' }}>
+              <div className="deliberation-main-grid" style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '1fr 3fr', 
+                gap: '1.5rem'
+              }}>
                 {/* Agent Status Panel */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)', marginBottom: '0.5rem' }}>Agents</h4>
@@ -383,7 +391,7 @@ export const DeliberationView: React.FC = () => {
                 </div>
 
                 {/* Live Log */}
-                <div className="enterprise-card" style={{ background: 'var(--bg-main)', height: '600px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+                <div className="enterprise-card deliberation-log-container" style={{ background: 'var(--bg-main)', height: '600px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface)' }}>
                     <h4 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', margin: 0 }}>Live Log</h4>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

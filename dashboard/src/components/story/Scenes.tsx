@@ -266,7 +266,7 @@ export const Scene4Consensus: React.FC = () => {
   ];
 
   return (
-    <div style={{ width: '100%', height: '100%', display: 'grid', gridTemplateColumns: '1.2fr 1fr', alignItems: 'center', gap: '2rem', padding: '3rem' }}>
+    <div className="scene4-grid" style={{ width: '100%', height: '100%', display: 'grid', gridTemplateColumns: '1.2fr 1fr', alignItems: 'center', gap: '2rem', padding: '3rem' }}>
       
       {/* Agents List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', zIndex: 10 }}>
@@ -422,7 +422,7 @@ export const Scene6OnChain: React.FC = () => {
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
       
       {/* Blockchain Nodes */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', zIndex: 10 }}>
+      <div className="scene6-nodes" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', zIndex: 10, maxWidth: '100%', overflowX: 'auto', paddingBottom: '1rem' }}>
         
         {/* Previous Block */}
         <motion.div 

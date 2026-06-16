@@ -31,14 +31,27 @@ export const DashboardView: React.FC = () => {
     <div className="container" style={{ padding: '3rem 0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
-          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Welcome back. Here's what's happening.</h2>
+          <h2 className="dashboard-heading" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Welcome back. Here's what's happening.</h2>
           <p style={{ color: 'var(--text-secondary)' }}>System overview and recent network activity.</p>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
-        <Link to="/deliberation" className="enterprise-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', background: 'var(--primary)', color: 'white', border: 'none' }}>
+      <div className="dashboard-quick-actions" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(3, 1fr)', 
+        gap: '1.5rem', 
+        marginBottom: '3rem'
+      }}>
+        <Link to="/deliberation" className="enterprise-card dashboard-action-card" style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '1rem', 
+          textDecoration: 'none', 
+          background: 'var(--primary)', 
+          color: 'white', 
+          border: 'none'
+        }}>
           <div style={{ background: 'rgba(255,255,255,0.2)', padding: '0.75rem', borderRadius: '8px' }}>
             <Play size={24} />
           </div>
@@ -47,7 +60,13 @@ export const DashboardView: React.FC = () => {
             <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>Launch a demo dispute</div>
           </div>
         </Link>
-        <Link to="/deliberation" className="enterprise-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', background: 'var(--bg-surface)' }}>
+        <Link to="/deliberation" className="enterprise-card dashboard-action-card" style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '1rem', 
+          textDecoration: 'none', 
+          background: 'var(--bg-surface)'
+        }}>
           <div style={{ background: 'var(--bg-surface-alt)', padding: '0.75rem', borderRadius: '8px', color: 'var(--text-secondary)' }}>
             <Activity size={24} />
           </div>
@@ -56,7 +75,13 @@ export const DashboardView: React.FC = () => {
             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Observe current deliberations</div>
           </div>
         </Link>
-        <Link to="/reputation" className="enterprise-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', background: 'var(--bg-surface)' }}>
+        <Link to="/reputation" className="enterprise-card dashboard-action-card" style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '1rem', 
+          textDecoration: 'none', 
+          background: 'var(--bg-surface)'
+        }}>
           <div style={{ background: 'var(--bg-surface-alt)', padding: '0.75rem', borderRadius: '8px', color: 'var(--text-secondary)' }}>
             <Users size={24} />
           </div>
@@ -67,7 +92,12 @@ export const DashboardView: React.FC = () => {
         </Link>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+      <div className="dashboard-main-grid" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: '2fr 1fr', 
+        gap: '2rem', 
+        marginBottom: '2rem'
+      }}>
         {/* Recent Activity */}
         <div className="enterprise-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1rem' }}>
@@ -145,7 +175,7 @@ export const DashboardView: React.FC = () => {
           <h3 style={{ fontSize: '1.1rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)' }}>Agent Performance This Week</h3>
           <Link to="/reputation" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textDecoration: 'none' }}>Detailed View →</Link>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem' }}>
+        <div className="agent-performance-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem' }}>
           {['Market Analyst', 'Income Analyst', 'Evidence Reviewer', 'Trend Analyst', 'Case Researcher'].map((agent, i) => (
             <div key={i} style={{ padding: '1rem', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
               <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>{agent}</div>

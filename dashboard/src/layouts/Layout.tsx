@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, LayoutDashboard, PlayCircle, Users, Activity, Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Joyride } from 'react-joyride';
 import { Logo } from '../components/Logo';
 import { ConnectionStatus } from '../components/ConnectionStatus';
@@ -10,6 +11,7 @@ export const Layout: React.FC = () => {
 
   const [theme, setTheme] = React.useState('light');
   const [runTour, setRunTour] = React.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -95,7 +97,7 @@ export const Layout: React.FC = () => {
             }}>VERDICT</span>
           </Link>
 
-          <nav style={{ display: 'flex', gap: '2rem' }}>
+          <nav className="desktop-nav" style={{ display: 'flex', gap: '2rem' }}>
             {navLinks.map((link, idx) => (
               <Link
                 key={link.name}
@@ -117,7 +119,16 @@ export const Layout: React.FC = () => {
             ))}
           </nav>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {/* Mobile hamburger button */}
+            <button
+              className="mobile-menu-btn"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+
             <button
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
               style={{
@@ -139,6 +150,33 @@ export const Layout: React.FC = () => {
         </div>
       </header>
 
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="mobile-menu-overlay"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div className="mobile-menu-content" onClick={(e) => e.stopPropagation()}>
+              {navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  className={`mobile-menu-link ${isActive(link.path) ? 'active' : ''}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Main Content Area */}
       <main className="main-content">
         <Outlet />
@@ -151,7 +189,7 @@ export const Layout: React.FC = () => {
         padding: '4rem 0'
       }}>
         <div className="container">
-          <div style={{
+          <div className="footer-grid" style={{
             display: 'grid',
             gridTemplateColumns: '1.5fr 1fr 1fr 1fr',
             gap: '4rem',
@@ -208,6 +246,27 @@ export const Layout: React.FC = () => {
           </div>
         </div>
       </footer>
+      {/* Mobile Bottom Tab Bar */}
+      <nav className="mobile-tab-bar">
+        {[
+          { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+          { name: 'Live', path: '/deliberation', icon: PlayCircle },
+          { name: 'Network', path: '/reputation', icon: Users },
+          { name: 'Activity', path: '/transactions', icon: Activity },
+        ].map((tab) => {
+          const active = isActive(tab.path);
+          return (
+            <Link
+              key={tab.name}
+              to={tab.path}
+              className={`mobile-tab-item ${active ? 'active' : ''}`}
+            >
+              <tab.icon size={20} strokeWidth={active ? 2.5 : 2} />
+              <span>{tab.name}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 };

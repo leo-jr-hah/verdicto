@@ -131,7 +131,7 @@ export const TransactionsView: React.FC = () => {
       </div>
 
       {/* Stats Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+      <div className="transactions-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
         {[
           { label: 'Total', value: stats.total, color: 'var(--text-primary)', icon: BarChart3 },
           { label: 'ZK-Lite', value: stats.zkLite, color: '#8B5CF6', icon: Shield },
@@ -215,11 +215,11 @@ export const TransactionsView: React.FC = () => {
       )}
 
       {filteredTransactions.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: selectedTx ? '2fr 1fr' : '1fr', gap: '1.5rem' }}>
+        <div className="transactions-main-grid" style={{ display: 'grid', gridTemplateColumns: selectedTx ? '2fr 1fr' : '1fr', gap: '1.5rem' }}>
           {/* Transaction Table */}
           <div className="enterprise-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '600px' }}>
             <div style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Action</th>
@@ -233,7 +233,7 @@ export const TransactionsView: React.FC = () => {
               </table>
             </div>
             <div style={{ overflowY: 'auto', flex: 1 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <tbody>
                   {filteredTransactions.map((tx, idx) => (
                     <motion.tr 
@@ -250,7 +250,7 @@ export const TransactionsView: React.FC = () => {
                     }}
                     onClick={() => setSelectedTx(selectedTx?.id === tx.id ? null : tx)}
                   >
-                    <td style={{ padding: '1.25rem 1.5rem', fontWeight: 600, fontFamily: 'var(--font-sans)' }}>
+                    <td data-label="Action" style={{ padding: '1.25rem 1.5rem', fontWeight: 600, fontFamily: 'var(--font-sans)' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: typeColor(tx.type), flexShrink: 0 }} />
                         <span style={{ color: 'var(--text-primary)' }}>{tx.type}</span>
@@ -259,15 +259,15 @@ export const TransactionsView: React.FC = () => {
                         {tx.action}
                       </div>
                     </td>
-                    <td style={{ padding: '1.25rem 1.5rem', color: 'var(--primary)', cursor: 'pointer' }}
+                    <td data-label="Transaction Hash" style={{ padding: '1.25rem 1.5rem', color: 'var(--primary)', cursor: 'pointer' }}
                         title={tx.hash}
                         onClick={(e) => { e.stopPropagation(); window.open(tx.explorerUrl, '_blank'); }}>
                       {truncateHash(tx.hash)}
                     </td>
-                    <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>{tx.contract}</td>
-                    <td style={{ padding: '1.25rem 1.5rem' }}>{tx.blockHeight}</td>
-                    <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-sans)' }}>{formatTime(tx.timestamp)}</td>
-                    <td style={{ padding: '1.25rem 1.5rem' }}>
+                    <td data-label="Target" style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>{tx.contract}</td>
+                    <td data-label="Block Height" style={{ padding: '1.25rem 1.5rem' }}>{tx.blockHeight}</td>
+                    <td data-label="Timestamp" style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-sans)' }}>{formatTime(tx.timestamp)}</td>
+                    <td data-label="Explorer" style={{ padding: '1.25rem 1.5rem' }}>
                       <a
                         href={tx.explorerUrl}
                         target="_blank"

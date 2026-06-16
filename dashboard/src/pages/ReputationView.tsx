@@ -150,7 +150,7 @@ export const ReputationView: React.FC = () => {
       </div>
 
       {/* Stats Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginBottom: '3rem' }}>
+      <div className="reputation-stats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginBottom: '3rem' }}>
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -208,7 +208,7 @@ export const ReputationView: React.FC = () => {
 
       {/* Agent Details Table */}
       <div className="enterprise-card" style={{ padding: 0, overflow: 'hidden', marginTop: '2rem' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-tertiary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Agent Identity</th>
@@ -232,7 +232,7 @@ export const ReputationView: React.FC = () => {
                   fontSize: '0.85rem'
                 }}
               >
-                <td style={{ padding: '1.25rem 1.5rem', fontWeight: 600, fontFamily: 'var(--font-sans)' }}>
+                <td data-label="Agent Identity" style={{ padding: '1.25rem 1.5rem', fontWeight: 600, fontFamily: 'var(--font-sans)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <div style={{ 
                       width: '32px', 
@@ -251,10 +251,10 @@ export const ReputationView: React.FC = () => {
                     <span style={{ color: 'var(--text-primary)' }}>{agent.agentName}</span>
                   </div>
                 </td>
-                <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>
+                <td data-label="Role" style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>
                   {agent.agentId.includes('valuation') ? 'Valuation' : 'Juror'}
                 </td>
-                <td style={{ padding: '1.25rem 1.5rem' }}>
+                <td data-label="Reputation Score" style={{ padding: '1.25rem 1.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <div style={{ 
                       width: '60px', 
@@ -273,13 +273,13 @@ export const ReputationView: React.FC = () => {
                     <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{agent.currentScore}</span>
                   </div>
                 </td>
-                <td style={{ padding: '1.25rem 1.5rem', color: '#10B981', fontWeight: 600 }}>
+                <td data-label="Win Rate" style={{ padding: '1.25rem 1.5rem', color: '#10B981', fontWeight: 600 }}>
                   {agent.winRate}%
                 </td>
-                <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>
+                <td data-label="Disputes" style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>
                   {agent.totalDisputes}
                 </td>
-                <td style={{ padding: '1.25rem 1.5rem' }}>
+                <td data-label="Status" style={{ padding: '1.25rem 1.5rem' }}>
                   <span style={{ 
                     display: 'inline-flex',
                     alignItems: 'center',
