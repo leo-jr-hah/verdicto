@@ -1,10 +1,11 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, LayoutDashboard, PlayCircle, Users, Activity, Menu, X } from 'lucide-react';
+import { Moon, Sun, LayoutDashboard, PlayCircle, Users, Activity, Film, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Joyride } from 'react-joyride';
 import { Logo } from '../components/Logo';
 import { ConnectionStatus } from '../components/ConnectionStatus';
+import { InteractiveStory } from '../components/story/InteractiveStory';
 
 export const Layout: React.FC = () => {
   const location = useLocation();
@@ -12,6 +13,7 @@ export const Layout: React.FC = () => {
   const [theme, setTheme] = React.useState('light');
   const [runTour, setRunTour] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [isStoryOpen, setIsStoryOpen] = React.useState(false);
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -54,6 +56,7 @@ export const Layout: React.FC = () => {
     { name: 'Network', path: '/reputation' },
     { name: 'Activity', path: '/transactions' },
     { name: 'How It Works', path: '/architecture' },
+    { name: 'Story', path: '/story' },
   ];
 
   const isActive = (path: string) => {
@@ -182,6 +185,37 @@ export const Layout: React.FC = () => {
         <Outlet />
       </main>
 
+      {/* Floating Action Button for Story */}
+      <motion.button
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 1, type: 'spring' }}
+        onClick={() => setIsStoryOpen(true)}
+        className="story-fab"
+        style={{
+          position: 'fixed',
+          bottom: '100px', // Above mobile tab bar
+          right: '20px',
+          width: '60px',
+          height: '60px',
+          borderRadius: '50%',
+          background: 'var(--primary)',
+          color: 'var(--bg-main)',
+          border: 'none',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(16, 185, 129, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          zIndex: 50
+        }}
+      >
+        <Film size={28} />
+      </motion.button>
+
+      {/* Interactive Story Modal Overlay */}
+      <InteractiveStory isOpen={isStoryOpen} onClose={() => setIsStoryOpen(false)} />
+
       {/* Enterprise Footer */}
       <footer style={{
         borderTop: '1px solid var(--border-color)',
@@ -253,6 +287,7 @@ export const Layout: React.FC = () => {
           { name: 'Live', path: '/deliberation', icon: PlayCircle },
           { name: 'Network', path: '/reputation', icon: Users },
           { name: 'Activity', path: '/transactions', icon: Activity },
+          { name: 'Story', path: '/story', icon: Film },
         ].map((tab) => {
           const active = isActive(tab.path);
           return (
