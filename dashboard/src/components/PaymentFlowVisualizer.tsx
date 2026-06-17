@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DollarSign, Zap, Shield, User, ArrowRight, ChevronDown, ChevronUp, Info, ExternalLink, FileText, TrendingUp } from 'lucide-react';
+import { Tooltip } from './Tooltip';
 
 /* ─────────── Types ─────────── */
 interface PaymentFlow {
@@ -20,58 +21,6 @@ interface PaymentFlowVisualizerProps {
   payments: PaymentFlow[];
   totalVolume?: number;
 }
-
-/* ─────────── Tooltip ─────────── */
-const Tooltip: React.FC<{ text: string; children: React.ReactNode }> = ({ text, children }) => {
-  const [visible, setVisible] = useState(false);
-  return (
-    <div
-      style={{ position: 'relative', display: 'inline-flex' }}
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
-    >
-      {children}
-      <AnimatePresence>
-        {visible && (
-          <motion.div
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4 }}
-            transition={{ duration: 0.15 }}
-            style={{
-              position: 'absolute',
-              left: '50%',
-              bottom: '100%',
-              transform: 'translateX(-50%)',
-              marginBottom: '8px',
-              background: '#1E1B2E',
-              color: '#E2E8F0',
-              padding: '8px 12px',
-              borderRadius: '8px',
-              fontSize: '0.72rem',
-              lineHeight: 1.4,
-              maxWidth: '240px',
-              whiteSpace: 'normal',
-              textAlign: 'center',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              zIndex: 100,
-              pointerEvents: 'none',
-            }}
-          >
-            {text}
-            <div style={{
-              position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
-              width: 0, height: 0,
-              borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
-              borderTop: '6px solid #1E1B2E',
-            }} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
 
 /* ─────────── Architecture Flow Diagram ─────────── */
 const FlowDiagram: React.FC = () => {
@@ -239,7 +188,7 @@ const SummaryCards: React.FC<{ payments: PaymentFlow[] }> = ({ payments }) => {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
       {cards.map((card, idx) => (
-        <Tooltip key={idx} text={card.desc}>
+        <Tooltip key={idx} term={card.label} explanation={card.desc}>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -513,4 +462,4 @@ export const PaymentFlowVisualizer: React.FC<PaymentFlowVisualizerProps> = ({ pa
   );
 };
 
-export default PaymentFlowVisualizer;
+

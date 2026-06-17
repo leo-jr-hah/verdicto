@@ -393,4 +393,3 @@ export const ReputationGraph: React.FC<ReputationGraphProps> = ({ agents }) => {
   );
 };
 
-export default ReputationGraph;

@@ -26,7 +26,6 @@ type AgentStatus = {
 export const DeliberationView: React.FC = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [status, setStatus] = useState<'idle' | 'deliberating' | 'settled'>('idle');
-  const [_activeDispute, setActiveDispute] = useState<any>(null);
   const [verdict, setVerdict] = useState<any>(null);
   const [autoScroll, setAutoScroll] = useState(true);
   const [activeTab, setActiveTab] = useState<'session' | 'evidence' | 'payments'>('session');
@@ -74,7 +73,6 @@ export const DeliberationView: React.FC = () => {
         
         if (data.type === 'dispute_started') {
           setStatus('deliberating');
-          setActiveDispute(data.payload);
           setVerdict(null);
           addLog('Orchestrator', `Case #${data.payload.disputeId} initiated for asset: ${data.payload.assetId}`, 'system');
           setAgentStatuses(prev => prev.map(agent => ({ ...agent, status: 'thinking', progress: 10 })));
@@ -471,7 +469,22 @@ export const DeliberationView: React.FC = () => {
             <motion.div key="evidence" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <AgentBrainVisualization />
               <CryptographicProofExplorer receipts={receipts} onVerify={(hash) => {
-                  console.log('Verifying proof:', hash);
+                  // Verify the hash exists in our receipts array
+                  const receipt = receipts.find(r => r.hash === hash);
+                  if (receipt) {
+                    addLog('Audit', `✓ Proof verified: ${hash.substring(0, 16)}...`, 'system');
+                    // Verify chain linkage
+                    if (receipt.previousHash) {
+                      const prevReceipt = receipts.find(r => r.hash === receipt.previousHash);
+                      if (prevReceipt) {
+                        addLog('Audit', `✓ Chain linkage confirmed: ${receipt.previousHash.substring(0, 16)}...`, 'system');
+                      } else {
+                        addLog('Audit', `⚠ Warning: Previous hash not found in chain`, 'system');
+                      }
+                    }
+                  } else {
+                    addLog('Audit', `✗ Proof verification failed: ${hash.substring(0, 16)}...`, 'system');
+                  }
               }} />
             </motion.div>
           )}

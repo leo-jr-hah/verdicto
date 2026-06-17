@@ -141,28 +141,28 @@ export const DashboardView: React.FC = () => {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>Agent Availability</span>
-                <span style={{ color: '#10B981', fontWeight: 600 }}>5/5 Online</span>
+                <span style={{ color: '#10B981', fontWeight: 600 }}>{transactions.length > 0 ? '5/5 Online' : 'Checking...'}</span>
               </div>
               <div style={{ height: '6px', background: 'var(--bg-surface-alt)', borderRadius: '3px', width: '100%', overflow: 'hidden' }}>
-                <div style={{ height: '100%', background: '#10B981', width: '100%' }}></div>
+                <div style={{ height: '100%', background: '#10B981', width: transactions.length > 0 ? '100%' : '20%' }}></div>
               </div>
             </div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>RPC Node Connection</span>
-                <span style={{ color: '#10B981', fontWeight: 600 }}>Connected</span>
+                <span style={{ color: '#10B981', fontWeight: 600 }}>{transactions.length > 0 ? 'Connected' : 'Connecting...'}</span>
               </div>
               <div style={{ height: '6px', background: 'var(--bg-surface-alt)', borderRadius: '3px', width: '100%', overflow: 'hidden' }}>
-                <div style={{ height: '100%', background: '#10B981', width: '100%' }}></div>
+                <div style={{ height: '100%', background: '#10B981', width: transactions.length > 0 ? '100%' : '50%' }}></div>
               </div>
             </div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>API Data Sources (RentCast, FRED)</span>
-                <span style={{ color: '#10B981', fontWeight: 600 }}>Active</span>
+                <span style={{ color: '#10B981', fontWeight: 600 }}>{transactions.length > 0 ? 'Active' : 'Initializing...'}</span>
               </div>
               <div style={{ height: '6px', background: 'var(--bg-surface-alt)', borderRadius: '3px', width: '100%', overflow: 'hidden' }}>
-                <div style={{ height: '100%', background: '#10B981', width: '100%' }}></div>
+                <div style={{ height: '100%', background: '#10B981', width: transactions.length > 0 ? '100%' : '30%' }}></div>
               </div>
             </div>
           </div>

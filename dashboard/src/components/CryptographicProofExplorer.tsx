@@ -291,4 +291,3 @@ export const CryptographicProofExplorer: React.FC<ProofExplorerProps> = ({ recei
   );
 };
 
-export default CryptographicProofExplorer;

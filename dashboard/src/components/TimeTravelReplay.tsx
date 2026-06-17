@@ -438,4 +438,3 @@ export const TimeTravelReplay: React.FC<TimeTravelReplayProps> = ({
   );
 };
 
-export default TimeTravelReplay;

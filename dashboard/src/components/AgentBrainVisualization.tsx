@@ -266,4 +266,3 @@ export const AgentBrainVisualization: React.FC = () => {
   );
 };
 
-export default AgentBrainVisualization;

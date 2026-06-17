@@ -1,54 +1,20 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, LayoutDashboard, PlayCircle, Users, Activity, Menu, X, Bot } from 'lucide-react';
+import { Moon, Sun, Menu, X, Bot, LayoutDashboard, PlayCircle, Users, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Joyride } from 'react-joyride';
 import { Logo } from '../components/Logo';
 import { ConnectionStatus } from '../components/ConnectionStatus';
 import { InteractiveStory } from '../components/story/InteractiveStory';
 
 export const Layout: React.FC = () => {
   const location = useLocation();
-
   const [theme, setTheme] = React.useState('light');
-  const [runTour, setRunTour] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [isStoryOpen, setIsStoryOpen] = React.useState(false);
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
-
-  // React.useEffect(() => {
-  //   const hasSeenTour = localStorage.getItem('verdict_has_seen_tour');
-  //   if (!hasSeenTour) {
-  //     setRunTour(true);
-  //   }
-  // }, []);
-
-  const handleJoyrideEvent = (data: any) => {
-    const { status } = data;
-    if (['finished', 'skipped'].includes(status)) {
-      setRunTour(false);
-      localStorage.setItem('verdict_has_seen_tour', 'true');
-    }
-  };
-
-  const tourSteps = [
-    {
-      target: '.tour-step-1',
-      content: 'Welcome to Verdict! We resolve complex real-world asset disputes using AI.',
-      disableBeacon: true,
-    },
-    {
-      target: '.tour-step-2',
-      content: 'You can start a new case or watch a live deliberation session right from your Dashboard.',
-    },
-    {
-      target: '.tour-step-3',
-      content: 'Our network of independent AI agents analyzes data and reaches consensus on a fair valuation.',
-    }
-  ];
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard' },
@@ -58,23 +24,10 @@ export const Layout: React.FC = () => {
     { name: 'How It Works', path: '/architecture' },
   ];
 
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <div className="app-container">
-      <Joyride
-        steps={tourSteps}
-        run={runTour}
-        continuous={true}
-        onEvent={handleJoyrideEvent}
-        options={{
-          primaryColor: '#6366f1',
-          textColor: '#333',
-          zIndex: 1000,
-        }}
-      />
       {/* Top Navigation */}
       <header style={{
         borderBottom: '1px solid var(--border-color)',
@@ -89,7 +42,7 @@ export const Layout: React.FC = () => {
           alignItems: 'center',
           height: '72px'
         }}>
-          <Link to="/" className="tour-step-1" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <Logo width={32} height={32} />
             <span style={{
               fontFamily: 'var(--font-display)',
@@ -100,11 +53,10 @@ export const Layout: React.FC = () => {
           </Link>
 
           <nav className="desktop-nav" style={{ display: 'flex', gap: '2rem' }}>
-            {navLinks.map((link, idx) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
-                className={idx === 0 ? 'tour-step-2' : idx === 2 ? 'tour-step-3' : ''}
                 style={{
                   fontSize: '0.9rem',
                   fontWeight: 500,
@@ -122,7 +74,6 @@ export const Layout: React.FC = () => {
           </nav>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            {/* Mobile hamburger button */}
             <button
               className="mobile-menu-btn"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -260,26 +211,24 @@ export const Layout: React.FC = () => {
             <div>
               <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>Developers</h4>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <li><a href="#" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Documentation</a></li>
-                <li><a href="#" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>GitHub</a></li>
-                <li><a href="#" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Architecture</a></li>
+                <li><Link to="/architecture" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textDecoration: 'none' }}>Architecture</Link></li>
+                <li><a href="https://github.com/casper-network" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textDecoration: 'none' }}>GitHub</a></li>
               </ul>
             </div>
 
             <div>
               <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>Network</h4>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <li><a href="#" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Smart Contracts</a></li>
-                <li><a href="#" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Casper Explorer</a></li>
-                <li><a href="#" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Status</a></li>
+                <li><a href="https://testnet.cspr.live" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textDecoration: 'none' }}>Casper Explorer</a></li>
+                <li><Link to="/transactions" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textDecoration: 'none' }}>Transactions</Link></li>
               </ul>
             </div>
 
             <div>
               <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>Project</h4>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <li><a href="#" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Roadmap</a></li>
-                <li><a href="#" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Contact</a></li>
+                <li><Link to="/deliberation" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textDecoration: 'none' }}>Live Demo</Link></li>
+                <li><Link to="/reputation" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textDecoration: 'none' }}>Agent Network</Link></li>
               </ul>
             </div>
           </div>

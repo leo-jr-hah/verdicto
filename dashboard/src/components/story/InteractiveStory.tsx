@@ -11,6 +11,7 @@ import charObserver from '../../assets/story/char_observer.webp';
 import charVerdictHero from '../../assets/story/char_verdict_hero.webp';
 import propAgentBot from '../../assets/story/prop_agent_bot.webp';
 import propCasperBlock from '../../assets/story/prop_casper_block.webp';
+import { useAmbientMusic } from '../../hooks/useAmbientMusic';
 
 interface InteractiveStoryProps {
   isOpen: boolean;
@@ -43,6 +44,10 @@ const learnMoreData: Record<string, { title: string, layman: string, tech: strin
 export const InteractiveStory: React.FC<InteractiveStoryProps> = ({ isOpen, onClose }) => {
   const [sceneIndex, setSceneIndex] = useState(0);
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
+  
+  // Start the generative ambient music when the story opens
+  useAmbientMusic(isOpen);
+  
   const navigate = useNavigate();
 
   // Reset to first scene when opened
