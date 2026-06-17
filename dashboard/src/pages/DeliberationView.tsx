@@ -30,6 +30,7 @@ export const DeliberationView: React.FC = () => {
   const [verdict, setVerdict] = useState<any>(null);
   const [autoScroll, setAutoScroll] = useState(true);
   const [activeTab, setActiveTab] = useState<'session' | 'evidence' | 'payments'>('session');
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const [agentStatuses, setAgentStatuses] = useState<AgentStatus[]>([
@@ -48,11 +49,26 @@ export const DeliberationView: React.FC = () => {
     const ws = new WebSocket('ws://localhost:3010');
     
     ws.onopen = () => {
+      console.log('[Dashboard] WebSocket connected to ws://localhost:3010');
+      setConnectionStatus('connected');
       addLog('System', 'Connecting to Orchestrator...', 'system');
       setTimeout(() => addLog('System', 'Connection established. Ready.', 'system'), 500);
     };
 
+    ws.onerror = (error) => {
+      console.error('[Dashboard] WebSocket error:', error);
+      setConnectionStatus('disconnected');
+      addLog('System', 'WebSocket connection error. Check if orchestrator is running on port 3010.', 'system');
+    };
+
+    ws.onclose = () => {
+      console.log('[Dashboard] WebSocket connection closed');
+      setConnectionStatus('disconnected');
+      addLog('System', 'WebSocket connection closed.', 'system');
+    };
+
     ws.onmessage = (event) => {
+      console.log('[Dashboard] WebSocket message received:', event.data.substring(0, 200));
       try {
         const data = JSON.parse(event.data);
         
@@ -208,9 +224,17 @@ export const DeliberationView: React.FC = () => {
   const startDemo = async () => {
     try {
       addLog('System', 'Initiating demo case...', 'system');
-      await fetch('http://localhost:3011/api/disputes/start', { method: 'POST' });
-    } catch (e) {
-      addLog('Error', 'Failed to connect to Orchestrator API endpoint. Ensure backend is running.', 'system');
+      const res = await fetch('http://localhost:3011/api/disputes/start', { method: 'POST' });
+      if (!res.ok) {
+        addLog('Error', `Orchestrator returned HTTP ${res.status}. Is the backend running?`, 'system');
+        return;
+      }
+      const data = await res.json();
+      if (!data.success) {
+        addLog('Error', `Failed to start dispute: ${data.error || 'Unknown error'}`, 'system');
+      }
+    } catch (e: any) {
+      addLog('Error', `Cannot reach orchestrator at localhost:3011 — ${e.message}. Start backend with: cd agents && npm run dev && npx tsx orchestrator/index.ts`, 'system');
     }
   };
 
@@ -246,12 +270,19 @@ export const DeliberationView: React.FC = () => {
             Observe autonomous <Tooltip term="AI Agents" explanation="Specialized LLMs evaluating specific parts of a dispute.">AI agents</Tooltip> resolving real-world disputes natively <Tooltip term="on-chain" explanation="Recorded permanently on the blockchain.">on-chain</Tooltip>.
           </p>
         </div>
-        {(status === 'idle' || status === 'settled') && (
-          <button onClick={() => { setLogs([]); setVerdict(null); setStatus('idle'); startDemo(); }} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', padding: '0.6rem 1.25rem' }}>
-            {status === 'settled' ? 'Start Another Case' : 'Start Demo Case'}
-          </button>
-        )}
+        {/* Connection Status Indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '0.5rem', backgroundColor: connectionStatus === 'connected' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)' }}>
+          <div style={{ width: '0.5rem', height: '0.5rem', borderRadius: '50%', backgroundColor: connectionStatus === 'connected' ? '#10B981' : connectionStatus === 'connecting' ? '#F59E0B' : '#EF4444' }} />
+          <span style={{ fontSize: '0.85rem', color: connectionStatus === 'connected' ? '#10B981' : connectionStatus === 'connecting' ? '#F59E0B' : '#EF4444' }}>
+            {connectionStatus === 'connected' ? 'Backend Connected' : connectionStatus === 'connecting' ? 'Connecting...' : 'Backend Disconnected'}
+          </span>
+        </div>
       </div>
+      {(status === 'idle' || status === 'settled') && (
+        <button onClick={() => { setLogs([]); setVerdict(null); setStatus('idle'); startDemo(); }} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', padding: '0.6rem 1.25rem' }}>
+          {status === 'settled' ? 'Start Another Case' : 'Start Demo Case'}
+        </button>
+      )}
 
       {/* Tabs */}
       <div className="deliberation-tabs" style={{ 

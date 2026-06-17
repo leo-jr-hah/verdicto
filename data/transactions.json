@@ -1,5 +1,741 @@
 [
   {
+    "id": "tx-1781704996955-88h9ll",
+    "type": "Native Transfer",
+    "action": "Dispute DISP-75 settlement payment",
+    "hash": "86541883c03747dba6a2b25892acac72a7a0b446fecbe13937444a329916063a",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T14:03:16.955Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/86541883c03747dba6a2b25892acac72a7a0b446fecbe13937444a329916063a",
+    "metadata": {
+      "disputeId": "DISP-75",
+      "amount": "2.5 CSPR",
+      "target": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
+    }
+  },
+  {
+    "id": "tx-1781704996697-99o1x2",
+    "type": "ZK-Lite Commitment",
+    "action": "Dispute DISP-75 execution commitment",
+    "hash": "mock_deploy_485c8059",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T14:03:16.697Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/mock_deploy_485c8059",
+    "metadata": {
+      "disputeId": "DISP-75",
+      "executionCommitment": {
+        "commitment": "485c805984f19302e65b7dcca1a3edc6dd360032ed54dded20fa841d75f297e0",
+        "agentStateHash": "c6ae7efff21d6efdda424188cb239a28277c0fd56f1c7430bd2ff61174936613",
+        "inputHash": "e6dc5b4f2851df7d2dac452c2a9e242de250636190dfa3ecb52949ddb67e0e00",
+        "timestamp": 1781704996538,
+        "blockHeight": 0
+      }
+    }
+  },
+  {
+    "id": "tx-1781704996537-clg2q0",
+    "type": "ExecuteVerdict",
+    "action": "Dispute DISP-75 verdict: SplitFifty",
+    "hash": "verdict-DISP-75",
+    "contract": "Orchestrator",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T14:03:16.537Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/verdict-DISP-75",
+    "metadata": {
+      "disputeId": "DISP-75",
+      "finalVerdict": "SplitFifty",
+      "finalValue": 3508372,
+      "scoreA": 800,
+      "scoreB": 0,
+      "scoreSplit": 1470
+    }
+  },
+  {
+    "id": "tx-1781704996536-yly8r5",
+    "type": "HMAC Receipt Chain",
+    "action": "Deliberation audit trail for DISP-75",
+    "hash": "c7b8639c-d750-4b2b-a83d-9b7a381d94ba",
+    "contract": "AuditTrail",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T14:03:16.536Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/c7b8639c-d750-4b2b-a83d-9b7a381d94ba",
+    "metadata": {
+      "disputeId": "DISP-75",
+      "receiptCount": 6,
+      "chainValid": true
+    }
+  },
+  {
+    "id": "tx-1781704995843-5if8qf",
+    "type": "x402 Payment",
+    "action": "Agent payment to Precedent Researcher",
+    "hash": "f58841af3eae56e5abc5c1c7846d9569a3f0b1b47f526249fd7cb69a190dc158",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T14:03:15.843Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/f58841af3eae56e5abc5c1c7846d9569a3f0b1b47f526249fd7cb69a190dc158",
+    "metadata": {
+      "agentLabel": "Precedent Researcher",
+      "amount": "2.5",
+      "payTo": "0203b4ef382c385d0d55b193b30b6aa774b1f0024d33e5b911bc2a4ea45c905f9986"
+    }
+  },
+  {
+    "id": "tx-1781704995840-db2bgu",
+    "type": "x402 Payment",
+    "action": "Agent payment to Market Data Interpreter",
+    "hash": "8a0e50b9a049a824a96fc09965a8c075c7537519d705eb363564432de0be1ff2",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T14:03:15.840Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/8a0e50b9a049a824a96fc09965a8c075c7537519d705eb363564432de0be1ff2",
+    "metadata": {
+      "agentLabel": "Market Data Interpreter",
+      "amount": "2.5",
+      "payTo": "0203a3c16476cfc8c77aad82d77e6cebdf43ad739baeb891a4f0b612de48ab1b960c"
+    }
+  },
+  {
+    "id": "tx-1781704995836-264fbp",
+    "type": "x402 Payment",
+    "action": "Agent payment to Evidence Analyst",
+    "hash": "97eed3edaddefce137810610f3594fb69bcb6e3dce2123f1462d4cc958f9a677",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T14:03:15.836Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/97eed3edaddefce137810610f3594fb69bcb6e3dce2123f1462d4cc958f9a677",
+    "metadata": {
+      "agentLabel": "Evidence Analyst",
+      "amount": "2.5",
+      "payTo": "0203b71fe15431c407a1eaf0d3bc82adf92d7653c28704a6037bfeb17a10d8073c88"
+    }
+  },
+  {
+    "id": "tx-1781704994565-39q833",
+    "type": "x402 Payment",
+    "action": "Agent payment to Market Data Interpreter",
+    "hash": "cdec920396c27943b196c59a96c5a9695c077aff11e44a00afc9aef4c129a8d1",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T14:03:14.565Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/cdec920396c27943b196c59a96c5a9695c077aff11e44a00afc9aef4c129a8d1",
+    "metadata": {
+      "agentLabel": "Market Data Interpreter",
+      "amount": "2.5",
+      "payTo": "0203a3c16476cfc8c77aad82d77e6cebdf43ad739baeb891a4f0b612de48ab1b960c"
+    }
+  },
+  {
+    "id": "tx-1781704994527-0gig1w",
+    "type": "x402 Payment",
+    "action": "Agent payment to Evidence Analyst",
+    "hash": "46c087313abc22f34d117dda66280995495e47a5ffa30c20c4db5727aefe494f",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T14:03:14.527Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/46c087313abc22f34d117dda66280995495e47a5ffa30c20c4db5727aefe494f",
+    "metadata": {
+      "agentLabel": "Evidence Analyst",
+      "amount": "2.5",
+      "payTo": "0203b71fe15431c407a1eaf0d3bc82adf92d7653c28704a6037bfeb17a10d8073c88"
+    }
+  },
+  {
+    "id": "tx-1781704994034-wye8ck",
+    "type": "x402 Payment",
+    "action": "Agent payment to Precedent Researcher",
+    "hash": "fe4581959c3104ad5412c6962a06dad0358533b4fdd78ff552bafcee01a49796",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T14:03:14.034Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/fe4581959c3104ad5412c6962a06dad0358533b4fdd78ff552bafcee01a49796",
+    "metadata": {
+      "agentLabel": "Precedent Researcher",
+      "amount": "2.5",
+      "payTo": "0203b4ef382c385d0d55b193b30b6aa774b1f0024d33e5b911bc2a4ea45c905f9986"
+    }
+  },
+  {
+    "id": "tx-1781704993758-u17mce",
+    "type": "x402 Payment",
+    "action": "Agent payment to Agent-B",
+    "hash": "aeacc426988a9baf7a76a91593406de2c6c84cf17bce5e7a09bdb5700c17ae55",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T14:03:13.758Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/aeacc426988a9baf7a76a91593406de2c6c84cf17bce5e7a09bdb5700c17ae55",
+    "metadata": {
+      "agentLabel": "Agent-B",
+      "amount": "2.5",
+      "payTo": "020335ae9358e3cc14a974d79a191eaafdf7693decc3603dfa3c5fc83cb893362f6f"
+    }
+  },
+  {
+    "id": "tx-1781704993465-j2hk7c",
+    "type": "x402 Payment",
+    "action": "Agent payment to Agent-A",
+    "hash": "be805b24fd2b9304f0bbfb42b063d766974549fe13b0a0acc31ea3cd84c285d3",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T14:03:13.465Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/be805b24fd2b9304f0bbfb42b063d766974549fe13b0a0acc31ea3cd84c285d3",
+    "metadata": {
+      "agentLabel": "Agent-A",
+      "amount": "2.5",
+      "payTo": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
+    }
+  },
+  {
+    "id": "tx-1781704358904-4acjbf",
+    "type": "Native Transfer",
+    "action": "Dispute DISP-811 settlement payment",
+    "hash": "82035d703e18fe46f4f4840d1330ee8f7f2804d00e7c719a84344859f70f9ba1",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:52:38.904Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/82035d703e18fe46f4f4840d1330ee8f7f2804d00e7c719a84344859f70f9ba1",
+    "metadata": {
+      "disputeId": "DISP-811",
+      "amount": "2.5 CSPR",
+      "target": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
+    }
+  },
+  {
+    "id": "tx-1781704358657-lzdau4",
+    "type": "ZK-Lite Commitment",
+    "action": "Dispute DISP-811 execution commitment",
+    "hash": "mock_deploy_3c556e86",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:52:38.657Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/mock_deploy_3c556e86",
+    "metadata": {
+      "disputeId": "DISP-811",
+      "executionCommitment": {
+        "commitment": "3c556e86fee74ebf863e6072707bee690b9c35bf248e2ff1e8fa09be56be2ab8",
+        "agentStateHash": "6370f89282699f08b6330e55deea3daa17d71827f39886a19c6a59104d49f769",
+        "inputHash": "7bed58b2c53580165a7c0d068dfaf708d8f8e303a0b190d9d31220f4f95257ac",
+        "timestamp": 1781704358495,
+        "blockHeight": 0
+      }
+    }
+  },
+  {
+    "id": "tx-1781704358494-079szl",
+    "type": "HMAC Receipt Chain",
+    "action": "Deliberation audit trail for DISP-811",
+    "hash": "373e5f9a-e3c4-4bf8-aee9-f4dde6069e98",
+    "contract": "AuditTrail",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:52:38.494Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/373e5f9a-e3c4-4bf8-aee9-f4dde6069e98",
+    "metadata": {
+      "disputeId": "DISP-811",
+      "receiptCount": 6,
+      "chainValid": true
+    }
+  },
+  {
+    "id": "tx-1781704357933-rl792a",
+    "type": "x402 Payment",
+    "action": "Agent payment to Precedent Researcher (simulated)",
+    "hash": "cspr-tx-1781704358267",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:52:37.933Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/cspr-tx-1781704358267",
+    "metadata": {
+      "agentLabel": "Precedent Researcher",
+      "amount": "0.01",
+      "payTo": "0203b4ef382c385d0d55b193b30b6aa774b1f0024d33e5b911bc2a4ea45c905f9986",
+      "simulated": true
+    }
+  },
+  {
+    "id": "tx-1781704357921-27t3gr",
+    "type": "x402 Payment",
+    "action": "Agent payment to Market Data Interpreter (simulated)",
+    "hash": "cspr-tx-1781704358257",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:52:37.921Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/cspr-tx-1781704358257",
+    "metadata": {
+      "agentLabel": "Market Data Interpreter",
+      "amount": "0.01",
+      "payTo": "0203a3c16476cfc8c77aad82d77e6cebdf43ad739baeb891a4f0b612de48ab1b960c",
+      "simulated": true
+    }
+  },
+  {
+    "id": "tx-1781704357918-l622c3",
+    "type": "x402 Payment",
+    "action": "Agent payment to Evidence Analyst (simulated)",
+    "hash": "cspr-tx-1781704357765",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:52:37.918Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/cspr-tx-1781704357765",
+    "metadata": {
+      "agentLabel": "Evidence Analyst",
+      "amount": "0.01",
+      "payTo": "0203b71fe15431c407a1eaf0d3bc82adf92d7653c28704a6037bfeb17a10d8073c88",
+      "simulated": true
+    }
+  },
+  {
+    "id": "tx-1781704357031-8bdu19",
+    "type": "x402 Payment",
+    "action": "Agent payment to Market Data Interpreter (simulated)",
+    "hash": "cspr-tx-1781704356620",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:52:37.031Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/cspr-tx-1781704356620",
+    "metadata": {
+      "agentLabel": "Market Data Interpreter",
+      "amount": "0.01",
+      "payTo": "0203a3c16476cfc8c77aad82d77e6cebdf43ad739baeb891a4f0b612de48ab1b960c",
+      "simulated": true
+    }
+  },
+  {
+    "id": "tx-1781704356974-umjg68",
+    "type": "x402 Payment",
+    "action": "Agent payment to Evidence Analyst (simulated)",
+    "hash": "cspr-tx-1781704357211",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:52:36.974Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/cspr-tx-1781704357211",
+    "metadata": {
+      "agentLabel": "Evidence Analyst",
+      "amount": "0.01",
+      "payTo": "0203b71fe15431c407a1eaf0d3bc82adf92d7653c28704a6037bfeb17a10d8073c88",
+      "simulated": true
+    }
+  },
+  {
+    "id": "tx-1781704356536-yrs0t6",
+    "type": "x402 Payment",
+    "action": "Agent payment to Precedent Researcher (simulated)",
+    "hash": "cspr-tx-1781704357008",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:52:36.536Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/cspr-tx-1781704357008",
+    "metadata": {
+      "agentLabel": "Precedent Researcher",
+      "amount": "0.01",
+      "payTo": "0203b4ef382c385d0d55b193b30b6aa774b1f0024d33e5b911bc2a4ea45c905f9986",
+      "simulated": true
+    }
+  },
+  {
+    "id": "tx-1781704356234-mfu951",
+    "type": "x402 Payment",
+    "action": "Agent payment to Agent-B (simulated)",
+    "hash": "cspr-tx-1781704356447",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:52:36.235Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/cspr-tx-1781704356447",
+    "metadata": {
+      "agentLabel": "Agent-B",
+      "amount": "0.01",
+      "payTo": "020335ae9358e3cc14a974d79a191eaafdf7693decc3603dfa3c5fc83cb893362f6f",
+      "simulated": true
+    }
+  },
+  {
+    "id": "tx-1781704355904-lxehnn",
+    "type": "x402 Payment",
+    "action": "Agent payment to Agent-A (simulated)",
+    "hash": "cspr-tx-1781704355512",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:52:35.904Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/cspr-tx-1781704355512",
+    "metadata": {
+      "agentLabel": "Agent-A",
+      "amount": "0.01",
+      "payTo": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d",
+      "simulated": true
+    }
+  },
+  {
+    "id": "tx-1781701772649-7wx22t",
+    "type": "Native Transfer",
+    "action": "Dispute DISP-131 settlement payment",
+    "hash": "20b96f6b456c4d5b996eddfacf630d955ee345cebfefaee45f63d5b9edbebae6",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:09:32.649Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/20b96f6b456c4d5b996eddfacf630d955ee345cebfefaee45f63d5b9edbebae6",
+    "metadata": {
+      "disputeId": "DISP-131",
+      "amount": "2.5 CSPR",
+      "target": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
+    }
+  },
+  {
+    "id": "tx-1781701771713-ghuyvy",
+    "type": "ZK-Lite Commitment",
+    "action": "Dispute DISP-131 execution commitment",
+    "hash": "mock_deploy_0553dc36",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:09:31.713Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/mock_deploy_0553dc36",
+    "metadata": {
+      "disputeId": "DISP-131",
+      "executionCommitment": {
+        "commitment": "0553dc361fc6b6c15083c593e1195e1bfc4d28acd61206599878ca03189ea4d7",
+        "agentStateHash": "6370f89282699f08b6330e55deea3daa17d71827f39886a19c6a59104d49f769",
+        "inputHash": "7ff247f191ee542eba4e229f320939261c8522f537a45f53340845f6ec3148b9",
+        "timestamp": 1781701771711,
+        "blockHeight": 0
+      }
+    }
+  },
+  {
+    "id": "tx-1781701771709-ake6mw",
+    "type": "HMAC Receipt Chain",
+    "action": "Deliberation audit trail for DISP-131",
+    "hash": "5a56747b-9f0f-494b-9716-91f73f68cc33",
+    "contract": "AuditTrail",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:09:31.709Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/5a56747b-9f0f-494b-9716-91f73f68cc33",
+    "metadata": {
+      "disputeId": "DISP-131",
+      "receiptCount": 6,
+      "chainValid": true
+    }
+  },
+  {
+    "id": "tx-1781701751451-et4hq0",
+    "type": "Native Transfer",
+    "action": "Dispute DISP-48 settlement payment",
+    "hash": "34cb68d352f7782d6af2374c3f975c0f6641e9a8c59581881db6d71a464ca9e5",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:09:11.451Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/34cb68d352f7782d6af2374c3f975c0f6641e9a8c59581881db6d71a464ca9e5",
+    "metadata": {
+      "disputeId": "DISP-48",
+      "amount": "2.5 CSPR",
+      "target": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
+    }
+  },
+  {
+    "id": "tx-1781701750452-kbt4rt",
+    "type": "ZK-Lite Commitment",
+    "action": "Dispute DISP-48 execution commitment",
+    "hash": "mock_deploy_7c4eddb6",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:09:10.452Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/mock_deploy_7c4eddb6",
+    "metadata": {
+      "disputeId": "DISP-48",
+      "executionCommitment": {
+        "commitment": "7c4eddb6fc487928e476f009afc6c7040756520b68f95c28426b62fca52bf08c",
+        "agentStateHash": "6370f89282699f08b6330e55deea3daa17d71827f39886a19c6a59104d49f769",
+        "inputHash": "6b691de4f21fc08cb497b9bc3ac556a7e8bdcdd77dda8532f00e84bdfd61ca20",
+        "timestamp": 1781701750449,
+        "blockHeight": 0
+      }
+    }
+  },
+  {
+    "id": "tx-1781701750446-s6u0wr",
+    "type": "HMAC Receipt Chain",
+    "action": "Deliberation audit trail for DISP-48",
+    "hash": "dc8f62c7-3082-44a0-bf8e-cc48cda0cfba",
+    "contract": "AuditTrail",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:09:10.446Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/dc8f62c7-3082-44a0-bf8e-cc48cda0cfba",
+    "metadata": {
+      "disputeId": "DISP-48",
+      "receiptCount": 6,
+      "chainValid": true
+    }
+  },
+  {
+    "id": "tx-1781701642846-q7orjq",
+    "type": "Native Transfer",
+    "action": "Dispute DISP-409 settlement payment",
+    "hash": "7349c88b8133196e1ff2d2ffe96dcd89a6bfbc54d572dc0a7103860f9535d3a8",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:07:22.846Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/7349c88b8133196e1ff2d2ffe96dcd89a6bfbc54d572dc0a7103860f9535d3a8",
+    "metadata": {
+      "disputeId": "DISP-409",
+      "amount": "2.5 CSPR",
+      "target": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
+    }
+  },
+  {
+    "id": "tx-1781701641849-ejz1ei",
+    "type": "ZK-Lite Commitment",
+    "action": "Dispute DISP-409 execution commitment",
+    "hash": "mock_deploy_9cae880d",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:07:21.849Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/mock_deploy_9cae880d",
+    "metadata": {
+      "disputeId": "DISP-409",
+      "executionCommitment": {
+        "commitment": "9cae880de05166f75366c46d9f18d68023ae0baa0600cc957f80eebdee95ea59",
+        "agentStateHash": "6370f89282699f08b6330e55deea3daa17d71827f39886a19c6a59104d49f769",
+        "inputHash": "b0597055b5222f28e3930a759bb682d326e31ec432ea938554c47dcc78b87b02",
+        "timestamp": 1781701641684,
+        "blockHeight": 0
+      }
+    }
+  },
+  {
+    "id": "tx-1781701641682-gc85ww",
+    "type": "HMAC Receipt Chain",
+    "action": "Deliberation audit trail for DISP-409",
+    "hash": "c4debe2b-42c3-4f05-8087-3e293f3c1c96",
+    "contract": "AuditTrail",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:07:21.682Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/c4debe2b-42c3-4f05-8087-3e293f3c1c96",
+    "metadata": {
+      "disputeId": "DISP-409",
+      "receiptCount": 6,
+      "chainValid": true
+    }
+  },
+  {
+    "id": "tx-1781701501601-vz367o",
+    "type": "Native Transfer",
+    "action": "Dispute DISP-53 settlement payment",
+    "hash": "08885f7cbde683843d69e19c0645b1be00c19c98ad471d385836b93e6a080098",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:05:01.601Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/08885f7cbde683843d69e19c0645b1be00c19c98ad471d385836b93e6a080098",
+    "metadata": {
+      "disputeId": "DISP-53",
+      "amount": "2.5 CSPR",
+      "target": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
+    }
+  },
+  {
+    "id": "tx-1781701500610-nvnujn",
+    "type": "ZK-Lite Commitment",
+    "action": "Dispute DISP-53 execution commitment",
+    "hash": "mock_deploy_099cd327",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:05:00.610Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/mock_deploy_099cd327",
+    "metadata": {
+      "disputeId": "DISP-53",
+      "executionCommitment": {
+        "commitment": "099cd3278621974321658018e3cc84c547f65aa48c18a2734b5d5b78c4d97696",
+        "agentStateHash": "6370f89282699f08b6330e55deea3daa17d71827f39886a19c6a59104d49f769",
+        "inputHash": "02516777819b1b0d1fc86ab01aab4f5bc37b3da71e2004bb26e5c1e1162ebcd4",
+        "timestamp": 1781701500607,
+        "blockHeight": 0
+      }
+    }
+  },
+  {
+    "id": "tx-1781701500604-elwpg5",
+    "type": "HMAC Receipt Chain",
+    "action": "Deliberation audit trail for DISP-53",
+    "hash": "3848b154-7e97-46b9-9451-e7a25eeb10d6",
+    "contract": "AuditTrail",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:05:00.604Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/3848b154-7e97-46b9-9451-e7a25eeb10d6",
+    "metadata": {
+      "disputeId": "DISP-53",
+      "receiptCount": 6,
+      "chainValid": true
+    }
+  },
+  {
+    "id": "tx-1781701417371-z9umdl",
+    "type": "Native Transfer",
+    "action": "Dispute DISP-199 settlement payment",
+    "hash": "ddfda1f8a0de5f31ba515be2931a1e42b4f9d1d6588aff916c9bffa815fa5b9e",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:03:37.371Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/ddfda1f8a0de5f31ba515be2931a1e42b4f9d1d6588aff916c9bffa815fa5b9e",
+    "metadata": {
+      "disputeId": "DISP-199",
+      "amount": "2.5 CSPR",
+      "target": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
+    }
+  },
+  {
+    "id": "tx-1781701416656-czn8xf",
+    "type": "ZK-Lite Commitment",
+    "action": "Dispute DISP-199 execution commitment",
+    "hash": "mock_deploy_1200777b",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:03:36.656Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/mock_deploy_1200777b",
+    "metadata": {
+      "disputeId": "DISP-199",
+      "executionCommitment": {
+        "commitment": "1200777b7225718ff083dc2a3f379b284f7fe220c22a8a86c9eaf672660328d5",
+        "agentStateHash": "6370f89282699f08b6330e55deea3daa17d71827f39886a19c6a59104d49f769",
+        "inputHash": "58f3b3762371ad85ff109a5bbcbf7122c229734b96c2dd614b71867fbe9a82bb",
+        "timestamp": 1781701416655,
+        "blockHeight": 0
+      }
+    }
+  },
+  {
+    "id": "tx-1781701416652-nhleav",
+    "type": "HMAC Receipt Chain",
+    "action": "Deliberation audit trail for DISP-199",
+    "hash": "18218740-fa26-435b-9b58-b5145103ccab",
+    "contract": "AuditTrail",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:03:36.652Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/18218740-fa26-435b-9b58-b5145103ccab",
+    "metadata": {
+      "disputeId": "DISP-199",
+      "receiptCount": 6,
+      "chainValid": true
+    }
+  },
+  {
+    "id": "tx-1781701404908-s9esko",
+    "type": "Native Transfer",
+    "action": "Dispute DISP-784 settlement payment",
+    "hash": "200dfecf0ae738a4de15da7de3313cf856978b3c5e01cf0279504f7dc3b21070",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:03:24.908Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/200dfecf0ae738a4de15da7de3313cf856978b3c5e01cf0279504f7dc3b21070",
+    "metadata": {
+      "disputeId": "DISP-784",
+      "amount": "2.5 CSPR",
+      "target": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
+    }
+  },
+  {
+    "id": "tx-1781701403918-1ppmeg",
+    "type": "ZK-Lite Commitment",
+    "action": "Dispute DISP-784 execution commitment",
+    "hash": "mock_deploy_cc0a7342",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:03:23.918Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/mock_deploy_cc0a7342",
+    "metadata": {
+      "disputeId": "DISP-784",
+      "executionCommitment": {
+        "commitment": "cc0a7342db19645e56abf9dfcd183c5b9957b89fbec3d93778f97e6c2307e71c",
+        "agentStateHash": "6370f89282699f08b6330e55deea3daa17d71827f39886a19c6a59104d49f769",
+        "inputHash": "bdb552c5b6718fbfc660116f021dbc21d7362962ea93b97dd2176754b2f1dbb3",
+        "timestamp": 1781701403766,
+        "blockHeight": 0
+      }
+    }
+  },
+  {
+    "id": "tx-1781701403762-8r82ae",
+    "type": "HMAC Receipt Chain",
+    "action": "Deliberation audit trail for DISP-784",
+    "hash": "8e283492-8600-44a8-99bf-374cf5eeaeb9",
+    "contract": "AuditTrail",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T13:03:23.762Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/8e283492-8600-44a8-99bf-374cf5eeaeb9",
+    "metadata": {
+      "disputeId": "DISP-784",
+      "receiptCount": 6,
+      "chainValid": true
+    }
+  },
+  {
+    "id": "tx-1781700919453-30ko24",
+    "type": "Native Transfer",
+    "action": "Dispute DISP-985 settlement payment",
+    "hash": "79e5d1afff0b5b62ea08664c844ec6163ad09cc986ccc631b978bcad8fd05d28",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T12:55:19.453Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/79e5d1afff0b5b62ea08664c844ec6163ad09cc986ccc631b978bcad8fd05d28",
+    "metadata": {
+      "disputeId": "DISP-985",
+      "amount": "2.5 CSPR",
+      "target": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
+    }
+  },
+  {
+    "id": "tx-1781700918517-6dvqwg",
+    "type": "ZK-Lite Commitment",
+    "action": "Dispute DISP-985 execution commitment",
+    "hash": "mock_deploy_6b82ca38",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T12:55:18.517Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/mock_deploy_6b82ca38",
+    "metadata": {
+      "disputeId": "DISP-985",
+      "executionCommitment": {
+        "commitment": "6b82ca387f47077152691f224e7c4af588d29feb34177a9c0348819a183e4b44",
+        "agentStateHash": "2abb499001e78f3ce9942210509c55577416dc606dae3fd0262b3fc5bdcaac98",
+        "inputHash": "5972fc5646e6bb81c4684d78cc7a6ab80b3ac2fb2c0ec0cc2767b0452db6b22c",
+        "timestamp": 1781700918387,
+        "blockHeight": 0
+      }
+    }
+  },
+  {
+    "id": "tx-1781700327267-bxustn",
+    "type": "Native Transfer",
+    "action": "Dispute DISP-589 settlement payment",
+    "hash": "cd4de69910e453a5e1564d8a7c1c95e8b69618c436c2fe9b2a2ea905f5b75b9e",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T12:45:27.267Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/cd4de69910e453a5e1564d8a7c1c95e8b69618c436c2fe9b2a2ea905f5b75b9e",
+    "metadata": {
+      "disputeId": "DISP-589",
+      "amount": "2.5 CSPR",
+      "target": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
+    }
+  },
+  {
+    "id": "tx-1781700326329-pt2rd2",
+    "type": "ZK-Lite Commitment",
+    "action": "Dispute DISP-589 execution commitment",
+    "hash": "mock_deploy_c5c9328a",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-17T12:45:26.329Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/mock_deploy_c5c9328a",
+    "metadata": {
+      "disputeId": "DISP-589",
+      "executionCommitment": {
+        "commitment": "c5c9328a188f8a4f13b50caf4b1e6647bdbb92c1328b7bf2126a77bd560a1d79",
+        "agentStateHash": "2abb499001e78f3ce9942210509c55577416dc606dae3fd0262b3fc5bdcaac98",
+        "inputHash": "55199135c92c18ac0b2b842fb4d2c97b4aa8f0285c5d58edb4a4d38e344239a7",
+        "timestamp": 1781700326199,
+        "blockHeight": 0
+      }
+    }
+  },
+  {
     "id": "tx-1781699824042-1hw0cv",
     "type": "Native Transfer",
     "action": "Dispute DISP-584 settlement payment",

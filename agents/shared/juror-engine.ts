@@ -18,7 +18,7 @@ export function createJurorServer(config: JurorConfig) {
 
   app.use('/mcp', simulatedX402Middleware({
     recipientAddress: config.publicKey,
-    amountCSPR: '0.01',
+    amountCSPR: '2.5',
   }));
 
   app.post('/mcp', async (req, res) => {

@@ -5,11 +5,13 @@ export function simulatedX402Middleware(config: { recipientAddress: string; amou
     const paymentProof = req.headers['payment-signature'] || req.headers['x-payment-proof'];
     
     // Bypass x402 for localhost/127.0.0.1 calls (orchestrator to agents)
+    // Can be disabled with X402_REQUIRE_PAYMENT=true for testnet/demo
     const origin = req.headers.origin || req.headers.referer || '';
     const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1') || 
                         req.ip === '127.0.0.1' || req.ip === '::1';
+    const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
     
-    if (isLocalhost && !paymentProof) {
+    if (isLocalhost && !paymentProof && !requirePayment) {
       // Allow local calls without payment for demo/testing
       (req as any).x402Payment = { valid: true, payer: 'localhost-bypass', local: true };
       return next();

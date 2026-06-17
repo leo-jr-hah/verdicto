@@ -24,8 +24,8 @@ export async function fetchTransactions(): Promise<TransactionEntry[]> {
     const data = await res.json();
     return data.transactions || [];
   } catch (err) {
-    console.warn('[API] Failed to fetch transactions:', err);
-    return [];
+    console.error('[API] Failed to fetch transactions:', err);
+    throw err; // Re-throw so caller can handle it
   }
 }
 

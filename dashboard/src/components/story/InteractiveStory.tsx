@@ -131,12 +131,12 @@ export const InteractiveStory: React.FC<InteractiveStoryProps> = ({ isOpen, onCl
 
         {/* Character Layer */}
         <div style={{ position: 'absolute', inset: 0, zIndex: 5, overflow: 'hidden' }}>
-          {scene.elements.map((el, i) => (
+          {scene.elements.map((el) => (
             <motion.div
               key={el.id}
               initial={el.initial}
               animate={el.animate}
-              transition={el.transition || { type: 'spring', damping: 20 }}
+              transition={('transition' in el ? el.transition : undefined) || ({ type: 'spring', damping: 20 } as any)}
               style={{ position: 'absolute', ...el.style }}
             >
               <img src={el.src} style={{ width: 'auto', height: '100%', display: 'block', objectFit: 'contain' }} alt="character" />
@@ -183,9 +183,9 @@ export const InteractiveStory: React.FC<InteractiveStoryProps> = ({ isOpen, onCl
                 <div style={{ fontSize: '1rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
                   {bubble.text}
                 </div>
-                {bubble.learnMore && (
+                {('learnMore' in bubble && bubble.learnMore) && (
                   <button 
-                    onClick={() => setActiveTopic(bubble.learnMore as string)}
+                    onClick={() => setActiveTopic((bubble as any).learnMore as string)}
                     style={{ 
                       marginTop: '1rem', 
                       display: 'inline-flex', 
@@ -199,7 +199,7 @@ export const InteractiveStory: React.FC<InteractiveStoryProps> = ({ isOpen, onCl
                       cursor: 'pointer',
                       color: 'var(--text-secondary)'
                     }}>
-                    <Info size={14} /> Learn more about {bubble.learnMore}
+                    <Info size={14} /> Learn more about {(bubble as any).learnMore}
                   </button>
                 )}
               </motion.div>

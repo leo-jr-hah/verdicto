@@ -39,6 +39,7 @@ function typeColor(type: string): string {
 export const TransactionsView: React.FC = () => {
   const [transactions, setTransactions] = useState<TransactionEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [wsConnected, setWsConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [selectedTx, setSelectedTx] = useState<TransactionEntry | null>(null);
@@ -46,10 +47,18 @@ export const TransactionsView: React.FC = () => {
 
   const loadTransactions = useCallback(async () => {
     setLoading(true);
-    const data = await fetchTransactions();
-    setTransactions(data);
-    setLastUpdate(new Date());
-    setLoading(false);
+    setError(null);
+    try {
+      const data = await fetchTransactions();
+      console.log('[TransactionsView] Loaded', data.length, 'transactions');
+      setTransactions(data);
+      setLastUpdate(new Date());
+    } catch (err: any) {
+      console.error('[TransactionsView] Failed to load transactions:', err);
+      setError(err.message || 'Failed to load transactions');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -199,7 +208,7 @@ export const TransactionsView: React.FC = () => {
         ))}
       </div>
 
-      {filteredTransactions.length === 0 && !loading && (
+      {filteredTransactions.length === 0 && !loading && !error && (
         <div className="enterprise-card" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
           <Shield size={48} color="var(--text-tertiary)" style={{ marginBottom: '1rem' }} />
           <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
@@ -211,6 +220,31 @@ export const TransactionsView: React.FC = () => {
           <p style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
             Make sure the orchestrator backend is running on port 3011.
           </p>
+        </div>
+      )}
+
+      {error && (
+        <div className="enterprise-card" style={{ textAlign: 'center', padding: '4rem 2rem', border: '2px solid #EF4444' }}>
+          <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem', color: '#EF4444' }}>
+            ⚠️ Error Loading Transactions
+          </div>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+            {error}
+          </p>
+          <button 
+            onClick={loadTransactions}
+            style={{
+              background: 'var(--primary)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.5rem 1rem',
+              cursor: 'pointer',
+              fontSize: '0.85rem',
+            }}
+          >
+            Retry
+          </button>
         </div>
       )}
 

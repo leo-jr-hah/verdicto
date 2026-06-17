@@ -142,9 +142,10 @@ export function createAgentServer(config: AgentConfig) {
   app.use(express.json());
 
   // x402 payment gate
+  // Note: Minimum transfer on Casper testnet is 2.5 CSPR
   app.use('/mcp', simulatedX402Middleware({
     recipientAddress: config.publicKey,
-    amountCSPR: '0.01',
+    amountCSPR: '2.5',
   }));
 
   // MCP endpoint setup via SDK

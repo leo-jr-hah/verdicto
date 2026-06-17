@@ -541,10 +541,22 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
 
   console.log(`\n${'─'.repeat(60)}`);
   console.log(`⚖️  VERDICT: ${finalVerdict}`);
-  console.log(`💵 Final Assessed Value: $${finalValue.toLocaleString()}`);
+  console.log(`💵 Final Assessed Value: ${finalValue.toLocaleString()}`);
   console.log(`${'─'.repeat(60)}`);
 
   emitEvent('final_verdict', { disputeId, finalVerdict, finalValue, scoreA, scoreB, scoreSplit });
+
+  // Log the verdict execution transaction
+  const verdictTx = createTransactionEntry(
+    'ExecuteVerdict',
+    `Dispute ${disputeId} verdict: ${finalVerdict}`,
+    `verdict-${disputeId}`,
+    'Orchestrator',
+    block ? block.block_height.toString() : 'latest',
+    { disputeId, finalVerdict, finalValue, scoreA, scoreB, scoreSplit }
+  );
+  saveTransaction(verdictTx);
+  emitEvent('transaction', verdictTx);
 
   console.log(`\n--- Step 6: Casper Blockchain Settlement ---`);
   const votingHash = process.env.VOTING_CONTRACT_HASH;
