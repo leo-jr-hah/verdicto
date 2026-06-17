@@ -433,8 +433,8 @@ const scenes = [
       { id: 'hero', src: charVerdictHero, initial: { opacity: 0 }, animate: { opacity: 1 }, style: { bottom: '0', right: '10%', height: '80%' } }
     ],
     bubbles: [
-      { speaker: 'Observer', text: 'So you securely gathered data, hid the private parts, proved it wasn\'t tampered with, resolved it using an AI swarm, and locked it on the blockchain?', style: { top: '15%', left: '30%', maxWidth: '350px' }, delay: 0.5 },
-      { speaker: 'Verdict', text: 'Exactly. Welcome to the future of Real World Asset management.', style: { top: '35%', right: '35%', maxWidth: '350px' }, delay: 2.5 }
+      { speaker: 'Observer', text: 'So you securely gathered data, hid the private parts, proved it wasn\'t tampered with, resolved it using an AI swarm, and locked it on the blockchain?', style: { top: '5%', left: '5%', maxWidth: '350px' }, delay: 0.5 },
+      { speaker: 'Verdict', text: 'Exactly. Welcome to the future of Real World Asset management.', style: { top: '5%', right: '5%', maxWidth: '350px' }, delay: 2.5 }
     ]
   }
 ];
