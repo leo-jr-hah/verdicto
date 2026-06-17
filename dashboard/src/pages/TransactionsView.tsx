@@ -36,6 +36,28 @@ function typeColor(type: string): string {
   }
 }
 
+const FILTER_TABS = ['all', 'zk-lite', 'hmac', 'payment', 'verdict'] as const;
+
+function matchesFilter(type: string, filter: string): boolean {
+  if (filter === 'all') return true;
+  const lower = type.toLowerCase();
+  switch (filter) {
+    case 'zk-lite': return lower.includes('zk-lite');
+    case 'hmac': return lower.includes('hmac');
+    case 'payment': return lower.includes('payment') || lower.includes('x402');
+    case 'verdict': return lower.includes('verdict') || lower.includes('execute');
+    default: return lower.includes(filter);
+  }
+}
+
+const STATS = [
+  { key: 'total' as const, label: 'Total', color: 'var(--text-primary)', icon: BarChart3 },
+  { key: 'zkLite' as const, label: 'ZK-Lite', color: '#8B5CF6', icon: Shield },
+  { key: 'hmac' as const, label: 'HMAC', color: '#3B82F6', icon: Hash },
+  { key: 'payments' as const, label: 'Payments', color: '#F59E0B', icon: TrendingUp },
+  { key: 'verdicts' as const, label: 'Verdicts', color: '#10B981', icon: Clock },
+];
+
 export const TransactionsView: React.FC = () => {
   const [transactions, setTransactions] = useState<TransactionEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,11 +72,9 @@ export const TransactionsView: React.FC = () => {
     setError(null);
     try {
       const data = await fetchTransactions();
-      console.log('[TransactionsView] Loaded', data.length, 'transactions');
       setTransactions(data);
       setLastUpdate(new Date());
     } catch (err: any) {
-      console.error('[TransactionsView] Failed to load transactions:', err);
       setError(err.message || 'Failed to load transactions');
     } finally {
       setLoading(false);
@@ -64,157 +84,128 @@ export const TransactionsView: React.FC = () => {
   useEffect(() => {
     loadTransactions();
 
-    // Connect WebSocket for live updates
-    const ws = createWebSocket((msg: WSMessage) => {
-      if (msg.type === 'transaction') {
-        setTransactions(prev => [msg.payload as TransactionEntry, ...prev]);
-        setLastUpdate(new Date());
-      }
-    });
+    let ws: WebSocket | null = null;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let reconnectDelay = 1000;
+    const MAX_RECONNECT_DELAY = 30_000;
+    let unmounted = false;
 
-    ws.onopen = () => setWsConnected(true);
-    ws.onclose = () => setWsConnected(false);
+    function connect() {
+      if (unmounted) return;
+      ws = createWebSocket((msg: WSMessage) => {
+        if (msg.type === 'transaction') {
+          setTransactions(prev => [msg.payload as TransactionEntry, ...prev]);
+          setLastUpdate(new Date());
+        }
+      });
 
-    return () => ws.close();
+      ws.onopen = () => {
+        setWsConnected(true);
+        reconnectDelay = 1000;
+      };
+      ws.onclose = () => {
+        setWsConnected(false);
+        if (!unmounted) {
+          reconnectTimeout = setTimeout(() => {
+            reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY);
+            connect();
+          }, reconnectDelay);
+        }
+      };
+    }
+
+    connect();
+
+    return () => {
+      unmounted = true;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+    };
   }, [loadTransactions]);
 
-  // Calculate stats
   const stats = {
     total: transactions.length,
     zkLite: transactions.filter(t => t.type === 'ZK-Lite Commitment').length,
     hmac: transactions.filter(t => t.type === 'HMAC Receipt Chain').length,
     payments: transactions.filter(t => t.type === 'x402 Payment').length,
-    verdicts: transactions.filter(t => t.type === 'ExecuteVerdict').length
+    verdicts: transactions.filter(t => t.type === 'ExecuteVerdict').length,
   };
 
-  const filteredTransactions = filterType === 'all' 
-    ? transactions 
-    : transactions.filter(t => {
-        const typeLower = t.type.toLowerCase();
-        const filterLower = filterType.toLowerCase();
-        // Map filter names to transaction types
-        if (filterLower === 'zk-lite') return typeLower.includes('zk-lite');
-        if (filterLower === 'hmac') return typeLower.includes('hmac');
-        if (filterLower === 'payment') return typeLower.includes('payment') || typeLower.includes('x402');
-        if (filterLower === 'verdict') return typeLower.includes('verdict') || typeLower.includes('execute');
-        return typeLower.includes(filterLower);
-      });
+  const filtered = filterType === 'all' ? transactions : transactions.filter(t => matchesFilter(t.type, filterType));
 
   return (
     <div className="container" style={{ padding: '3rem 0' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+      <div className="tx-header">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <div className="tx-header-title">
             <Shield size={24} color="var(--text-secondary)" />
-            <h2 style={{ fontSize: '2rem', margin: 0 }}>Cryptographic Audit Ledger</h2>
+            <h2>Cryptographic Audit Ledger</h2>
           </div>
           <p style={{ color: 'var(--text-secondary)' }}>
             Immutable ZK-Lite execution commitments and HMAC-chained receipts on Casper Testnet.
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: wsConnected ? '#10B981' : 'var(--text-tertiary)' }}>
+        <div className="tx-header-controls">
+          <div className={`tx-ws-status ${wsConnected ? 'connected' : 'disconnected'}`}>
             {wsConnected ? <Wifi size={16} /> : <WifiOff size={16} />}
             {wsConnected ? 'Live' : 'Offline'}
           </div>
           {lastUpdate && (
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
+            <span className="tx-last-update">
               Updated {formatTime(lastUpdate.toISOString())}
             </span>
           )}
-          <button
-            onClick={loadTransactions}
-            disabled={loading}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              background: 'var(--bg-surface)', border: '1px solid var(--border-color)',
-              borderRadius: '6px', padding: '0.5rem 1rem', cursor: loading ? 'wait' : 'pointer',
-              color: 'var(--text-secondary)', fontSize: '0.85rem',
-            }}
-          >
+          <button onClick={loadTransactions} disabled={loading} className="tx-refresh-btn">
             <RefreshCw size={14} className={loading ? 'spin' : ''} />
             Refresh
           </button>
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="transactions-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
-        {[
-          { label: 'Total', value: stats.total, color: 'var(--text-primary)', icon: BarChart3 },
-          { label: 'ZK-Lite', value: stats.zkLite, color: '#8B5CF6', icon: Shield },
-          { label: 'HMAC', value: stats.hmac, color: '#3B82F6', icon: Hash },
-          { label: 'Payments', value: stats.payments, color: '#F59E0B', icon: TrendingUp },
-          { label: 'Verdicts', value: stats.verdicts, color: '#10B981', icon: Clock }
-        ].map((stat, idx) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            style={{
-              background: 'var(--bg-surface)',
-              borderRadius: '8px',
-              padding: '1rem',
-              border: '1px solid var(--border-color)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem'
-            }}
-          >
-            <div style={{ 
-              width: '36px', 
-              height: '36px', 
-              borderRadius: '8px', 
-              background: `${stat.color}22`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <stat.icon size={18} color={stat.color} />
-            </div>
-            <div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                {stat.value}
+      {/* Stats */}
+      <div className="tx-stats-grid">
+        {STATS.map((stat, idx) => {
+          const Icon = stat.icon;
+          return (
+            <motion.div
+              key={stat.label}
+              className="tx-stat-card"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+            >
+              <div className="tx-stat-icon" style={{ background: `${stat.color}22` }}>
+                <Icon size={18} color={stat.color} />
               </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
-                {stat.label}
+              <div>
+                <div className="tx-stat-value">{stats[stat.key]}</div>
+                <div className="tx-stat-label">{stat.label}</div>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Filter Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-        {['all', 'zk-lite', 'hmac', 'payment', 'verdict'].map((filter) => (
+      <div className="filter-tabs">
+        {FILTER_TABS.map(filter => (
           <button
             key={filter}
             onClick={() => setFilterType(filter)}
-            style={{
-              padding: '0.5rem 1rem',
-              background: filterType === filter ? 'var(--bg-surface)' : 'transparent',
-              border: `1px solid ${filterType === filter ? 'var(--border-color)' : 'transparent'}`,
-              borderRadius: '6px',
-              color: filterType === filter ? 'var(--text-primary)' : 'var(--text-tertiary)',
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-              textTransform: 'capitalize'
-            }}
+            className={`filter-tab ${filterType === filter ? 'active' : ''}`}
           >
             {filter}
           </button>
         ))}
       </div>
 
-      {filteredTransactions.length === 0 && !loading && !error && (
-        <div className="enterprise-card" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-          <Shield size={48} color="var(--text-tertiary)" style={{ marginBottom: '1rem' }} />
-          <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-            No transactions yet
-          </div>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+      {/* Empty State */}
+      {filtered.length === 0 && !loading && !error && (
+        <div className="enterprise-card empty-state">
+          <Shield size={48} color="var(--text-tertiary)" className="empty-state-icon" />
+          <div className="empty-state-title">No transactions yet</div>
+          <p className="empty-state-text">
             Run a dispute resolution to see on-chain transactions appear here in real time.
           </p>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
@@ -223,99 +214,89 @@ export const TransactionsView: React.FC = () => {
         </div>
       )}
 
+      {/* Error State */}
       {error && (
-        <div className="enterprise-card" style={{ textAlign: 'center', padding: '4rem 2rem', border: '2px solid #EF4444' }}>
-          <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem', color: '#EF4444' }}>
-            ⚠️ Error Loading Transactions
-          </div>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-            {error}
-          </p>
-          <button 
-            onClick={loadTransactions}
-            style={{
-              background: 'var(--primary)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '0.5rem 1rem',
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-            }}
-          >
-            Retry
-          </button>
+        <div className="enterprise-card tx-error-card">
+          <div className="tx-error-title">⚠️ Error Loading Transactions</div>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{error}</p>
+          <button onClick={loadTransactions} className="tx-retry-btn">Retry</button>
         </div>
       )}
 
-      {filteredTransactions.length > 0 && (
-        <div className="transactions-main-grid" style={{ display: 'grid', gridTemplateColumns: selectedTx ? '2fr 1fr' : '1fr', gap: '1.5rem' }}>
-          {/* Transaction Table */}
-          <div className="enterprise-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '600px' }}>
-            <div style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)' }}>
-              <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      {/* Transaction Table */}
+      {filtered.length > 0 && (
+        <div className={`tx-main-grid ${selectedTx ? 'with-detail' : 'full'}`}>
+          <div className="enterprise-card tx-table-wrap">
+            <div className="tx-table-header">
+              <table className="responsive-table data-table" style={{ width: '100%' }}>
                 <thead>
-                  <tr style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Action</th>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Transaction Hash</th>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Target</th>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Block Height</th>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Timestamp</th>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Explorer</th>
+                  <tr>
+                    <th>Action</th>
+                    <th>Transaction Hash</th>
+                    <th>Target</th>
+                    <th>Block Height</th>
+                    <th>Timestamp</th>
+                    <th>Explorer</th>
                   </tr>
                 </thead>
               </table>
             </div>
-            <div style={{ overflowY: 'auto', flex: 1 }}>
-              <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div className="tx-table-scroll">
+              <table className="responsive-table data-table" style={{ width: '100%' }}>
                 <tbody>
-                  {filteredTransactions.map((tx, idx) => (
-                    <motion.tr 
-                      key={tx.id} 
+                  {filtered.map((tx, idx) => (
+                    <motion.tr
+                      key={tx.id}
+                      className={`tx-row ${selectedTx?.id === tx.id ? 'selected' : ''}`}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.05 }}
-                    style={{ 
-                      borderBottom: '1px solid var(--border-color)', 
-                      fontFamily: "'JetBrains Mono', monospace", 
-                      fontSize: '0.85rem',
-                      background: selectedTx?.id === tx.id ? 'var(--bg-surface-alt)' : 'transparent',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => setSelectedTx(selectedTx?.id === tx.id ? null : tx)}
-                  >
-                    <td data-label="Action" style={{ padding: '1.25rem 1.5rem', fontWeight: 600, fontFamily: 'var(--font-sans)' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: typeColor(tx.type), flexShrink: 0 }} />
-                        <span style={{ color: 'var(--text-primary)' }}>{tx.type}</span>
-                      </span>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem', fontFamily: 'var(--font-sans)' }}>
-                        {tx.action}
-                      </div>
-                    </td>
-                    <td data-label="Transaction Hash" style={{ padding: '1.25rem 1.5rem', color: 'var(--primary)', cursor: 'pointer' }}
+                      onClick={() => setSelectedTx(selectedTx?.id === tx.id ? null : tx)}
+                    >
+                      <td className="tx-cell-action">
+                        <span className="tx-type-label">
+                          <span className="tx-type-dot" style={{ background: typeColor(tx.type) }} />
+                          <span>{tx.type}</span>
+                        </span>
+                        <div className="tx-action-sub">{tx.action}</div>
+                      </td>
+                      <td
+                        className="tx-hash-cell"
                         title={tx.hash}
-                        onClick={(e) => { e.stopPropagation(); window.open(tx.explorerUrl, '_blank'); }}>
-                      {truncateHash(tx.hash)}
-                    </td>
-                    <td data-label="Target" style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>{tx.contract}</td>
-                    <td data-label="Block Height" style={{ padding: '1.25rem 1.5rem' }}>{tx.blockHeight}</td>
-                    <td data-label="Timestamp" style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-sans)' }}>{formatTime(tx.timestamp)}</td>
-                    <td data-label="Explorer" style={{ padding: '1.25rem 1.5rem' }}>
-                      <a
-                        href={tx.explorerUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--primary)', fontSize: '0.85rem', textDecoration: 'none' }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); if (tx.onChain && tx.explorerUrl) window.open(tx.explorerUrl, '_blank'); }}
+                        style={!tx.onChain ? { cursor: 'default', opacity: 0.6 } : undefined}
                       >
-                        View <ExternalLink size={14} />
-                      </a>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
+                        {truncateHash(tx.hash)}
+                        {!tx.onChain && (
+                          <span style={{ display: 'inline-block', marginLeft: '0.4rem', fontSize: '0.65rem', padding: '0.1rem 0.35rem', borderRadius: '4px', background: 'rgba(255,255,255,0.08)', color: 'var(--text-tertiary)', verticalAlign: 'middle' }}>
+                            off-chain
+                          </span>
+                        )}
+                      </td>
+                      <td className="tx-cell" style={{ color: 'var(--text-secondary)' }}>{tx.contract}</td>
+                      <td className="tx-cell">{tx.blockHeight}</td>
+                      <td className="tx-cell" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-sans)' }}>
+                        {formatTime(tx.timestamp)}
+                      </td>
+                      <td className="tx-cell">
+                        {tx.onChain && tx.explorerUrl ? (
+                          <a
+                            href={tx.explorerUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="tx-link"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            View <ExternalLink size={14} />
+                          </a>
+                        ) : (
+                          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem' }}>Off-chain</span>
+                        )}
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -324,116 +305,80 @@ export const TransactionsView: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="enterprise-card"
-              style={{ padding: '1.5rem', height: 'fit-content', position: 'sticky', top: '100px' }}
+              className="enterprise-card tx-detail"
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Transaction Details
-                </h3>
-                <button 
-                  onClick={() => setSelectedTx(null)}
-                  style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer' }}
-                >
-                  ✕
-                </button>
+              <div className="tx-detail-header">
+                <h3>Transaction Details</h3>
+                <button onClick={() => setSelectedTx(null)} className="tx-detail-close">✕</button>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ 
-                  padding: '0.75rem', 
-                  background: 'var(--bg-surface)', 
-                  borderRadius: '6px',
-                  border: `1px solid ${typeColor(selectedTx.type)}33`
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: typeColor(selectedTx.type) }} />
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{selectedTx.type}</span>
+              <div className="tx-detail-fields">
+                <div className="tx-detail-type-badge" style={{ border: `1px solid ${typeColor(selectedTx.type)}33` }}>
+                  <div className="tx-detail-type-header">
+                    <span className="tx-type-dot" style={{ background: typeColor(selectedTx.type) }} />
+                    <span className="tx-detail-type-name">{selectedTx.type}</span>
                   </div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{selectedTx.action}</div>
+                  <div className="tx-detail-type-action">{selectedTx.action}</div>
                 </div>
 
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Transaction Hash</div>
-                  <div style={{ 
-                    fontFamily: 'monospace', 
-                    fontSize: '0.8rem', 
-                    color: 'var(--primary)',
-                    wordBreak: 'break-all',
-                    background: 'var(--bg-surface)',
-                    padding: '0.5rem',
-                    borderRadius: '4px'
-                  }}>
-                    {selectedTx.hash}
-                  </div>
+                  <div className="tx-detail-label">Transaction Hash</div>
+                  <div className="tx-detail-hash">{selectedTx.hash}</div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="tx-detail-grid">
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Target</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{selectedTx.contract}</div>
+                    <div className="tx-detail-label">Target</div>
+                    <div className="tx-detail-value">{selectedTx.contract}</div>
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Block</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{selectedTx.blockHeight}</div>
+                    <div className="tx-detail-label">Block</div>
+                    <div className="tx-detail-value">{selectedTx.blockHeight}</div>
                   </div>
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Timestamp</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                    {new Date(selectedTx.timestamp).toLocaleString()}
-                  </div>
-                </div>
-
-                {selectedTx.metadata && Object.keys(selectedTx.metadata).length > 0 && (
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.5rem' }}>Metadata</div>
-                    <div style={{ 
-                      background: 'var(--bg-surface)', 
-                      borderRadius: '4px', 
-                      padding: '0.75rem',
-                      fontSize: '0.8rem',
-                      fontFamily: 'monospace',
-                      color: 'var(--text-secondary)',
-                      maxHeight: '150px',
-                      overflowY: 'auto'
-                    }}>
-                      {JSON.stringify(selectedTx.metadata, null, 2)}
+                    <div className="tx-detail-label">Timestamp</div>
+                    <div className="tx-detail-value">{new Date(selectedTx.timestamp).toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div className="tx-detail-label">Network</div>
+                    <div className="tx-detail-value">Casper Testnet</div>
+                  </div>
+                  <div>
+                    <div className="tx-detail-label">Location</div>
+                    <div className="tx-detail-value" style={{ color: selectedTx.onChain ? '#10B981' : '#F59E0B' }}>
+                      {selectedTx.onChain ? '⛓️ On-chain (Casper)' : '📋 Off-chain (logical event)'}
                     </div>
+                  </div>
+                </div>
+
+                {selectedTx.onChain && selectedTx.explorerUrl ? (
+                  <a
+                    href={selectedTx.explorerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="tx-detail-explorer"
+                  >
+                    View on cspr.live <ExternalLink size={14} />
+                  </a>
+                ) : (
+                  <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', fontSize: '0.85rem', color: '#F59E0B' }}>
+                    ℹ️ This is an off-chain logical event — no on-chain deploy hash to view on cspr.live.
                   </div>
                 )}
 
-                <a
-                  href={selectedTx.explorerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    padding: '0.75rem',
-                    background: 'var(--primary)',
-                    color: 'white',
-                    borderRadius: '6px',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    textDecoration: 'none'
-                  }}
-                >
-                  View on Explorer <ExternalLink size={14} />
-                </a>
+                {selectedTx.metadata && (
+                  <div>
+                    <div className="tx-detail-label">Metadata</div>
+                    <pre className="tx-detail-meta">
+                      {JSON.stringify(selectedTx.metadata, null, 2)}
+                    </pre>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
         </div>
       )}
-
-      <style>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .spin { animation: spin 1s linear infinite; }
-      `}</style>
     </div>
   );
 };

@@ -23,7 +23,7 @@ const CSPR_CLOUD_KEY = process.env.CSPRCLOUD_API_KEY || '';
  */
 export async function fetchWithX402(url: string, payload: any, agentLabel: string) {
   try {
-    const res = await axios.post(url, payload);
+    const res = await axios.post(url, payload, { timeout: 30_000 });
     return res.data;
   } catch (err: any) {
     if (err.response && err.response.status === 402) {

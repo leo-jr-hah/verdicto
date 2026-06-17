@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, X, CheckCircle, AlertTriangle, ShieldCheck, Database, FileText, Info } from 'lucide-react';
+import { ChevronRight, ChevronLeft, X, FileText, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import bgProperty from '../../assets/story/bg_property.webp';

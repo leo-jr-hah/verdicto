@@ -15,6 +15,11 @@ wss.on('connection', (ws) => {
     connectionCallback = null; // Only run once
   }
 
+  ws.on('error', (err) => {
+    console.error('[WebSocket] Client error:', err.message);
+    clients.delete(ws);
+  });
+
   ws.on('close', () => {
     console.log('[WebSocket] Dashboard client disconnected');
     clients.delete(ws);

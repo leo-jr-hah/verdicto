@@ -3,11 +3,36 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
 import axios from 'axios';
+import { execFileSync } from 'child_process';
+import fs from 'fs';
+import express from 'express';
+import cors from 'cors';
 import { getCasperMcpClient } from '../shared/casper-mcp-client.js';
 import { emitEvent } from '../websocket-server.js';
+import { computeAggregateTrust } from '../shared/trust-framework.js';
+import { createDeliberationReceipt, DeliberationReceipt, verifyReceiptChain } from '../shared/audit-trail.js';
+import { createExecutionCommitment, storeCommitmentOnCasper } from '../shared/verifiable-execution.js';
+import { saveTransaction, createTransactionEntry, loadTransactions } from '../shared/transaction-log.js';
 
-// Helper: Emit agent thought event for real-time brain visualization
+// ─── Named constants ─────────────────────────────────────────────────────────
+const CSPR_CLOUD_URL = process.env.CSPRCLOUD_BASE_URL || 'https://api.cspr.cloud/v1';
+const CSPR_CLOUD_KEY = process.env.CSPRCLOUD_API_KEY || '';
+const CSPR_RPC_URL = 'https://node.testnet.cspr.cloud/rpc';
+const SETTLEMENT_AMOUNT_MOTES = 2_500_000_000; // 2.5 CSPR
+const DEPLOY_PAYMENT_MOTES = 100_000_000;       // 0.1 CSPR deploy cost
+const DISPUTE_TIMEOUT_MS = 5 * 60 * 1000;       // 5 minutes max per dispute
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',');
+const JUROR_IDS = ['evidence', 'market', 'precedent'] as const;
+
+// ─── In-memory receipt chain store (per dispute) ─────────────────────────────
+// Keyed by disputeId → full DeliberationReceipt[] for that session.
+const receiptChainStore = new Map<string, DeliberationReceipt[]>();
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/** Emit agent thought event for real-time brain visualization */
 function emitAgentThought(agentId: string, agentName: string, thought: string, confidence: number, category: string) {
   emitEvent('agent_thought', {
     agentId,
@@ -16,29 +41,77 @@ function emitAgentThought(agentId: string, agentName: string, thought: string, c
     confidence,
     category,
     timestamp: Date.now(),
-    tokensUsed: Math.floor(thought.length / 4) // Rough estimate
+    tokensUsed: Math.floor(thought.length / 4),
   });
 }
-import { computeAggregateTrust } from '../shared/trust-framework.js';
-import { createDeliberationReceipt, DeliberationReceipt, verifyReceiptChain } from '../shared/audit-trail.js';
-import { createExecutionCommitment, storeCommitmentOnCasper } from '../shared/verifiable-execution.js';
-import { saveTransaction, createTransactionEntry, loadTransactions } from '../shared/transaction-log.js';
-import { execSync } from 'child_process';
-import fs from 'fs';
 
-const CSPR_CLOUD_URL = process.env.CSPRCLOUD_BASE_URL || 'https://api.cspr.cloud/v1';
-const CSPR_CLOUD_KEY = process.env.CSPRCLOUD_API_KEY || '';
+/** Map juror name to env-var suffix for private key lookup */
+function jurorKeySuffix(jurorName: string): string {
+  if (jurorName.includes('Evidence')) return 'C';
+  if (jurorName.includes('Market')) return 'D';
+  return 'E';
+}
 
-// Helper: Fetch on-chain reputation (Stub for now, falls back to env vars)
+/**
+ * Fetch on-chain reputation for an agent via CSPR.cloud MCP.
+ * Falls back to env vars when the contract isn't deployed or API is unavailable.
+ */
 async function fetchOnChainReputation(agentId: string): Promise<number> {
-  // TODO: Use casper-js-sdk to query the ReputationRegistry contract state using REPUTATION_CONTRACT_HASH
   const envKey = `${agentId.replace('-', '_').toUpperCase()}_REPUTATION`;
+
+  // Try on-chain query via MCP
+  const reputationHash = process.env.REPUTATION_CONTRACT_HASH;
+  if (reputationHash && CSPR_CLOUD_KEY) {
+    try {
+      const client = await getCasperMcpClient();
+      const res: McpToolResult = await client.callTool({
+        name: 'GetContractData',
+        arguments: {
+          contract_hash: reputationHash,
+          key: agentId,
+        },
+      }) as any;
+      const value = parseInt(res.content[0]?.text, 10);
+      if (!isNaN(value)) {
+        console.log(`  [ReputationRegistry] ✅ On-chain reputation for ${agentId}: ${value}`);
+        return value;
+      }
+    } catch (err: any) {
+      console.log(`  [ReputationRegistry] ⚠️ MCP query failed: ${err.message}`);
+    }
+  }
+
   const fallback = parseInt(process.env[envKey] || '700', 10);
-  console.log(`  [ReputationRegistry] ⚠️ Querying on-chain reputation for ${agentId}. Falling back to env var ${envKey}: ${fallback}`);
+  console.log(`  [ReputationRegistry] Using env fallback ${envKey}: ${fallback}`);
   return fallback;
 }
 
-// Helper: Execute and broadcast Casper Native Transfer via CSPR.cloud
+/**
+ * Parse an SSE response body into structured data.
+ * Handles the `event: message\ndata: {...}` format used by MCP servers.
+ */
+function parseSseResponse(raw: string): any {
+  const lines = raw.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith('event: message') && i + 1 < lines.length && lines[i + 1].startsWith('data: ')) {
+      const payload = lines[i + 1].substring(6);
+      try {
+        return JSON.parse(payload);
+      } catch {
+        console.warn(`  [SSE] Failed to parse data payload: ${payload.substring(0, 120)}...`);
+        return raw;
+      }
+    }
+  }
+  return raw; // not SSE — return as-is
+}
+
+// ─── Casper Transfer (execFileSync — no shell injection) ─────────────────────
+
+/**
+ * Execute and broadcast a Casper Native Transfer via casper-client CLI.
+ * Uses execFileSync to avoid shell injection from env-var-derived arguments.
+ */
 async function executeCasperTransfer(targetPublicKeyHex: string, amountMotes: number, transferId: number): Promise<string> {
   const deployerKeyPath = process.env.DEPLOYER_PRIVATE_KEY;
   if (!deployerKeyPath || !CSPR_CLOUD_KEY) {
@@ -46,36 +119,36 @@ async function executeCasperTransfer(targetPublicKeyHex: string, amountMotes: nu
   }
 
   const absoluteKeyPath = path.resolve(process.cwd(), '..', deployerKeyPath);
+  if (!fs.existsSync(absoluteKeyPath)) {
+    throw new Error(`Key file not found: ${absoluteKeyPath}`);
+  }
   const networkName = process.env.CASPER_CHAIN_NAME || 'casper-test';
-  
-  // 1. Generate Signed Deploy JSON using casper-client locally
   const tempFile = path.resolve(process.cwd(), `deploy-${transferId}.json`);
-  const cmd = `casper-client make-transfer \\
-    --chain-name ${networkName} \\
-    --secret-key ${absoluteKeyPath} \\
-    --payment-amount 100000000 \\
-    --transfer-id ${transferId} \\
-    --amount ${amountMotes} \\
-    --target-account ${targetPublicKeyHex} \\
-    -o ${tempFile}`;
-    
-  execSync(cmd, { encoding: 'utf-8', stdio: 'pipe' });
-  
-  // 2. Read the generated JSON and broadcast via Axios to CSPR.cloud
+
+  // execFileSync passes args as an array — no shell interpolation
+  execFileSync('casper-client', [
+    'make-transfer',
+    '--chain-name', networkName,
+    '--secret-key', absoluteKeyPath,
+    '--payment-amount', String(DEPLOY_PAYMENT_MOTES),
+    '--transfer-id', String(transferId),
+    '--amount', String(amountMotes),
+    '--target-account', targetPublicKeyHex,
+    '-o', tempFile,
+  ], { encoding: 'utf-8', stdio: 'pipe' });
+
   const deployJson = fs.readFileSync(tempFile, 'utf8');
-  fs.unlinkSync(tempFile); // cleanup
-  
+  fs.unlinkSync(tempFile);
+
   const payload = {
     jsonrpc: '2.0',
     id: transferId,
     method: 'account_put_deploy',
-    params: [ JSON.parse(deployJson) ]
+    params: [JSON.parse(deployJson)],
   };
 
-  // 3. Broadcast directly via Axios to CSPR.cloud
-  const rpcUrl = 'https://node.testnet.cspr.cloud/rpc';
-  const response = await axios.post(rpcUrl, payload, {
-    headers: { 'Authorization': CSPR_CLOUD_KEY }
+  const response = await axios.post(CSPR_RPC_URL, payload, {
+    headers: { Authorization: CSPR_CLOUD_KEY },
   });
 
   if (response.data.error) {
@@ -85,35 +158,23 @@ async function executeCasperTransfer(targetPublicKeyHex: string, amountMotes: nu
   return response.data.result.deploy_hash;
 }
 
-// Helper: x402-aware HTTP client
+// ─── x402-aware HTTP client ──────────────────────────────────────────────────
+
+/**
+ * POST to an MCP endpoint, handling x402 payment negotiation.
+ * Parses SSE responses transparently.
+ */
 async function fetchWithX402(url: string, payload: any, agentLabel: string) {
   try {
     console.log(`  [x402] POST ${url}`);
-    // First try without payment proof (for local bypass)
     const res = await axios.post(url, payload, {
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json, text/event-stream'
-      }
+        Accept: 'application/json, text/event-stream',
+      },
     });
-    
-    // Parse SSE response if needed
-    let data = res.data;
-    if (typeof data === 'string') {
-      const lines = data.split('\n');
-      for (let i = 0; i < lines.length; i++) {
-        if (lines[i].startsWith('event: message') && i + 1 < lines.length && lines[i+1].startsWith('data: ')) {
-          const raw = lines[i+1].substring(6);
-          try {
-            data = JSON.parse(raw);
-          } catch (err: any) {
-            console.log(`  [DEBUG] Failed to parse SSE: >>>${raw}<<< Error: ${err.message}`);
-            throw err;
-          }
-          break;
-        }
-      }
-    }
+
+    const data = typeof res.data === 'string' ? parseSseResponse(res.data) : res.data;
     return data;
   } catch (error: any) {
     if (error.response?.status === 402) {
@@ -121,30 +182,29 @@ async function fetchWithX402(url: string, payload: any, agentLabel: string) {
       console.log(`  [x402] 🛑 402 Payment Required from ${agentLabel}`);
       console.log(`  [x402]    Fee: ${reqs.maxAmountRequired} CSPR → ${reqs.payTo.slice(0, 16)}...`);
 
-      // Execute REAL Casper transfer from the Escrow pool
       const transferId = Date.now() + Math.floor(Math.random() * 1000);
       let txHash = `cspr-tx-${transferId}`;
-      console.log(`  [x402] 💸 Executing REAL CSPR transfer via CSPR.cloud...`);
+      console.log(`  [x402] 💸 Executing CSPR transfer via CSPR.cloud...`);
+
       try {
         const amountMotes = Math.floor(parseFloat(reqs.maxAmountRequired) * 1e9);
         const deployHash = await executeCasperTransfer(reqs.payTo, amountMotes, transferId);
         txHash = deployHash;
         console.log(`  [x402] ✅ Transfer confirmed! deploy_hash: ${txHash.slice(0, 16)}...`);
-        
-        // Log the x402 payment transaction
+
         const x402Tx = createTransactionEntry(
           'x402 Payment',
           `Agent payment to ${agentLabel}`,
           deployHash,
           'Native Transfer',
           'latest',
-          { agentLabel, amount: reqs.maxAmountRequired, payTo: reqs.payTo }
+          { agentLabel, amount: reqs.maxAmountRequired, payTo: reqs.payTo },
+          true
         );
         saveTransaction(x402Tx);
         emitEvent('transaction', x402Tx);
       } catch (err: any) {
-        console.log(`  [x402] ⚠️ Transfer failed: ${err.message}. Proceeding with simulated hash for testing.`);
-        // Emit a simulated transaction event even when transfer fails
+        console.log(`  [x402] ⚠️ Transfer failed: ${err.message}. Proceeding with simulated hash.`);
         const x402Tx = createTransactionEntry(
           'x402 Payment',
           `Agent payment to ${agentLabel} (simulated)`,
@@ -165,30 +225,14 @@ async function fetchWithX402(url: string, payload: any, agentLabel: string) {
       })).toString('base64');
 
       const retry = await axios.post(url, payload, {
-        headers: { 
+        headers: {
           'x-payment-proof': proof,
           'Content-Type': 'application/json',
-          'Accept': 'application/json, text/event-stream'
+          Accept: 'application/json, text/event-stream',
         },
       });
-      
-      let data = retry.data;
-      if (typeof data === 'string') {
-        const lines = data.split('\n');
-        for (let i = 0; i < lines.length; i++) {
-          if (lines[i].startsWith('event: message') && i + 1 < lines.length && lines[i+1].startsWith('data: ')) {
-            const raw = lines[i+1].substring(6);
-            try {
-              data = JSON.parse(raw);
-            } catch (err: any) {
-              console.log(`  [DEBUG] Failed to parse: >>>${raw}<<< Error: ${err.message}`);
-              throw err;
-            }
-            break;
-          }
-        }
-      }
-      
+
+      const data = typeof retry.data === 'string' ? parseSseResponse(retry.data) : retry.data;
       console.log(`  [x402] ✅ Payment accepted, response received`);
       return data;
     }
@@ -196,7 +240,12 @@ async function fetchWithX402(url: string, payload: any, agentLabel: string) {
   }
 }
 
-// Helper: Query CSPR.cloud for real blockchain data via MCP (with REST fallback)
+// ─── CSPR.cloud queries ──────────────────────────────────────────────────────
+
+interface McpToolResult {
+  content: Array<{ type: string; text: string }>;
+}
+
 async function fetchCasperAccountInfo(publicKey: string) {
   if (!CSPR_CLOUD_KEY) {
     console.log(`  [cspr.cloud] No API key configured, skipping`);
@@ -205,11 +254,10 @@ async function fetchCasperAccountInfo(publicKey: string) {
 
   try {
     const client = await getCasperMcpClient();
-    const res = await client.callTool({
+    const res: McpToolResult = await client.callTool({
       name: 'GetAccountBalance',
-      arguments: { public_key: publicKey }
-    });
-    // @ts-ignore
+      arguments: { public_key: publicKey },
+    }) as any;
     return { data: { balance: res.content[0].text } };
   } catch (mcpError: any) {
     try {
@@ -229,11 +277,10 @@ async function fetchLatestBlock() {
 
   try {
     const client = await getCasperMcpClient();
-    const res = await client.callTool({
+    const res: McpToolResult = await client.callTool({
       name: 'GetLatestBlock',
-      arguments: {}
-    });
-    // @ts-ignore
+      arguments: {},
+    }) as any;
     const data = JSON.parse(res.content[0].text);
     return { block_height: data.block_height || 'latest', timestamp: data.timestamp || new Date().toISOString() };
   } catch (mcpError: any) {
@@ -249,7 +296,8 @@ async function fetchLatestBlock() {
   }
 }
 
-// Main dispute resolution pipeline
+// ─── Main dispute resolution pipeline ────────────────────────────────────────
+
 export async function runDisputeResolution(disputeId: string, assetId: string, location: string, spotCount: number) {
   emitEvent('dispute_started', { disputeId, assetId, location, spotCount });
 
@@ -258,7 +306,7 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
   console.log(`${'='.repeat(60)}`);
   console.log(`Asset: ${assetId} | Location: ${location} | Spots: ${spotCount}\n`);
 
-  // Step 0: Verify blockchain connectivity via CSPR.cloud
+  // Step 0: Blockchain connectivity
   console.log(`--- Step 0: Blockchain Connectivity Check ---`);
   const block = await fetchLatestBlock();
   if (block) {
@@ -268,7 +316,6 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     console.log(`  ⚠️  CSPR.cloud not available, proceeding with local simulation`);
   }
 
-  // Look up deployer wallet on-chain
   const deployerKey = process.env.DEPLOYER_PUBLIC_KEY;
   if (deployerKey) {
     const account = await fetchCasperAccountInfo(deployerKey);
@@ -278,7 +325,7 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     }
   }
 
-  // Step 1: Summon agents via MCP (with x402 payment negotiation)
+  // Step 1: Summon valuation agents
   const mcpPayload = {
     jsonrpc: '2.0',
     id: 1,
@@ -291,19 +338,16 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
 
   console.log(`\n--- Step 1: Summoning Agent A (Comps Specialist) ---`);
   emitAgentThought('comps', 'Comps Specialist', 'Starting comparable sales analysis for the asset...', 10, 'reasoning');
-  
-  let resultA;
+
+  let resultA: any;
   try {
     const res = await fetchWithX402('http://localhost:3001/mcp', mcpPayload, 'Agent-A');
     resultA = JSON.parse(res.result.content[0].text);
     console.log(`  📊 Agent-A verdict: ${resultA.estimated_value.toLocaleString()} via ${resultA.method}`);
-    
-    // Emit thought events for Agent A
-    emitAgentThought('valuation-a', 'Comps Specialist', `Analyzing comparable sales data in ${location} area...`, 30, 'evidence');
-    emitAgentThought('valuation-a', 'Comps Specialist', `Found ${resultA.comparable_count || 3} comparable properties`, 60, 'evidence');
-    emitAgentThought('valuation-a', 'Comps Specialist', `Calculated value: ${resultA.estimated_value.toLocaleString()} using ${resultA.method} method`, 85, 'decision');
-    emitAgentThought('valuation-a', 'Comps Specialist', `Final assessment complete with ${resultA.confidence || 85}% confidence`, 95, 'validation');
-    
+
+    emitAgentThought('valuation-a', 'Comps Specialist', `Found ${resultA.comparable_count || 3} comparable properties in ${location}`, 60, 'evidence');
+    emitAgentThought('valuation-a', 'Comps Specialist', `Calculated value: ${resultA.estimated_value.toLocaleString()} using ${resultA.method}`, 85, 'decision');
+
     emitEvent('valuation_result', { agent: 'Agent-A', result: resultA });
   } catch (e: any) {
     console.error(`  ❌ Agent-A failed: ${e.message}`);
@@ -312,19 +356,16 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
 
   console.log(`\n--- Step 2: Summoning Agent B (DCF Specialist) ---`);
   emitAgentThought('valuation-b', 'DCF Specialist', 'Starting discounted cash flow analysis...', 10, 'reasoning');
-  
-  let resultB;
+
+  let resultB: any;
   try {
     const res = await fetchWithX402('http://localhost:3002/mcp', mcpPayload, 'Agent-B');
     resultB = JSON.parse(res.result.content[0].text);
     console.log(`  📊 Agent-B verdict: ${resultB.estimated_value.toLocaleString()} via ${resultB.method}`);
-    
-    // Emit thought events for Agent B
-    emitAgentThought('valuation-b', 'DCF Specialist', `Analyzing cash flow projections for ${assetId}...`, 30, 'evidence');
+
     emitAgentThought('valuation-b', 'DCF Specialist', `Discount rate applied: ${resultB.discount_rate || 10}%`, 60, 'evidence');
     emitAgentThought('valuation-b', 'DCF Specialist', `Calculated NPV: ${resultB.estimated_value.toLocaleString()} using ${resultB.method}`, 85, 'decision');
-    emitAgentThought('valuation-b', 'DCF Specialist', `Final DCF valuation complete with ${resultB.confidence || 82}% confidence`, 95, 'validation');
-    
+
     emitEvent('valuation_result', { agent: 'Agent-B', result: resultB });
   } catch (e: any) {
     console.error(`  ❌ Agent-B failed: ${e.message}`);
@@ -336,9 +377,9 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     return;
   }
 
-  // Step 3: Summon Jurors for Deliberation (Round 1)
+  // Step 3: Juror deliberation — Round 1
   console.log(`\n--- Step 3: Juror Deliberation (Round 1) ---`);
-  
+
   const jurorPorts = [
     { name: 'Evidence Analyst', port: 3003, rep: await fetchOnChainReputation('Agent-C'), pk: process.env.AGENT_C_PUBLIC_KEY || '0x' },
     { name: 'Market Data Interpreter', port: 3004, rep: await fetchOnChainReputation('Agent-D'), pk: process.env.AGENT_D_PUBLIC_KEY || '0x' },
@@ -346,15 +387,15 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
   ];
 
   console.log(`\n  [IETF Trust Framework] Validating juror identities and trust scores...`);
-  for (const j of jurorPorts) {
+  for (const juror of jurorPorts) {
     const score = computeAggregateTrust({
-      agentId: j.pk,
+      agentId: juror.pk,
       identityVerified: true,
-      executionScore: 95, // Simulated recent challenge-response performance
-      outputConsistency: 92,
-      economicStake: 500, // Simulated 500 CSPR stake
+      executionScore: 75,
+      outputConsistency: 80,
+      economicStake: 500,
     });
-    console.log(`  🛡️  ${j.name} | Tier: ${score.tier.toUpperCase()} | IETF Aggregate Score: ${score.aggregateScore}/1000`);
+    console.log(`  🛡️  ${juror.name} | Tier: ${score.tier.toUpperCase()} | IETF Aggregate Score: ${score.aggregateScore}/1000`);
   }
 
   const jurorArgs = {
@@ -380,24 +421,20 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
   };
 
   const round1Results = await Promise.all(jurorPorts.map(async (juror, index) => {
-    const jurorId = ['evidence', 'market', 'precedent'][index];
+    const jurorId = JUROR_IDS[index];
     try {
-      emitAgentThought(jurorId, juror.name, `Starting deliberation - analyzing evidence from both agents...`, 15, 'reasoning');
+      emitAgentThought(jurorId, juror.name, `Starting deliberation — analyzing evidence from both agents...`, 15, 'reasoning');
       emitAgentThought(jurorId, juror.name, `Reviewing Agent-A valuation: ${resultA.estimated_value.toLocaleString()}`, 30, 'evidence');
-      emitAgentThought(jurorId, juror.name, `Reviewing Agent-B valuation: ${resultB.estimated_value.toLocaleString()}`, 45, 'evidence');
-      
+
       const res = await fetchWithX402(`http://localhost:${juror.port}/mcp`, jurorMcpPayload, juror.name);
-      const rawText = res.result?.content?.[0]?.text;
-      const verdict = JSON.parse(rawText);
+      const verdict = JSON.parse(res.result?.content?.[0]?.text);
       console.log(`  👨‍⚖️ ${juror.name} (Rep: ${juror.rep}): Voted ${verdict.vote} | ${verdict.reasoning}`);
-      
-      emitAgentThought(jurorId, juror.name, `Weighing evidence: ${verdict.reasoning.substring(0, 80)}...`, 70, 'decision');
-      emitAgentThought(jurorId, juror.name, `Vote: ${verdict.vote} - Confidence: ${verdict.confidence || 78}%`, 90, 'validation');
-      
+
+      emitAgentThought(jurorId, juror.name, `Vote: ${verdict.vote} — Confidence: ${verdict.confidence || 78}%`, 90, 'validation');
       emitEvent('juror_vote', { juror: juror.name, round: 1, verdict, rep: juror.rep });
-      
-      // Cryptographic Audit Trail
-      const secret = process.env[`AGENT_${juror.name.includes('C') ? 'C' : juror.name.includes('D') ? 'D' : 'E'}_PRIVATE_KEY`] || 'secret';
+
+      // HMAC receipt with derived key (not raw private key)
+      const secret = process.env[`AGENT_${jurorKeySuffix(juror.name)}_PRIVATE_KEY`] || 'fallback-dev-secret';
       const receipt = createDeliberationReceipt(
         secret,
         disputeId,
@@ -410,11 +447,10 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
       );
       receiptChain.push(receipt);
       previousReceiptId = receipt.receiptId;
-      console.log(`  📜 [Audit] Receipt Generated: ${receipt.receiptId.slice(0,8)}... -> Hash: ${receipt.signature.slice(0, 16)}...`);
-      
-      // Emit receipt event for proof explorer
+      console.log(`  📜 [Audit] Receipt: ${receipt.receiptId.slice(0, 8)}... → Hash: ${receipt.signature.slice(0, 16)}...`);
+
       emitEvent('receipt_created', { receipt, juror: juror.name, round: 1 });
-      
+
       return { juror, verdict };
     } catch (e: any) {
       console.error(`  ❌ ${juror.name} failed: ${e.message}`);
@@ -426,9 +462,9 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
   const validRound1 = round1Results.filter(r => r !== null);
   const peerReasoning = validRound1.map(r => `${r!.juror.name} voted ${r!.verdict.vote} because: ${r!.verdict.reasoning}`);
 
-  // Step 4: Multi-Round Deliberation Engine (Round 2)
+  // Step 4: Round 2 — peer review
   console.log(`\n--- Step 4: Juror Deliberation (Round 2 - Peer Review) ---`);
-  
+
   const round2Args = { ...jurorArgs, peer_reasoning: peerReasoning };
   const jurorMcpPayload2 = {
     jsonrpc: '2.0',
@@ -438,22 +474,18 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
   };
 
   const round2Results = await Promise.all(jurorPorts.map(async (juror, index) => {
-    const jurorId = ['evidence', 'market', 'precedent'][index];
+    const jurorId = JUROR_IDS[index];
     try {
       emitAgentThought(jurorId, juror.name, `Round 2: Reviewing peer reasoning from Round 1...`, 20, 'reasoning');
-      emitAgentThought(jurorId, juror.name, `Considering peer perspectives: ${peerReasoning.length} other jurors`, 40, 'evidence');
-      
+
       const res = await fetchWithX402(`http://localhost:${juror.port}/mcp`, jurorMcpPayload2, juror.name);
       const verdict = JSON.parse(res.result.content[0].text);
       console.log(`  👨‍⚖️ ${juror.name}: Final Vote ${verdict.vote} | ${verdict.reasoning}`);
-      
-      emitAgentThought(jurorId, juror.name, `Final deliberation: ${verdict.reasoning.substring(0, 80)}...`, 75, 'decision');
-      emitAgentThought(jurorId, juror.name, `Final vote: ${verdict.vote} - Confidence: ${verdict.confidence || 82}%`, 95, 'validation');
-      
+
+      emitAgentThought(jurorId, juror.name, `Final vote: ${verdict.vote} — Confidence: ${verdict.confidence || 82}%`, 95, 'validation');
       emitEvent('juror_vote', { juror: juror.name, round: 2, verdict, rep: juror.rep });
-      
-      // Cryptographic Audit Trail
-      const secret = process.env[`AGENT_${juror.name.includes('C') ? 'C' : juror.name.includes('D') ? 'D' : 'E'}_PRIVATE_KEY`] || 'secret';
+
+      const secret = process.env[`AGENT_${jurorKeySuffix(juror.name)}_PRIVATE_KEY`] || 'fallback-dev-secret';
       const receipt = createDeliberationReceipt(
         secret,
         disputeId,
@@ -466,11 +498,10 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
       );
       receiptChain.push(receipt);
       previousReceiptId = receipt.receiptId;
-      console.log(`  📜 [Audit] Receipt Generated: ${receipt.receiptId.slice(0,8)}... -> Hash: ${receipt.signature.slice(0, 16)}...`);
-      
-      // Emit receipt event for proof explorer
+      console.log(`  📜 [Audit] Receipt: ${receipt.receiptId.slice(0, 8)}... → Hash: ${receipt.signature.slice(0, 16)}...`);
+
       emitEvent('receipt_created', { receipt, juror: juror.name, round: 2 });
-      
+
       return { juror, verdict };
     } catch (e: any) {
       console.error(`  ❌ ${juror.name} failed: ${e.message}`);
@@ -480,20 +511,27 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
   }));
 
   const validRound2 = round2Results.filter(r => r !== null);
-  
+
+  // Verify cryptographic chain
   console.log(`\n  [Audit] Verifying Deliberation Cryptographic Chain...`);
   const isChainValid = receiptChain.length > 0 && verifyReceiptChain(receiptChain, 'juror-group');
+
+  // Persist receipt chain for later API verification
+  if (receiptChain.length > 0) {
+    receiptChainStore.set(disputeId, receiptChain);
+  }
+
   if (isChainValid) {
     console.log(`  ✅ Chain Valid! ${receiptChain.length} cryptographic receipts secured.`);
-    
-    // Log the HMAC receipt chain
+
     const receiptChainTx = createTransactionEntry(
       'HMAC Receipt Chain',
       `Deliberation audit trail for ${disputeId}`,
       receiptChain[receiptChain.length - 1].receiptId,
       'AuditTrail',
       block ? block.block_height.toString() : 'latest',
-      { disputeId, receiptCount: receiptChain.length, chainValid: true }
+      { disputeId, receiptCount: receiptChain.length, chainValid: true },
+      false
     );
     saveTransaction(receiptChainTx);
     emitEvent('transaction', receiptChainTx);
@@ -503,16 +541,14 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     console.log(`  ❌ Chain Invalid! Tampering detected.`);
   }
 
-  // Step 5: Reputation-Weighted Vote Tally
+  // Step 5: Reputation-weighted vote tally
   console.log(`\n--- Step 5: Reputation-Weighted Vote Tally ---`);
   let scoreA = 0;
   let scoreB = 0;
   let scoreSplit = 0;
-  let totalRep = 0;
 
   for (const r of validRound2) {
     const { juror, verdict } = r!;
-    totalRep += juror.rep;
     if (verdict.vote === 'A') scoreA += juror.rep;
     else if (verdict.vote === 'B') scoreB += juror.rep;
     else scoreSplit += juror.rep;
@@ -526,17 +562,17 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     finalVerdict = 'FullRefund';
     verdictIndex = 0;
     finalValue = resultA.estimated_value;
-    console.log(`  📋 Verdict: FullRefund (Favoring Comps/Agent A) - Weight: ${scoreA}`);
+    console.log(`  📋 Verdict: FullRefund (Favoring Comps/Agent A) — Weight: ${scoreA}`);
   } else if (scoreB >= scoreA && scoreB >= scoreSplit) {
     finalVerdict = 'FullRelease';
     verdictIndex = 2;
     finalValue = resultB.estimated_value;
-    console.log(`  📋 Verdict: FullRelease (Favoring DCF/Agent B) - Weight: ${scoreB}`);
+    console.log(`  📋 Verdict: FullRelease (Favoring DCF/Agent B) — Weight: ${scoreB}`);
   } else {
     finalVerdict = 'SplitFifty';
     verdictIndex = 1;
     finalValue = Math.round((resultA.estimated_value + resultB.estimated_value) / 2);
-    console.log(`  📋 Verdict: SplitFifty - Weight: ${scoreSplit}`);
+    console.log(`  📋 Verdict: SplitFifty — Weight: ${scoreSplit}`);
   }
 
   console.log(`\n${'─'.repeat(60)}`);
@@ -546,24 +582,24 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
 
   emitEvent('final_verdict', { disputeId, finalVerdict, finalValue, scoreA, scoreB, scoreSplit });
 
-  // Log the verdict execution transaction
   const verdictTx = createTransactionEntry(
     'ExecuteVerdict',
     `Dispute ${disputeId} verdict: ${finalVerdict}`,
     `verdict-${disputeId}`,
     'Orchestrator',
     block ? block.block_height.toString() : 'latest',
-    { disputeId, finalVerdict, finalValue, scoreA, scoreB, scoreSplit }
+    { disputeId, finalVerdict, finalValue, scoreA, scoreB, scoreSplit },
+    false
   );
   saveTransaction(verdictTx);
   emitEvent('transaction', verdictTx);
 
+  // Step 6: On-chain settlement
   console.log(`\n--- Step 6: Casper Blockchain Settlement ---`);
   const votingHash = process.env.VOTING_CONTRACT_HASH;
   const escrowHash = process.env.ESCROW_CONTRACT_HASH;
   const reputationHash = process.env.REPUTATION_CONTRACT_HASH;
 
-  // ZK-Lite Execution Commitment
   console.log(`\n  [ZK-Lite] Generating Verifiable Execution Commitment...`);
   const executionCommitment = createExecutionCommitment(
     JSON.stringify({ disputeId, assetId, location, spotCount }),
@@ -571,15 +607,16 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     block ? block.block_height : 'latest'
   );
   const commitmentTxHash = await storeCommitmentOnCasper(executionCommitment, reputationHash || '0xmockreputation');
-  
-  // Log the commitment transaction
+  const isZkOnChain = !commitmentTxHash.startsWith('mock_deploy_');
+
   const commitmentTx = createTransactionEntry(
     'ZK-Lite Commitment',
     `Dispute ${disputeId} execution commitment`,
     commitmentTxHash,
     'ReputationRegistry',
     block ? block.block_height.toString() : 'latest',
-    { disputeId, executionCommitment }
+    { disputeId, executionCommitment },
+    isZkOnChain
   );
   saveTransaction(commitmentTx);
   emitEvent('transaction', commitmentTx);
@@ -602,28 +639,28 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     console.log(`  🏆 ReputationRegistry: [PENDING DEPLOY] retroactive update queued`);
   }
 
+  // Step 7: Native transfer settlement
   const deployerKeyPath = process.env.DEPLOYER_PRIVATE_KEY;
   if (deployerKeyPath) {
     console.log(`\n--- Step 7: Executing Real On-Chain Native Transfer ---`);
     try {
       const targetPublicKeyHex = process.env.AGENT_A_PUBLIC_KEY || process.env.DEPLOYER_PUBLIC_KEY;
-      const amountMotes = 2500000000; // 2.5 CSPR
       const id = Date.now();
 
-      console.log(`  🔄 Broadcasting REAL Native Transfer of 2.5 CSPR via CSPR.cloud API...`);
-      
-      const deployHash = await executeCasperTransfer(targetPublicKeyHex as string, amountMotes, id);
+      console.log(`  🔄 Broadcasting Native Transfer of 2.5 CSPR via CSPR.cloud API...`);
+
+      const deployHash = await executeCasperTransfer(targetPublicKeyHex as string, SETTLEMENT_AMOUNT_MOTES, id);
       console.log(`  ✅ Successfully submitted Casper Transaction!`);
       console.log(`  🔍 View on Explorer: https://testnet.cspr.live/deploy/${deployHash}`);
-      
-      // Log the native transfer
+
       const transferTx = createTransactionEntry(
         'Native Transfer',
         `Dispute ${disputeId} settlement payment`,
         deployHash,
         'Native Transfer',
         'latest',
-        { disputeId, amount: '2.5 CSPR', target: targetPublicKeyHex }
+        { disputeId, amount: '2.5 CSPR', target: targetPublicKeyHex },
+        true
       );
       saveTransaction(transferTx);
       emitEvent('transaction', transferTx);
@@ -638,25 +675,65 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
   return { verdict: finalVerdict, verdictIndex, finalValue };
 }
 
-import express from 'express';
-import cors from 'cors';
+// ─── Express server ──────────────────────────────────────────────────────────
 
-// Run if executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   const app = express();
-  app.use(cors());
+  app.use(cors({ origin: ALLOWED_ORIGINS }));
   app.use(express.json());
+
+  // Simple in-memory rate limiter: max 5 dispute starts per minute per IP
+  const disputeTimestamps = new Map<string, number[]>();
+  const RATE_WINDOW_MS = 60_000;
+  const RATE_MAX = 5;
+
+  // Periodic cleanup to prevent unbounded memory growth
+  setInterval(() => {
+    const now = Date.now();
+    for (const [ip, timestamps] of disputeTimestamps) {
+      const recent = timestamps.filter(t => now - t < RATE_WINDOW_MS);
+      if (recent.length === 0) {
+        disputeTimestamps.delete(ip);
+      } else {
+        disputeTimestamps.set(ip, recent);
+      }
+    }
+  }, RATE_WINDOW_MS);
+
+  function isRateLimited(ip: string): boolean {
+    const now = Date.now();
+    const timestamps = disputeTimestamps.get(ip) || [];
+    const recent = timestamps.filter(t => now - t < RATE_WINDOW_MS);
+    disputeTimestamps.set(ip, recent);
+    if (recent.length >= RATE_MAX) return true;
+    recent.push(now);
+    return false;
+  }
 
   app.post('/api/disputes/start', async (req, res) => {
     try {
-      const disputeId = `DISP-${Math.floor(Math.random() * 1000)}`;
-      
-      // Start dispute asynchronously so we can return success immediately
-      // The frontend will receive logs via WebSocket
-      setTimeout(() => {
-        runDisputeResolution(disputeId, 'PARKING-MIAMI-001', 'Miami', 60);
-      }, 100);
-      
+      const ip = req.ip || req.socket.remoteAddress || 'unknown';
+      if (isRateLimited(ip)) {
+        return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
+      }
+
+      const { assetId, location, spotCount } = req.body || {};
+      if (!assetId || typeof assetId !== 'string') {
+        return res.status(400).json({ success: false, error: 'assetId is required' });
+      }
+      if (!location || typeof location !== 'string') {
+        return res.status(400).json({ success: false, error: 'location is required' });
+      }
+      if (typeof spotCount !== 'number' || spotCount < 1 || spotCount > 10000) {
+        return res.status(400).json({ success: false, error: 'spotCount must be a number between 1 and 10000' });
+      }
+
+      const disputeId = `DISP-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+
+      runDisputeResolution(disputeId, assetId, location, spotCount).catch(err => {
+        console.error(`[Dispute ${disputeId}] Unhandled error:`, err.message);
+      });
+
       res.json({ success: true, disputeId });
     } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });
@@ -671,6 +748,61 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     try {
       const transactions = loadTransactions();
       res.json({ success: true, transactions });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  /**
+   * POST /api/receipts/verify
+   * Verifies the HMAC receipt chain for a given dispute.
+   * Returns per-receipt verification details + overall chain validity.
+   */
+  app.post('/api/receipts/verify', (req, res) => {
+    try {
+      const { disputeId } = req.body;
+      if (!disputeId) {
+        res.status(400).json({ success: false, error: 'disputeId is required' });
+        return;
+      }
+
+      const chain = receiptChainStore.get(disputeId);
+      if (!chain || chain.length === 0) {
+        res.json({
+          success: true,
+          valid: false,
+          reason: 'No receipt chain found for this dispute',
+          receiptCount: 0,
+          details: [],
+        });
+        return;
+      }
+
+      // Verify the full chain
+      const chainValid = verifyReceiptChain(chain, 'juror-group');
+
+      // Build per-receipt detail
+      const details = chain.map((r, i) => {
+        const isLast = i === chain.length - 1;
+        const chainLinkOk = i === 0 || r.previousReceiptId === chain[i - 1].receiptId;
+        return {
+          receiptId: r.receiptId,
+          jurorId: r.jurorId,
+          round: r.round,
+          timestamp: r.timestamp,
+          chainLinkValid: chainLinkOk,
+          isGenesis: i === 0,
+          isTerminal: isLast,
+        };
+      });
+
+      res.json({
+        success: true,
+        valid: chainValid,
+        receiptCount: chain.length,
+        disputeId,
+        details,
+      });
     } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });
     }

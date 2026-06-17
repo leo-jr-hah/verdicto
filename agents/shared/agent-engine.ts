@@ -2,7 +2,7 @@ import express from 'express';
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { simulatedX402Middleware } from './x402-middleware.js';
+import { casperX402Middleware } from './x402-middleware.js';
 import { getComparableSales } from './rentcast-client.js';
 import { getMortgageRate } from './fred-client.js';
 import type { ValuationResult } from './types.js';
@@ -43,9 +43,13 @@ export async function calcCompsValue(agentName: string, assetId: string, locatio
   try {
     const realComps = await getComparableSales(city);
     if (realComps && realComps.length > 0) {
-      // RentCast property price avg. (Assuming price / 100 for a single spot equivalent for demo)
+      // RentCast returns full property prices. For parking lots, we estimate
+      // per-spot value by dividing by an assumed spot count (20 is a typical
+      // small lot). This is a rough heuristic — real integration would query
+      // lot-specific data.
       const avgPrice = realComps.reduce((sum: number, c: any) => sum + (c.price || 0), 0) / realComps.length;
-      avgPps = avgPrice > 0 ? (avgPrice / 20) : (comps.reduce((sum, c) => sum + c.price_per_spot, 0) / comps.length); // fallback heuristics
+      const ASSUMED_SPOTS_FOR_HEURISTIC = 20;
+      avgPps = avgPrice > 0 ? (avgPrice / ASSUMED_SPOTS_FOR_HEURISTIC) : (comps.reduce((sum, c) => sum + c.price_per_spot, 0) / comps.length);
       dataSource = 'RentCast API';
       compsCount = realComps.length;
     } else {
@@ -143,35 +147,36 @@ export function createAgentServer(config: AgentConfig) {
 
   // x402 payment gate
   // Note: Minimum transfer on Casper testnet is 2.5 CSPR
-  app.use('/mcp', simulatedX402Middleware({
+  app.use('/mcp', casperX402Middleware({
     recipientAddress: config.publicKey,
     amountCSPR: '2.5',
   }));
 
-  // MCP endpoint setup via SDK
+  // MCP server created once, reused across requests
+  const mcpServer = new McpServer({
+    name: config.name,
+    version: '1.0.0',
+  });
+
+  mcpServer.tool(
+    'assess_asset_autonomously',
+    'Autonomously assess a parking asset using the best available method',
+    {
+      asset_id: z.string(),
+      location: z.string(),
+      spot_count: z.number(),
+    },
+    async ({ asset_id, location, spot_count }) => {
+      const result = await autonomousRoute(config.name, config.methodPreference, asset_id, location, spot_count);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+  );
+
+  // MCP endpoint — each request gets its own transport but shares the server
   app.post('/mcp', async (req, res) => {
     try {
-      const mcpServer = new McpServer({
-        name: config.name,
-        version: '1.0.0',
-      });
-
-      mcpServer.tool(
-        'assess_asset_autonomously',
-        'Autonomously assess a parking asset using the best available method',
-        {
-          asset_id: z.string(),
-          location: z.string(),
-          spot_count: z.number(),
-        },
-        async ({ asset_id, location, spot_count }) => {
-          const result = await autonomousRoute(config.name, config.methodPreference, asset_id, location, spot_count);
-          return {
-            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-          };
-        }
-      );
-
       const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
       await mcpServer.connect(transport);
       await transport.handleRequest(req, res, req.body);

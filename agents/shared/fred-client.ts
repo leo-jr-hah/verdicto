@@ -9,5 +9,13 @@ export async function getMortgageRate(): Promise<number> {
   const response = await axios.get(
     `https://api.stlouisfed.org/fred/series/observations?series_id=MORTGAGE30US&api_key=${FRED_API_KEY}&sort_order=desc&limit=1&file_type=json`
   );
-  return parseFloat(response.data.observations[0].value) / 100;
+  const observations = response.data?.observations;
+  if (!observations || observations.length === 0) {
+    throw new Error('No mortgage rate data available from FRED');
+  }
+  const value = parseFloat(observations[0].value);
+  if (isNaN(value)) {
+    throw new Error(`Invalid mortgage rate value: ${observations[0].value}`);
+  }
+  return value / 100;
 }

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CheckCircle2, Brain, DollarSign, Activity, Zap } from 'lucide-react';
+import { CheckCircle2, Brain, DollarSign, Activity, Zap, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AgentBrainVisualization } from '../components/AgentBrainVisualization';
 import { CryptographicProofExplorer } from '../components/CryptographicProofExplorer';
 import { PaymentFlowVisualizer } from '../components/PaymentFlowVisualizer';
 import { TimeTravelReplay } from '../components/TimeTravelReplay';
 import { Tooltip } from '../components/Tooltip';
+import { verifyReceiptChain } from '../services/api';
 
 type LogEntry = {
   id: string;
@@ -26,6 +27,7 @@ type AgentStatus = {
 export const DeliberationView: React.FC = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [status, setStatus] = useState<'idle' | 'deliberating' | 'settled'>('idle');
+  const [starting, setStarting] = useState(false);
   const [verdict, setVerdict] = useState<any>(null);
   const [autoScroll, setAutoScroll] = useState(true);
   const [activeTab, setActiveTab] = useState<'session' | 'evidence' | 'payments'>('session');
@@ -43,30 +45,45 @@ export const DeliberationView: React.FC = () => {
   const [receipts, setReceipts] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [timelineEvents, setTimelineEvents] = useState<any[]>([]);
+  const [activeDisputeId, setActiveDisputeId] = useState<string | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:3010');
+    let ws: WebSocket | null = null;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let reconnectDelay = 1000;
+    const MAX_RECONNECT_DELAY = 30_000;
+    let unmounted = false;
+
+    function connect() {
+      if (unmounted) return;
+      ws = new WebSocket('ws://localhost:3010');
     
-    ws.onopen = () => {
-      console.log('[Dashboard] WebSocket connected to ws://localhost:3010');
-      setConnectionStatus('connected');
-      addLog('System', 'Connecting to Orchestrator...', 'system');
-      setTimeout(() => addLog('System', 'Connection established. Ready.', 'system'), 500);
-    };
+      ws.onopen = () => {
+        console.log('[Dashboard] WebSocket connected to ws://localhost:3010');
+        setConnectionStatus('connected');
+        reconnectDelay = 1000; // Reset backoff on success
+        addLog('System', 'Connecting to Orchestrator...', 'system');
+        setTimeout(() => addLog('System', 'Connection established. Ready.', 'system'), 500);
+      };
 
-    ws.onerror = (error) => {
-      console.error('[Dashboard] WebSocket error:', error);
-      setConnectionStatus('disconnected');
-      addLog('System', 'WebSocket connection error. Check if orchestrator is running on port 3010.', 'system');
-    };
+      ws.onerror = (error) => {
+        console.error('[Dashboard] WebSocket error:', error);
+        setConnectionStatus('disconnected');
+      };
 
-    ws.onclose = () => {
-      console.log('[Dashboard] WebSocket connection closed');
-      setConnectionStatus('disconnected');
-      addLog('System', 'WebSocket connection closed.', 'system');
-    };
+      ws.onclose = () => {
+        console.log('[Dashboard] WebSocket connection closed');
+        setConnectionStatus('disconnected');
+        if (!unmounted) {
+          addLog('System', `Connection lost. Reconnecting in ${Math.round(reconnectDelay / 1000)}s...`, 'system');
+          reconnectTimeout = setTimeout(() => {
+            reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY);
+            connect();
+          }, reconnectDelay);
+        }
+      };
 
-    ws.onmessage = (event) => {
+      ws.onmessage = (event) => {
       console.log('[Dashboard] WebSocket message received:', event.data.substring(0, 200));
       try {
         const data = JSON.parse(event.data);
@@ -74,6 +91,8 @@ export const DeliberationView: React.FC = () => {
         if (data.type === 'dispute_started') {
           setStatus('deliberating');
           setVerdict(null);
+          setActiveDisputeId(data.payload.disputeId);
+          setReceipts([]); // Reset receipts for new dispute
           addLog('Orchestrator', `Case #${data.payload.disputeId} initiated for asset: ${data.payload.assetId}`, 'system');
           setAgentStatuses(prev => prev.map(agent => ({ ...agent, status: 'thinking', progress: 10 })));
           addTimelineEvent('system', 'Dispute Initiated', `Case #${data.payload.disputeId} opened for ${data.payload.assetId}`);
@@ -145,8 +164,15 @@ export const DeliberationView: React.FC = () => {
         console.error("Error processing WS message", err);
       }
     };
+    } // end connect()
 
-    return () => ws.close();
+    connect();
+
+    return () => {
+      unmounted = true;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+    };
   }, []);
 
   useEffect(() => {
@@ -220,9 +246,14 @@ export const DeliberationView: React.FC = () => {
   };
 
   const startDemo = async () => {
+    setStarting(true);
     try {
       addLog('System', 'Initiating demo case...', 'system');
-      const res = await fetch('http://localhost:3011/api/disputes/start', { method: 'POST' });
+      const res = await fetch(`${import.meta.env.VITE_ORCHESTRATOR_URL || 'http://localhost:3011'}/api/disputes/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assetId: 'PARKING-MIAMI-001', location: 'Miami', spotCount: 60 }),
+      });
       if (!res.ok) {
         addLog('Error', `Orchestrator returned HTTP ${res.status}. Is the backend running?`, 'system');
         return;
@@ -233,6 +264,8 @@ export const DeliberationView: React.FC = () => {
       }
     } catch (e: any) {
       addLog('Error', `Cannot reach orchestrator at localhost:3011 — ${e.message}. Start backend with: cd agents && npm run dev && npx tsx orchestrator/index.ts`, 'system');
+    } finally {
+      setStarting(false);
     }
   };
 
@@ -277,8 +310,18 @@ export const DeliberationView: React.FC = () => {
         </div>
       </div>
       {(status === 'idle' || status === 'settled') && (
-        <button onClick={() => { setLogs([]); setVerdict(null); setStatus('idle'); startDemo(); }} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', padding: '0.6rem 1.25rem' }}>
-          {status === 'settled' ? 'Start Another Case' : 'Start Demo Case'}
+        <button
+          onClick={() => { setLogs([]); setVerdict(null); setStatus('idle'); startDemo(); }}
+          disabled={starting}
+          className="btn-primary"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', padding: '0.6rem 1.25rem', opacity: starting ? 0.7 : 1, cursor: starting ? 'wait' : 'pointer' }}
+        >
+          {starting ? (
+            <>
+              <RefreshCw size={16} className="spin" />
+              Starting...
+            </>
+          ) : status === 'settled' ? 'Start Another Case' : 'Start Demo Case'}
         </button>
       )}
 
@@ -468,22 +511,30 @@ export const DeliberationView: React.FC = () => {
           {activeTab === 'evidence' && (
             <motion.div key="evidence" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <AgentBrainVisualization />
-              <CryptographicProofExplorer receipts={receipts} onVerify={(hash) => {
-                  // Verify the hash exists in our receipts array
-                  const receipt = receipts.find(r => r.hash === hash);
-                  if (receipt) {
-                    addLog('Audit', `✓ Proof verified: ${hash.substring(0, 16)}...`, 'system');
-                    // Verify chain linkage
-                    if (receipt.previousHash) {
-                      const prevReceipt = receipts.find(r => r.hash === receipt.previousHash);
-                      if (prevReceipt) {
-                        addLog('Audit', `✓ Chain linkage confirmed: ${receipt.previousHash.substring(0, 16)}...`, 'system');
-                      } else {
-                        addLog('Audit', `⚠ Warning: Previous hash not found in chain`, 'system');
-                      }
+              <CryptographicProofExplorer receipts={receipts} onVerify={async (_hash) => {
+                  if (!activeDisputeId) {
+                    addLog('Audit', '⚠ No active dispute to verify', 'system');
+                    return;
+                  }
+                  addLog('Audit', `🔍 Verifying receipt chain for dispute ${activeDisputeId}...`, 'system');
+                  try {
+                    const result = await verifyReceiptChain(activeDisputeId);
+                    if (!result.success) {
+                      addLog('Audit', `✗ Verification request failed: ${result.reason}`, 'system');
+                      return;
                     }
-                  } else {
-                    addLog('Audit', `✗ Proof verification failed: ${hash.substring(0, 16)}...`, 'system');
+                    if (result.valid) {
+                      addLog('Audit', `✅ Chain VALID — ${result.receiptCount} receipts verified with HMAC signatures`, 'system');
+                    } else {
+                      addLog('Audit', `❌ Chain INVALID — tampering detected in ${result.receiptCount} receipts`, 'system');
+                    }
+                    // Log per-receipt details
+                    for (const d of result.details) {
+                      const icon = d.chainLinkValid ? '✓' : '✗';
+                      addLog('Audit', `  ${icon} Receipt ${d.receiptId.substring(0, 8)}... (juror: ${d.jurorId}, round: ${d.round}) — chain link: ${d.chainLinkValid ? 'ok' : 'BROKEN'}`, 'system');
+                    }
+                  } catch (err: any) {
+                    addLog('Audit', `✗ Verification error: ${err.message}`, 'system');
                   }
               }} />
             </motion.div>

@@ -1,5 +1,9 @@
 import { createHash } from 'crypto';
 
+const MINIMUM_TRANSFER_MOTES = '10000000000'; // 10 CSPR — minimum for testnet self-transfer
+const DEPLOY_PAYMENT_MOTES = 100_000_000;      // 0.1 CSPR — standard deploy cost
+const DEPLOY_TTL_MS = 1_800_000;               // 30 minutes — deploy time-to-live
+
 export interface ExecutionCommitment {
   commitment: string; // SHA-256 of (input + agentState + timestamp)
   agentStateHash: string; // Hash of agent's internal state
@@ -63,15 +67,21 @@ export async function storeCommitmentOnCasper(
     const { fileURLToPath } = await import('url');
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
     
-    // Load deployer key
     const deployerKeyPath = process.env.DEPLOYER_PRIVATE_KEY;
     if (!deployerKeyPath) {
       throw new Error('DEPLOYER_PRIVATE_KEY not configured');
     }
     
     const absoluteKeyPath = path.resolve(__dirname, '../../..', deployerKeyPath);
+    if (!fs.existsSync(absoluteKeyPath)) {
+      throw new Error(`Key file not found: ${absoluteKeyPath}`);
+    }
+    const stat = fs.statSync(absoluteKeyPath);
+    if (stat.mode & 0o077) {
+      console.warn(`  ⚠️ Key file has overly permissive permissions (${stat.mode.toString(8)}). Consider: chmod 600 ${absoluteKeyPath}`);
+    }
     const pemContent = fs.readFileSync(absoluteKeyPath, 'utf8');
-    const privateKey = PrivateKey.fromPem(pemContent, KeyAlgorithm.SECP256K1);
+    const privateKey = PrivateKey.fromPem(pemContent, KeyAlgorithm.ED25519);
     const publicKey = privateKey.publicKey;
     
     // Create RPC client
@@ -84,22 +94,19 @@ export async function storeCommitmentOnCasper(
     // This creates an on-chain record of the commitment without needing a custom contract
     // Note: The transfer may fail with "Invalid purse" but the transaction hash is still on-chain
     const tx = casperNetwork.createTransferTransaction(
-      publicKey, // sender
-      publicKey, // recipient (self-transfer)
-      process.env.CASPER_CHAIN_NAME || 'casper-test', // chain name
-      '10000000000', // 10 CSPR in motes (minimum for testnet)
-      100_000_000, // deploy cost
-      1800000, // TTL in ms
-      Date.now() // transfer ID
+      publicKey,
+      publicKey,
+      process.env.CASPER_CHAIN_NAME || 'casper-test',
+      MINIMUM_TRANSFER_MOTES,
+      DEPLOY_PAYMENT_MOTES,
+      DEPLOY_TTL_MS,
+      Date.now()
     );
     
-    // Sign the transaction
     tx.sign(privateKey);
     
-    // Submit to network
     const result = await casperNetwork.putTransaction(tx);
-    // transactionHash is a custom object that serializes to a string via JSON.stringify
-    // Handle both PutTransactionResult (v2) and PutDeployResult (v1) types
+    // Handle both PutTransactionResult (v2) and PutDeployResult (v1) shapes
     const txHash = 'transactionHash' in result 
       ? JSON.parse(JSON.stringify(result.transactionHash))
       : 'hash' in result && typeof result.hash === 'string'

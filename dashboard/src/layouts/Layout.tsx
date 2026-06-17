@@ -4,6 +4,7 @@ import { Moon, Sun, Menu, X, Bot, LayoutDashboard, PlayCircle, Users, Activity }
 import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from '../components/Logo';
 import { ConnectionStatus } from '../components/ConnectionStatus';
+import { WalletConnectButton } from '../components/WalletConnectButton';
 import { InteractiveStory } from '../components/story/InteractiveStory';
 
 export const Layout: React.FC = () => {
@@ -81,6 +82,8 @@ export const Layout: React.FC = () => {
             >
               {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
+
+            <WalletConnectButton />
 
             <button
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}

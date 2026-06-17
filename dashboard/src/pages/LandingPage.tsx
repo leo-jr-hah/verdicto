@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, ChevronRight } from 'lucide-react';
+import { StoryExplainer } from '../components/story/StoryExplainer';
 
 export const LandingPage: React.FC = () => {
 

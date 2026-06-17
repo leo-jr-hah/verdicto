@@ -14,6 +14,7 @@ export interface TransactionEntry {
   blockHeight: string;
   timestamp: string;
   explorerUrl: string;
+  onChain: boolean;
   metadata?: Record<string, unknown>;
 }
 
@@ -22,7 +23,13 @@ export async function fetchTransactions(): Promise<TransactionEntry[]> {
     const res = await fetch(`${ORCHESTRATOR_URL}/api/transactions`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return data.transactions || [];
+    const txs = data.transactions || [];
+    // Backward compat: default onChain=false for entries missing the field
+    return txs.map((tx: any) => ({
+      ...tx,
+      onChain: tx.onChain ?? false,
+      explorerUrl: tx.explorerUrl ?? '',
+    }));
   } catch (err) {
     console.error('[API] Failed to fetch transactions:', err);
     throw err; // Re-throw so caller can handle it
@@ -35,6 +42,37 @@ export async function startDispute(): Promise<{ success: boolean; disputeId?: st
     return await res.json();
   } catch (err: any) {
     return { success: false, error: err.message };
+  }
+}
+
+export interface ReceiptVerificationResult {
+  success: boolean;
+  valid: boolean;
+  receiptCount: number;
+  disputeId?: string;
+  reason?: string;
+  details: Array<{
+    receiptId: string;
+    jurorId: string;
+    round: number;
+    timestamp: number;
+    chainLinkValid: boolean;
+    isGenesis: boolean;
+    isTerminal: boolean;
+  }>;
+}
+
+export async function verifyReceiptChain(disputeId: string): Promise<ReceiptVerificationResult> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/receipts/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ disputeId }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err: any) {
+    return { success: false, valid: false, receiptCount: 0, reason: err.message, details: [] };
   }
 }
 

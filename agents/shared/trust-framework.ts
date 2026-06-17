@@ -25,6 +25,7 @@ export function calculateSimilarity(response1: string, response2: string): numbe
   const intersection = new Set([...words1].filter(x => words2.has(x)));
   const union = new Set([...words1, ...words2]);
   
+  if (union.size === 0) return 0;
   return Math.round((intersection.size / union.size) * 100);
 }
 

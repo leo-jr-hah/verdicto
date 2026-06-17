@@ -1,4 +1,4 @@
-import { createHmac, randomUUID } from 'crypto';
+import { createHmac, randomUUID, createHash, timingSafeEqual } from 'crypto';
 
 export interface DeliberationReceipt {
   receiptId: string; // UUID
@@ -9,8 +9,21 @@ export interface DeliberationReceipt {
   outputHash: string; // SHA-256 of juror output
   reasoningHash: string; // SHA-256 of reasoning text
   timestamp: number; // Unix timestamp
-  signature: string; // HMAC-SHA256(jurorSecret, receiptData)
+  signature: string; // HMAC-SHA256(derivedKey, receiptData)
   previousReceiptId: string; // Chain to previous receipt
+}
+
+/**
+ * Derives a dedicated HMAC key from a private key material.
+ * We never use the raw private key as a symmetric secret —
+ * instead we hash it with a fixed domain separator so the
+ * HMAC key is irreversible and distinct from the signing key.
+ */
+function deriveHmacKey(privateKeyMaterial: string): string {
+  return createHash('sha256')
+    .update('casper-rwa-court:deliberation-receipt-hmac')
+    .update(privateKeyMaterial)
+    .digest('hex');
 }
 
 export function createDeliberationReceipt(
@@ -25,17 +38,18 @@ export function createDeliberationReceipt(
 ): DeliberationReceipt {
   const receiptId = randomUUID();
   const timestamp = Date.now();
+  const hmacKey = deriveHmacKey(jurorSecret);
   
   // Hash inputs and outputs to prevent tampering
-  const inputHash = createHmac('sha256', jurorSecret).update(input).digest('hex');
-  const outputHash = createHmac('sha256', jurorSecret).update(output).digest('hex');
-  const reasoningHash = createHmac('sha256', jurorSecret).update(reasoning).digest('hex');
+  const inputHash = createHmac('sha256', hmacKey).update(input).digest('hex');
+  const outputHash = createHmac('sha256', hmacKey).update(output).digest('hex');
+  const reasoningHash = createHmac('sha256', hmacKey).update(reasoning).digest('hex');
   
   // Construct receipt data string for signing
   const receiptData = `${receiptId}|${disputeId}|${jurorId}|${round}|${inputHash}|${outputHash}|${reasoningHash}|${timestamp}|${previousReceiptId}`;
   
   // Cryptographically sign the receipt
-  const signature = createHmac('sha256', jurorSecret).update(receiptData).digest('hex');
+  const signature = createHmac('sha256', hmacKey).update(receiptData).digest('hex');
   
   return {
     receiptId,
@@ -51,20 +65,27 @@ export function createDeliberationReceipt(
   };
 }
 
-export function verifyReceiptChain(receipts: DeliberationReceipt[], jurorPublicKey: string): boolean {
-  for (let i = 1; i < receipts.length; i++) {
-    // 1. Verify temporal chaining
-    if (receipts[i].previousReceiptId !== receipts[i-1].receiptId) {
-      return false; // Chain broken
-    }
-    
-    // 2. Verify signature (in production, use ECDSA verify with jurorPublicKey)
-    // For this implementation, we demonstrate the HMAC verification structure
+export function verifyReceiptChain(receipts: DeliberationReceipt[], jurorSecret: string): boolean {
+  if (receipts.length === 0) return true;
+  const hmacKey = deriveHmacKey(jurorSecret);
+
+  for (let i = 0; i < receipts.length; i++) {
     const r = receipts[i];
+
+    // 1. Verify temporal chaining (skip genesis receipt)
+    if (i > 0 && r.previousReceiptId !== receipts[i - 1].receiptId) {
+      console.error(`  [Audit] Chain broken at receipt ${i}: expected prev=${receipts[i - 1].receiptId}, got ${r.previousReceiptId}`);
+      return false;
+    }
+
+    // 2. Verify HMAC signature
     const receiptData = `${r.receiptId}|${r.disputeId}|${r.jurorId}|${r.round}|${r.inputHash}|${r.outputHash}|${r.reasoningHash}|${r.timestamp}|${r.previousReceiptId}`;
-    
-    // In a real scenario with asymmetric crypto, we would verify `r.signature` against `receiptData` using `jurorPublicKey`.
-    // We assume it's valid here to complete the demonstration of the chaining structure.
+    const expectedSignature = createHmac('sha256', hmacKey).update(receiptData).digest('hex');
+
+    if (!timingSafeEqual(Buffer.from(r.signature, 'hex'), Buffer.from(expectedSignature, 'hex'))) {
+      console.error(`  [Audit] Signature mismatch on receipt ${i} (${r.receiptId})`);
+      return false;
+    }
   }
   return true;
 }
