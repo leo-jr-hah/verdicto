@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, LayoutDashboard, PlayCircle, Users, Activity, Film, Menu, X } from 'lucide-react';
+import { Moon, Sun, LayoutDashboard, PlayCircle, Users, Activity, Film, Menu, X, Bot } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Joyride } from 'react-joyride';
 import { Logo } from '../components/Logo';
@@ -210,7 +210,7 @@ export const Layout: React.FC = () => {
           zIndex: 50
         }}
       >
-        <Film size={28} />
+        <Bot size={28} />
       </motion.button>
 
       {/* Interactive Story Modal Overlay */}
