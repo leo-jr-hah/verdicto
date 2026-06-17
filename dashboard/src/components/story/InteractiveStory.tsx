@@ -298,144 +298,143 @@ const scenes = [
   {
     bg: bgProperty,
     elements: [
-      { id: 'owner', src: charOwner, initial: { x: -200, opacity: 0 }, animate: { x: 0, opacity: 1 }, style: { bottom: '0', left: '10%', height: '45%' } },
-      { id: 'investor', src: charInvestor, initial: { x: 200, opacity: 0 }, animate: { x: 0, opacity: 1 }, style: { bottom: '0', right: '10%', height: '45%' } }
+      { id: 'owner', src: charOwner, initial: { x: -200, opacity: 0 }, animate: { x: 0, opacity: 1 }, style: { bottom: '0', left: '10%', height: '70%' } },
+      { id: 'investor', src: charInvestor, initial: { x: 200, opacity: 0 }, animate: { x: 0, opacity: 1 }, style: { bottom: '0', right: '10%', height: '70%' } }
     ],
     bubbles: [
-      { speaker: 'Asset Owner', text: 'This commercial building is easily worth $2.5 Million!', style: { top: '5%', left: '5%' }, delay: 0.5 },
-      { speaker: 'Investor', text: 'No way, the market data says it\'s only worth $1.8 Million. We are at a deadlock.', style: { top: '5%', right: '5%' }, delay: 1.5 }
+      { speaker: 'Asset Owner', text: 'This commercial building is easily worth $2.5 Million!', style: { top: '15%', left: '25%' }, delay: 0.5 },
+      { speaker: 'Investor', text: 'No way, the market data says it\'s only worth $1.8 Million. We are at a deadlock.', style: { top: '35%', right: '25%' }, delay: 1.5 }
     ]
   },
   // Scene 2: Confusion
   {
     bg: bgProperty,
     elements: [
-      { id: 'observer', src: charObserver, initial: { y: 200, opacity: 0 }, animate: { y: 0, opacity: 1 }, style: { bottom: '0', left: '40%', height: '50%' } }
+      { id: 'observer', src: charObserver, initial: { y: 200, opacity: 0 }, animate: { y: 0, opacity: 1 }, style: { bottom: '0', left: '35%', height: '75%' } }
     ],
     bubbles: [
-      { speaker: 'Observer', text: 'Oh no... a major financial dispute. This is going to take months in court and cost thousands in legal fees. How do we solve this fairly without a central authority?', style: { top: '5%', left: '5%' }, delay: 0.5 }
+      { speaker: 'Observer', text: 'Oh no... a major financial dispute. This is going to take months in court and cost thousands in legal fees. How do we solve this fairly without a central authority?', style: { top: '20%', left: '10%', maxWidth: '350px' }, delay: 0.5 }
     ]
   },
   // Scene 3: Enter the Hero
   {
     bg: bgProperty,
     elements: [
-      { id: 'observer', src: charObserver, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '10%', height: '45%' } },
-      { id: 'hero', src: charVerdictHero, initial: { y: -500, opacity: 0 }, animate: { y: 0, opacity: 1 }, transition: { type: 'spring', bounce: 0.5 }, style: { bottom: '0', right: '10%', height: '55%' } }
+      { id: 'observer', src: charObserver, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '10%', height: '70%' } },
+      { id: 'hero', src: charVerdictHero, initial: { y: -500, opacity: 0 }, animate: { y: 0, opacity: 1 }, transition: { type: 'spring', bounce: 0.5 }, style: { bottom: '0', right: '15%', height: '80%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'Fear not! I am Verdict. I can resolve this dispute instantly, fairly, and permanently using AI and the blockchain!', style: { top: '5%', right: '5%' }, delay: 0.8 }
+      { speaker: 'Verdict', text: 'Fear not! I am Verdict. I can resolve this dispute instantly, fairly, and permanently using AI and the blockchain!', style: { top: '15%', left: '35%' }, delay: 0.8 }
     ]
   },
   // Scene 4: ZK
   {
     bg: bgVerdictHq,
     elements: [
-      { id: 'hero', src: charVerdictHero, initial: { opacity: 0, scale: 0.9 }, animate: { opacity: 1, scale: 1 }, style: { bottom: '0', left: '5%', height: '55%' } },
-      { id: 'owner', src: charOwner, initial: { opacity: 0 }, animate: { opacity: 1 }, style: { bottom: '0', right: '30%', height: '45%' } },
-      { id: 'investor', src: charInvestor, initial: { opacity: 0 }, animate: { opacity: 1 }, style: { bottom: '0', right: '5%', height: '45%' } }
+      { id: 'hero', src: charVerdictHero, initial: { opacity: 0, scale: 0.9 }, animate: { opacity: 1, scale: 1 }, style: { bottom: '0', left: '5%', height: '80%' } },
+      { id: 'owner', src: charOwner, initial: { opacity: 0 }, animate: { opacity: 1 }, style: { bottom: '0', right: '30%', height: '65%' } },
+      { id: 'investor', src: charInvestor, initial: { opacity: 0 }, animate: { opacity: 1 }, style: { bottom: '0', right: '10%', height: '65%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'First, upload your data. Don\'t worry about privacy - we use Zero-Knowledge (ZK) technology. This lets you prove your financial numbers are real without actually showing me your private bank statements!', style: { top: '5%', left: '5%', maxWidth: '400px' }, delay: 0.5, learnMore: 'ZK Proofs' }
+      { speaker: 'Verdict', text: 'First, upload your data. Don\'t worry about privacy - we use Zero-Knowledge (ZK) technology. This lets you prove your financial numbers are real without actually showing me your private bank statements!', style: { top: '10%', left: '30%', maxWidth: '400px' }, delay: 0.5, learnMore: 'ZK Proofs' }
     ]
   },
   // Scene 5: X402
   {
     bg: bgVerdictHq,
     elements: [
-      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '55%' } }
+      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '80%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'To ensure nobody unauthorized sneaks into this dispute, we issue an X402 Token. Think of it as a VIP digital ticket. It ensures only verified parties have access to this specific case.', style: { top: '5%', left: '5%', maxWidth: '400px' }, delay: 0.2, learnMore: 'X402 Authentication' }
+      { speaker: 'Verdict', text: 'To ensure nobody unauthorized sneaks into this dispute, we issue an X402 Token. Think of it as a VIP digital ticket. It ensures only verified parties have access to this specific case.', style: { top: '20%', left: '40%', maxWidth: '400px' }, delay: 0.2, learnMore: 'X402 Authentication' }
     ]
   },
   // Scene 6: HMAC
   {
     bg: bgVerdictHq,
     elements: [
-      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '55%' } }
+      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '80%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'When you send the data, we stamp it with an HMAC. Think of it as an unbreakable digital wax seal. If a hacker tries to tamper with the data while it\'s traveling, the seal breaks and we reject it!', style: { top: '5%', left: '5%', maxWidth: '400px' }, delay: 0.2, learnMore: 'HMAC Security' }
+      { speaker: 'Verdict', text: 'When you send the data, we stamp it with an HMAC. Think of it as an unbreakable digital wax seal. If a hacker tries to tamper with the data while it\'s traveling, the seal breaks and we reject it!', style: { top: '20%', left: '40%', maxWidth: '400px' }, delay: 0.2, learnMore: 'HMAC Security' }
     ]
   },
   // Scene 7: Summoning Agents
   {
     bg: bgVerdictHq,
     elements: [
-      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '55%' } },
-      // Swarm effect (all bots lowered to keep top clear)
-      { id: 'bot1', src: propAgentBot, initial: { scale: 0 }, animate: { scale: 1, x: [0, 40, -20, 0], y: [0, -25, 20, 0] }, style: { bottom: '20%', right: '40%', height: '10%' }, transition: { delay: 0.5, x: { repeat: Infinity, duration: 4 }, y: { repeat: Infinity, duration: 3 } } },
-      { id: 'bot2', src: propAgentBot, initial: { scale: 0 }, animate: { scale: 1, x: [0, -30, 20, 0], y: [0, 25, -15, 0] }, style: { bottom: '30%', right: '25%', height: '10%' }, transition: { delay: 0.7, x: { repeat: Infinity, duration: 4.5 }, y: { repeat: Infinity, duration: 3.5 } } },
-      { id: 'bot3', src: propAgentBot, initial: { scale: 0 }, animate: { scale: 1, x: [0, 25, -25, 0], y: [0, 15, -20, 0] }, style: { bottom: '20%', right: '15%', height: '10%' }, transition: { delay: 0.9, x: { repeat: Infinity, duration: 3.8 }, y: { repeat: Infinity, duration: 4 } } },
-      { id: 'bot4', src: propAgentBot, initial: { scale: 0 }, animate: { scale: 1, x: [0, -40, 30, 0], y: [0, -20, 25, 0] }, style: { bottom: '25%', right: '10%', height: '10%' }, transition: { delay: 1.1, x: { repeat: Infinity, duration: 5 }, y: { repeat: Infinity, duration: 4.2 } } },
-      { id: 'bot5', src: propAgentBot, initial: { scale: 0 }, animate: { scale: 1, x: [0, 30, -30, 0], y: [0, 30, -10, 0] }, style: { bottom: '35%', right: '35%', height: '10%' }, transition: { delay: 1.3, x: { repeat: Infinity, duration: 4.2 }, y: { repeat: Infinity, duration: 4.8 } } }
+      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '80%' } },
+      { id: 'bot1', src: propAgentBot, initial: { scale: 0 }, animate: { scale: 1, x: [0, 40, -20, 0], y: [0, -25, 20, 0] }, style: { bottom: '40%', right: '40%', height: '12%' }, transition: { delay: 0.5, x: { repeat: Infinity, duration: 4 }, y: { repeat: Infinity, duration: 3 } } },
+      { id: 'bot2', src: propAgentBot, initial: { scale: 0 }, animate: { scale: 1, x: [0, -30, 20, 0], y: [0, 25, -15, 0] }, style: { bottom: '50%', right: '25%', height: '12%' }, transition: { delay: 0.7, x: { repeat: Infinity, duration: 4.5 }, y: { repeat: Infinity, duration: 3.5 } } },
+      { id: 'bot3', src: propAgentBot, initial: { scale: 0 }, animate: { scale: 1, x: [0, 25, -25, 0], y: [0, 15, -20, 0] }, style: { bottom: '40%', right: '15%', height: '12%' }, transition: { delay: 0.9, x: { repeat: Infinity, duration: 3.8 }, y: { repeat: Infinity, duration: 4 } } },
+      { id: 'bot4', src: propAgentBot, initial: { scale: 0 }, animate: { scale: 1, x: [0, -40, 30, 0], y: [0, -20, 25, 0] }, style: { bottom: '30%', right: '10%', height: '12%' }, transition: { delay: 1.1, x: { repeat: Infinity, duration: 5 }, y: { repeat: Infinity, duration: 4.2 } } },
+      { id: 'bot5', src: propAgentBot, initial: { scale: 0 }, animate: { scale: 1, x: [0, 30, -30, 0], y: [0, 30, -10, 0] }, style: { bottom: '60%', right: '35%', height: '12%' }, transition: { delay: 1.3, x: { repeat: Infinity, duration: 4.2 }, y: { repeat: Infinity, duration: 4.8 } } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'Now that the data is perfectly secure, I don\'t use a human judge. Instead, I summon a decentralized swarm of independent AI Agents to review the facts.', style: { top: '5%', left: '5%', maxWidth: '400px' }, delay: 0.2 }
+      { speaker: 'Verdict', text: 'Now that the data is perfectly secure, I don\'t use a human judge. Instead, I summon a decentralized swarm of independent AI Agents to review the facts.', style: { top: '10%', left: '35%', maxWidth: '400px' }, delay: 0.2 }
     ]
   },
   // Scene 8: Investigation
   {
     bg: bgVerdictHq,
     elements: [
-      { id: 'observer', src: charObserver, initial: { opacity: 0, x: -50 }, animate: { opacity: 1, x: 0 }, style: { bottom: '0', left: '10%', height: '45%' } },
-      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', right: '10%', height: '55%' } }
+      { id: 'observer', src: charObserver, initial: { opacity: 0, x: -50 }, animate: { opacity: 1, x: 0 }, style: { bottom: '0', left: '5%', height: '70%' } },
+      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', right: '10%', height: '80%' } }
     ],
     bubbles: [
-      { speaker: 'Observer', text: 'Wait, what if one of the AI agents makes a mistake or is biased?', style: { top: '5%', left: '5%' }, delay: 0.5 },
-      { speaker: 'Verdict', text: 'Great question! That\'s why they don\'t work alone.', style: { top: '5%', right: '5%' }, delay: 1.5 }
+      { speaker: 'Observer', text: 'Wait, what if one of the AI agents makes a mistake or is biased?', style: { top: '15%', left: '30%' }, delay: 0.5 },
+      { speaker: 'Verdict', text: 'Great question! That\'s why they don\'t work alone.', style: { top: '35%', right: '35%' }, delay: 1.5 }
     ]
   },
   // Scene 9: Consensus
   {
     bg: bgVerdictHq,
     elements: [
-      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '55%' } },
-      { id: 'bot1', src: propAgentBot, initial: { opacity: 1 }, animate: { y: [0, -10, 10, 0] }, style: { bottom: '30%', right: '30%', height: '10%' }, transition: { repeat: Infinity, duration: 3 } },
-      { id: 'bot2', src: propAgentBot, initial: { opacity: 1 }, animate: { y: [0, -10, 10, 0] }, style: { bottom: '20%', right: '40%', height: '10%' }, transition: { repeat: Infinity, duration: 3.5, delay: 0.5 } },
-      { id: 'bot3', src: propAgentBot, initial: { opacity: 1 }, animate: { y: [0, -10, 10, 0] }, style: { bottom: '25%', right: '15%', height: '10%' }, transition: { repeat: Infinity, duration: 4, delay: 1 } }
+      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '80%' } },
+      { id: 'bot1', src: propAgentBot, initial: { opacity: 1 }, animate: { y: [0, -10, 10, 0] }, style: { bottom: '30%', right: '30%', height: '12%' }, transition: { repeat: Infinity, duration: 3 } },
+      { id: 'bot2', src: propAgentBot, initial: { opacity: 1 }, animate: { y: [0, -10, 10, 0] }, style: { bottom: '40%', right: '40%', height: '12%' }, transition: { repeat: Infinity, duration: 3.5, delay: 0.5 } },
+      { id: 'bot3', src: propAgentBot, initial: { opacity: 1 }, animate: { y: [0, -10, 10, 0] }, style: { bottom: '35%', right: '15%', height: '12%' }, transition: { repeat: Infinity, duration: 4, delay: 1 } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'The AI agents cross-check each other\'s work. Agents with a history of being highly accurate have their votes weighted heavier. We call this Trust-Weighted Consensus. It guarantees mathematical fairness.', style: { top: '5%', left: '5%', maxWidth: '400px' }, delay: 0.2 }
+      { speaker: 'Verdict', text: 'The AI agents cross-check each other\'s work. Agents with a history of being highly accurate have their votes weighted heavier. We call this Trust-Weighted Consensus. It guarantees mathematical fairness.', style: { top: '15%', left: '30%', maxWidth: '400px' }, delay: 0.2 }
     ]
   },
   // Scene 10: Resolution
   {
     bg: bgVerdictHq,
     elements: [
-      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '35%', height: '55%' } },
-      { id: 'owner', src: charOwner, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '45%' } },
-      { id: 'investor', src: charInvestor, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', right: '5%', height: '45%' } }
+      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '35%', height: '80%' } },
+      { id: 'owner', src: charOwner, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '60%' } },
+      { id: 'investor', src: charInvestor, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', right: '5%', height: '60%' } }
     ],
     bubbles: [
       { speaker: 'Verdict', text: 'Through consensus, the agents have mathematically determined the exact fair market value is $2.1 Million, not $2.5 Million or $1.8 Million.', style: { top: '5%', left: '35%', maxWidth: '400px' }, delay: 0.2 },
-      { speaker: 'Asset Owner', text: 'That makes total sense based on the verified data. I accept!', style: { top: '5%', left: '5%', maxWidth: '250px' }, delay: 2 },
-      { speaker: 'Investor', text: 'Thank you for this awesome work, Verdict! This saved us months of legal battles.', style: { top: '5%', right: '5%', maxWidth: '250px' }, delay: 3 }
+      { speaker: 'Asset Owner', text: 'That makes total sense based on the verified data. I accept!', style: { top: '40%', left: '20%', maxWidth: '250px' }, delay: 2 },
+      { speaker: 'Investor', text: 'Thank you for this awesome work, Verdict! This saved us months of legal battles.', style: { top: '40%', right: '20%', maxWidth: '250px' }, delay: 3 }
     ]
   },
   // Scene 11: Casper Blockchain
   {
     bg: bgVerdictHq,
     elements: [
-      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '55%' } },
-      { id: 'casper_glow', src: propCasperBlock, initial: { scale: 1.2, opacity: 0 }, animate: { scale: [1, 1.5, 1], opacity: [0, 0.4, 0] }, transition: { repeat: Infinity, duration: 2 }, style: { bottom: '18%', right: '18%', height: '18%', filter: 'blur(10px)', zIndex: 0 } },
-      { id: 'casper', src: propCasperBlock, initial: { scale: 0, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { type: 'spring', bounce: 0.5 }, style: { bottom: '20%', right: '20%', height: '14%', zIndex: 1 } }
+      { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '80%' } },
+      { id: 'casper_glow', src: propCasperBlock, initial: { scale: 1.2, opacity: 0 }, animate: { scale: [1, 1.5, 1], opacity: [0, 0.4, 0] }, transition: { repeat: Infinity, duration: 2 }, style: { bottom: '28%', right: '18%', height: '22%', filter: 'blur(10px)', zIndex: 0 } },
+      { id: 'casper', src: propCasperBlock, initial: { scale: 0, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { type: 'spring', bounce: 0.5 }, style: { bottom: '30%', right: '20%', height: '18%', zIndex: 1 } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'Finally, I take this verdict and permanently lock it onto the Casper Blockchain. Once it\'s on Casper, it can never be tampered with, deleted, or altered by anyone. Total transparency!', style: { top: '5%', left: '5%', maxWidth: '400px' }, delay: 0.5, learnMore: 'Casper Finality' }
+      { speaker: 'Verdict', text: 'Finally, I take this verdict and permanently lock it onto the Casper Blockchain. Once it\'s on Casper, it can never be tampered with, deleted, or altered by anyone. Total transparency!', style: { top: '15%', left: '35%', maxWidth: '400px' }, delay: 0.5, learnMore: 'Casper Finality' }
     ]
   },
   // Scene 12: Conclusion
   {
     bg: bgProperty,
     elements: [
-      { id: 'observer', src: charObserver, initial: { opacity: 0 }, animate: { opacity: 1 }, style: { bottom: '0', left: '10%', height: '45%' } },
-      { id: 'hero', src: charVerdictHero, initial: { opacity: 0 }, animate: { opacity: 1 }, style: { bottom: '0', right: '10%', height: '55%' } }
+      { id: 'observer', src: charObserver, initial: { opacity: 0 }, animate: { opacity: 1 }, style: { bottom: '0', left: '10%', height: '70%' } },
+      { id: 'hero', src: charVerdictHero, initial: { opacity: 0 }, animate: { opacity: 1 }, style: { bottom: '0', right: '10%', height: '80%' } }
     ],
     bubbles: [
-      { speaker: 'Observer', text: 'So you securely gathered data, hid the private parts, proved it wasn\'t tampered with, resolved it using an AI swarm, and locked it on the blockchain?', style: { top: '5%', left: '5%', maxWidth: '350px' }, delay: 0.5 },
-      { speaker: 'Verdict', text: 'Exactly. Welcome to the future of Real World Asset management.', style: { top: '5%', right: '5%', maxWidth: '350px' }, delay: 2.5 }
+      { speaker: 'Observer', text: 'So you securely gathered data, hid the private parts, proved it wasn\'t tampered with, resolved it using an AI swarm, and locked it on the blockchain?', style: { top: '15%', left: '30%', maxWidth: '350px' }, delay: 0.5 },
+      { speaker: 'Verdict', text: 'Exactly. Welcome to the future of Real World Asset management.', style: { top: '35%', right: '35%', maxWidth: '350px' }, delay: 2.5 }
     ]
   }
 ];
