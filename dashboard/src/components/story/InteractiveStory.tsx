@@ -408,8 +408,8 @@ const scenes = [
       { id: 'investor', src: charInvestor, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', right: '0%', height: '60%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'Through consensus, the agents have mathematically determined the exact fair market value is $2.1 Million, not $2.5 Million or $1.8 Million.', style: { top: '15%', right: '55%', maxWidth: '350px' }, delay: 0.2 },
-      { speaker: 'Asset Owner', text: 'That makes total sense based on the verified data. I accept!', style: { top: '45%', left: '22%', maxWidth: '220px' }, delay: 2 },
+      { speaker: 'Verdict', text: 'Through consensus, the agents have mathematically determined the exact fair market value is $2.1 Million, not $2.5 Million or $1.8 Million.', style: { top: '5%', left: '22%', maxWidth: '340px' }, delay: 0.2 },
+      { speaker: 'Asset Owner', text: 'That makes total sense based on the verified data. I accept!', style: { top: '30%', left: '15%', maxWidth: '240px' }, delay: 2 },
       { speaker: 'Investor', text: 'Thank you for this awesome work, Verdict! This saved us months of legal battles.', style: { top: '5%', right: '5%', maxWidth: '250px' }, delay: 3 }
     ]
   },
