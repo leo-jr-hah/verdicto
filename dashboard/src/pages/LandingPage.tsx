@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, ChevronRight } from 'lucide-react';
-import { StoryExplainer } from '../components/story/StoryExplainer';
 
 export const LandingPage: React.FC = () => {
 
@@ -56,10 +55,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Interactive Story Explainer Section */}
-      <section id="how-it-works" style={{ borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
-        <StoryExplainer />
-      </section>
+
       {/* Security Narrative Section */}
       <section className="container landing-security-section" style={{ padding: '8rem 0', textAlign: 'center' }}>
         <div className="landing-security-badge" style={{ 

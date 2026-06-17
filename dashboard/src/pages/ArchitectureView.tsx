@@ -439,31 +439,7 @@ export const ArchitectureView: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Legend */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        gap: '2rem',
-        flexWrap: 'wrap'
-      }}>
-        {[
-          { type: 'frontend', label: 'Frontend', color: '#3B82F6' },
-          { type: 'backend', label: 'Backend', color: '#8B5CF6' },
-          { type: 'agent', label: 'AI Agents', color: '#10B981' },
-          { type: 'blockchain', label: 'Blockchain', color: '#EF4444' },
-          { type: 'external', label: 'External', color: '#6B7280' }
-        ].map(item => (
-          <div key={item.type} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ 
-              width: '12px', 
-              height: '12px', 
-              borderRadius: '3px', 
-              background: item.color 
-            }} />
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{item.label}</span>
-          </div>
-        ))}
-      </div>
+      {/* Removed color palette/legend - colors are shown in the diagram itself */}
     </div>
   );
 };

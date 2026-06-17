@@ -144,6 +144,17 @@ async function fetchWithX402(url: string, payload: any, agentLabel: string) {
         emitEvent('transaction', x402Tx);
       } catch (err: any) {
         console.log(`  [x402] ⚠️ Transfer failed: ${err.message}. Proceeding with simulated hash for testing.`);
+        // Emit a simulated transaction event even when transfer fails
+        const x402Tx = createTransactionEntry(
+          'x402 Payment',
+          `Agent payment to ${agentLabel} (simulated)`,
+          txHash,
+          'Native Transfer',
+          'latest',
+          { agentLabel, amount: reqs.maxAmountRequired, payTo: reqs.payTo, simulated: true }
+        );
+        saveTransaction(x402Tx);
+        emitEvent('transaction', x402Tx);
       }
 
       const proof = Buffer.from(JSON.stringify({
