@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-export const useAmbientMusic = (isPlaying: boolean) => {
+export const useAmbientMusic = (isPlaying: boolean, isMuted: boolean = false) => {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
   const timerIDRef = useRef<number | null>(null);
@@ -49,7 +49,7 @@ export const useAmbientMusic = (isPlaying: boolean) => {
     };
 
     const nextNote = () => {
-      const tempo = 130; // BPM
+      const tempo = 80; // Slower BPM
       const secondsPerBeat = 60.0 / tempo;
       const secondsPerSixteenth = 0.25 * secondsPerBeat;
       
@@ -78,12 +78,15 @@ export const useAmbientMusic = (isPlaying: boolean) => {
         audioCtxRef.current.resume();
       }
       
-      // Start the sequencer
-      nextNoteTimeRef.current = audioCtxRef.current.currentTime + 0.1;
-      scheduler();
+      // If we just started, kick off the sequencer
+      if (timerIDRef.current === null) {
+        nextNoteTimeRef.current = audioCtxRef.current.currentTime + 0.1;
+        scheduler();
+      }
 
-      // Fade in gently over 2 seconds
-      masterGainRef.current.gain.setTargetAtTime(0.6, audioCtxRef.current.currentTime, 1.0);
+      // Handle mute state
+      const targetVolume = isMuted ? 0 : 0.6;
+      masterGainRef.current.gain.setTargetAtTime(targetVolume, audioCtxRef.current.currentTime, 1.0);
       
     } else if (!isPlaying && audioCtxRef.current && masterGainRef.current) {
       // Stop the sequencer
@@ -109,5 +112,5 @@ export const useAmbientMusic = (isPlaying: boolean) => {
         window.clearTimeout(timerIDRef.current);
       }
     };
-  }, [isPlaying]);
+  }, [isPlaying, isMuted]);
 };
