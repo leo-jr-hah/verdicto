@@ -187,12 +187,12 @@ export const Layout: React.FC = () => {
 
       {/* Floating Action Button for Story */}
       <motion.button
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, ...(location.pathname === '/' ? { y: 0 } : { y: '-50%' }) }}
         transition={{ delay: 1, type: 'spring' }}
         onClick={() => setIsStoryOpen(true)}
         className="story-fab"
-        style={{
+        style={location.pathname === '/' ? {
           position: 'fixed',
           bottom: '100px', // Above mobile tab bar
           right: '20px',
@@ -203,6 +203,24 @@ export const Layout: React.FC = () => {
           color: 'var(--bg-main)',
           border: 'none',
           boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(16, 185, 129, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          zIndex: 50
+        } : {
+          position: 'fixed',
+          top: '50%',
+          right: '0',
+          transform: 'translateY(-50%)',
+          width: '45px',
+          height: '90px',
+          borderRadius: '45px 0 0 45px',
+          background: 'var(--primary)',
+          color: 'var(--bg-main)',
+          border: 'none',
+          borderRight: 'none',
+          boxShadow: '-5px 0 15px rgba(0, 0, 0, 0.3), 0 0 15px rgba(16, 185, 129, 0.3)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
