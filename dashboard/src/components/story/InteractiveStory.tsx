@@ -336,7 +336,7 @@ const scenes = [
       { id: 'investor', src: charInvestor, initial: { opacity: 0 }, animate: { opacity: 1 }, style: { bottom: '0', right: '10%', height: '65%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'First, upload your data. Don\'t worry about privacy - we use Zero-Knowledge (ZK) technology. This lets you prove your financial numbers are real without actually showing me your private bank statements!', style: { top: '10%', left: '30%', maxWidth: '400px' }, delay: 0.5, learnMore: 'ZK Proofs' }
+      { speaker: 'Verdict', text: 'First, upload your data. Don\'t worry about privacy - we use Zero-Knowledge (ZK) technology. This lets you prove your financial numbers are real without actually showing me your private bank statements!', style: { top: '5%', left: '50%', transform: 'translateX(-50%)', maxWidth: '400px' }, delay: 0.5, learnMore: 'ZK Proofs' }
     ]
   },
   // Scene 5: X402
@@ -408,9 +408,9 @@ const scenes = [
       { id: 'investor', src: charInvestor, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', right: '5%', height: '60%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'Through consensus, the agents have mathematically determined the exact fair market value is $2.1 Million, not $2.5 Million or $1.8 Million.', style: { top: '5%', left: '35%', maxWidth: '400px' }, delay: 0.2 },
-      { speaker: 'Asset Owner', text: 'That makes total sense based on the verified data. I accept!', style: { top: '40%', left: '20%', maxWidth: '250px' }, delay: 2 },
-      { speaker: 'Investor', text: 'Thank you for this awesome work, Verdict! This saved us months of legal battles.', style: { top: '40%', right: '20%', maxWidth: '250px' }, delay: 3 }
+      { speaker: 'Verdict', text: 'Through consensus, the agents have mathematically determined the exact fair market value is $2.1 Million, not $2.5 Million or $1.8 Million.', style: { top: '5%', left: '50%', transform: 'translateX(-50%)', maxWidth: '400px' }, delay: 0.2 },
+      { speaker: 'Asset Owner', text: 'That makes total sense based on the verified data. I accept!', style: { top: '20%', left: '5%', maxWidth: '250px' }, delay: 2 },
+      { speaker: 'Investor', text: 'Thank you for this awesome work, Verdict! This saved us months of legal battles.', style: { top: '20%', right: '5%', maxWidth: '250px' }, delay: 3 }
     ]
   },
   // Scene 11: Casper Blockchain
