@@ -10,13 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@make-software/csprclick-core-client": "^1.11.0",
+    "@make-software/csprclick-core-types": "^2.1.0",
+    "@make-software/csprclick-ui": "^2.1.0",
     "casper-js-sdk": "^5.0.12",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.18.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-joyride": "^3.1.0",
-    "react-router-dom": "^7.17.0"
+    "react-router-dom": "^7.17.0",
+    "styled-components": "^5.3.9"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

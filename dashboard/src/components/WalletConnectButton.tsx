@@ -1,18 +1,19 @@
 /**
  * WalletConnectButton — displays in the top nav bar.
  *
- * States:
- *   - No extension installed → "Install Wallet" link
- *   - Disconnected → "Connect Wallet" button
- *   - Connected → truncated public key + dropdown with disconnect
+ * Always shows "Connect Wallet". On click:
+ *   - If extension is installed → triggers the Casper Wallet popup
+ *   - If extension is NOT installed → opens Chrome Web Store in new tab
+ *
+ * When connected → truncated public key + dropdown with disconnect
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Wallet, ChevronDown, ExternalLink, LogOut, Copy, Check } from 'lucide-react';
-import { useWallet } from '../contexts/WalletContext';
+import { Wallet, ChevronDown, LogOut, Copy, Check } from 'lucide-react';
+import { useWallet } from '../contexts/CSPRClickContext';
 
 export const WalletConnectButton: React.FC = () => {
-  const { connected, publicKey, loading, error, connect, disconnect, isExtensionInstalled } = useWallet();
+  const { connected, publicKey, loading, error, connect, disconnect, walletInstalled } = useWallet();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -41,36 +42,7 @@ export const WalletConnectButton: React.FC = () => {
     }
   };
 
-  // No extension installed
-  if (!isExtensionInstalled) {
-    return (
-      <a
-        href="https://chrome.google.com/webstore/detail/casper-wallet/abkahkcbhngaabpcpabfkpccmepffjck"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          padding: '0.5rem 1rem',
-          fontSize: '0.85rem',
-          fontWeight: 600,
-          color: 'var(--primary)',
-          background: 'rgba(255, 59, 59, 0.08)',
-          border: '1px solid rgba(255, 59, 59, 0.2)',
-          borderRadius: '999px',
-          textDecoration: 'none',
-          transition: 'all 0.2s ease',
-        }}
-      >
-        <Wallet size={14} />
-        Install Wallet
-        <ExternalLink size={12} />
-      </a>
-    );
-  }
-
-  // Connected state
+  // Connected state — show key + dropdown
   if (connected && publicKey) {
     return (
       <div ref={dropdownRef} style={{ position: 'relative' }}>
@@ -99,7 +71,7 @@ export const WalletConnectButton: React.FC = () => {
           }} />
           {truncateKey(publicKey)}
           <ChevronDown size={14} style={{
-            transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)',
+            transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.2s ease',
           }} />
         </button>
@@ -114,45 +86,48 @@ export const WalletConnectButton: React.FC = () => {
             borderRadius: '12px',
             padding: '0.5rem',
             minWidth: '220px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-            zIndex: 100,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            zIndex: 1000,
           }}>
             <div style={{
               padding: '0.75rem',
-              fontSize: '0.75rem',
-              color: 'var(--text-tertiary)',
               borderBottom: '1px solid var(--border-color)',
               marginBottom: '0.25rem',
-              wordBreak: 'break-all',
-              lineHeight: 1.5,
             }}>
-              <div style={{ marginBottom: '0.25rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Connected Account
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                Connected
               </div>
-              {publicKey}
+              <div style={{
+                fontSize: '0.8rem',
+                fontFamily: 'monospace',
+                wordBreak: 'break-all',
+                color: 'var(--text-primary)',
+              }}>
+                {publicKey}
+              </div>
             </div>
 
             <button
-              onClick={copyKey}
+              onClick={() => { copyKey(); }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
                 width: '100%',
-                padding: '0.6rem 0.75rem',
+                padding: '0.5rem 0.75rem',
                 fontSize: '0.85rem',
                 color: 'var(--text-primary)',
-                background: 'none',
+                background: 'transparent',
                 border: 'none',
                 borderRadius: '8px',
                 cursor: 'pointer',
-                transition: 'background 0.15s ease',
+                transition: 'background 0.15s',
               }}
-              onMouseOver={(e) => (e.currentTarget.style.background = 'var(--bg-surface-alt)')}
-              onMouseOut={(e) => (e.currentTarget.style.background = 'none')}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               {copied ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
-              {copied ? 'Copied!' : 'Copy Public Key'}
+              {copied ? 'Copied!' : 'Copy Address'}
             </button>
 
             <button
@@ -162,17 +137,17 @@ export const WalletConnectButton: React.FC = () => {
                 alignItems: 'center',
                 gap: '0.5rem',
                 width: '100%',
-                padding: '0.6rem 0.75rem',
+                padding: '0.5rem 0.75rem',
                 fontSize: '0.85rem',
-                color: 'var(--primary)',
-                background: 'none',
+                color: '#EF4444',
+                background: 'transparent',
                 border: 'none',
                 borderRadius: '8px',
                 cursor: 'pointer',
-                transition: 'background 0.15s ease',
+                transition: 'background 0.15s',
               }}
-              onMouseOver={(e) => (e.currentTarget.style.background = 'rgba(255,59,59,0.06)')}
-              onMouseOut={(e) => (e.currentTarget.style.background = 'none')}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239,68,68,0.08)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               <LogOut size={14} />
               Disconnect
@@ -183,7 +158,8 @@ export const WalletConnectButton: React.FC = () => {
     );
   }
 
-  // Disconnected — show connect button
+  // Disconnected (or loading) — single "Connect Wallet" button
+  // The hook's connect() handles: extension present → popup, extension absent → Chrome Web Store
   return (
     <div style={{ position: 'relative' }}>
       <button
@@ -196,7 +172,7 @@ export const WalletConnectButton: React.FC = () => {
           padding: '0.5rem 1rem',
           fontSize: '0.85rem',
           fontWeight: 600,
-          color: loading ? 'var(--text-tertiary)' : 'var(--text-primary)',
+          color: loading ? 'var(--text-secondary)' : 'var(--text-primary)',
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-color)',
           borderRadius: '999px',
@@ -206,22 +182,23 @@ export const WalletConnectButton: React.FC = () => {
         }}
       >
         <Wallet size={14} />
-        {loading ? 'Connecting...' : 'Connect Wallet'}
+        {loading ? 'Connecting...' : walletInstalled ? 'Connect Wallet' : 'Install Wallet'}
       </button>
+
       {error && (
         <div style={{
           position: 'absolute',
           top: 'calc(100% + 8px)',
           right: 0,
-          background: 'rgba(255,59,59,0.08)',
-          border: '1px solid rgba(255,59,59,0.2)',
+          background: 'rgba(239, 68, 68, 0.1)',
+          border: '1px solid rgba(239, 68, 68, 0.2)',
           borderRadius: '8px',
           padding: '0.5rem 0.75rem',
           fontSize: '0.8rem',
-          color: 'var(--primary)',
-          whiteSpace: 'nowrap',
+          color: '#EF4444',
           maxWidth: '280px',
-          zIndex: 100,
+          whiteSpace: 'normal',
+          zIndex: 1000,
         }}>
           {error}
         </div>

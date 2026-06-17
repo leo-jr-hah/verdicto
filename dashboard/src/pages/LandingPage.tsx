@@ -56,6 +56,10 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* How It Works — Interactive Story */}
+      <section id="how-it-works" style={{ borderTop: '1px solid var(--border-color)' }}>
+        <StoryExplainer />
+      </section>
 
       {/* Security Narrative Section */}
       <section className="container landing-security-section" style={{ padding: '8rem 0', textAlign: 'center' }}>
