@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, X, CheckCircle, AlertTriangle, ShieldCheck, Database, FileText, Volume2, VolumeX, Info } from 'lucide-react';
+import { ChevronRight, ChevronLeft, X, CheckCircle, AlertTriangle, ShieldCheck, Database, FileText, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import bgProperty from '../../assets/story/bg_property.webp';
@@ -11,7 +11,6 @@ import charObserver from '../../assets/story/char_observer.webp';
 import charVerdictHero from '../../assets/story/char_verdict_hero.webp';
 import propAgentBot from '../../assets/story/prop_agent_bot.webp';
 import propCasperBlock from '../../assets/story/prop_casper_block.webp';
-import { useAmbientMusic } from '../../hooks/useAmbientMusic';
 
 interface InteractiveStoryProps {
   isOpen: boolean;
@@ -44,10 +43,6 @@ const learnMoreData: Record<string, { title: string, layman: string, tech: strin
 export const InteractiveStory: React.FC<InteractiveStoryProps> = ({ isOpen, onClose }) => {
   const [sceneIndex, setSceneIndex] = useState(0);
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
-  const [isMuted, setIsMuted] = useState(false);
-  
-  // Start the generative ambient music when the story opens
-  useAmbientMusic(isOpen, isMuted);
   
   const navigate = useNavigate();
 
@@ -215,36 +210,6 @@ export const InteractiveStory: React.FC<InteractiveStoryProps> = ({ isOpen, onCl
 
         {/* Top Bar Controls */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '1.5rem 2rem', display: 'flex', justifyContent: 'flex-end', zIndex: 20 }}>
-          <button 
-            onClick={() => setIsMuted(!isMuted)}
-            style={{
-              position: 'absolute',
-              top: '1.5rem',
-              right: '4.5rem', // Just to the left of the close button
-              background: 'rgba(0, 0, 0, 0.5)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: 'var(--text-secondary)',
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              zIndex: 100,
-              transition: 'all 0.2s ease',
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.color = 'var(--text-primary)';
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.color = 'var(--text-secondary)';
-              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.5)';
-            }}
-          >
-            {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-          </button>
           <button onClick={onClose} style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: 'none', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', cursor: 'pointer' }}>
             <X size={20} />
           </button>
