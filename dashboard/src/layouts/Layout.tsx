@@ -56,7 +56,6 @@ export const Layout: React.FC = () => {
     { name: 'Network', path: '/reputation' },
     { name: 'Activity', path: '/transactions' },
     { name: 'How It Works', path: '/architecture' },
-    { name: 'Story', path: '/story' },
   ];
 
   const isActive = (path: string) => {
@@ -302,10 +301,9 @@ export const Layout: React.FC = () => {
       <nav className="mobile-tab-bar">
         {[
           { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-          { name: 'Live', path: '/deliberation', icon: PlayCircle },
+          { name: 'Live Session', path: '/deliberation', icon: PlayCircle },
           { name: 'Network', path: '/reputation', icon: Users },
-          { name: 'Activity', path: '/transactions', icon: Activity },
-          { name: 'Story', path: '/story', icon: Film },
+          { name: 'Activity', path: '/transactions', icon: Activity }
         ].map((tab) => {
           const active = isActive(tab.path);
           return (
