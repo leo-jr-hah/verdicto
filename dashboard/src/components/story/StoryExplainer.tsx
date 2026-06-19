@@ -168,8 +168,8 @@ export const StoryExplainer: React.FC = () => {
             </AnimatePresence>
             
             {/* Progress Indicators and Controls */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '3rem', borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
-              <div style={{ display: 'flex', gap: '8px', flex: 1, maxWidth: '300px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginTop: '3rem', borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
+              <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
                 {SCENES.map((_, idx) => (
                   <button 
                     key={idx}
@@ -207,8 +207,8 @@ export const StoryExplainer: React.FC = () => {
                 ))}
               </div>
 
-              {/* Navigation Controls */}
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
+              {/* Navigation Controls - fixed position */}
+              <div style={{ display: 'flex', gap: '0.75rem', flexShrink: 0 }}>
                 <motion.button 
                   onClick={handlePrev}
                   disabled={activeStep === 0}

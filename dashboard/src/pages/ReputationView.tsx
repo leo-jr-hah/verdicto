@@ -6,6 +6,7 @@ import { ReputationGraph } from '../components/ReputationGraph';
 interface AgentReputation {
   agentId: string;
   agentName: string;
+  description: string;
   currentScore: number;
   previousScore: number;
   history: { timestamp: number; score: number; reason?: string }[];
@@ -28,7 +29,8 @@ export const ReputationView: React.FC = () => {
       ],
       rank: 1,
       totalDisputes: 156,
-      winRate: 94
+      winRate: 94,
+      description: 'Validates raw data points and cross-references sources for accuracy.'
     },
     {
       agentId: 'precedent',
@@ -42,7 +44,8 @@ export const ReputationView: React.FC = () => {
       ],
       rank: 2,
       totalDisputes: 142,
-      winRate: 91
+      winRate: 91,
+      description: 'Searches historical dispute precedents using RAG-powered retrieval.'
     },
     {
       agentId: 'market',
@@ -56,11 +59,12 @@ export const ReputationView: React.FC = () => {
       ],
       rank: 3,
       totalDisputes: 128,
-      winRate: 89
+      winRate: 89,
+      description: 'Provides macro-economic context and market trend interpretation.'
     },
     {
       agentId: 'valuation-a',
-      agentName: 'Market Analyst',
+      agentName: 'Comps Specialist',
       currentScore: 720,
       previousScore: 710,
       history: [
@@ -70,11 +74,12 @@ export const ReputationView: React.FC = () => {
       ],
       rank: 4,
       totalDisputes: 98,
-      winRate: 87
+      winRate: 87,
+      description: 'Analyzes comparable sales and market listings to estimate asset value.'
     },
     {
       agentId: 'valuation-b',
-      agentName: 'Income Analyst',
+      agentName: 'Income Specialist',
       currentScore: 710,
       previousScore: 705,
       history: [
@@ -84,9 +89,12 @@ export const ReputationView: React.FC = () => {
       ],
       rank: 5,
       totalDisputes: 87,
-      winRate: 85
+      winRate: 85,
+      description: 'Projects future cash flows and applies discounted cash flow (DCF) analysis.'
     }
   ]);
+
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
 
   // Listen for reputation updates via WebSocket
   useEffect(() => {
@@ -116,49 +124,38 @@ export const ReputationView: React.FC = () => {
     return () => ws.close();
   }, []);
 
-  const totalSlashingEvents = 0;
   const avgResolutionTime = '14s';
   const topPerformer = agents[0];
 
   return (
-    <div className="container" style={{ padding: '3rem 0' }}>
+    <div>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-            <Shield size={24} color="var(--text-secondary)" />
-            <h2 style={{ fontSize: '2rem', margin: 0 }}>Agent Reputation Registry</h2>
+      <div className="page-header">
+        <div className="page-header-row">
+          <div>
+            <h1 className="page-title">AI Agents</h1>
+            <p className="page-subtitle">Meet the autonomous analysts behind every valuation. Track their accuracy, speed, and track record.</p>
           </div>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            On-chain reliability metrics governing agent selection probability and dispute resolution authority.
-          </p>
-        </div>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '0.5rem',
-          padding: '0.5rem 1rem',
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '999px',
-          fontSize: '0.85rem',
-          color: '#10B981'
-        }}>
-          <CheckCircle2 size={14} />
-          All Agents Verified
+          <div className="page-header-actions">
+            <div className="badge badge-success" style={{ padding: '6px 14px' }}>
+              <CheckCircle2 size={14} />
+              All Agents Verified
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Stats Row */}
-      <div className="reputation-stats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginBottom: '3rem' }}>
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+      <div className="section">
+        <div className="grid-3">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="enterprise-card" 
           style={{ background: 'var(--text-primary)', color: 'white' }}
         >
           <div style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Top Performing Juror
+            Top Performer
           </div>
           <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
             {topPerformer.agentName}
@@ -175,13 +172,13 @@ export const ReputationView: React.FC = () => {
           className="enterprise-card"
         >
           <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Total Slashing Events
+            Honesty Score
           </div>
           <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: '#10B981' }}>
-            {totalSlashingEvents}
+            100%
           </h3>
           <div style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
-            Network behaves honestly
+            Zero penalties recorded
           </div>
         </motion.div>
         
@@ -192,30 +189,80 @@ export const ReputationView: React.FC = () => {
           className="enterprise-card"
         >
           <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Avg Resolution Time
+            Avg Speed
           </div>
           <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
             {avgResolutionTime}
           </h3>
           <div style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
-            Block finality
+            Per case resolution
           </div>
         </motion.div>
+        </div>
       </div>
 
       {/* Reputation Graph Component */}
-      <ReputationGraph agents={agents} />
+      <div className="section">
+        <ReputationGraph agents={agents} />
+      </div>
 
       {/* Agent Details Table */}
-      <div className="enterprise-card" style={{ padding: 0, overflow: 'hidden', marginTop: '2rem' }}>
+      <div className="section">
+        <div className="table-container">
+        {/* Selected Agent Detail Panel */}
+        {selectedAgent && (() => {
+          const agent = agents.find(a => a.agentId === selectedAgent);
+          if (!agent) return null;
+          return (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              style={{
+                padding: '1.25rem 1.5rem',
+                background: 'var(--bg-main)',
+                borderBottom: '1px solid var(--border-color)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '1rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{
+                  width: '40px', height: '40px', borderRadius: '50%',
+                  background: 'var(--primary)', color: 'white',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.8rem', fontWeight: 700, flexShrink: 0,
+                }}>
+                  {agent.agentName.substring(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>{agent.agentName}</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{agent.description}</div>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedAgent(null)}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: 'var(--text-tertiary)', fontSize: '1.1rem', padding: '0.25rem',
+                }}
+              >
+                ✕
+              </button>
+            </motion.div>
+          );
+        })()}
+
         <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-tertiary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Agent Identity</th>
+              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Agent</th>
               <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Role</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Reputation Score</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Win Rate</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Disputes</th>
+              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Score</th>
+              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Accuracy</th>
+              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Cases</th>
               <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Status</th>
             </tr>
           </thead>
@@ -226,18 +273,22 @@ export const ReputationView: React.FC = () => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
+                onClick={() => setSelectedAgent(selectedAgent === agent.agentId ? null : agent.agentId)}
                 style={{ 
                   borderBottom: '1px solid var(--border-color)',
                   fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: '0.85rem'
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  background: selectedAgent === agent.agentId ? 'var(--bg-main)' : 'transparent',
+                  transition: 'background 0.15s ease',
                 }}
               >
-                <td data-label="Agent Identity" style={{ padding: '1.25rem 1.5rem', fontWeight: 600, fontFamily: 'var(--font-sans)' }}>
+                <td data-label="Agent" style={{ padding: '1.25rem 1.5rem', fontWeight: 600, fontFamily: 'var(--font-sans)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ 
-                      width: '32px', 
-                      height: '32px', 
-                      borderRadius: '50%', 
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
                       background: 'var(--bg-surface-alt)',
                       display: 'flex',
                       alignItems: 'center',
@@ -248,24 +299,27 @@ export const ReputationView: React.FC = () => {
                     }}>
                       {agent.agentName.substring(0, 2).toUpperCase()}
                     </div>
-                    <span style={{ color: 'var(--text-primary)' }}>{agent.agentName}</span>
+                    <div>
+                      <span style={{ color: 'var(--text-primary)' }}>{agent.agentName}</span>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>{agent.description}</div>
+                    </div>
                   </div>
                 </td>
                 <td data-label="Role" style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>
                   {agent.agentId.includes('valuation') ? 'Valuation' : 'Juror'}
                 </td>
-                <td data-label="Reputation Score" style={{ padding: '1.25rem 1.5rem' }}>
+                <td data-label="Score" style={{ padding: '1.25rem 1.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ 
-                      width: '60px', 
-                      height: '6px', 
-                      background: 'var(--bg-surface-alt)', 
+                    <div style={{
+                      width: '60px',
+                      height: '6px',
+                      background: 'var(--bg-surface-alt)',
                       borderRadius: '3px',
                       overflow: 'hidden'
                     }}>
-                      <div style={{ 
-                        width: `${agent.currentScore / 10}%`, 
-                        height: '100%', 
+                      <div style={{
+                        width: `${agent.currentScore / 10}%`,
+                        height: '100%',
                         background: agent.currentScore >= 800 ? '#10B981' : agent.currentScore >= 700 ? '#F59E0B' : '#EF4444',
                         borderRadius: '3px'
                       }} />
@@ -273,10 +327,10 @@ export const ReputationView: React.FC = () => {
                     <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{agent.currentScore}</span>
                   </div>
                 </td>
-                <td data-label="Win Rate" style={{ padding: '1.25rem 1.5rem', color: '#10B981', fontWeight: 600 }}>
+                <td data-label="Accuracy" style={{ padding: '1.25rem 1.5rem', color: '#10B981', fontWeight: 600 }}>
                   {agent.winRate}%
                 </td>
-                <td data-label="Disputes" style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>
+                <td data-label="Cases" style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>
                   {agent.totalDisputes}
                 </td>
                 <td data-label="Status" style={{ padding: '1.25rem 1.5rem' }}>
@@ -299,6 +353,7 @@ export const ReputationView: React.FC = () => {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

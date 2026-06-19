@@ -263,7 +263,7 @@ export const DeliberationView: React.FC = () => {
         addLog('Error', `Failed to start dispute: ${data.error || 'Unknown error'}`, 'system');
       }
     } catch (e: any) {
-      addLog('Error', `Cannot reach orchestrator at localhost:3011 — ${e.message}. Start backend with: cd agents && npm run dev && npx tsx orchestrator/index.ts`, 'system');
+      addLog('Error', `Cannot reach orchestrator at localhost:3011. ${e.message}. Start backend with: cd agents && npm run dev && npx tsx orchestrator/index.ts`, 'system');
     } finally {
       setStarting(false);
     }
@@ -290,86 +290,69 @@ export const DeliberationView: React.FC = () => {
   };
 
   return (
-    <div className="container" style={{ padding: '2rem 0', fontFamily: 'var(--font-sans)', color: 'var(--text-primary)', minHeight: 'calc(100vh - 72px)' }}>
-      {/* Terminal Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <div>
-          <h2 style={{ fontSize: '2rem', marginBottom: '0.25rem', fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
-            Live Session
-          </h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-            Observe autonomous <Tooltip term="AI Agents" explanation="Specialized LLMs evaluating specific parts of a dispute.">AI agents</Tooltip> resolving real-world disputes natively <Tooltip term="on-chain" explanation="Recorded permanently on the blockchain.">on-chain</Tooltip>.
-          </p>
+    <div>
+      {/* Page Header */}
+      <div className="page-header">
+        <div className="page-header-row">
+          <div>
+            <h1 className="page-title">Live Demo</h1>
+            <p className="page-subtitle">
+              Watch <Tooltip term="AI Agents" explanation="Specialized LLMs evaluating specific parts of a dispute.">AI agents</Tooltip> resolve a real-world dispute in real time. Every step recorded <Tooltip term="on-chain" explanation="Recorded permanently on the blockchain.">on-chain</Tooltip>.
+            </p>
+          </div>
+          {/* Connection Status Indicator */}
+        <div className="page-header-actions">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', borderRadius: '8px', background: connectionStatus === 'connected' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)' }}>
+            <div className={`status-dot status-dot-${connectionStatus === 'connected' ? 'online' : connectionStatus === 'connecting' ? 'thinking' : 'offline'}`} />
+            <span style={{ fontSize: '12px', fontWeight: 500, color: connectionStatus === 'connected' ? 'var(--success)' : connectionStatus === 'connecting' ? 'var(--warning)' : 'var(--error)' }}>
+              {connectionStatus === 'connected' ? 'Connected' : connectionStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}
+            </span>
+          </div>
         </div>
-        {/* Connection Status Indicator */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '0.5rem', backgroundColor: connectionStatus === 'connected' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)' }}>
-          <div style={{ width: '0.5rem', height: '0.5rem', borderRadius: '50%', backgroundColor: connectionStatus === 'connected' ? '#10B981' : connectionStatus === 'connecting' ? '#F59E0B' : '#EF4444' }} />
-          <span style={{ fontSize: '0.85rem', color: connectionStatus === 'connected' ? '#10B981' : connectionStatus === 'connecting' ? '#F59E0B' : '#EF4444' }}>
-            {connectionStatus === 'connected' ? 'Backend Connected' : connectionStatus === 'connecting' ? 'Connecting...' : 'Backend Disconnected'}
-          </span>
         </div>
       </div>
+
       {(status === 'idle' || status === 'settled') && (
-        <button
-          onClick={() => { setLogs([]); setVerdict(null); setStatus('idle'); startDemo(); }}
-          disabled={starting}
-          className="btn-primary"
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', padding: '0.6rem 1.25rem', opacity: starting ? 0.7 : 1, cursor: starting ? 'wait' : 'pointer' }}
-        >
-          {starting ? (
-            <>
-              <RefreshCw size={16} className="spin" />
-              Starting...
-            </>
-          ) : status === 'settled' ? 'Start Another Case' : 'Start Demo Case'}
-        </button>
+        <div className="section">
+          <button
+            onClick={() => { setLogs([]); setVerdict(null); setStatus('idle'); startDemo(); }}
+            disabled={starting}
+            className="btn btn-primary btn-lg"
+          >
+            {starting ? (
+              <>
+                <RefreshCw size={16} className="spin" />
+                Starting...
+              </>
+            ) : status === 'settled' ? 'Start Another Case' : 'Start Demo Case'}
+          </button>
+        </div>
       )}
 
       {/* Tabs */}
-      <div className="deliberation-tabs" style={{ 
-        display: 'flex', 
-        gap: '0.5rem', 
-        marginBottom: '1.5rem',
-        padding: '0.5rem',
-        background: 'var(--bg-surface)',
-        borderRadius: '8px',
-        border: '1px solid var(--border-color)',
-        overflowX: 'auto'
-      }}>
-        {[
-          { id: 'session', label: 'Session', icon: Activity },
-          { id: 'evidence', label: 'Evidence & Proofs', icon: Brain },
-          { id: 'payments', label: 'Payments & History', icon: DollarSign }
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className="deliberation-tab"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.6rem 1rem',
-              background: activeTab === tab.id ? 'var(--bg-main)' : 'transparent',
-              border: activeTab === tab.id ? '1px solid var(--border-color)' : '1px solid transparent',
-              borderRadius: '6px',
-              color: activeTab === tab.id ? 'var(--text-primary)' : 'var(--text-secondary)',
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-              fontWeight: activeTab === tab.id ? 600 : 400,
-              transition: 'all 0.2s ease',
-              boxShadow: activeTab === tab.id ? 'var(--shadow-sm)' : 'none',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <tab.icon size={16} />
-            <span className="hide-on-mobile">{tab.label}</span>
-            <span className="show-on-mobile">{tab.id === 'session' ? 'Session' : tab.id === 'evidence' ? 'Evidence' : 'Payments'}</span>
-          </button>
-        ))}
+      <div className="section">
+        <div className="filter-tabs">
+          {[
+            { id: 'session', label: 'Live Stream', icon: Activity },
+            { id: 'evidence', label: 'Evidence & Proofs', icon: Brain },
+            { id: 'payments', label: 'Payments', icon: DollarSign }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`filter-tab ${activeTab === tab.id ? 'active' : ''}`}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <tab.icon size={14} />
+              <span className="hide-on-mobile">{tab.label}</span>
+              <span className="show-on-mobile">{tab.id === 'session' ? 'Live' : tab.id === 'evidence' ? 'Evidence' : 'Payments'}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Tab Content */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <AnimatePresence mode="wait">
           {activeTab === 'session' && (
             <motion.div
@@ -393,12 +376,12 @@ export const DeliberationView: React.FC = () => {
                       <span style={{ fontSize: '1rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Final Verdict</span>
                     </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-                      {verdict.finalVerdict === 'FullRefund' ? '100% Refund Granted' : 
-                       verdict.finalVerdict === 'SplitFifty' ? '50/50 Settlement Reached' : 
-                       'Full Release to Treasury'}
+                      {verdict.finalVerdict === 'FullRefund' ? 'Full Refund Granted' :
+                       verdict.finalVerdict === 'SplitFifty' ? '50/50 Settlement' :
+                       'Released to Treasury'}
                     </div>
                     <div style={{ fontSize: '1rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                      <strong>Explanation:</strong> Based on the market APIs and mortgage rates, the 3 AI agents determined the true assessed value is <strong>${verdict.finalValue?.toLocaleString()}</strong>. The smart contract automatically routed the funds back to the token holders.
+                      <strong>What happened:</strong> After analyzing market data and mortgage rates, the AI agents determined the true value is <strong>${verdict.finalValue?.toLocaleString()}</strong>. Funds were automatically routed back to the token holders.
                     </div>
                     <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
                       <button onClick={() => setActiveTab('evidence')} className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>View Evidence</button>
@@ -416,12 +399,8 @@ export const DeliberationView: React.FC = () => {
                 )}
               </div>
 
-              {/* Layout Split: Agents (25%) / Live Log (75%) */}
-              <div className="deliberation-main-grid" style={{ 
-                display: 'grid', 
-                gridTemplateColumns: '1fr 3fr', 
-                gap: '1.5rem'
-              }}>
+              {/* Layout Split: Agents / Live Log */}
+              <div className="grid-sidebar-main" style={{ gridTemplateColumns: '260px 1fr' }}>
                 {/* Agent Status Panel */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)', marginBottom: '0.5rem' }}>Agents</h4>
@@ -445,7 +424,7 @@ export const DeliberationView: React.FC = () => {
                         <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{agent.name}</span>
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                        {agent.status === 'idle' ? 'Standby' : agent.status === 'thinking' ? 'Processing...' : 'Completed'}
+                        {agent.status === 'idle' ? 'Waiting' : agent.status === 'thinking' ? 'Working...' : 'Done'}
                       </div>
                     </motion.div>
                   ))}
@@ -524,14 +503,14 @@ export const DeliberationView: React.FC = () => {
                       return;
                     }
                     if (result.valid) {
-                      addLog('Audit', `✅ Chain VALID — ${result.receiptCount} receipts verified with HMAC signatures`, 'system');
+                      addLog('Audit', `✅ Chain VALID. ${result.receiptCount} receipts verified with HMAC signatures.`, 'system');
                     } else {
-                      addLog('Audit', `❌ Chain INVALID — tampering detected in ${result.receiptCount} receipts`, 'system');
+                      addLog('Audit', `❌ Chain INVALID. Tampering detected in ${result.receiptCount} receipts.`, 'system');
                     }
                     // Log per-receipt details
                     for (const d of result.details) {
                       const icon = d.chainLinkValid ? '✓' : '✗';
-                      addLog('Audit', `  ${icon} Receipt ${d.receiptId.substring(0, 8)}... (juror: ${d.jurorId}, round: ${d.round}) — chain link: ${d.chainLinkValid ? 'ok' : 'BROKEN'}`, 'system');
+                      addLog('Audit', `  ${icon} Receipt ${d.receiptId.substring(0, 8)}... (juror: ${d.jurorId}, round: ${d.round}), chain link: ${d.chainLinkValid ? 'ok' : 'BROKEN'}`, 'system');
                     }
                   } catch (err: any) {
                     addLog('Audit', `✗ Verification error: ${err.message}`, 'system');

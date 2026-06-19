@@ -1,14 +1,59 @@
 /**
- * CSPRClickProvider — lightweight wallet context.
+ * CSPRClickProvider - wallet context using the official Casper Wallet SDK.
  *
- * Detects Casper Wallet via window.casper (injected by Casper Wallet v2.x
- * browser extension). No external SDK dependency needed for the demo.
+ * Detection: window.CasperWalletProvider (injected by Casper Wallet v2.x extension).
+ * API docs: https://github.com/make-software/casper-wallet-sdk
+ * Reference: https://github.com/make-software/casper-wallet-playground
  *
- * If the extension is NOT installed, clicking "Connect Wallet" opens the
- * Chrome Web Store so the user can install it.
+ * IMPORTANT: Casper Wallet extension does NOT have provider.on() / provider.off().
+ * Instead, it dispatches DOM CustomEvents on `window`. You listen with:
+ *   window.addEventListener(CasperWalletEventTypes.Connected, handler)
+ *
+ * The event.detail is a JSON string: { activeKey: string, isConnected: boolean, isLocked: boolean }
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  type ReactNode,
+} from 'react';
+
+/* ---------- Types (matching Casper Wallet SDK) ---------- */
+
+interface CasperWalletProvider {
+  requestConnection(): Promise<boolean>;
+  requestSwitchAccount(): Promise<boolean>;
+  sign(transactionJson: string, signingPublicKeyHex: string): Promise<{ signature?: string; cancelled?: boolean }>;
+  signMessage(message: string, signingPublicKeyHex: string): Promise<{ signature?: string; cancelled?: boolean }>;
+  getActivePublicKey(): Promise<string>;
+  isConnected(): Promise<boolean>;
+  disconnect(): Promise<void>;
+}
+
+interface CasperWalletEventTypes {
+  Connected: string;
+  Disconnected: string;
+  ActiveKeyChanged: string;
+  SwitchedAccount: string;
+}
+
+/** Event.detail parsed from Casper Wallet CustomEvents */
+interface CasperWalletState {
+  activeKey: string | null;
+  isConnected: boolean;
+  isLocked: boolean;
+}
+
+declare global {
+  interface Window {
+    CasperWalletProvider?: () => CasperWalletProvider;
+    CasperWalletEventTypes?: CasperWalletEventTypes;
+  }
+}
 
 /* ---------- Context shape ---------- */
 
@@ -26,24 +71,24 @@ export interface WalletState {
 
 const WalletContext = createContext<WalletState | null>(null);
 
-/* ---------- Helpers ---------- */
+/* ---------- Constants ---------- */
 
 const CHROME_WEB_STORE_URL =
   'https://chromewebstore.google.com/detail/casper-wallet/abkahkcbhngaebpcgfmhkoioedceoigp?hl=en';
 
-function accountHashFromPublicKey(publicKeyHex: string): string {
-  const cleanHex = publicKeyHex.replace(/^0(0|x)/i, '');
-  let hash = 0;
-  for (let i = 0; i < cleanHex.length; i++) {
-    hash = ((hash << 5) - hash + cleanHex.charCodeAt(i)) | 0;
-  }
-  const hex = Math.abs(hash).toString(16).padStart(8, '0');
-  return `account-hash-${cleanHex.substring(0, 8)}...${hex}`;
-}
+/* ---------- Helpers ---------- */
 
 /** Check if Casper Wallet extension is installed */
 function isCasperWalletInstalled(): boolean {
-  return typeof window !== 'undefined' && !!(window as any).casper;
+  return typeof window !== 'undefined' && typeof window.CasperWalletProvider === 'function';
+}
+
+/** Derive a display-friendly account hash from a public key hex */
+function accountHashFromPublicKey(publicKeyHex: string): string {
+  if (publicKeyHex.length > 16) {
+    return `account-hash-${publicKeyHex.substring(0, 8)}...${publicKeyHex.substring(publicKeyHex.length - 8)}`;
+  }
+  return `account-hash-${publicKeyHex}`;
 }
 
 /* ---------- Provider ---------- */
@@ -57,23 +102,100 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [error, setError] = useState<string | null>(null);
   const [walletInstalled, setWalletInstalled] = useState(false);
 
-  // Check wallet installation on mount
+  const providerRef = useRef<CasperWalletProvider | null>(null);
+
+  // Helper to update wallet state from a public key
+  const updateFromPublicKey = useCallback((pk: string) => {
+    setConnected(true);
+    setPublicKey(pk);
+    setAccountHash(accountHashFromPublicKey(pk));
+    setAccountName(pk.substring(0, 12) + '...');
+  }, []);
+
+  const clearState = useCallback(() => {
+    setConnected(false);
+    setPublicKey(null);
+    setAccountHash(null);
+    setAccountName(null);
+  }, []);
+
+  // Check wallet installation on mount + periodically (extension may load after page)
   useEffect(() => {
     setWalletInstalled(isCasperWalletInstalled());
 
-    // Also check periodically (extension may load after page)
     const interval = setInterval(() => {
-      setWalletInstalled(isCasperWalletInstalled());
-    }, 1000);
+      const installed = isCasperWalletInstalled();
+      setWalletInstalled(installed);
+      if (installed) clearInterval(interval);
+    }, 500);
 
-    // Stop checking after 10s
-    const timeout = setTimeout(() => clearInterval(interval), 10000);
+    const timeout = setTimeout(() => clearInterval(interval), 15000);
 
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
   }, []);
+
+  // Subscribe to Casper Wallet CustomEvents on window
+  // The extension dispatches DOM events, NOT provider.on()!
+  useEffect(() => {
+    const events = window.CasperWalletEventTypes;
+    if (!events) return;
+
+    const handleConnected = (e: Event) => {
+      try {
+        const state: CasperWalletState = JSON.parse((e as CustomEvent).detail);
+        if (state.activeKey) {
+          updateFromPublicKey(state.activeKey);
+        }
+      } catch {
+        // If parse fails, try getting active key directly
+        providerRef.current?.getActivePublicKey().then(updateFromPublicKey).catch(() => {});
+      }
+    };
+
+    const handleDisconnected = () => {
+      clearState();
+    };
+
+    const handleActiveKeyChanged = (e: Event) => {
+      try {
+        const state: CasperWalletState = JSON.parse((e as CustomEvent).detail);
+        if (state.activeKey) {
+          updateFromPublicKey(state.activeKey);
+        } else {
+          clearState();
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    window.addEventListener(events.Connected, handleConnected);
+    window.addEventListener(events.Disconnected, handleDisconnected);
+    window.addEventListener(events.ActiveKeyChanged, handleActiveKeyChanged);
+
+    return () => {
+      window.removeEventListener(events.Connected, handleConnected);
+      window.removeEventListener(events.Disconnected, handleDisconnected);
+      window.removeEventListener(events.ActiveKeyChanged, handleActiveKeyChanged);
+    };
+  }, [updateFromPublicKey, clearState]);
+
+  // Also check if already connected on mount (page refresh while wallet is connected)
+  useEffect(() => {
+    if (!isCasperWalletInstalled()) return;
+
+    const provider = window.CasperWalletProvider!();
+    providerRef.current = provider;
+
+    provider.isConnected().then((connected) => {
+      if (connected) {
+        provider.getActivePublicKey().then(updateFromPublicKey).catch(() => {});
+      }
+    }).catch(() => {});
+  }, [updateFromPublicKey]);
 
   const connect = useCallback(async () => {
     setError(null);
@@ -86,50 +208,72 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     setLoading(true);
 
+    // Safety timeout: if the popup is closed without resolving,
+    // reset loading after 30 seconds (user likely closed the popup)
+    const safetyTimeout = setTimeout(() => {
+      setLoading(false);
+    }, 30000);
+
     try {
-      const casper = (window as any).casper;
+      // Create provider instance
+      const provider = window.CasperWalletProvider!();
+      providerRef.current = provider;
 
-      // Request connection — Casper Wallet v2.x shows its popup
-      const result = await casper.requestConnection();
+      // Request connection — this opens the wallet popup
+      const accepted = await provider.requestConnection();
 
-      if (result && result.publicKey) {
-        setConnected(true);
-        setPublicKey(result.publicKey);
-        setAccountHash(accountHashFromPublicKey(result.publicKey));
-        setAccountName(result.activeKey || null);
+      clearTimeout(safetyTimeout);
+
+      if (accepted) {
+        // Get the active public key
+        const pk = await provider.getActivePublicKey();
+        updateFromPublicKey(pk);
       }
+      // If not accepted, user cancelled — silently ignore
     } catch (err: any) {
-      // User cancelled — not a real error
-      if (err?.message?.includes('cancelled') || err?.message?.includes('denied')) {
-        // silently ignore
+      clearTimeout(safetyTimeout);
+      // User cancelled or wallet error
+      if (
+        err?.message?.includes('cancelled') ||
+        err?.message?.includes('denied') ||
+        err?.message?.includes('rejected')
+      ) {
+        // silently ignore user cancellation
       } else {
         setError(err?.message || 'Failed to connect wallet.');
       }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [updateFromPublicKey]);
 
   const disconnect = useCallback(() => {
-    setConnected(false);
-    setPublicKey(null);
-    setAccountHash(null);
-    setAccountName(null);
-    setError(null);
-  }, []);
+    const provider = providerRef.current;
+
+    if (provider) {
+      provider.disconnect().catch(() => {
+        // ignore errors on disconnect
+      });
+    }
+
+    clearState();
+    providerRef.current = null;
+  }, [clearState]);
 
   return (
-    <WalletContext.Provider value={{
-      connected,
-      publicKey,
-      accountHash,
-      accountName,
-      loading,
-      error,
-      connect,
-      disconnect,
-      walletInstalled,
-    }}>
+    <WalletContext.Provider
+      value={{
+        connected,
+        publicKey,
+        accountHash,
+        accountName,
+        loading,
+        error,
+        connect,
+        disconnect,
+        walletInstalled,
+      }}
+    >
       {children}
     </WalletContext.Provider>
   );
@@ -137,7 +281,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
 
 /**
  * Access wallet state from any component.
- * Throws if used outside <CSPRClickProvider>.
+ * Must be used inside <CSPRClickProvider>.
  */
 export function useWallet(): WalletState {
   const ctx = useContext(WalletContext);

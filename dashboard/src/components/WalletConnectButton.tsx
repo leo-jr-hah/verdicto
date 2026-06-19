@@ -1,16 +1,20 @@
 /**
- * WalletConnectButton — displays in the top nav bar.
+ * WalletConnectButton - displays in the sidebar and mobile header.
  *
- * Always shows "Connect Wallet". On click:
- *   - If extension is installed → triggers the Casper Wallet popup
- *   - If extension is NOT installed → opens Chrome Web Store in new tab
+ * - If extension is NOT installed → shows "Install Wallet" → opens Chrome Web Store
+ * - If extension IS installed → shows "Connect Wallet" → triggers Casper Wallet popup
  *
- * When connected → truncated public key + dropdown with disconnect
+ * When connected → truncated public key + dropdown with:
+ *   - Copy Address
+ *   - Get Testnet Tokens (faucet link)
+ *   - Disconnect
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Wallet, ChevronDown, LogOut, Copy, Check } from 'lucide-react';
+import { Wallet, ChevronDown, LogOut, Copy, Check, Droplets } from 'lucide-react';
 import { useWallet } from '../contexts/CSPRClickContext';
+
+const FAUCET_URL = 'https://testnet.cspr.live/tools/faucet';
 
 export const WalletConnectButton: React.FC = () => {
   const { connected, publicKey, loading, error, connect, disconnect, walletInstalled } = useWallet();
@@ -42,7 +46,7 @@ export const WalletConnectButton: React.FC = () => {
     }
   };
 
-  // Connected state — show key + dropdown
+  // Connected state: show key + dropdown
   if (connected && publicKey) {
     return (
       <div ref={dropdownRef} style={{ position: 'relative' }}>
@@ -52,8 +56,8 @@ export const WalletConnectButton: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            padding: '0.5rem 1rem',
-            fontSize: '0.85rem',
+            padding: '0.5rem 0.75rem',
+            fontSize: '0.8rem',
             fontWeight: 600,
             color: '#10B981',
             background: 'rgba(16, 185, 129, 0.08)',
@@ -61,6 +65,8 @@ export const WalletConnectButton: React.FC = () => {
             borderRadius: '999px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
+            width: '100%',
+            justifyContent: 'center',
           }}
         >
           <div style={{
@@ -68,18 +74,23 @@ export const WalletConnectButton: React.FC = () => {
             height: 8,
             borderRadius: '50%',
             background: '#10B981',
+            flexShrink: 0,
           }} />
-          {truncateKey(publicKey)}
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {truncateKey(publicKey)}
+          </span>
           <ChevronDown size={14} style={{
             transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.2s ease',
+            flexShrink: 0,
           }} />
         </button>
 
         {dropdownOpen && (
           <div style={{
             position: 'absolute',
-            top: 'calc(100% + 8px)',
+            bottom: 'calc(100% + 8px)',
+            left: 0,
             right: 0,
             background: 'var(--bg-surface)',
             border: '1px solid var(--border-color)',
@@ -89,24 +100,27 @@ export const WalletConnectButton: React.FC = () => {
             boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
             zIndex: 1000,
           }}>
+            {/* Connected account info */}
             <div style={{
               padding: '0.75rem',
               borderBottom: '1px solid var(--border-color)',
               marginBottom: '0.25rem',
             }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Connected
               </div>
               <div style={{
-                fontSize: '0.8rem',
+                fontSize: '0.75rem',
                 fontFamily: 'monospace',
                 wordBreak: 'break-all',
                 color: 'var(--text-primary)',
+                lineHeight: 1.4,
               }}>
                 {publicKey}
               </div>
             </div>
 
+            {/* Copy Address */}
             <button
               onClick={() => { copyKey(); }}
               style={{
@@ -130,6 +144,7 @@ export const WalletConnectButton: React.FC = () => {
               {copied ? 'Copied!' : 'Copy Address'}
             </button>
 
+            {/* Disconnect */}
             <button
               onClick={() => { disconnect(); setDropdownOpen(false); }}
               style={{
@@ -158,10 +173,9 @@ export const WalletConnectButton: React.FC = () => {
     );
   }
 
-  // Disconnected (or loading) — single "Connect Wallet" button
-  // The hook's connect() handles: extension present → popup, extension absent → Chrome Web Store
+  // Disconnected (or loading): single "Connect Wallet" button
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', width: '100%' }}>
       <button
         onClick={connect}
         disabled={loading}
@@ -169,8 +183,8 @@ export const WalletConnectButton: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           gap: '0.5rem',
-          padding: '0.5rem 1rem',
-          fontSize: '0.85rem',
+          padding: '0.5rem 0.75rem',
+          fontSize: '0.8rem',
           fontWeight: 600,
           color: loading ? 'var(--text-secondary)' : 'var(--text-primary)',
           background: 'var(--bg-surface)',
@@ -179,6 +193,8 @@ export const WalletConnectButton: React.FC = () => {
           cursor: loading ? 'wait' : 'pointer',
           transition: 'all 0.2s ease',
           opacity: loading ? 0.7 : 1,
+          width: '100%',
+          justifyContent: 'center',
         }}
       >
         <Wallet size={14} />
@@ -188,7 +204,8 @@ export const WalletConnectButton: React.FC = () => {
       {error && (
         <div style={{
           position: 'absolute',
-          top: 'calc(100% + 8px)',
+          bottom: 'calc(100% + 8px)',
+          left: 0,
           right: 0,
           background: 'rgba(239, 68, 68, 0.1)',
           border: '1px solid rgba(239, 68, 68, 0.2)',
@@ -196,7 +213,6 @@ export const WalletConnectButton: React.FC = () => {
           padding: '0.5rem 0.75rem',
           fontSize: '0.8rem',
           color: '#EF4444',
-          maxWidth: '280px',
           whiteSpace: 'normal',
           zIndex: 1000,
         }}>

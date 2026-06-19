@@ -36,16 +36,16 @@ function typeColor(type: string): string {
   }
 }
 
-const FILTER_TABS = ['all', 'zk-lite', 'hmac', 'payment', 'verdict'] as const;
+const FILTER_TABS = ['all', 'valuations', 'votes', 'payments', 'verdicts'] as const;
 
 function matchesFilter(type: string, filter: string): boolean {
   if (filter === 'all') return true;
   const lower = type.toLowerCase();
   switch (filter) {
-    case 'zk-lite': return lower.includes('zk-lite');
-    case 'hmac': return lower.includes('hmac');
-    case 'payment': return lower.includes('payment') || lower.includes('x402');
-    case 'verdict': return lower.includes('verdict') || lower.includes('execute');
+    case 'valuations': return lower.includes('zk-lite') || lower.includes('hmac');
+    case 'votes': return lower.includes('receipt') || lower.includes('juror');
+    case 'payments': return lower.includes('payment') || lower.includes('x402');
+    case 'verdicts': return lower.includes('verdict') || lower.includes('execute');
     default: return lower.includes(filter);
   }
 }
@@ -134,16 +134,16 @@ export const TransactionsView: React.FC = () => {
   const filtered = filterType === 'all' ? transactions : transactions.filter(t => matchesFilter(t.type, filterType));
 
   return (
-    <div className="container" style={{ padding: '3rem 0' }}>
+    <div>
       {/* Header */}
       <div className="tx-header">
         <div>
           <div className="tx-header-title">
             <Shield size={24} color="var(--text-secondary)" />
-            <h2>Cryptographic Audit Ledger</h2>
+            <h2>Case History</h2>
           </div>
           <p style={{ color: 'var(--text-secondary)' }}>
-            Immutable ZK-Lite execution commitments and HMAC-chained receipts on Casper Testnet.
+            Every valuation, vote, and payment, permanently recorded and cryptographically verified.
           </p>
         </div>
         <div className="tx-header-controls">
@@ -322,13 +322,13 @@ export const TransactionsView: React.FC = () => {
                 </div>
 
                 <div>
-                  <div className="tx-detail-label">Transaction Hash</div>
+                  <div className="tx-detail-label">Hash</div>
                   <div className="tx-detail-hash">{selectedTx.hash}</div>
                 </div>
 
                 <div className="tx-detail-grid">
                   <div>
-                    <div className="tx-detail-label">Target</div>
+                    <div className="tx-detail-label">Contract</div>
                     <div className="tx-detail-value">{selectedTx.contract}</div>
                   </div>
                   <div>
@@ -336,7 +336,7 @@ export const TransactionsView: React.FC = () => {
                     <div className="tx-detail-value">{selectedTx.blockHeight}</div>
                   </div>
                   <div>
-                    <div className="tx-detail-label">Timestamp</div>
+                    <div className="tx-detail-label">Time</div>
                     <div className="tx-detail-value">{new Date(selectedTx.timestamp).toLocaleString()}</div>
                   </div>
                   <div>
@@ -346,7 +346,7 @@ export const TransactionsView: React.FC = () => {
                   <div>
                     <div className="tx-detail-label">Location</div>
                     <div className="tx-detail-value" style={{ color: selectedTx.onChain ? '#10B981' : '#F59E0B' }}>
-                      {selectedTx.onChain ? '⛓️ On-chain (Casper)' : '📋 Off-chain (logical event)'}
+                      {selectedTx.onChain ? '⛓️ On-chain' : '📋 Off-chain'}
                     </div>
                   </div>
                 </div>
@@ -362,7 +362,7 @@ export const TransactionsView: React.FC = () => {
                   </a>
                 ) : (
                   <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', fontSize: '0.85rem', color: '#F59E0B' }}>
-                    ℹ️ This is an off-chain logical event — no on-chain deploy hash to view on cspr.live.
+                    ℹ️ This is an off-chain logical event. No on-chain deploy hash to view on cspr.live.
                   </div>
                 )}
 

@@ -208,7 +208,7 @@ export const CryptographicProofExplorer: React.FC<ProofExplorerProps> = ({ recei
 
   const verifyChain = () => {
     if (onVerify) {
-      // Call once — the backend verifies the entire chain for the active dispute
+      // Call once. The backend verifies the entire chain for the active dispute
       onVerify(receipts.length > 0 ? receipts[0].hash : '');
     }
   };

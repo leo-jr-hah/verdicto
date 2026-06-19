@@ -15,6 +15,9 @@ import { computeAggregateTrust } from '../shared/trust-framework.js';
 import { createDeliberationReceipt, DeliberationReceipt, verifyReceiptChain } from '../shared/audit-trail.js';
 import { createExecutionCommitment, storeCommitmentOnCasper } from '../shared/verifiable-execution.js';
 import { saveTransaction, createTransactionEntry, loadTransactions } from '../shared/transaction-log.js';
+import { runDualValuation, type ValuationRequest } from '../shared/agent-engine.js';
+import { fetchAssetData, type AssetData } from '../shared/data-sources.js';
+import type { AssetType } from '../shared/types.js';
 
 // ─── Named constants ─────────────────────────────────────────────────────────
 const CSPR_CLOUD_URL = process.env.CSPRCLOUD_BASE_URL || 'https://api.cspr.cloud/v1';
@@ -423,14 +426,14 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
   const round1Results = await Promise.all(jurorPorts.map(async (juror, index) => {
     const jurorId = JUROR_IDS[index];
     try {
-      emitAgentThought(jurorId, juror.name, `Starting deliberation — analyzing evidence from both agents...`, 15, 'reasoning');
+      emitAgentThought(jurorId, juror.name, `Starting deliberation: analyzing evidence from both agents...`, 15, 'reasoning');
       emitAgentThought(jurorId, juror.name, `Reviewing Agent-A valuation: ${resultA.estimated_value.toLocaleString()}`, 30, 'evidence');
 
       const res = await fetchWithX402(`http://localhost:${juror.port}/mcp`, jurorMcpPayload, juror.name);
       const verdict = JSON.parse(res.result?.content?.[0]?.text);
       console.log(`  👨‍⚖️ ${juror.name} (Rep: ${juror.rep}): Voted ${verdict.vote} | ${verdict.reasoning}`);
 
-      emitAgentThought(jurorId, juror.name, `Vote: ${verdict.vote} — Confidence: ${verdict.confidence || 78}%`, 90, 'validation');
+      emitAgentThought(jurorId, juror.name, `Vote: ${verdict.vote} | Confidence: ${verdict.confidence || 78}%`, 90, 'validation');
       emitEvent('juror_vote', { juror: juror.name, round: 1, verdict, rep: juror.rep });
 
       // HMAC receipt with derived key (not raw private key)
@@ -482,7 +485,7 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
       const verdict = JSON.parse(res.result.content[0].text);
       console.log(`  👨‍⚖️ ${juror.name}: Final Vote ${verdict.vote} | ${verdict.reasoning}`);
 
-      emitAgentThought(jurorId, juror.name, `Final vote: ${verdict.vote} — Confidence: ${verdict.confidence || 82}%`, 95, 'validation');
+      emitAgentThought(jurorId, juror.name, `Final vote: ${verdict.vote} | Confidence: ${verdict.confidence || 82}%`, 95, 'validation');
       emitEvent('juror_vote', { juror: juror.name, round: 2, verdict, rep: juror.rep });
 
       const secret = process.env[`AGENT_${jurorKeySuffix(juror.name)}_PRIVATE_KEY`] || 'fallback-dev-secret';
@@ -562,17 +565,17 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
     finalVerdict = 'FullRefund';
     verdictIndex = 0;
     finalValue = resultA.estimated_value;
-    console.log(`  📋 Verdict: FullRefund (Favoring Comps/Agent A) — Weight: ${scoreA}`);
+    console.log(`  📋 Verdict: FullRefund (Favoring Comps/Agent A) | Weight: ${scoreA}`);
   } else if (scoreB >= scoreA && scoreB >= scoreSplit) {
     finalVerdict = 'FullRelease';
     verdictIndex = 2;
     finalValue = resultB.estimated_value;
-    console.log(`  📋 Verdict: FullRelease (Favoring DCF/Agent B) — Weight: ${scoreB}`);
+    console.log(`  📋 Verdict: FullRelease (Favoring DCF/Agent B) | Weight: ${scoreB}`);
   } else {
     finalVerdict = 'SplitFifty';
     verdictIndex = 1;
     finalValue = Math.round((resultA.estimated_value + resultB.estimated_value) / 2);
-    console.log(`  📋 Verdict: SplitFifty — Weight: ${scoreSplit}`);
+    console.log(`  📋 Verdict: SplitFifty | Weight: ${scoreSplit}`);
   }
 
   console.log(`\n${'─'.repeat(60)}`);
@@ -806,6 +809,378 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });
     }
+  });
+
+  /**
+   * POST /api/assess
+   * Run a full RWA assessment: dual valuation + juror deliberation.
+   * Returns the assessment result synchronously (waits for completion).
+   */
+  app.post('/api/assess', async (req, res) => {
+    try {
+      const ip = req.ip || req.socket.remoteAddress || 'unknown';
+      if (isRateLimited(ip)) {
+        return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
+      }
+
+      const { assetType, name, description, askingPrice, location, artistOrMedium, weightOz, sqft } = req.body;
+
+      // Validate asset type
+      const validTypes: AssetType[] = ['real-estate', 'art', 'commodity'];
+      if (!assetType || !validTypes.includes(assetType)) {
+        return res.status(400).json({
+          success: false,
+          error: `assetType must be one of: ${validTypes.join(', ')}`,
+        });
+      }
+
+      if (!name || typeof name !== 'string' || name.trim().length === 0) {
+        return res.status(400).json({ success: false, error: 'name is required' });
+      }
+
+      if (typeof askingPrice !== 'number' || askingPrice <= 0) {
+        return res.status(400).json({ success: false, error: 'askingPrice must be a positive number' });
+      }
+
+      // Asset-specific validation
+      if (assetType === 'real-estate' && !location) {
+        return res.status(400).json({ success: false, error: 'location is required for real estate' });
+      }
+      if (assetType === 'art' && !artistOrMedium) {
+        return res.status(400).json({ success: false, error: 'artistOrMedium is required for art' });
+      }
+      if (assetType === 'commodity' && (!weightOz || weightOz <= 0)) {
+        return res.status(400).json({ success: false, error: 'weightOz must be a positive number for commodities' });
+      }
+
+      const assetId = `${assetType.toUpperCase().slice(0, 2)}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+
+      console.log(`\n📋 Assessment request: ${name} (${assetType}) | ${askingPrice.toLocaleString()}`);
+
+      // Step 1: Fetch market data
+      let marketData: AssetData | null = null;
+      try {
+        if (assetType === 'real-estate' && location) {
+          marketData = await fetchAssetData({ id: assetId, type: assetType, name, description: description || '', askingPrice, location });
+        } else if (assetType === 'art' && artistOrMedium) {
+          marketData = await fetchAssetData({ id: assetId, type: assetType, name, description: description || '', askingPrice, artist: artistOrMedium });
+        } else if (assetType === 'commodity') {
+          marketData = await fetchAssetData({ id: assetId, type: assetType, name, description: description || '', askingPrice, weight: weightOz });
+        }
+      } catch (err: any) {
+        console.warn(`  ⚠️ Market data fetch failed: ${err.message}`);
+      }
+
+      // Step 2: Dual valuation
+      const valuationReq: ValuationRequest = {
+        assetType,
+        assetId,
+        name,
+        location,
+        artistOrMedium,
+        weightOz,
+        sqft,
+      };
+
+      const [valuationA, valuationB] = await runDualValuation(valuationReq);
+      const minVal = Math.min(valuationA.estimated_value, valuationB.estimated_value);
+      const divergence = minVal > 0
+        ? Math.abs(((valuationA.estimated_value - valuationB.estimated_value) / minVal) * 100)
+        : 0;
+
+      console.log(`  📊 Valuation A: ${valuationA.estimated_value.toLocaleString()} (${valuationA.method})`);
+      console.log(`  📊 Valuation B: ${valuationB.estimated_value.toLocaleString()} (${valuationB.method})`);
+      console.log(`  📊 Divergence: ${divergence.toFixed(1)}%`);
+
+      // Step 3: If divergence > 15%, run juror deliberation
+      let verdict: any = null;
+      if (divergence > 15) {
+        const disputeId = `ASSESS-${Date.now()}`;
+        try {
+          const result = await runDisputeResolution(disputeId, assetId, location || 'Global', weightOz || sqft || 1);
+          verdict = result;
+        } catch (err: any) {
+          console.warn(`  ⚠️ Deliberation failed: ${err.message}`);
+        }
+      }
+
+      const assessedValue = verdict?.finalValue || Math.round((valuationA.estimated_value + valuationB.estimated_value) / 2);
+
+      // ── Build analysis steps (the "how we got here" trail) ──────────────
+      const analysisSteps: Array<{
+        step: number;
+        title: string;
+        description: string;
+        status: 'success' | 'warning' | 'error';
+        data?: Record<string, unknown>;
+      }> = [];
+
+      // Step 1: Data collection
+      const dataSourcesUsed: Array<{
+        name: string;
+        type: string;
+        status: 'live' | 'mock' | 'failed';
+        detail: string;
+      }> = [];
+
+      if (assetType === 'real-estate') {
+        dataSourcesUsed.push({
+          name: 'RentCast API',
+          type: 'property_data',
+          status: marketData?.source === 'RentCast API' ? 'live' : 'mock',
+          detail: marketData?.source === 'RentCast API'
+            ? `Found ${marketData.comparables?.length || 0} comparable properties for ${location}`
+            : `Using regional price estimates for ${location} (API unavailable)`,
+        });
+        dataSourcesUsed.push({
+          name: 'FRED Economic Data',
+          type: 'interest_rates',
+          status: valuationA.dataSource === 'FRED API' || valuationB.dataSource === 'FRED API' ? 'live' : 'mock',
+          detail: valuationA.dataSource === 'FRED API' || valuationB.dataSource === 'FRED API'
+            ? 'Mortgage rate fetched from Federal Reserve Economic Data'
+            : 'Using default mortgage rate (6.8%)',
+        });
+      } else if (assetType === 'art') {
+        dataSourcesUsed.push({
+          name: 'Met Museum Collection API',
+          type: 'art_database',
+          status: marketData?.source === 'Met Museum API' ? 'live' : 'mock',
+          detail: marketData?.source === 'Met Museum API'
+            ? `Found ${marketData.comparables?.length || 0} comparable works in museum collections`
+            : 'Using art market heuristics (museum API unavailable)',
+        });
+        dataSourcesUsed.push({
+          name: 'Auction Market Heuristics',
+          type: 'price_estimation',
+          status: 'mock',
+          detail: 'Estimated auction value based on medium, artist prominence, and market conditions',
+        });
+      } else if (assetType === 'commodity') {
+        const commodityName = name?.toLowerCase() || 'gold';
+        const commodityType = commodityName.includes('silver') ? 'Silver'
+          : commodityName.includes('platinum') ? 'Platinum'
+          : commodityName.includes('palladium') ? 'Palladium' : 'Gold';
+        dataSourcesUsed.push({
+          name: 'CoinGecko API',
+          type: 'spot_price',
+          status: valuationA.dataSource === 'CoinGecko API' ? 'live' : 'mock',
+          detail: valuationA.dataSource === 'CoinGecko API'
+            ? `Live ${commodityType} spot price fetched`
+            : `Using mock ${commodityType} price (API unavailable)`,
+        });
+      }
+
+      analysisSteps.push({
+        step: 1,
+        title: 'Data Collection',
+        description: `Queried ${dataSourcesUsed.length} data source${dataSourcesUsed.length > 1 ? 's' : ''} for ${assetType.replace('-', ' ')} market data`,
+        status: dataSourcesUsed.some(s => s.status === 'live') ? 'success' : 'warning',
+        data: { sources: dataSourcesUsed },
+      });
+
+      // Step 2: Agent A valuation
+      analysisSteps.push({
+        step: 2,
+        title: `Agent A | ${valuationA.method.replace('_', ' ')} analysis`,
+        description: valuationA.reasoning,
+        status: valuationA.confidence >= 0.7 ? 'success' : 'warning',
+        data: {
+          method: valuationA.method,
+          value: valuationA.estimated_value,
+          confidence: valuationA.confidence,
+          source: valuationA.dataSource,
+        },
+      });
+
+      // Step 3: Agent B valuation
+      analysisSteps.push({
+        step: 3,
+        title: `Agent B | ${valuationB.method.replace('_', ' ')} analysis`,
+        description: valuationB.reasoning,
+        status: valuationB.confidence >= 0.7 ? 'success' : 'warning',
+        data: {
+          method: valuationB.method,
+          value: valuationB.estimated_value,
+          confidence: valuationB.confidence,
+          source: valuationB.dataSource,
+        },
+      });
+
+      // Step 4: Divergence check
+      const divergenceThreshold = 15;
+      const needsDeliberation = divergence > divergenceThreshold;
+      analysisSteps.push({
+        step: 4,
+        title: 'Divergence Analysis',
+        description: needsDeliberation
+          ? `Agents diverged by ${divergence.toFixed(1)}% (above ${divergenceThreshold}% threshold) - triggering juror deliberation`
+          : `Agents converged within ${divergence.toFixed(1)}% (below ${divergenceThreshold}% threshold) - no deliberation needed`,
+        status: needsDeliberation ? 'warning' : 'success',
+        data: {
+          divergence,
+          threshold: divergenceThreshold,
+          needsDeliberation,
+        },
+      });
+
+      // Step 5: Verdict (if deliberation happened)
+      if (verdict) {
+        analysisSteps.push({
+          step: 5,
+          title: 'Juror Deliberation',
+          description: `3 jurors deliberated and reached a ${verdict.verdict.replace('_', ' ')} decision`,
+          status: 'success',
+          data: {
+            decision: verdict.verdict,
+            finalValue: verdict.finalValue,
+            jurors: verdict.votes?.length || 0,
+          },
+        });
+      }
+
+      // Methodology explanation based on asset type
+      let methodology: { title: string; description: string; methods: Array<{ name: string; description: string }> };
+      if (assetType === 'real-estate') {
+        methodology = {
+          title: 'Real Estate Valuation Methodology',
+          description: 'Two independent agents use different approaches to value the property. If they disagree by more than 15%, a panel of 3 jurors deliberates.',
+          methods: [
+            { name: 'Comparable Sales (Agent A)', description: 'Analyzes recent sales of similar properties in the same area. Adjusts for size, condition, and features. Most reliable when enough comps exist.' },
+            { name: 'Discounted Cash Flow (Agent B)', description: 'Estimates future rental income and discounts it to present value using current mortgage rates. Better for investment properties.' },
+          ],
+        };
+      } else if (assetType === 'art') {
+        methodology = {
+          title: 'Fine Art Valuation Methodology',
+          description: 'Art valuation combines museum collection data with auction market heuristics. Art is inherently subjective, confidence scores reflect this.',
+          methods: [
+            { name: 'Appraisal Analysis (Agent A)', description: 'Cross-references the work against museum collections and established artists in the same medium. More conservative estimate.' },
+            { name: 'Market Comparison (Agent B)', description: 'Estimates auction value based on recent sales of comparable works. Upper range reflects premium market conditions.' },
+          ],
+        };
+      } else {
+        methodology = {
+          title: 'Commodity Valuation Methodology',
+          description: 'Commodities are valued against live spot prices with adjustments for physical delivery premiums.',
+          methods: [
+            { name: 'Spot Price (Agent A)', description: 'Uses the current market spot price per troy ounce. Most accurate for fungible commodities like gold and silver.' },
+            { name: 'Physical Appraisal (Agent B)', description: 'Adds a premium for assay certification, physical delivery, and secure storage. Reflects the true cost of physical ownership.' },
+          ],
+        };
+      }
+
+      const response = {
+        success: true,
+        assessment: {
+          assetId,
+          assetType,
+          name,
+          askingPrice,
+          assessedValue,
+          divergence: Math.round(divergence * 10) / 10,
+          valuationA: {
+            method: valuationA.method,
+            value: valuationA.estimated_value,
+            confidence: valuationA.confidence,
+            source: valuationA.dataSource || 'Agent',
+            reasoning: valuationA.reasoning,
+          },
+          valuationB: {
+            method: valuationB.method,
+            value: valuationB.estimated_value,
+            confidence: valuationB.confidence,
+            source: valuationB.dataSource || 'Agent',
+            reasoning: valuationB.reasoning,
+          },
+          verdict: verdict ? {
+            decision: verdict.verdict,
+            finalValue: verdict.finalValue,
+          } : null,
+          marketData: marketData ? {
+            source: marketData.source,
+            comparables: marketData.comparables?.length || 0,
+          } : null,
+          analysisSteps,
+          dataSources: dataSourcesUsed,
+          methodology,
+          timestamp: Date.now(),
+        },
+      };
+
+      // Log the assessment as a transaction
+      const assessmentTx = createTransactionEntry(
+        'InitiateDispute',
+        `Assessment: ${name} (${assetType}) - ${assessedValue.toLocaleString()}`,
+        assetId,
+        'Orchestrator',
+        'latest',
+        { assetType, askingPrice, assessedValue, divergence },
+        false
+      );
+      saveTransaction(assessmentTx);
+      emitEvent('transaction', assessmentTx);
+
+      res.json(response);
+    } catch (err: any) {
+      console.error('[Assess] Error:', err.message);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  /**
+   * GET /api/assess/demo
+   * Returns pre-built demo assessment data for the UI.
+   */
+  app.get('/api/assess/demo', (_, res) => {
+    res.json({
+      success: true,
+      assets: [
+        {
+          type: 'real-estate',
+          name: 'Miami Beachfront Condo',
+          description: '2BR/2BA oceanfront unit, 1,200 sqft, recently renovated',
+          askingPrice: 1_250_000,
+          location: 'Miami, FL',
+          sqft: 1200,
+        },
+        {
+          type: 'real-estate',
+          name: 'Manhattan Studio Apartment',
+          description: '450 sqft studio in Midtown, doorman building',
+          askingPrice: 650_000,
+          location: 'New York, NY',
+          sqft: 450,
+        },
+        {
+          type: 'art',
+          name: 'Contemporary Oil on Canvas',
+          description: 'Abstract expressionist work, 48x60 inches, signed',
+          askingPrice: 85_000,
+          artistOrMedium: 'oil painting',
+        },
+        {
+          type: 'art',
+          name: 'Bronze Sculpture',
+          description: 'Limited edition bronze, 24 inches, edition 3/12',
+          askingPrice: 42_000,
+          artistOrMedium: 'sculpture',
+        },
+        {
+          type: 'commodity',
+          name: '10oz Gold Bar (999.9 Fine)',
+          description: 'LBMA certified, sealed with assay card',
+          askingPrice: 23_500,
+          weightOz: 10,
+        },
+        {
+          type: 'commodity',
+          name: '100oz Silver Bar',
+          description: '.999 fine silver, serialized',
+          askingPrice: 2_800,
+          weightOz: 100,
+        },
+      ],
+    });
   });
 
   const PORT = process.env.ORCHESTRATOR_API_PORT || 3011;

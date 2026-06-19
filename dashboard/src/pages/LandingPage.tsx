@@ -56,7 +56,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* How It Works — Interactive Story */}
+      {/* How It Works - Interactive Story */}
       <section id="how-it-works" style={{ borderTop: '1px solid var(--border-color)' }}>
         <StoryExplainer />
       </section>

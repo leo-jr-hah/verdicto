@@ -1,15 +1,42 @@
+/**
+ * Juror Engine — MCP server for juror agents
+ *
+ * Each juror specializes in one dimension:
+ *   - Evidence Analyst: document quality, proof strength
+ *   - Market Data Interpreter: market trends, pricing signals
+ *   - Precedent Researcher: historical case outcomes
+ *
+ * Supports all asset types with tailored prompts.
+ */
+
 import express from 'express';
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { casperX402Middleware } from './x402-middleware.js';
-import { askJuror } from './llm.js';
+import { askJuror } from './mimo-client.js';
+import type { AssetType } from './types.js';
 
 export interface JurorConfig {
   name: string;
   port: number;
   publicKey: string;
   specializationContext: string;
+}
+
+function buildJurorSystemPrompt(config: JurorConfig, assetType: AssetType): string {
+  const assetContext: Record<AssetType, string> = {
+    'real-estate': 'This is a real estate dispute. Consider property condition, location desirability, comparable sales, rental income potential, and macroeconomic factors like interest rates.',
+    'art': 'This is a fine art dispute. Consider artist provenance, exhibition history, medium, condition, comparable auction results, and current market demand for the artist\'s work.',
+    'commodity': 'This is a commodity dispute. Consider spot prices, purity/weight verification, storage costs, market volatility, and physical delivery premiums.',
+  };
+
+  return `You are ${config.name}, a specialized juror in the Casper RWA Court.
+Your specialization: ${config.specializationContext}
+Asset context: ${assetContext[assetType] || assetContext['real-estate']}
+
+You must analyze the evidence and choose which valuation is more credible: 'A', 'B', or 'split'.
+Respond ONLY as a JSON object in this format: {"vote": "A"|"B"|"split", "confidence": 0.0-1.0, "reasoning": "2-3 sentences explaining why"}`;
 }
 
 export function createJurorServer(config: JurorConfig) {
@@ -21,7 +48,6 @@ export function createJurorServer(config: JurorConfig) {
     amountCSPR: '2.5',
   }));
 
-  // MCP server created once, reused across requests
   const mcpServer = new McpServer({
     name: config.name,
     version: '1.0.0',
@@ -33,46 +59,50 @@ export function createJurorServer(config: JurorConfig) {
     {
       dispute_id: z.string(),
       asset_id: z.string(),
+      asset_type: z.enum(['real-estate', 'art', 'commodity']).optional(),
       location: z.string(),
       spot_count: z.number(),
       valuation_a: z.number(),
       valuation_b: z.number(),
       peer_reasoning: z.array(z.string()).optional(),
     },
-    async ({ dispute_id, asset_id, location, spot_count, valuation_a, valuation_b, peer_reasoning }) => {
+    async ({ dispute_id, asset_id, asset_type, location, spot_count, valuation_a, valuation_b, peer_reasoning }) => {
+      const resolvedAssetType: AssetType = asset_type || 'real-estate';
       const isRound2 = peer_reasoning && peer_reasoning.length > 0;
-      
-      const systemPrompt = `You are ${config.name}, a specialized juror in the Casper RWA Court.
-Your specialization: ${config.specializationContext}
-You must analyze the evidence and choose which valuation is more credible: 'A', 'B', or 'split'.
-Respond ONLY as a JSON object in this format: {"vote": "A"|"B"|"split", "confidence": 0.0-1.0, "reasoning": "2-3 sentences explaining why"}`;
 
-      let userPrompt = `Dispute: ${dispute_id} | Asset: ${asset_id} | Location: ${location} | Spots: ${spot_count}
-Valuation A (Comparable Sales): ${valuation_a}
-Valuation B (DCF): ${valuation_b}
+      const systemPrompt = buildJurorSystemPrompt(config, resolvedAssetType);
+
+      let userPrompt = `Dispute: ${dispute_id} | Asset: ${asset_id} | Type: ${resolvedAssetType} | Location: ${location} | Units: ${spot_count}
+Valuation A (Comparable/Appraisal): $${valuation_a.toLocaleString()}
+Valuation B (DCF/Market): $${valuation_b.toLocaleString()}
+Divergence: ${Math.abs(((valuation_a - valuation_b) / Math.min(valuation_a, valuation_b)) * 100).toFixed(1)}%
 Analyze the evidence from your perspective.`;
 
       if (config.name === 'Precedent Researcher') {
-        const { queryPrecedents } = await import('../precedent-researcher/rag.js');
-        const precedents = await queryPrecedents(location, asset_id);
-        userPrompt += `\n\n${precedents}`;
+        try {
+          const { queryPrecedents } = await import('../precedent-researcher/rag.js');
+          const precedents = await queryPrecedents(location, asset_id);
+          userPrompt += `\n\n${precedents}`;
+        } catch {
+          userPrompt += `\n\nNo precedent data available for this asset type.`;
+        }
       }
 
       if (isRound2) {
         userPrompt += `\n\nThis is ROUND 2 of deliberation. Here is what your peers said in Round 1:\n${peer_reasoning.join('\n')}\nGiven your peers' reasoning, do you maintain your position or shift your vote? Explain why.`;
       }
 
-      console.log(`[${config.name}] 🤔 Reasoning about dispute ${dispute_id} (Round ${isRound2 ? 2 : 1})...`);
+      console.log(`[${config.name}] 🤔 Reasoning about dispute ${dispute_id} (${resolvedAssetType}, Round ${isRound2 ? 2 : 1})...`);
       const llmResponse = await askJuror(systemPrompt, userPrompt);
       console.log(`[${config.name}] ✅ Reached verdict: ${llmResponse.vote}`);
-      
+
       return {
         content: [{ type: 'text', text: JSON.stringify(llmResponse, null, 2) }],
       };
     }
   );
 
-  // MCP endpoint — each request gets its own transport but shares the server
+  // MCP endpoint
   app.post('/mcp', async (req, res) => {
     try {
       const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });

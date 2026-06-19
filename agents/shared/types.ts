@@ -1,23 +1,44 @@
 // Shared TypeScript types for all Casper RWA Court agents
 // DO NOT change after Day 3 — all agents depend on these
 
+// ─── Asset Types ─────────────────────────────────────────────────────────────
+
+export type AssetType = 'real-estate' | 'art' | 'commodity';
+
+export interface AssetListing {
+  id: string;
+  type: AssetType;
+  name: string;
+  description: string;
+  askingPrice: number;
+  location?: string;
+  artist?: string;
+  weight?: number;
+  documents?: string[];
+}
+
+// ─── Valuation ───────────────────────────────────────────────────────────────
+
 export interface ValuationResult {
   agent: string;
-  method: 'comparable_sales' | 'dcf';
+  method: 'comparable_sales' | 'dcf' | 'appraisal' | 'market_price';
   asset_id: string;
   estimated_value: number;
   confidence: number;
   per_spot_value: number;
   reasoning: string;
   timestamp: number;
+  dataSource?: string;
 }
 
 export interface DisputeCase {
   dispute_id: number;
   asset_id: string;
   asset_name: string;
+  asset_type: AssetType;
   location: string;
   spot_count: number;
+  asking_price: number;
   valuation_a: ValuationResult;
   valuation_b: ValuationResult;
   divergence_percent: number;
@@ -73,41 +94,47 @@ export interface PaymentEvent {
 export const DEMO_DISPUTES: Partial<DisputeCase>[] = [
   {
     dispute_id: 1,
-    asset_id: 'PARKING-MIAMI-001',
-    asset_name: 'Miami Downtown Parking',
+    asset_id: 'RE-MIAMI-001',
+    asset_name: 'Miami Beachfront Condo',
+    asset_type: 'real-estate',
     location: 'Miami, FL',
-    spot_count: 100,
+    spot_count: 1,
+    asking_price: 1_250_000,
     divergence_percent: 25,
     status: 'pending',
     filing_fee_motes: '100000000',
   },
   {
     dispute_id: 2,
-    asset_id: 'PARKING-NYC-007',
-    asset_name: 'Manhattan Midtown Garage',
+    asset_id: 'ART-NYC-007',
+    asset_name: 'Contemporary Oil Painting',
+    asset_type: 'art',
     location: 'New York, NY',
-    spot_count: 250,
+    spot_count: 1,
+    asking_price: 85_000,
     divergence_percent: 31,
     status: 'resolved',
     filing_fee_motes: '100000000',
   },
   {
     dispute_id: 3,
-    asset_id: 'PARKING-LA-003',
-    asset_name: 'Beverly Hills Surface Lot',
-    location: 'Beverly Hills, CA',
-    spot_count: 75,
-    divergence_percent: 28,
+    asset_id: 'GOLD-003',
+    asset_name: '10oz Gold Bar (999.9)',
+    asset_type: 'commodity',
+    location: 'Global',
+    spot_count: 10,
+    asking_price: 23_500,
+    divergence_percent: 12,
     status: 'deliberating',
     filing_fee_motes: '100000000',
   },
 ];
 
 // Agent reputation seed data
-export const AGENT_SEED_SCORES = {
-  'valuation-agent-a': { parking: 750, real_estate: 700 },
-  'valuation-agent-b': { parking: 720, real_estate: 780 },
-  'evidence-analyst':  { parking: 810, real_estate: 650 },
+export const AGENT_SEED_SCORES: Record<string, Record<string, number>> = {
+  'valuation-agent-a': { 'real-estate': 750, art: 680, commodity: 720 },
+  'valuation-agent-b': { 'real-estate': 780, art: 710, commodity: 760 },
+  'evidence-analyst':  { 'real-estate': 810, art: 740, commodity: 690 },
 };
 
 // Precedent cases for Vectra vector store

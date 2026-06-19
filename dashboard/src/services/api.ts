@@ -5,6 +5,8 @@
 const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || 'http://localhost:3011';
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3010';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 export interface TransactionEntry {
   id: string;
   type: 'ZK-Lite Commitment' | 'Native Transfer' | 'HMAC Receipt Chain' | 'ExecuteVerdict' | 'UpdateReputation' | 'InitiateDispute' | 'x402 Payment';
@@ -18,32 +20,174 @@ export interface TransactionEntry {
   metadata?: Record<string, unknown>;
 }
 
+export type AssetType = 'real-estate' | 'art' | 'commodity';
+
+export interface AssessmentRequest {
+  assetType: AssetType;
+  name: string;
+  description?: string;
+  askingPrice: number;
+  location?: string;
+  artistOrMedium?: string;
+  weightOz?: number;
+  sqft?: number;
+}
+
+export interface AnalysisStep {
+  step: number;
+  title: string;
+  description: string;
+  status: 'success' | 'warning' | 'error';
+  data?: Record<string, unknown>;
+}
+
+export interface DataSource {
+  name: string;
+  type: string;
+  status: 'live' | 'mock' | 'failed';
+  detail: string;
+}
+
+export interface Methodology {
+  title: string;
+  description: string;
+  methods: Array<{
+    name: string;
+    description: string;
+  }>;
+}
+
+export interface AssessmentResult {
+  assetId: string;
+  assetType: AssetType;
+  name: string;
+  askingPrice: number;
+  assessedValue: number;
+  divergence: number;
+  valuationA: {
+    method: string;
+    value: number;
+    confidence: number;
+    source: string;
+    reasoning: string;
+  };
+  valuationB: {
+    method: string;
+    value: number;
+    confidence: number;
+    source: string;
+    reasoning: string;
+  };
+  verdict: {
+    decision: string;
+    finalValue: number;
+  } | null;
+  marketData: {
+    source: string;
+    comparables: number;
+  } | null;
+  analysisSteps?: AnalysisStep[];
+  dataSources?: DataSource[];
+  methodology?: Methodology;
+  timestamp: number;
+}
+
+export interface DemoAsset {
+  type: AssetType;
+  name: string;
+  description: string;
+  askingPrice: number;
+  location?: string;
+  sqft?: number;
+  artistOrMedium?: string;
+  weightOz?: number;
+}
+
+// ─── Error Handling ──────────────────────────────────────────────────────────
+
+class ApiError extends Error {
+  status: number;
+  body?: unknown;
+  constructor(message: string, status: number, body?: unknown) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.body = body;
+  }
+}
+
+async function handleResponse<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    let body: unknown;
+    try {
+      body = await res.json();
+    } catch {
+      body = await res.text();
+    }
+    throw new ApiError(
+      (body as any)?.error || `HTTP ${res.status}`,
+      res.status,
+      body
+    );
+  }
+  return res.json();
+}
+
+// ─── Transactions ────────────────────────────────────────────────────────────
+
 export async function fetchTransactions(): Promise<TransactionEntry[]> {
   try {
     const res = await fetch(`${ORCHESTRATOR_URL}/api/transactions`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const txs = data.transactions || [];
-    // Backward compat: default onChain=false for entries missing the field
-    return txs.map((tx: any) => ({
+    const data = await handleResponse<{ success: boolean; transactions: TransactionEntry[] }>(res);
+    return (data.transactions || []).map(tx => ({
       ...tx,
       onChain: tx.onChain ?? false,
       explorerUrl: tx.explorerUrl ?? '',
     }));
   } catch (err) {
     console.error('[API] Failed to fetch transactions:', err);
-    throw err; // Re-throw so caller can handle it
+    throw err;
   }
 }
+
+// ─── Disputes ────────────────────────────────────────────────────────────────
 
 export async function startDispute(): Promise<{ success: boolean; disputeId?: string; error?: string }> {
   try {
     const res = await fetch(`${ORCHESTRATOR_URL}/api/disputes/start`, { method: 'POST' });
-    return await res.json();
+    return await handleResponse(res);
   } catch (err: any) {
     return { success: false, error: err.message };
   }
 }
+
+// ─── Assessment ──────────────────────────────────────────────────────────────
+
+export async function submitAssessment(request: AssessmentRequest): Promise<{ success: boolean; assessment?: AssessmentResult; error?: string }> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/assess`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    });
+    return await handleResponse(res);
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function fetchDemoAssets(): Promise<DemoAsset[]> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/assess/demo`);
+    const data = await handleResponse<{ success: boolean; assets: DemoAsset[] }>(res);
+    return data.assets || [];
+  } catch (err) {
+    console.error('[API] Failed to fetch demo assets:', err);
+    return [];
+  }
+}
+
+// ─── Receipt Verification ────────────────────────────────────────────────────
 
 export interface ReceiptVerificationResult {
   success: boolean;
@@ -69,14 +213,15 @@ export async function verifyReceiptChain(disputeId: string): Promise<ReceiptVeri
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ disputeId }),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
+    return await handleResponse(res);
   } catch (err: any) {
     return { success: false, valid: false, receiptCount: 0, reason: err.message, details: [] };
   }
 }
 
-export type WSMessageType = 'transaction' | 'dispute_started' | 'valuation_result' | 'juror_vote' | 'final_verdict';
+// ─── WebSocket ───────────────────────────────────────────────────────────────
+
+export type WSMessageType = 'transaction' | 'dispute_started' | 'valuation_result' | 'juror_vote' | 'final_verdict' | 'agent_thought' | 'receipt_created';
 
 export interface WSMessage {
   type: WSMessageType;
@@ -86,11 +231,11 @@ export interface WSMessage {
 
 export function createWebSocket(onMessage: (msg: WSMessage) => void): WebSocket {
   const ws = new WebSocket(WS_URL);
-  
+
   ws.onopen = () => {
     console.log('[WS] Connected to orchestrator');
   };
-  
+
   ws.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
@@ -99,10 +244,10 @@ export function createWebSocket(onMessage: (msg: WSMessage) => void): WebSocket 
       console.warn('[WS] Failed to parse message:', err);
     }
   };
-  
+
   ws.onclose = () => {
     console.log('[WS] Disconnected');
   };
-  
+
   return ws;
 }

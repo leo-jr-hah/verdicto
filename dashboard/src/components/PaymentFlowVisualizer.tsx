@@ -294,7 +294,7 @@ const TransactionLog: React.FC<{ payments: PaymentFlow[] }> = ({ payments }) => 
               <div style={{ maxHeight: '260px', overflowY: 'auto' }}>
                 {payments.length === 0 ? (
                   <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '0.8rem' }}>
-                    No transactions yet — start a dispute to see payments flow
+                    No transactions yet. Start a dispute to see payments flow.
                   </div>
                 ) : (
                   payments.map((payment, idx) => {
