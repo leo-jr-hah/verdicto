@@ -44,14 +44,14 @@ export const LandingPage: React.FC = () => {
             See How It Works
           </button>
           <Link 
-            to="/deliberation" 
+            to="/assess" 
             className="btn-secondary landing-hero-btn" 
             style={{ 
               padding: '1rem 2rem', 
               fontSize: '1.1rem'
             }}
           >
-            Watch a Case
+            Value an Asset
           </Link>
         </div>
       </section>

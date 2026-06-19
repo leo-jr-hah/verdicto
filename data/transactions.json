@@ -1,5 +1,22 @@
 [
   {
+    "id": "tx-1781880822874-i62pec",
+    "type": "InitiateDispute",
+    "action": "Assessment: Manhattan Studio Apartment (real-estate) - 593,171",
+    "hash": "RE-1781880819981-i4dm",
+    "contract": "Orchestrator",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-19T14:53:42.874Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assetType": "real-estate",
+      "askingPrice": 650000,
+      "assessedValue": 593171,
+      "divergence": 35.38531746031746
+    }
+  },
+  {
     "id": "tx-1781880225121-i9o5n0",
     "type": "InitiateDispute",
     "action": "Assessment: Manhattan Studio Apartment (real-estate) - 602,727",

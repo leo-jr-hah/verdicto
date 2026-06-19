@@ -5,7 +5,7 @@ import { TrendingUp, TrendingDown, Award, Star } from 'lucide-react';
 interface ReputationDataPoint {
   timestamp: number;
   score: number;
-  disputeId?: string;
+  assessmentId?: string;
   reason?: string;
 }
 
@@ -16,8 +16,8 @@ interface AgentReputation {
   previousScore: number;
   history: ReputationDataPoint[];
   rank: number;
-  totalDisputes: number;
-  winRate: number;
+  totalAssessments: number;
+  successRate: number;
 }
 
 interface ReputationGraphProps {
@@ -144,7 +144,7 @@ const AgentReputationCard: React.FC<{
             {agent.agentName}
           </div>
           <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
-            {agent.totalDisputes} disputes • {agent.winRate}% win rate
+            {agent.totalAssessments} assessments • {agent.successRate}% success rate
           </div>
         </div>
 
@@ -234,13 +234,13 @@ const AgentReputationCard: React.FC<{
 
 export const ReputationGraph: React.FC<ReputationGraphProps> = ({ agents }) => {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<'score' | 'rank' | 'winRate'>('score');
+  const [sortBy, setSortBy] = useState<'score' | 'rank' | 'successRate'>('score');
 
   const sortedAgents = [...agents].sort((a, b) => {
     switch (sortBy) {
       case 'score': return b.currentScore - a.currentScore;
       case 'rank': return a.rank - b.rank;
-      case 'winRate': return b.winRate - a.winRate;
+      case 'successRate': return b.successRate - a.successRate;
       default: return 0;
     }
   });
@@ -258,7 +258,7 @@ export const ReputationGraph: React.FC<ReputationGraphProps> = ({ agents }) => {
         </div>
         
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {(['score', 'rank', 'winRate'] as const).map((option) => (
+          {(['score', 'rank', 'successRate'] as const).map((option) => (
             <button
               key={option}
               onClick={() => setSortBy(option)}
@@ -272,7 +272,7 @@ export const ReputationGraph: React.FC<ReputationGraphProps> = ({ agents }) => {
                 cursor: 'pointer'
               }}
             >
-              {option === 'score' ? 'Score' : option === 'rank' ? 'Rank' : 'Win Rate'}
+              {option === 'score' ? 'Score' : option === 'rank' ? 'Rank' : 'Success Rate'}
             </button>
           ))}
         </div>
@@ -328,15 +328,15 @@ export const ReputationGraph: React.FC<ReputationGraphProps> = ({ agents }) => {
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                {selectedAgentData.totalDisputes}
+                {selectedAgentData.totalAssessments}
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Total Disputes</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Total Assessments</div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10B981' }}>
-                {selectedAgentData.winRate}%
+                {selectedAgentData.successRate}%
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Win Rate</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Success Rate</div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>

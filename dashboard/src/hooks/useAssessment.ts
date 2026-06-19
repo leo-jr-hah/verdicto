@@ -17,7 +17,7 @@ interface UseAssessmentState {
 }
 
 interface UseAssessmentReturn extends UseAssessmentState {
-  assess: (request: AssessmentRequest) => Promise<void>;
+  assess: (request: AssessmentRequest, paymentProof?: string) => Promise<void>;
   loadDemoAssets: () => Promise<void>;
   reset: () => void;
   clearError: () => void;
@@ -41,7 +41,7 @@ export function useAssessment(): UseAssessmentReturn {
     };
   }, []);
 
-  const assess = useCallback(async (request: AssessmentRequest) => {
+  const assess = useCallback(async (request: AssessmentRequest, paymentProof?: string) => {
     // Cancel any in-flight request
     abortRef.current?.abort();
     abortRef.current = new AbortController();
@@ -49,7 +49,7 @@ export function useAssessment(): UseAssessmentReturn {
     setState(prev => ({ ...prev, loading: true, error: null, result: null }));
 
     try {
-      const response = await submitAssessment(request);
+      const response = await submitAssessment(request, paymentProof);
 
       if (response.success && response.assessment) {
         setState(prev => ({

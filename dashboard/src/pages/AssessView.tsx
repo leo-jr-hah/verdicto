@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Building2,
@@ -23,13 +23,15 @@ import {
   Info,
   Zap,
   Terminal,
+  Wallet,
 } from 'lucide-react';
 import {
   useAssessment,
   validateAssessmentForm,
   type FormErrors,
 } from '../hooks/useAssessment';
-import type { AssetType, AssessmentResult, DemoAsset } from '../services/api';
+import type { AssetType, AssessmentResult, AssessmentRequest, DemoAsset } from '../services/api';
+import { useWallet } from '../contexts/CSPRClickContext';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -310,6 +312,204 @@ const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, 
   );
 };
 
+// ─── Assessment Fee ──────────────────────────────────────────────────────────
+
+const ASSESSMENT_FEE_CSPR = 2.5;
+
+// ─── Payment Confirmation Modal ──────────────────────────────────────────────
+
+const PaymentModal: React.FC<{
+  open: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+  signing: boolean;
+  signError: string | null;
+}> = ({ open, onConfirm, onCancel, signing, signError }) => {
+  if (!open) return null;
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+          onClick={onCancel}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '16px',
+              padding: '2rem',
+              maxWidth: '420px',
+              width: '90%',
+              boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
+            }}
+          >
+            {/* Header */}
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+              <div style={{
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                background: 'rgba(139, 92, 246, 0.1)',
+                border: '2px solid rgba(139, 92, 246, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1rem',
+              }}>
+                <Zap size={24} color="#8B5CF6" />
+              </div>
+              <h3 style={{
+                fontSize: '1.2rem',
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                marginBottom: '0.5rem',
+              }}>
+                Confirm Assessment Payment
+              </h3>
+              <p style={{
+                fontSize: '0.85rem',
+                color: 'var(--text-secondary)',
+                lineHeight: 1.5,
+              }}>
+                A micropayment is required to run the AI valuation pipeline.
+              </p>
+            </div>
+
+            {/* Fee breakdown */}
+            <div style={{
+              background: 'var(--bg-surface-alt)',
+              borderRadius: '10px',
+              padding: '1rem 1.25rem',
+              marginBottom: '1.5rem',
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '0.5rem',
+              }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Assessment Fee</span>
+                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {ASSESSMENT_FEE_CSPR} CSPR
+                </span>
+              </div>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: '0.75rem',
+                color: 'var(--text-tertiary)',
+              }}>
+                <span>Network</span>
+                <span>Casper Testnet</span>
+              </div>
+            </div>
+
+            {/* What you get */}
+            <div style={{
+              fontSize: '0.8rem',
+              color: 'var(--text-secondary)',
+              marginBottom: '1.5rem',
+              lineHeight: 1.6,
+            }}>
+              <div style={{ fontWeight: 600, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>You'll receive:</div>
+              <div>• Dual-agent independent valuation</div>
+              <div>• Agent deliberation (if agents diverge &gt;15%)</div>
+              <div>• Full analysis report with data sources</div>
+            </div>
+
+            {signError && (
+              <div style={{
+                background: 'rgba(239, 68, 68, 0.08)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                borderRadius: '8px',
+                padding: '0.75rem',
+                marginBottom: '1rem',
+                fontSize: '0.8rem',
+                color: '#EF4444',
+              }}>
+                {signError}
+              </div>
+            )}
+
+            {/* Buttons */}
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button
+                onClick={onCancel}
+                disabled={signing}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-color)',
+                  background: 'transparent',
+                  color: 'var(--text-secondary)',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  cursor: signing ? 'not-allowed' : 'pointer',
+                  opacity: signing ? 0.5 : 1,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={onConfirm}
+                disabled={signing}
+                style={{
+                  flex: 2,
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: signing ? '#6366f1aa' : '#6366f1',
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  cursor: signing ? 'wait' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                {signing ? (
+                  <>
+                    <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                    Waiting for wallet...
+                  </>
+                ) : (
+                  <>
+                    <Wallet size={16} />
+                    Pay {ASSESSMENT_FEE_CSPR} CSPR & Run
+                  </>
+                )}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 // ─── Result Card ─────────────────────────────────────────────────────────────
 
 const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
@@ -570,6 +770,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
 
 export const AssessView: React.FC = () => {
   const { loading, error, result, demoAssets, assess, loadDemoAssets, reset, clearError } = useAssessment();
+  const wallet = useWallet();
 
   const [assetType, setAssetType] = useState<AssetType>('real-estate');
   const [name, setName] = useState('');
@@ -581,6 +782,12 @@ export const AssessView: React.FC = () => {
   const [sqft, setSqft] = useState('');
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [showDemos, setShowDemos] = useState(false);
+
+  // Payment modal state
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [signingPayment, setSigningPayment] = useState(false);
+  const [signError, setSignError] = useState<string | null>(null);
+  const pendingRequestRef = useRef<AssessmentRequest | null>(null);
 
   // Live log state
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -614,9 +821,9 @@ export const AssessView: React.FC = () => {
     timers.push(setTimeout(() => addLog('agent', 'Income Specialist: applying 8.5% discount rate to projected NOI...'), 4800));
     timers.push(setTimeout(() => addLog('info', 'Comparing valuations and computing divergence...'), 5500));
     timers.push(setTimeout(() => addLog('data', `Agent A value: ${(Math.random() * 500000 + 200000).toFixed(0)} | Agent B value: ${(Math.random() * 500000 + 200000).toFixed(0)}`), 6000));
-    timers.push(setTimeout(() => addLog('agent', 'Running juror deliberation: Evidence Reviewer validating data sources...'), 6800));
-    timers.push(setTimeout(() => addLog('agent', 'Running juror deliberation: Trend Analyst assessing market conditions...'), 7400));
-    timers.push(setTimeout(() => addLog('agent', 'Running juror deliberation: Case Researcher searching precedents...'), 8000));
+    timers.push(setTimeout(() => addLog('agent', 'Running agent deliberation: Evidence Reviewer validating data sources...'), 6800));
+    timers.push(setTimeout(() => addLog('agent', 'Running agent deliberation: Trend Analyst assessing market conditions...'), 7400));
+    timers.push(setTimeout(() => addLog('agent', 'Running agent deliberation: Case Researcher searching comparables...'), 8000));
     timers.push(setTimeout(() => addLog('success', 'Assessment complete. Generating report...'), 8800));
 
     return () => timers.forEach(clearTimeout);
@@ -664,6 +871,20 @@ export const AssessView: React.FC = () => {
     setFormErrors({});
   };
 
+  const buildRequest = useCallback((): AssessmentRequest => {
+    const price = parseFloat(askingPrice.replace(/[^0-9.]/g, ''));
+    return {
+      assetType,
+      name: name.trim(),
+      description: description.trim() || undefined,
+      askingPrice: price,
+      location: location.trim() || undefined,
+      artistOrMedium: artistOrMedium.trim() || undefined,
+      weightOz: weightOz ? parseFloat(weightOz) : undefined,
+      sqft: sqft ? parseInt(sqft, 10) : undefined,
+    };
+  }, [assetType, name, description, askingPrice, location, artistOrMedium, weightOz, sqft]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
@@ -674,18 +895,62 @@ export const AssessView: React.FC = () => {
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
-    const price = parseFloat(askingPrice.replace(/[^0-9.]/g, ''));
+    // Store the request and show payment modal
+    pendingRequestRef.current = buildRequest();
+    setSignError(null);
+    setShowPaymentModal(true);
+  };
 
-    assess({
-      assetType,
-      name: name.trim(),
-      description: description.trim() || undefined,
-      askingPrice: price,
-      location: location.trim() || undefined,
-      artistOrMedium: artistOrMedium.trim() || undefined,
-      weightOz: weightOz ? parseFloat(weightOz) : undefined,
-      sqft: sqft ? parseInt(sqft, 10) : undefined,
-    });
+  const handlePaymentConfirm = async () => {
+    const request = pendingRequestRef.current;
+    if (!request) return;
+
+    // If wallet not connected, connect first
+    if (!wallet.connected) {
+      try {
+        await wallet.connect();
+      } catch {
+        setSignError('Please connect your wallet first.');
+        return;
+      }
+      // If still not connected after attempt, user cancelled
+      if (!wallet.connected) {
+        setSignError('Wallet connection is required to proceed.');
+        return;
+      }
+    }
+
+    setSigningPayment(true);
+    setSignError(null);
+
+    try {
+      // Sign the payment via wallet — this opens the wallet popup
+      const { paymentProof } = await wallet.signPayment(
+        '020306722d77bfb1a14e9e3e8c8e5b3e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e',
+        ASSESSMENT_FEE_CSPR,
+      );
+
+      // Close modal and run assessment with payment proof
+      setShowPaymentModal(false);
+      setLogs([]);
+      logIdRef.current = 0;
+      assess(request, paymentProof);
+    } catch (err: any) {
+      if (err?.message?.includes('cancelled')) {
+        setSignError('Payment was cancelled. Please approve the transfer in your wallet.');
+      } else {
+        setSignError(err?.message || 'Failed to sign payment. Please try again.');
+      }
+    } finally {
+      setSigningPayment(false);
+    }
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPaymentModal(false);
+    setSigningPayment(false);
+    setSignError(null);
+    pendingRequestRef.current = null;
   };
 
   const handleReset = () => {
@@ -705,6 +970,15 @@ export const AssessView: React.FC = () => {
 
   return (
     <div>
+      {/* Payment Confirmation Modal */}
+      <PaymentModal
+        open={showPaymentModal}
+        onConfirm={handlePaymentConfirm}
+        onCancel={handlePaymentCancel}
+        signing={signingPayment}
+        signError={signError}
+      />
+
       {/* Page Header */}
       <div className="page-header">
         <h1 className="page-title">Value an Asset</h1>
@@ -953,9 +1227,9 @@ export const AssessView: React.FC = () => {
                   {[
                     { step: '1', title: 'You provide asset details', desc: 'Name, type, asking price, and relevant attributes.' },
                     { step: '2', title: 'Two AI agents analyze independently', desc: 'Comps Specialist uses comparable sales. Income Specialist uses cash flow projections.' },
-                    { step: '3', title: 'Divergence is measured', desc: 'If agents disagree by more than 15%, the case goes to jury deliberation.' },
-                    { step: '4', title: 'Three jurors review and vote', desc: 'Evidence Reviewer, Trend Analyst, and Case Researcher each cast a weighted vote.' },
-                    { step: '5', title: 'Final verdict is issued', desc: 'The assessed value is recorded with a cryptographic receipt on Casper testnet.' },
+                    { step: '3', title: 'Divergence is measured', desc: 'If agents disagree by more than 15%, additional analysis agents review the case.' },
+                    { step: '4', title: 'Analysis agents review', desc: 'Evidence Reviewer, Trend Analyst, and Case Researcher each provide independent analysis.' },
+                    { step: '5', title: 'Final valuation is issued', desc: 'The assessed value is recorded with a cryptographic receipt on Casper testnet.' },
                   ].map((item) => (
                     <div key={item.step} style={{ display: 'flex', gap: '0.75rem' }}>
                       <div style={{

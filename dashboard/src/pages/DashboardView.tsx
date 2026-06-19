@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Play, Activity, Scale, TrendingUp, Shield, Zap, ArrowRight, BarChart3, CheckCircle2, Wifi, WifiOff } from 'lucide-react';
+import { Users, Activity, Scale, TrendingUp, Shield, Zap, ArrowRight, BarChart3, CheckCircle2, Wifi, WifiOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { fetchTransactions, createWebSocket, type TransactionEntry, type WSMessage } from '../services/api';
 
 const AGENTS = [
   { name: 'Comps Specialist', color: '#EC4899', role: 'Valuation', method: 'Comparable Sales', initials: 'CS' },
   { name: 'Income Specialist', color: '#F97316', role: 'Valuation', method: 'DCF Analysis', initials: 'IS' },
-  { name: 'Evidence Reviewer', color: '#10B981', role: 'Juror', method: 'Data Validation', initials: 'ER' },
-  { name: 'Trend Analyst', color: '#06B6D4', role: 'Juror', method: 'Market Context', initials: 'TA' },
-  { name: 'Case Researcher', color: '#8B5CF6', role: 'Juror', method: 'Precedent Search', initials: 'CR' },
+  { name: 'Evidence Reviewer', color: '#10B981', role: 'Analysis', method: 'Data Validation', initials: 'ER' },
+  { name: 'Trend Analyst', color: '#06B6D4', role: 'Analysis', method: 'Market Context', initials: 'TA' },
+  { name: 'Case Researcher', color: '#8B5CF6', role: 'Analysis', method: 'Comparable Research', initials: 'CR' },
 ];
 
 const QUICK_ACTIONS = [
   { label: 'Value an Asset', sub: 'Dual-agent valuation', to: '/assess', icon: Scale, primary: true },
-  { label: 'Run Demo', sub: 'See agents resolve a case', to: '/deliberation', icon: Play },
   { label: 'Meet the Agents', sub: 'Track performance', to: '/reputation', icon: Users },
-  { label: 'View History', sub: 'All cases & transactions', to: '/transactions', icon: Activity },
+  { label: 'View History', sub: 'All assessments & transactions', to: '/transactions', icon: Activity },
 ];
 
 export const DashboardView: React.FC = () => {

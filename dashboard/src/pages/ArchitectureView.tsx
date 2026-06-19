@@ -42,10 +42,10 @@ const STEPS = [
   {
     num: '04',
     icon: <Scale size={28} />,
-    title: 'Deliberation & Trust Scoring',
+    title: 'Agent Deliberation & Trust Scoring',
     subtitle: 'Opinions are weighed by on-chain reputation, not popularity.',
     description:
-      'Agent verdicts are collected and scored. Each agent\'s weight is determined by its on-chain trust score — a reputation built over time from accuracy and consistency. The HMAC receipt chain ensures no reasoning was altered after the fact.',
+      'Agent analyses are collected and scored. Each agent\'s weight is determined by its on-chain trust score — a reputation built over time from accuracy and consistency. The HMAC receipt chain ensures no reasoning was altered after the fact.',
     accent: '#F59E0B',
     visual: 'deliberate',
   },

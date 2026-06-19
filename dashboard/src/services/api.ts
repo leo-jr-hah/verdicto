@@ -163,11 +163,22 @@ export async function startDispute(): Promise<{ success: boolean; disputeId?: st
 
 // ─── Assessment ──────────────────────────────────────────────────────────────
 
-export async function submitAssessment(request: AssessmentRequest): Promise<{ success: boolean; assessment?: AssessmentResult; error?: string }> {
+export async function submitAssessment(
+  request: AssessmentRequest,
+  paymentProof?: string,
+): Promise<{ success: boolean; assessment?: AssessmentResult; error?: string }> {
   try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (paymentProof) {
+      headers['payment-signature'] = paymentProof;
+      headers['x-payment-proof'] = paymentProof;
+    }
+
     const res = await fetch(`${ORCHESTRATOR_URL}/api/assess`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(request),
     });
     return await handleResponse(res);

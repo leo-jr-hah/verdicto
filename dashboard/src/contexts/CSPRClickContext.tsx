@@ -21,6 +21,7 @@ import React, {
   useRef,
   type ReactNode,
 } from 'react';
+import { makeCsprTransferDeploy, Deploy, PublicKey } from 'casper-js-sdk';
 
 /* ---------- Types (matching Casper Wallet SDK) ---------- */
 
@@ -67,6 +68,11 @@ export interface WalletState {
   connect: () => Promise<void>;
   disconnect: () => void;
   walletInstalled: boolean;
+  /** Sign a native CSPR transfer deploy and return the payment proof */
+  signPayment: (recipientAddress: string, amountCSPR: number) => Promise<{
+    paymentProof: string;
+    deployHash: string;
+  }>;
 }
 
 const WalletContext = createContext<WalletState | null>(null);
@@ -260,6 +266,67 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
     providerRef.current = null;
   }, [clearState]);
 
+  /**
+   * Sign a native CSPR transfer deploy via the wallet extension.
+   * Returns a base64-encoded payment proof that the backend x402 middleware expects.
+   */
+  const signPayment = useCallback(async (
+    recipientAddress: string,
+    amountCSPR: number,
+  ): Promise<{ paymentProof: string; deployHash: string }> => {
+    const provider = providerRef.current;
+    if (!provider || !publicKey) {
+      throw new Error('Wallet not connected');
+    }
+
+    // Convert CSPR to motes (1 CSPR = 10^9 motes)
+    const amountMotes = Math.floor(amountCSPR * 1e9).toString();
+
+    // Create the transfer deploy
+    const deploy = makeCsprTransferDeploy({
+      senderPublicKeyHex: publicKey,
+      recipientPublicKeyHex: recipientAddress,
+      transferAmount: amountMotes,
+      chainName: 'casper-test',
+      ttl: 1800000, // 30 minutes
+      gasPrice: 1,
+    });
+
+    // Get the deploy JSON for signing
+    const deployJson = Deploy.toJSON(deploy);
+
+    // Ask the wallet to sign it — this opens the wallet popup
+    const result = await provider.sign(JSON.stringify(deployJson), publicKey);
+
+    if (result.cancelled || !result.signature) {
+      throw new Error('Payment signing was cancelled');
+    }
+
+    // Set the signature on the deploy (static method)
+    // The wallet returns a hex string; SDK accepts it at runtime despite TS typing
+    const signedDeploy = Deploy.setSignature(deploy, result.signature as unknown as Uint8Array, PublicKey.fromHex(publicKey));
+
+    // Get the deploy hash
+    const signedDeployJson = Deploy.toJSON(signedDeploy);
+    const deployHash = (signedDeployJson as any).hash || (signedDeployJson as any).deploy?.hash || '';
+
+    // Build the payment proof (base64-encoded JSON)
+    const paymentProof = {
+      scheme: 'casper',
+      payload: {
+        deploy: signedDeployJson,
+        payer: publicKey,
+        amount: amountCSPR.toString(),
+        network: 'casper:testnet',
+      },
+      deployHash,
+    };
+
+    const proofHeader = btoa(JSON.stringify(paymentProof));
+
+    return { paymentProof: proofHeader, deployHash };
+  }, [publicKey]);
+
   return (
     <WalletContext.Provider
       value={{
@@ -272,6 +339,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
         connect,
         disconnect,
         walletInstalled,
+        signPayment,
       }}
     >
       {children}

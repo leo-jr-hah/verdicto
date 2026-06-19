@@ -11,10 +11,8 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Wallet, ChevronDown, LogOut, Copy, Check, Droplets } from 'lucide-react';
+import { Wallet, ChevronDown, LogOut, Copy, Check } from 'lucide-react';
 import { useWallet } from '../contexts/CSPRClickContext';
-
-const FAUCET_URL = 'https://testnet.cspr.live/tools/faucet';
 
 export const WalletConnectButton: React.FC = () => {
   const { connected, publicKey, loading, error, connect, disconnect, walletInstalled } = useWallet();

@@ -11,8 +11,8 @@ interface AgentReputation {
   previousScore: number;
   history: { timestamp: number; score: number; reason?: string }[];
   rank: number;
-  totalDisputes: number;
-  winRate: number;
+  totalAssessments: number;
+  successRate: number;
 }
 
 export const ReputationView: React.FC = () => {
@@ -23,13 +23,13 @@ export const ReputationView: React.FC = () => {
       currentScore: 850,
       previousScore: 820,
       history: [
-        { timestamp: Date.now() - 3600000, score: 820, reason: 'Dispute #123 resolved' },
-        { timestamp: Date.now() - 7200000, score: 835, reason: 'Dispute #122 resolved' },
-        { timestamp: Date.now() - 10800000, score: 850, reason: 'Dispute #121 resolved' }
+        { timestamp: Date.now() - 3600000, score: 820, reason: 'Assessment #123 completed' },
+        { timestamp: Date.now() - 7200000, score: 835, reason: 'Assessment #122 completed' },
+        { timestamp: Date.now() - 10800000, score: 850, reason: 'Assessment #121 completed' }
       ],
       rank: 1,
-      totalDisputes: 156,
-      winRate: 94,
+      totalAssessments: 156,
+      successRate: 94,
       description: 'Validates raw data points and cross-references sources for accuracy.'
     },
     {
@@ -38,14 +38,14 @@ export const ReputationView: React.FC = () => {
       currentScore: 790,
       previousScore: 780,
       history: [
-        { timestamp: Date.now() - 3600000, score: 780, reason: 'Dispute #123 resolved' },
-        { timestamp: Date.now() - 7200000, score: 785, reason: 'Dispute #122 resolved' },
-        { timestamp: Date.now() - 10800000, score: 790, reason: 'Dispute #121 resolved' }
+        { timestamp: Date.now() - 3600000, score: 780, reason: 'Assessment #123 completed' },
+        { timestamp: Date.now() - 7200000, score: 785, reason: 'Assessment #122 completed' },
+        { timestamp: Date.now() - 10800000, score: 790, reason: 'Assessment #121 completed' }
       ],
       rank: 2,
-      totalDisputes: 142,
-      winRate: 91,
-      description: 'Searches historical dispute precedents using RAG-powered retrieval.'
+      totalAssessments: 142,
+      successRate: 91,
+      description: 'Searches historical comparable assets using RAG-powered retrieval.'
     },
     {
       agentId: 'market',
@@ -53,13 +53,13 @@ export const ReputationView: React.FC = () => {
       currentScore: 760,
       previousScore: 755,
       history: [
-        { timestamp: Date.now() - 3600000, score: 755, reason: 'Dispute #123 resolved' },
-        { timestamp: Date.now() - 7200000, score: 758, reason: 'Dispute #122 resolved' },
-        { timestamp: Date.now() - 10800000, score: 760, reason: 'Dispute #121 resolved' }
+        { timestamp: Date.now() - 3600000, score: 755, reason: 'Assessment #123 completed' },
+        { timestamp: Date.now() - 7200000, score: 758, reason: 'Assessment #122 completed' },
+        { timestamp: Date.now() - 10800000, score: 760, reason: 'Assessment #121 completed' }
       ],
       rank: 3,
-      totalDisputes: 128,
-      winRate: 89,
+      totalAssessments: 128,
+      successRate: 89,
       description: 'Provides macro-economic context and market trend interpretation.'
     },
     {
@@ -68,13 +68,13 @@ export const ReputationView: React.FC = () => {
       currentScore: 720,
       previousScore: 710,
       history: [
-        { timestamp: Date.now() - 3600000, score: 710, reason: 'Dispute #123 resolved' },
-        { timestamp: Date.now() - 7200000, score: 715, reason: 'Dispute #122 resolved' },
-        { timestamp: Date.now() - 10800000, score: 720, reason: 'Dispute #121 resolved' }
+        { timestamp: Date.now() - 3600000, score: 710, reason: 'Assessment #123 completed' },
+        { timestamp: Date.now() - 7200000, score: 715, reason: 'Assessment #122 completed' },
+        { timestamp: Date.now() - 10800000, score: 720, reason: 'Assessment #121 completed' }
       ],
       rank: 4,
-      totalDisputes: 98,
-      winRate: 87,
+      totalAssessments: 98,
+      successRate: 87,
       description: 'Analyzes comparable sales and market listings to estimate asset value.'
     },
     {
@@ -83,13 +83,13 @@ export const ReputationView: React.FC = () => {
       currentScore: 710,
       previousScore: 705,
       history: [
-        { timestamp: Date.now() - 3600000, score: 705, reason: 'Dispute #123 resolved' },
-        { timestamp: Date.now() - 7200000, score: 708, reason: 'Dispute #122 resolved' },
-        { timestamp: Date.now() - 10800000, score: 710, reason: 'Dispute #121 resolved' }
+        { timestamp: Date.now() - 3600000, score: 705, reason: 'Assessment #123 completed' },
+        { timestamp: Date.now() - 7200000, score: 708, reason: 'Assessment #122 completed' },
+        { timestamp: Date.now() - 10800000, score: 710, reason: 'Assessment #121 completed' }
       ],
       rank: 5,
-      totalDisputes: 87,
-      winRate: 85,
+      totalAssessments: 87,
+      successRate: 85,
       description: 'Projects future cash flows and applies discounted cash flow (DCF) analysis.'
     }
   ]);
@@ -328,10 +328,10 @@ export const ReputationView: React.FC = () => {
                   </div>
                 </td>
                 <td data-label="Accuracy" style={{ padding: '1.25rem 1.5rem', color: '#10B981', fontWeight: 600 }}>
-                  {agent.winRate}%
+                  {agent.successRate}%
                 </td>
                 <td data-label="Cases" style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>
-                  {agent.totalDisputes}
+                  {agent.totalAssessments}
                 </td>
                 <td data-label="Status" style={{ padding: '1.25rem 1.5rem' }}>
                   <span style={{ 
