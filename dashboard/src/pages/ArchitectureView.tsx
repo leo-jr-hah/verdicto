@@ -13,40 +13,40 @@ const STEPS = [
   {
     num: '01',
     icon: <Upload size={28} />,
-    title: 'Submit a Dispute',
-    subtitle: 'You describe the asset and the question you need answered.',
+    title: 'Submit Your Asset',
+    subtitle: 'Tell Verdict what you want valued.',
     description:
-      'Enter an asset address, type (property, art, or commodity), and the dispute details. The Orchestrator creates a unique dispute ID, opens a real-time session, and locks a 0.1 CSPR filing fee in the Escrow contract on Casper.',
+      'Choose from Real Estate, Fine Art, or Commodities. Provide the asset details and your asking price. A 2.5 CSPR assessment fee is collected via x402 micropayment.',
     accent: '#3B82F6',
     visual: 'submit',
   },
   {
     num: '02',
     icon: <Cpu size={28} />,
-    title: 'The Orchestrator Dispatches',
-    subtitle: 'One command center routes your case to two valuation agents.',
+    title: 'Independent Dual Valuation',
+    subtitle: 'Two AI agents, two different methodologies.',
     description:
-      'The Orchestrator receives your dispute and fetches baseline data from external APIs — RentCast for real estate, Met Museum for art, CoinGecko for commodities, FRED for macro indicators. It then dispatches parallel valuation tasks to Agent A (comparable sales) and Agent B (DCF/market analysis).',
+      'The Orchestrator dispatches parallel valuation tasks to the Comps Specialist (comparable sales analysis) and the DCF Specialist (discounted cash flow modeling). Each agent works independently using different data sources and methodologies.',
     accent: '#8B5CF6',
     visual: 'dispatch',
   },
   {
     num: '03',
     icon: <Users size={28} />,
-    title: 'Two Valuations, Three Jurors',
-    subtitle: 'Dual valuations are adjudicated by specialized jurors.',
+    title: 'Juror Deliberation',
+    subtitle: 'Three specialized jurors evaluate the valuations.',
     description:
-      'Agent A and Agent B produce independent valuations using different methodologies. If the divergence exceeds a threshold, three MCP-based jurors — Evidence Analyst, Market Data Interpreter, and Precedent Researcher — evaluate which valuation is more credible. Jurors pay for data access via x402 micropayments on Casper.',
+      'If the two valuations diverge beyond a threshold, three jurors (Evidence Analyst, Market Data Interpreter, Precedent Researcher) deliberate across two rounds. In Round 2, each juror reviews peer reasoning and may revise their vote.',
     accent: '#EC4899',
     visual: 'agents',
   },
   {
     num: '04',
     icon: <Scale size={28} />,
-    title: 'Juror Deliberation & Trust Scoring',
-    subtitle: 'Votes are weighted by on-chain reputation, not popularity.',
+    title: 'Trust-Weighted Vote Tally',
+    subtitle: 'Votes are weighted by on-chain reputation.',
     description:
-      'Jurors vote across two rounds. In Round 2, each juror sees peer reasoning and may revise their verdict. Votes are weighted by each juror\'s on-chain trust score — built from execution accuracy (40%), output consistency (30%), and economic stake (30%), scaled to 0–1000. The HMAC receipt chain ensures no reasoning was altered after the fact.',
+      'Votes are weighted by each juror\'s on-chain trust score, built from execution accuracy (40%), output consistency (30%), and economic stake (30%), scaled to 0-1000. The HMAC receipt chain ensures no reasoning was altered after the fact.',
     accent: '#F59E0B',
     visual: 'deliberate',
   },
@@ -56,7 +56,7 @@ const STEPS = [
     title: 'Verdict Recorded On-Chain',
     subtitle: 'Immutable, verifiable, permanently auditable.',
     description:
-      'The final verdict — full_refund, split_fifty, or full_release — along with every juror\'s reasoning, confidence, and trust weight is committed to the Casper blockchain as a SHA-256 execution commitment. Anyone can verify the HMAC receipt chain independently. No central authority can rewrite the outcome.',
+      'The final verdict, along with every juror\'s reasoning, confidence, and trust weight, is committed to the Casper blockchain as a SHA-256 execution commitment. Anyone can verify the HMAC receipt chain independently.',
     accent: '#10B981',
     visual: 'verdict',
   },
@@ -66,44 +66,44 @@ const STEPS = [
 
 const AGENTS = [
   {
-    name: 'Valuation Agent A',
+    name: 'Comps Specialist',
     role: 'Comparable Sales',
     icon: <Calculator size={20} />,
     color: '#EC4899',
-    method: 'RentCast API',
-    desc: 'Pulls recent comparable sales from RentCast and adjusts for differences in size, condition, and location.',
+    method: 'Comparable Sales Analysis',
+    desc: 'Analyzes comparable sales data and adjusts for differences in size, condition, and location to estimate fair market value.',
   },
   {
-    name: 'Valuation Agent B',
+    name: 'DCF Specialist',
     role: 'DCF Analysis',
     icon: <TrendingUp size={20} />,
     color: '#F97316',
-    method: 'FRED Economic Data',
-    desc: 'Models rental income potential, cap rates, and discounted cash flow using live economic indicators from FRED.',
+    method: 'Discounted Cash Flow',
+    desc: 'Models rental income potential, cap rates, and discounted cash flow using economic indicators and market data.',
   },
   {
     name: 'Evidence Analyst',
     role: 'Data Validation',
     icon: <Shield size={20} />,
     color: '#10B981',
-    method: 'MiMo LLM',
-    desc: 'Cross-references raw data points, flags inconsistencies, and assesses evidence quality using MiMo LLM reasoning.',
+    method: 'LLM Reasoning',
+    desc: 'Cross-references raw data points, flags inconsistencies, and assesses evidence quality using LLM reasoning.',
   },
   {
     name: 'Market Data Interpreter',
     role: 'Market Context',
     icon: <TrendingUp size={20} />,
     color: '#06B6D4',
-    method: 'MiMo LLM + Market Data',
-    desc: 'Evaluates macro trends, neighborhood trajectory, and market timing factors using MiMo LLM and live market feeds.',
+    method: 'LLM + Market Data',
+    desc: 'Evaluates macro trends, neighborhood trajectory, and market timing factors using LLM and live market feeds.',
   },
   {
     name: 'Precedent Researcher',
     role: 'Precedent Search',
     icon: <Search size={20} />,
     color: '#8B5CF6',
-    method: 'Vectra RAG + Vector Search',
-    desc: 'Searches historical disputes and outcomes via Vectra vector database to find relevant precedents and legal frameworks.',
+    method: 'Vector Search',
+    desc: 'Searches historical assessments and outcomes via vector database to find relevant precedents and frameworks.',
   },
 ];
 
@@ -121,8 +121,8 @@ const StepVisualSubmit: React.FC = () => (
         <div className="hiw-form-value">Residential Property</div>
       </div>
       <div className="hiw-form-row">
-        <div className="hiw-form-label">Dispute</div>
-        <div className="hiw-form-value">Seller claims $450K value. Buyer disputes.</div>
+        <div className="hiw-form-label">Asking Price</div>
+        <div className="hiw-form-value">$450,000</div>
       </div>
       <div className="hiw-form-btn">
         <Zap size={14} />
@@ -173,9 +173,9 @@ const StepVisualAgents: React.FC = () => (
 
 const StepVisualDeliberate: React.FC = () => {
   const votes = [
-    { name: 'Evidence Analyst', verdict: 'full_refund', weight: 40, color: '#10B981' },
-    { name: 'Market Interpreter', verdict: 'split_fifty', weight: 35, color: '#06B6D4' },
-    { name: 'Precedent Researcher', verdict: 'full_refund', weight: 25, color: '#8B5CF6' },
+    { name: 'Evidence Analyst', verdict: 'Value A (Comps)', weight: 40, color: '#10B981' },
+    { name: 'Market Interpreter', verdict: 'Value B (DCF)', weight: 35, color: '#06B6D4' },
+    { name: 'Precedent Researcher', verdict: 'Value A (Comps)', weight: 25, color: '#8B5CF6' },
   ];
   return (
     <div className="hiw-visual-card hiw-deliberate-visual">
@@ -202,7 +202,7 @@ const StepVisualDeliberate: React.FC = () => {
       </div>
       <div className="hiw-deliberate-result">
         <div className="hiw-deliberate-verdict-label">Trust-Weighted Verdict</div>
-        <div className="hiw-deliberate-verdict-value">full_refund</div>
+        <div className="hiw-deliberate-verdict-value">Value A: $450,000</div>
         <div className="hiw-deliberate-verdict-note">HMAC receipt chain verified</div>
       </div>
     </div>
@@ -218,7 +218,7 @@ const StepVisualVerdict: React.FC = () => (
     <div className="hiw-verdict-body">
       <div className="hiw-verdict-row">
         <span className="hiw-verdict-label">Outcome</span>
-        <span className="hiw-verdict-value" style={{ color: '#10B981' }}>full_refund</span>
+        <span className="hiw-verdict-value" style={{ color: '#10B981' }}>$450,000</span>
       </div>
       <div className="hiw-verdict-row">
         <span className="hiw-verdict-label">Confidence</span>
@@ -255,7 +255,7 @@ const DETAILS = [
     title: 'HMAC Receipt Chain',
     icon: <GitBranch size={16} />,
     content:
-      'Every agent action produces a signed receipt. Receipts are chained via HMAC-SHA256 — each receipt includes the hash of the previous one. This means any tampering with historical reasoning is instantly detectable.',
+      'Every agent action produces a signed receipt. Receipts are chained via HMAC-SHA256, where each receipt includes the hash of the previous one. This means any tampering with historical reasoning is instantly detectable.',
   },
   {
     title: 'x402 Micropayments',
@@ -273,7 +273,7 @@ const DETAILS = [
     title: 'Verifiable Execution',
     icon: <Eye size={16} />,
     content:
-      'Before analysis begins, the orchestrator commits to a specific execution plan on-chain. After completion, anyone can verify that the committed plan was followed — no shortcuts, no substitutions.',
+      'Before analysis begins, the orchestrator commits to a specific execution plan on-chain. After completion, anyone can verify that the committed plan was followed, with no shortcuts or substitutions.',
   },
 ];
 
@@ -292,7 +292,7 @@ export const ArchitectureView: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          Submit a Dispute. <br />Get a Verdict.
+          Submit Your Asset. <br />Get a Verdict.
         </motion.h1>
         <motion.p
           className="hiw-hero-subtitle"

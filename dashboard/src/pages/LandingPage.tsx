@@ -7,7 +7,6 @@ import { AgentGrid } from '../components/landing/AgentGrid';
 import { X402PaymentFlow } from '../components/landing/X402PaymentFlow';
 import { ContractCards } from '../components/landing/ContractCards';
 import { TestnetProof } from '../components/landing/TestnetProof';
-import { CTASection } from '../components/landing/CTASection';
 import { Footer } from '../components/landing/Footer';
 
 export const LandingPage: React.FC = () => {
@@ -23,7 +22,6 @@ export const LandingPage: React.FC = () => {
         <X402PaymentFlow />
         <ContractCards />
         <TestnetProof />
-        <CTASection />
       </main>
 
       <Footer />

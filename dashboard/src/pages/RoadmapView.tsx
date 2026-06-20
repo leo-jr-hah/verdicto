@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  Rocket,
   Clock,
   CheckCircle2,
   ArrowRight,
@@ -25,7 +24,6 @@ interface RoadmapItem {
   status: 'live' | 'building' | 'planned' | 'future';
   effort: string;
   icon: React.ReactNode;
-  impact: 'high' | 'medium' | 'low';
 }
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -40,7 +38,6 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
     status: 'live',
     effort: '5 hours',
     icon: <BarChart3 size={18} />,
-    impact: 'high',
   },
   {
     id: 'd4',
@@ -50,7 +47,6 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
     status: 'live',
     effort: '4 hours',
     icon: <Layers size={18} />,
-    impact: 'medium',
   },
   {
     id: 'd7',
@@ -60,7 +56,6 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
     status: 'live',
     effort: '1 hour',
     icon: <Zap size={18} />,
-    impact: 'medium',
   },
   {
     id: 'd8',
@@ -70,42 +65,36 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
     status: 'live',
     effort: '1 hour',
     icon: <Shield size={18} />,
-    impact: 'low',
+  },
+  {
+    id: 'd1',
+    title: 'Live Contract State Panel',
+    description: 'Real-time dashboard showing deployed contract data: dispute count, agent reputation scores, recent votes, escrow balances.',
+    category: 'enhancement',
+    status: 'live',
+    effort: '3 hours',
+    icon: <Globe size={18} />,
+  },
+  {
+    id: 'd2',
+    title: 'x402 Payment Stream',
+    description: 'Live visualization of CSPR flowing between agents via x402: payment requests, settlements, and confirmations with tx hashes.',
+    category: 'enhancement',
+    status: 'live',
+    effort: '4 hours',
+    icon: <Zap size={18} />,
   },
 
-  // BUILDING
+  // PLANNED
   {
     id: 'b2',
     title: 'Prediction Market Resolution',
     description: 'Ask real-world outcome questions. 5 AI agents analyze market data and give probability estimates with full reasoning.',
     category: 'economic',
-    status: 'building',
+    status: 'planned',
     effort: '5 hours',
     icon: <TrendingUp size={18} />,
-    impact: 'high',
   },
-  {
-    id: 'd1',
-    title: 'Live Contract State Panel',
-    description: 'Real-time dashboard showing deployed contract data — dispute count, agent reputation scores, recent votes, escrow balances.',
-    category: 'enhancement',
-    status: 'building',
-    effort: '3 hours',
-    icon: <Globe size={18} />,
-    impact: 'high',
-  },
-  {
-    id: 'd2',
-    title: 'x402 Payment Stream',
-    description: 'Live visualization of CSPR flowing between agents via x402 — payment requests, settlements, and confirmations with tx hashes.',
-    category: 'enhancement',
-    status: 'building',
-    effort: '4 hours',
-    icon: <Zap size={18} />,
-    impact: 'high',
-  },
-
-  // PLANNED
   {
     id: 'a1',
     title: 'On-Chain Verdict Certificate (NFT)',
@@ -114,7 +103,6 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
     status: 'planned',
     effort: '4 hours',
     icon: <Shield size={18} />,
-    impact: 'high',
   },
   {
     id: 'a3',
@@ -124,59 +112,53 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
     status: 'planned',
     effort: '4 hours',
     icon: <Lock size={18} />,
-    impact: 'medium',
   },
   {
     id: 'b1',
     title: 'DeFi Collateral Oracle Feed',
-    description: 'Standardized API endpoint that outputs CASPER valuations in a format consumable by DeFi lending protocols (Aave, Compound, Morpho).',
+    description: 'Standardized API endpoint that outputs Verdict valuations in a format consumable by DeFi lending protocols (Aave, Compound, Morpho).',
     category: 'economic',
     status: 'planned',
     effort: '4 hours',
     icon: <Globe size={18} />,
-    impact: 'high',
   },
   {
     id: 'b3',
     title: 'Agent Staking Marketplace',
-    description: 'Open platform where third-party AI analysts register as CASPER agents, stake CSPR as collateral, and earn fees for accurate valuations.',
+    description: 'Open platform where third-party AI analysts register as Verdict agents, stake CSPR as collateral, and earn fees for accurate valuations.',
     category: 'economic',
     status: 'planned',
     effort: '6 hours',
     icon: <Users size={18} />,
-    impact: 'high',
   },
   {
     id: 'b4',
     title: 'Insurance Claim Verification',
-    description: 'Insurance companies submit property damage claims; CASPER agents verify the claimed value against market data and flag fraud.',
+    description: 'Insurance companies submit property damage claims; Verdict agents verify the claimed value against market data and flag fraud.',
     category: 'economic',
     status: 'planned',
     effort: '5 hours',
     icon: <Shield size={18} />,
-    impact: 'medium',
   },
 
   // FUTURE
   {
     id: 'c1',
     title: 'Historical Accuracy Leaderboard',
-    description: 'Public leaderboard showing each agent\'s historical accuracy — how close their valuations were to actual market outcomes.',
+    description: 'Public leaderboard showing each agent\'s historical accuracy: how close their valuations were to actual market outcomes.',
     category: 'network',
     status: 'future',
     effort: '3 hours',
     icon: <TrendingUp size={18} />,
-    impact: 'medium',
   },
   {
     id: 'c2',
     title: 'Cross-Asset Correlation Analysis',
-    description: 'Portfolio risk reports across multiple asset types — concentration risk, macro sensitivity, and diversification recommendations.',
+    description: 'Portfolio risk reports across multiple asset types: concentration risk, macro sensitivity, and diversification recommendations.',
     category: 'network',
     status: 'future',
     effort: '6 hours',
     icon: <BarChart3 size={18} />,
-    impact: 'medium',
   },
   {
     id: 'c3',
@@ -186,7 +168,6 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
     status: 'future',
     effort: '8 hours',
     icon: <TrendingUp size={18} />,
-    impact: 'high',
   },
 ];
 
@@ -200,16 +181,10 @@ const STATUS_CONFIG = {
 };
 
 const CATEGORY_CONFIG = {
-  verifiable: { label: 'Verifiable Value', color: '#6366f1', description: 'Outputs ChatGPT cannot produce' },
+  verifiable: { label: 'Verifiable Value', color: '#6366f1', description: 'Outputs traditional AI cannot produce' },
   economic: { label: 'Economic Value', color: '#10b981', description: 'Direct revenue or cost savings' },
   network: { label: 'Network Effects', color: '#f59e0b', description: 'More users = more value' },
   enhancement: { label: 'Enhancement', color: '#8b5cf6', description: 'Improvements to existing system' },
-};
-
-const IMPACT_BADGE = {
-  high: { label: 'High Impact', color: '#ef4444' },
-  medium: { label: 'Medium', color: '#f59e0b' },
-  low: { label: 'Low', color: 'var(--text-tertiary)' },
 };
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -217,7 +192,6 @@ const IMPACT_BADGE = {
 const RoadmapCard: React.FC<{ item: RoadmapItem; index: number }> = ({ item, index }) => {
   const status = STATUS_CONFIG[item.status];
   const category = CATEGORY_CONFIG[item.category];
-  const impact = IMPACT_BADGE[item.impact];
 
   return (
     <motion.div
@@ -259,18 +233,6 @@ const RoadmapCard: React.FC<{ item: RoadmapItem; index: number }> = ({ item, ind
           }}>
             {status.label}
           </span>
-          {item.impact === 'high' && (
-            <span style={{
-              padding: '0.15rem 0.5rem',
-              borderRadius: '4px',
-              background: `${impact.color}15`,
-              color: impact.color,
-              fontSize: '0.7rem',
-              fontWeight: 600,
-            }}>
-              {impact.label}
-            </span>
-          )}
         </div>
       </div>
 
@@ -322,13 +284,11 @@ const RoadmapCard: React.FC<{ item: RoadmapItem; index: number }> = ({ item, ind
 
 export const RoadmapView: React.FC = () => {
   const live = ROADMAP_ITEMS.filter(i => i.status === 'live');
-  const building = ROADMAP_ITEMS.filter(i => i.status === 'building');
   const planned = ROADMAP_ITEMS.filter(i => i.status === 'planned');
   const future = ROADMAP_ITEMS.filter(i => i.status === 'future');
 
   const sections = [
     { title: 'Live Now', items: live, icon: <CheckCircle2 size={18} color="#10b981" />, color: '#10b981' },
-    { title: 'Building', items: building, icon: <Rocket size={18} color="#6366f1" />, color: '#6366f1' },
     { title: 'Planned', items: planned, icon: <Clock size={18} color="#f59e0b" />, color: '#f59e0b' },
     { title: 'Future Vision', items: future, icon: <ArrowRight size={18} color="var(--text-tertiary)" />, color: 'var(--text-tertiary)' },
   ];
@@ -339,7 +299,7 @@ export const RoadmapView: React.FC = () => {
       <div className="page-header">
         <h1 className="page-title">Roadmap</h1>
         <p className="page-subtitle">
-          What CASPER is building — from live features to future vision. Every feature creates verifiable value that ChatGPT cannot produce.
+          What Verdict is building, from live features to future vision. Every feature creates verifiable value that traditional AI cannot produce.
         </p>
       </div>
 
@@ -424,7 +384,7 @@ export const RoadmapView: React.FC = () => {
         }}
       >
         <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-          The CASPER Vision
+          The Verdict Vision
         </h3>
         <p style={{
           fontSize: '0.9rem',
@@ -433,9 +393,9 @@ export const RoadmapView: React.FC = () => {
           maxWidth: '600px',
           margin: '0 auto',
         }}>
-          ChatGPT gives you an <strong>opinion</strong>. CASPER gives you a <strong>verifiable, actionable, on-chain asset</strong> —
+          Traditional AI gives you an <strong>opinion</strong>. Verdict gives you a <strong>verifiable, actionable, on-chain asset</strong>,
           cryptographically signed, permanently recorded, legally defensible, and economically valuable.
-          Built on the Casper Manifest with real x402 payments, deployed Odra contracts, and a $27.5B RWA market
+          Built on the Verdict Manifest with real x402 payments, deployed Odra contracts, and a $27.5B RWA market
           that desperately needs trustworthy price discovery.
         </p>
       </motion.div>

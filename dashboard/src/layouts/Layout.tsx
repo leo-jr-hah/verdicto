@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Moon, Sun, Menu, X, Bot, LayoutDashboard, Users, Scale, History, Cpu, ChevronRight, Droplets, Target, Map } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Logo } from '../components/Logo';
+import verdictLogo from '../assets/logo.jpeg';
 import { ConnectionStatus } from '../components/ConnectionStatus';
 import { WalletConnectButton } from '../components/WalletConnectButton';
 import { InteractiveStory } from '../components/story/InteractiveStory';
@@ -51,11 +51,9 @@ export const Layout: React.FC = () => {
       <aside className="sidebar" data-collapsed={sidebarCollapsed}>
         {/* Logo */}
         <div className="sidebar-header">
-          <Link to="/" className="sidebar-logo">
-            <Logo width={28} height={28} />
-            {!sidebarCollapsed && (
-              <span className="sidebar-logo-text">VERDICT</span>
-            )}
+          <Link to="/" className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+            <img src={verdictLogo} alt="Verdict" style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover' }} />
+            <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>Verdict</span>
           </Link>
           <button
             className="sidebar-collapse-btn"
@@ -196,9 +194,9 @@ export const Layout: React.FC = () => {
         >
           {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Logo width={24} height={24} />
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem' }}>VERDICT</span>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+          <img src={verdictLogo} alt="Verdict" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
+          <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>Verdict</span>
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <WalletConnectButton />

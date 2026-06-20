@@ -1,21 +1,12 @@
 import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Scale, Menu, X } from 'lucide-react';
+import { Scale } from 'lucide-react';
 
 export const LandingLayout: React.FC = () => {
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-  const location = useLocation();
-
-  const navLinks = [
-    { label: 'How It Works', href: '/#how-it-works' },
-    { label: 'Agents', href: '/#agents' },
-    { label: 'Roadmap', href: '/roadmap' },
-  ];
-
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
-      {/* ── Top Navigation ── */}
+      {/* ── Top Navigation — Logo + Open App only ── */}
       <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -55,108 +46,30 @@ export const LandingLayout: React.FC = () => {
           </span>
         </Link>
 
-        {/* Desktop nav */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            {navLinks.map(link => (
-              <Link
-                key={link.label}
-                to={link.href}
-                style={{
-                  fontSize: '0.85rem', fontWeight: 500,
-                  color: location.pathname === link.href ? 'var(--text-primary)' : 'var(--text-secondary)',
-                  textDecoration: 'none',
-                  transition: 'color 0.15s ease',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-
-          <Link
-            to="/assess"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-              background: '#FF3B3B', color: '#fff',
-              padding: '0.5rem 1.25rem',
-              borderRadius: 8, fontWeight: 700, fontSize: '0.85rem',
-              textDecoration: 'none',
-              boxShadow: '0 2px 12px rgba(255,59,59,0.25)',
-              transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 4px 20px rgba(255,59,59,0.35)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = '';
-              e.currentTarget.style.boxShadow = '0 2px 12px rgba(255,59,59,0.25)';
-            }}
-          >
-            Open App →
-          </Link>
-        </div>
-
-        {/* Mobile hamburger */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
+        {/* Open App button only */}
+        <Link
+          to="/assess"
           style={{
-            display: 'none',
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--text-primary)', padding: '0.5rem',
+            display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+            background: '#FF3B3B', color: '#fff',
+            padding: '0.5rem 1.25rem',
+            borderRadius: 8, fontWeight: 700, fontSize: '0.85rem',
+            textDecoration: 'none',
+            boxShadow: '0 2px 12px rgba(255,59,59,0.25)',
+            transition: 'all 0.15s ease',
           }}
-          className="landing-mobile-toggle"
+          onMouseEnter={e => {
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 4px 20px rgba(255,59,59,0.35)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.transform = '';
+            e.currentTarget.style.boxShadow = '0 2px 12px rgba(255,59,59,0.25)';
+          }}
         >
-          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
+          Open App →
+        </Link>
       </motion.nav>
-
-      {/* Mobile menu overlay */}
-      {mobileOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          style={{
-            position: 'fixed', top: 64, left: 0, right: 0,
-            background: 'var(--bg-elevated)',
-            borderBottom: '1px solid var(--border-color)',
-            padding: '1rem 2rem',
-            display: 'flex', flexDirection: 'column', gap: '1rem',
-            zIndex: 999,
-          }}
-        >
-          {navLinks.map(link => (
-            <Link
-              key={link.label}
-              to={link.href}
-              onClick={() => setMobileOpen(false)}
-              style={{
-                fontSize: '0.95rem', fontWeight: 500,
-                color: 'var(--text-secondary)', textDecoration: 'none',
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <Link
-            to="/assess"
-            onClick={() => setMobileOpen(false)}
-            style={{
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
-              background: '#FF3B3B', color: '#fff',
-              padding: '0.75rem 1.25rem',
-              borderRadius: 8, fontWeight: 700, fontSize: '0.9rem',
-              textDecoration: 'none',
-            }}
-          >
-            Open App →
-          </Link>
-        </motion.div>
-      )}
 
       {/* Page content */}
       <main style={{ paddingTop: 64 }}>
@@ -183,9 +96,6 @@ export const LandingLayout: React.FC = () => {
         </div>
         <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', margin: 0 }}>
           Autonomous RWA Assessment on Casper Blockchain
-        </p>
-        <p style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', margin: '0.5rem 0 0', opacity: 0.6 }}>
-          Built for the Casper Hackathon · Testnet
         </p>
       </footer>
 

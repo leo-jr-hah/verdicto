@@ -38,9 +38,16 @@ export const AgentGrid: React.FC = () => {
           </div>
         </Reveal>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-          {AGENTS.map((agent, i) => (
+        {/* Top row: 3 agents */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
+          {AGENTS.slice(0, 3).map((agent, i) => (
             <AgentCard key={agent.name} agent={agent} index={i} />
+          ))}
+        </div>
+        {/* Bottom row: 2 agents centered */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', maxWidth: 720, margin: '0 auto' }}>
+          {AGENTS.slice(3).map((agent, i) => (
+            <AgentCard key={agent.name} agent={agent} index={i + 3} />
           ))}
         </div>
       </div>

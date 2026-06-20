@@ -2065,19 +2065,27 @@ button {
 
 /* ── Landing: Footer ─────────────────────────────────────────────────────── */
 
-.footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; }
 .footer-link:hover { color: var(--primary) !important; }
-@media (max-width: 1024px) {
-  .footer-grid { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 640px) {
-  .footer-grid { grid-template-columns: 1fr; }
-}
 
 /* ── Landing: How It Works responsive ────────────────────────────────────── */
 
 @media (max-width: 768px) {
   .hiw-steps-grid {
     grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Landing: Button ripple animation ────────────────────────────────────── */
+
+@keyframes ripple-expand {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.5;
+  }
+  100% {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
   }
 }

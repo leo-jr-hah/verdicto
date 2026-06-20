@@ -110,7 +110,7 @@ export const ArchitectureDiagram: React.FC = () => {
             fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-primary)',
             marginBottom: '16px', fontFamily: 'var(--font-display)', letterSpacing: '-0.02em'
           }}>
-            How the Tribunal Works
+            How Verdict Works
           </h2>
         </div>
       </Reveal>
@@ -119,43 +119,51 @@ export const ArchitectureDiagram: React.FC = () => {
         <svg ref={svgRef} viewBox="0 0 1000 600" style={{ width: '100%', minWidth: 800, height: 'auto' }}>
           {/* Edges */}
           <g fill="none" stroke="var(--border-color)" strokeWidth="1.5">
-            <path id="e1" className="arch-edge" d="M 175 100 L 425 100" />
-            <path id="e2" className="arch-edge" d="M 500 120 C 500 200, 300 150, 300 230" />
-            <path id="e3" className="arch-edge" d="M 500 120 C 500 200, 500 150, 500 230" />
-            <path id="e4" className="arch-edge" d="M 500 120 C 500 200, 700 150, 700 230" />
-            <path id="e5" className="arch-edge" d="M 700 270 C 700 350, 600 300, 600 380" />
-            <path id="e6" className="arch-edge" d="M 700 270 C 700 350, 800 300, 800 380" />
-            <path id="e7" className="arch-edge" d="M 875 380 L 925 380" />
-            <path id="e8" className="arch-edge" d="M 425 500 L 500 500 L 500 400" />
-            <path id="e9" className="arch-edge" d="M 575 500 L 500 500 L 500 400" />
-            <path id="e10" className="arch-edge" d="M 500 520 L 500 560" />
-            <path id="e11" className="arch-edge" d="M 300 100 C 300 50, 100 50, 100 560" />
+            {/* User -> Orchestrator */}
+            <path id="e1" className="arch-edge" d="M 200 100 L 425 100" />
+            {/* Orchestrator -> Data Sources */}
+            <path id="e2" className="arch-edge" d="M 425 120 C 350 170, 250 170, 225 200" />
+            {/* Orchestrator -> Comps Specialist */}
+            <path id="e3" className="arch-edge" d="M 425 120 C 350 170, 300 170, 300 230" />
+            {/* Orchestrator -> DCF Specialist */}
+            <path id="e4" className="arch-edge" d="M 575 120 C 650 170, 700 170, 700 230" />
+            {/* Comps Specialist -> Jurors */}
+            <path id="e5" className="arch-edge" d="M 300 270 C 300 310, 200 310, 200 350" />
+            <path id="e6" className="arch-edge" d="M 300 270 C 300 310, 500 310, 500 350" />
+            <path id="e7" className="arch-edge" d="M 300 270 C 300 310, 800 310, 800 350" />
+            {/* DCF Specialist -> Jurors */}
+            <path id="e8" className="arch-edge" d="M 700 270 C 700 310, 200 310, 200 350" />
+            <path id="e9" className="arch-edge" d="M 700 270 C 700 310, 500 310, 500 350" />
+            <path id="e10" className="arch-edge" d="M 700 270 C 700 310, 800 310, 800 350" />
+            {/* Jurors -> Verdict */}
+            <path id="e11" className="arch-edge" d="M 200 390 C 200 430, 500 430, 500 440" />
+            <path id="e12" className="arch-edge" d="M 500 390 L 500 440" />
+            <path id="e13" className="arch-edge" d="M 800 390 C 800 430, 500 430, 500 440" />
+            {/* Verdict -> Blockchain */}
+            <path id="e14" className="arch-edge" d="M 500 480 L 500 520" />
           </g>
 
           {/* Packet Paths (Overlay for animation) */}
           <g fill="none">
-            <path className="packet-path" data-color="#FF3B3B" d="M 500 120 C 500 200, 300 150, 300 230" />
-            <path className="packet-path" data-color="#FF3B3B" d="M 500 120 C 500 200, 500 150, 500 230" />
-            <path className="packet-path" data-color="#FF3B3B" d="M 500 120 C 500 200, 700 150, 700 230" />
-            <path className="packet-path" data-color="#3B82F6" d="M 300 230 C 300 150, 500 200, 500 120" />
-            <path className="packet-path" data-color="#3B82F6" d="M 500 230 C 500 150, 500 200, 500 120" />
-            <path className="packet-path" data-color="#3B82F6" d="M 700 230 C 700 150, 500 200, 500 120" />
-            <path className="packet-path" data-color="#F59E0B" d="M 500 400 L 500 500 L 425 500" />
+            <path className="packet-path" data-color="#FF3B3B" d="M 425 120 C 350 170, 300 170, 300 230" />
+            <path className="packet-path" data-color="#FF3B3B" d="M 575 120 C 650 170, 700 170, 700 230" />
+            <path className="packet-path" data-color="#3B82F6" d="M 300 270 C 300 310, 500 310, 500 350" />
+            <path className="packet-path" data-color="#3B82F6" d="M 700 270 C 700 310, 500 310, 500 350" />
+            <path className="packet-path" data-color="#10B981" d="M 500 390 L 500 440" />
+            <path className="packet-path" data-color="#10B981" d="M 500 480 L 500 520" />
           </g>
 
           {/* Nodes */}
-          <SvgNode id="n1" x="100" y="100" label="User Wallet" type="Human" Icon={Wallet} borderColor="#9CA3AF" />
-          <SvgNode id="n2" x="500" y="100" label="Orchestrator" type="Orchestrator" Icon={Cpu} borderColor="#FF3B3B" />
-          <SvgNode id="n3" x="300" y="250" label="Agent A (Comps)" type="Valuation" Icon={BarChart2} borderColor="#EC4899" />
-          <SvgNode id="n4" x="700" y="250" label="Agent B (DCF)" type="Valuation" Icon={TrendingUp} borderColor="#F97316" />
-          <SvgNode id="n5" x="300" y="400" label="Evidence Analyst" type="Juror" Icon={FileText} borderColor="#10B981" />
-          <SvgNode id="n6" x="500" y="400" label="Market Interpreter" type="Juror" Icon={Activity} borderColor="#06B6D4" />
-          <SvgNode id="n7" x="700" y="400" label="Precedent Researcher" type="Juror" Icon={Search} borderColor="#8B5CF6" />
-          <SvgNode id="n8" x="900" y="400" label="Vectra DB" type="External" Icon={Database} borderColor="#06B6D4" />
-          <SvgNode id="n9" x="400" y="540" label="VotingContract" type="Contract" Icon={Shield} borderColor="#10B981" />
-          <SvgNode id="n10" x="600" y="540" label="EscrowContract" type="Contract" Icon={Shield} borderColor="#F59E0B" />
-          <SvgNode id="n11" x="500" y="580" label="Trust Framework" type="Contract" Icon={Shield} borderColor="#10B981" />
-          <SvgNode id="n12" x="100" y="580" label="CSPR.cloud" type="Data" Icon={Globe} borderColor="#8B5CF6" />
+          <SvgNode id="n1" x={200} y={100} label="Your Asset" Icon={Wallet} borderColor="#FF3B3B" />
+          <SvgNode id="n2" x={500} y={100} label="Orchestrator" Icon={Cpu} borderColor="#8B5CF6" />
+          <SvgNode id="n3" x={225} y={200} label="Data Sources" Icon={Database} borderColor="#6366f1" />
+          <SvgNode id="n4" x={300} y={250} label="Comps Specialist" Icon={BarChart2} borderColor="#EC4899" />
+          <SvgNode id="n5" x={700} y={250} label="DCF Specialist" Icon={TrendingUp} borderColor="#F97316" />
+          <SvgNode id="n6" x={200} y={370} label="Evidence Analyst" Icon={FileText} borderColor="#10B981" />
+          <SvgNode id="n7" x={500} y={370} label="Market Interpreter" Icon={Activity} borderColor="#06B6D4" />
+          <SvgNode id="n8" x={800} y={370} label="Precedent Researcher" Icon={Search} borderColor="#8B5CF6" />
+          <SvgNode id="n9" x={500} y={460} label="Verdict" Icon={Shield} borderColor="#10B981" />
+          <SvgNode id="n10" x={500} y={540} label="Casper Blockchain" Icon={Globe} borderColor="#22D3EE" />
         </svg>
       </div>
     </section>
