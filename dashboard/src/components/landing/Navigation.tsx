@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import verdictLogo from '../../assets/Verdict logo.jpeg';
 
 export const Navigation: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -19,7 +20,7 @@ export const Navigation: React.FC = () => {
     { label: 'How It Works', href: '#how-it-works' },
     { label: 'Agents', href: '#agents' },
     { label: 'Contracts', href: '#contracts' },
-    { label: 'Docs', href: '/architecture' },
+    { label: 'Dashboard', href: '/dashboard' },
   ];
 
   return (
@@ -57,16 +58,18 @@ export const Navigation: React.FC = () => {
         >
           {/* Logo */}
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-            <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M16 2 L16 30 M8 10 L8 22 M24 10 L24 22 M4 10 L12 10 M20 10 L28 10 M2 26 L30 26" />
-            </svg>
+            <img
+              src={verdictLogo}
+              alt="Verdict"
+              style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }}
+            />
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-primary)' }}>
-              Casper RWA Court
+              Verdict
             </span>
           </Link>
 
           {/* Desktop Links */}
-          <div className="desktop-nav" style={{ display: 'none', gap: '32px' }}>
+          <div className="desktop-nav" style={{ display: 'flex', gap: '32px' }}>
             {navLinks.map((link, i) => (
               <motion.a
                 key={link.label}
@@ -165,14 +168,6 @@ export const Navigation: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      <style>{`
-        @media (min-width: 768px) {
-          .desktop-nav { display: flex !important; }
-        }
-        @media (max-width: 767px) {
-          .mobile-toggle { display: block !important; }
-        }
-      `}</style>
     </>
   );
 };

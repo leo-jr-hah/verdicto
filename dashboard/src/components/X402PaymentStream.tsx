@@ -57,7 +57,7 @@ const DEMO_PAYMENTS: PaymentEvent[] = [
   {
     id: 'pay-2',
     from: 'Escrow Contract',
-    to: 'Comps Specialist',
+    to: 'Valuation Agent A',
     amount: 500_000_000,
     tool: 'x402 Agent Payment',
     txHash: '02b3c4d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef01',
@@ -67,7 +67,7 @@ const DEMO_PAYMENTS: PaymentEvent[] = [
   {
     id: 'pay-3',
     from: 'Escrow Contract',
-    to: 'Income Specialist',
+    to: 'Valuation Agent B',
     amount: 500_000_000,
     tool: 'x402 Agent Payment',
     txHash: '03c4d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef0123',
@@ -77,7 +77,7 @@ const DEMO_PAYMENTS: PaymentEvent[] = [
   {
     id: 'pay-4',
     from: 'Escrow Contract',
-    to: 'Evidence Reviewer',
+    to: 'Evidence Analyst',
     amount: 400_000_000,
     tool: 'x402 Juror Payment',
     txHash: '04d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef012345',
@@ -87,7 +87,7 @@ const DEMO_PAYMENTS: PaymentEvent[] = [
   {
     id: 'pay-5',
     from: 'Escrow Contract',
-    to: 'Trend Analyst',
+    to: 'Market Interpreter',
     amount: 400_000_000,
     tool: 'x402 Juror Payment',
     txHash: '05e6f7890123456789abcdef0123456789abcdef0123456789abcdef01234567',
@@ -97,7 +97,7 @@ const DEMO_PAYMENTS: PaymentEvent[] = [
   {
     id: 'pay-6',
     from: 'Escrow Contract',
-    to: 'Case Researcher',
+    to: 'Precedent Researcher',
     amount: 400_000_000,
     tool: 'x402 Juror Payment',
     txHash: '06f7890123456789abcdef0123456789abcdef0123456789abcdef0123456789',

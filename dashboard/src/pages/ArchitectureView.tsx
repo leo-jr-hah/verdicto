@@ -5,6 +5,7 @@ import {
   ChevronDown, ChevronUp, Zap, Lock, Eye, GitBranch
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArchitectureDiagram } from '../components/landing/ArchitectureDiagram';
 
 // ─── Step Data ────────────────────────────────────────────────────────────────
 
@@ -15,7 +16,7 @@ const STEPS = [
     title: 'Submit a Dispute',
     subtitle: 'You describe the asset and the question you need answered.',
     description:
-      'Enter an asset address, type (property, collectible, etc.), and the dispute details. The system creates a unique dispute ID and opens a real-time session so you can watch the analysis unfold live.',
+      'Enter an asset address, type (property, art, or commodity), and the dispute details. The Orchestrator creates a unique dispute ID, opens a real-time session, and locks a 0.1 CSPR filing fee in the Escrow contract on Casper.',
     accent: '#3B82F6',
     visual: 'submit',
   },
@@ -23,29 +24,29 @@ const STEPS = [
     num: '02',
     icon: <Cpu size={28} />,
     title: 'The Orchestrator Dispatches',
-    subtitle: 'One command center routes your case to five independent specialists.',
+    subtitle: 'One command center routes your case to two valuation agents.',
     description:
-      'The Orchestrator receives your dispute, fetches baseline data from external APIs (property records, market feeds, economic indicators), then dispatches parallel analysis tasks to five AI agents — each with a distinct expertise.',
+      'The Orchestrator receives your dispute and fetches baseline data from external APIs — RentCast for real estate, Met Museum for art, CoinGecko for commodities, FRED for macro indicators. It then dispatches parallel valuation tasks to Agent A (comparable sales) and Agent B (DCF/market analysis).',
     accent: '#8B5CF6',
     visual: 'dispatch',
   },
   {
     num: '03',
     icon: <Users size={28} />,
-    title: 'Five Specialists Analyze',
-    subtitle: 'Independent, parallel, adversarial by design.',
+    title: 'Two Valuations, Three Jurors',
+    subtitle: 'Dual valuations are adjudicated by specialized jurors.',
     description:
-      'Each agent works in isolation — no agent sees another\'s reasoning until deliberation. This prevents groupthink and ensures diverse perspectives. Agents pay for data access via x402 micropayments on Casper.',
+      'Agent A and Agent B produce independent valuations using different methodologies. If the divergence exceeds a threshold, three MCP-based jurors — Evidence Analyst, Market Data Interpreter, and Precedent Researcher — evaluate which valuation is more credible. Jurors pay for data access via x402 micropayments on Casper.',
     accent: '#EC4899',
     visual: 'agents',
   },
   {
     num: '04',
     icon: <Scale size={28} />,
-    title: 'Agent Deliberation & Trust Scoring',
-    subtitle: 'Opinions are weighed by on-chain reputation, not popularity.',
+    title: 'Juror Deliberation & Trust Scoring',
+    subtitle: 'Votes are weighted by on-chain reputation, not popularity.',
     description:
-      'Agent analyses are collected and scored. Each agent\'s weight is determined by its on-chain trust score — a reputation built over time from accuracy and consistency. The HMAC receipt chain ensures no reasoning was altered after the fact.',
+      'Jurors vote across two rounds. In Round 2, each juror sees peer reasoning and may revise their verdict. Votes are weighted by each juror\'s on-chain trust score — built from execution accuracy (40%), output consistency (30%), and economic stake (30%), scaled to 0–1000. The HMAC receipt chain ensures no reasoning was altered after the fact.',
     accent: '#F59E0B',
     visual: 'deliberate',
   },
@@ -55,7 +56,7 @@ const STEPS = [
     title: 'Verdict Recorded On-Chain',
     subtitle: 'Immutable, verifiable, permanently auditable.',
     description:
-      'The final verdict — along with every agent\'s reasoning, confidence, and trust weight — is committed to the Casper blockchain. Anyone can verify the receipt chain independently. No central authority can rewrite the outcome.',
+      'The final verdict — full_refund, split_fifty, or full_release — along with every juror\'s reasoning, confidence, and trust weight is committed to the Casper blockchain as a SHA-256 execution commitment. Anyone can verify the HMAC receipt chain independently. No central authority can rewrite the outcome.',
     accent: '#10B981',
     visual: 'verdict',
   },
@@ -65,44 +66,44 @@ const STEPS = [
 
 const AGENTS = [
   {
-    name: 'Comps Specialist',
+    name: 'Valuation Agent A',
     role: 'Comparable Sales',
     icon: <Calculator size={20} />,
     color: '#EC4899',
     method: 'RentCast API',
-    desc: 'Pulls recent comparable sales and adjusts for differences in size, condition, and location.',
+    desc: 'Pulls recent comparable sales from RentCast and adjusts for differences in size, condition, and location.',
   },
   {
-    name: 'Income Specialist',
-    role: 'Cash Flow Analysis',
+    name: 'Valuation Agent B',
+    role: 'DCF Analysis',
     icon: <TrendingUp size={20} />,
     color: '#F97316',
     method: 'FRED Economic Data',
-    desc: 'Models rental income potential, cap rates, and discounted cash flow using live economic indicators.',
+    desc: 'Models rental income potential, cap rates, and discounted cash flow using live economic indicators from FRED.',
   },
   {
-    name: 'Evidence Reviewer',
+    name: 'Evidence Analyst',
     role: 'Data Validation',
     icon: <Shield size={20} />,
     color: '#10B981',
-    method: 'Groq LLM + RAG',
-    desc: 'Cross-references raw data points, flags inconsistencies, and assesses evidence quality.',
+    method: 'MiMo LLM',
+    desc: 'Cross-references raw data points, flags inconsistencies, and assesses evidence quality using MiMo LLM reasoning.',
   },
   {
-    name: 'Trend Analyst',
+    name: 'Market Data Interpreter',
     role: 'Market Context',
     icon: <TrendingUp size={20} />,
     color: '#06B6D4',
-    method: 'Groq LLM + Market Data',
-    desc: 'Evaluates macro trends, neighborhood trajectory, and market timing factors.',
+    method: 'MiMo LLM + Market Data',
+    desc: 'Evaluates macro trends, neighborhood trajectory, and market timing factors using MiMo LLM and live market feeds.',
   },
   {
-    name: 'Case Researcher',
+    name: 'Precedent Researcher',
     role: 'Precedent Search',
     icon: <Search size={20} />,
     color: '#8B5CF6',
     method: 'Vectra RAG + Vector Search',
-    desc: 'Searches historical disputes and outcomes to find relevant precedents and legal frameworks.',
+    desc: 'Searches historical disputes and outcomes via Vectra vector database to find relevant precedents and legal frameworks.',
   },
 ];
 
@@ -138,13 +139,13 @@ const StepVisualDispatch: React.FC = () => (
       <span>Orchestrator</span>
     </div>
     <div className="hiw-dispatch-arrows">
-      {[0, 1, 2, 3, 4].map(i => (
+      {[0, 1].map(i => (
         <div key={i} className="hiw-dispatch-arrow" style={{ animationDelay: `${i * 0.15}s` }} />
       ))}
     </div>
     <div className="hiw-dispatch-targets">
-      {['Comps', 'Income', 'Evidence', 'Trends', 'Precedent'].map((name, i) => (
-        <div key={name} className="hiw-dispatch-target" style={{ animationDelay: `${0.6 + i * 0.1}s` }}>
+      {['Agent A\n(Comps)', 'Agent B\n(DCF)'].map((name, i) => (
+        <div key={name} className="hiw-dispatch-target" style={{ animationDelay: `${0.6 + i * 0.1}s`, whiteSpace: 'pre-line' }}>
           {name}
         </div>
       ))}
@@ -172,11 +173,9 @@ const StepVisualAgents: React.FC = () => (
 
 const StepVisualDeliberate: React.FC = () => {
   const votes = [
-    { name: 'Comps', value: 450000, weight: 28, color: '#EC4899' },
-    { name: 'Income', value: 435000, weight: 24, color: '#F97316' },
-    { name: 'Evidence', value: 442000, weight: 20, color: '#10B981' },
-    { name: 'Trends', value: 448000, weight: 16, color: '#06B6D4' },
-    { name: 'Precedent', value: 440000, weight: 12, color: '#8B5CF6' },
+    { name: 'Evidence Analyst', verdict: 'full_refund', weight: 40, color: '#10B981' },
+    { name: 'Market Interpreter', verdict: 'split_fifty', weight: 35, color: '#06B6D4' },
+    { name: 'Precedent Researcher', verdict: 'full_refund', weight: 25, color: '#8B5CF6' },
   ];
   return (
     <div className="hiw-visual-card hiw-deliberate-visual">
@@ -189,22 +188,22 @@ const StepVisualDeliberate: React.FC = () => {
                 className="hiw-vote-fill"
                 style={{ background: v.color }}
                 initial={{ width: 0 }}
-                whileInView={{ width: `${v.weight * 3}%` }}
+                whileInView={{ width: `${v.weight * 2.5}%` }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.2 }}
               />
             </div>
             <div className="hiw-vote-meta">
-              <span className="hiw-vote-value">${(v.value / 1000).toFixed(0)}K</span>
+              <span className="hiw-vote-value">{v.verdict}</span>
               <span className="hiw-vote-weight">{v.weight}%</span>
             </div>
           </div>
         ))}
       </div>
       <div className="hiw-deliberate-result">
-        <div className="hiw-deliberate-verdict-label">Weighted Verdict</div>
-        <div className="hiw-deliberate-verdict-value">$443,200</div>
-        <div className="hiw-deliberate-verdict-note">±3.2% confidence interval</div>
+        <div className="hiw-deliberate-verdict-label">Trust-Weighted Verdict</div>
+        <div className="hiw-deliberate-verdict-value">full_refund</div>
+        <div className="hiw-deliberate-verdict-note">HMAC receipt chain verified</div>
       </div>
     </div>
   );
@@ -219,7 +218,7 @@ const StepVisualVerdict: React.FC = () => (
     <div className="hiw-verdict-body">
       <div className="hiw-verdict-row">
         <span className="hiw-verdict-label">Outcome</span>
-        <span className="hiw-verdict-value" style={{ color: '#10B981' }}>$443,200 Fair Market Value</span>
+        <span className="hiw-verdict-value" style={{ color: '#10B981' }}>full_refund</span>
       </div>
       <div className="hiw-verdict-row">
         <span className="hiw-verdict-label">Confidence</span>
@@ -230,8 +229,8 @@ const StepVisualVerdict: React.FC = () => (
         <span className="hiw-verdict-value hiw-hash">0x7a3f...e2b1</span>
       </div>
       <div className="hiw-verdict-row">
-        <span className="hiw-verdict-label">Block</span>
-        <span className="hiw-verdict-value hiw-hash">#2,847,391</span>
+        <span className="hiw-verdict-label">Trust Score</span>
+        <span className="hiw-verdict-value">847 / 1000</span>
       </div>
     </div>
     <div className="hiw-verdict-badge">
@@ -349,8 +348,11 @@ export const ArchitectureView: React.FC = () => {
       </div>
 
       {/* ── Under the Hood ───────────────────────────────────────── */}
+      {/* Architecture Diagram */}
+      <ArchitectureDiagram />
+
+      {/* Deep Dive Section */}
       <motion.section
-        className="hiw-deep-dive"
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-60px' }}

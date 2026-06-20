@@ -1,134 +1,163 @@
-import React, { useRef, useLayoutEffect } from 'react';
-import { motion } from 'motion/react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { BlockchainRecord } from './BlockchainRecord';
+import React from 'react';
+import { motion, useInView } from 'motion/react';
+import { useRef } from 'react';
+import { Wallet, Cpu, Scale, Shield, CheckCircle2 } from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
+const STEPS = [
+  {
+    num: '01',
+    title: 'File the Dispute',
+    color: 'var(--primary)',
+    icon: Wallet,
+    description: 'Connect your Casper wallet and submit a real-world asset dispute. The Orchestrator locks a 0.1 CSPR filing fee in the Escrow contract and begins coordination.',
+    detail: 'Submit Dispute (0.1 CSPR)',
+  },
+  {
+    num: '02',
+    title: 'Dual Valuation',
+    color: '#3B82F6',
+    icon: Cpu,
+    description: 'The Orchestrator fetches live data from RentCast, Met Museum, CoinGecko, or FRED — then dispatches two valuation agents that independently estimate fair market value using different methodologies.',
+    detail: 'Comparable Sales + DCF Analysis',
+  },
+  {
+    num: '03',
+    title: 'Jury Deliberation',
+    color: '#8B5CF6',
+    icon: Scale,
+    description: 'Three specialized jurors — Evidence Analyst, Market Data Interpreter, and Precedent Researcher — evaluate both valuations, cross-check data, and cast reputation-weighted votes.',
+    detail: '3 Jurors · Reputation-Weighted',
+  },
+  {
+    num: '04',
+    title: 'Verdict & Settlement',
+    color: '#10B981',
+    icon: Shield,
+    description: 'The winning verdict is recorded on-chain via the VotingContract. The Escrow contract routes CSPR to agents, and trust scores update in the ReputationRegistry.',
+    detail: 'Recorded on Casper Testnet',
+  },
+];
 
-export const HowItWorks: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    if (!containerRef.current || !trackRef.current) return;
-
-    const ctx = gsap.context(() => {
-      // Horizontal scroll
-      gsap.to(trackRef.current, {
-        xPercent: -66.66,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: containerRef.current,
-          pin: true,
-          scrub: 1,
-          end: '+=300%',
-        }
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
+const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, index }) => {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-80px' });
+  const Icon = step.icon;
 
   return (
-    <section id="how-it-works" ref={containerRef} style={{ height: '300vh', position: 'relative', background: 'var(--bg-main)' }}>
-      <div style={{
-        position: 'sticky',
-        top: 0,
-        height: '100vh',
-        width: '100%',
-        overflow: 'hidden',
-        display: 'flex',
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 40 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '3rem',
         alignItems: 'center',
-      }}>
-        <div ref={trackRef} style={{
-          display: 'flex',
-          width: '300vw',
-          height: '100%',
+        padding: '3rem 0',
+        borderTop: index > 0 ? '1px solid var(--border-color)' : 'none',
+      }}
+      className="hiw-step-row"
+    >
+      {/* Left: text */}
+      <div style={{ order: index % 2 === 0 ? 0 : 1 }}>
+        <div style={{ color: step.color, fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', marginBottom: '0.75rem' }}>
+          {step.num}
+        </div>
+        <h3 style={{
+          fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 800, marginBottom: '1rem',
+          fontFamily: 'var(--font-display)', letterSpacing: '-0.02em', color: 'var(--text-primary)',
         }}>
-          
-          {/* Panel 1: Submit */}
-          <div style={{ width: '100vw', height: '100%', display: 'flex', padding: '0 5vw', alignItems: 'center' }}>
-            <div style={{ flex: 1, paddingRight: '4rem' }}>
-              <div style={{ color: 'var(--primary)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', marginBottom: '1rem' }}>01</div>
-              <h2 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1.5rem', fontFamily: 'var(--font-display)', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>File the Dispute</h2>
-              <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: 480 }}>
-                Connect your Casper wallet and submit a real-world asset dispute. The Orchestrator Agent locks a 0.1 CSPR filing fee in the Escrow contract and begins coordination.
-              </p>
-            </div>
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-              <div className="card" style={{ width: '100%', maxWidth: 400, boxShadow: '0 20px 40px rgba(0,0,0,0.05)' }}>
-                <div style={{ width: '100%', height: 40, background: 'var(--bg-surface)', borderRadius: 8, marginBottom: 16 }} />
-                <div style={{ width: '100%', height: 80, background: 'var(--bg-surface)', borderRadius: 8, marginBottom: 24 }} />
-                <div className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                  Submit Dispute (0.1 CSPR)
-                </div>
-              </div>
-            </div>
-          </div>
+          {step.title}
+        </h3>
+        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: 480 }}>
+          {step.description}
+        </p>
+      </div>
 
-          {/* Panel 2: Analyze */}
-          <div style={{ width: '100vw', height: '100%', display: 'flex', padding: '0 5vw', alignItems: 'center' }}>
-            <div style={{ flex: 1, paddingRight: '4rem' }}>
-              <div style={{ color: '#3B82F6', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', marginBottom: '1rem' }}>02</div>
-              <h2 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1.5rem', fontFamily: 'var(--font-display)', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>Agent Deliberation</h2>
-              <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: 480 }}>
-                Five independent AI agents receive the dispute data through isolated channels. Each agent pulls live market data, selects its methodology autonomously, and produces a valuation. No agent sees another's work.
-              </p>
-            </div>
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', position: 'relative', height: 400 }}>
-              <div className="card" style={{
-                position: 'absolute', bottom: 40, left: '50%', transform: 'translateX(-50%)',
-                width: 60, height: 60, borderRadius: '50%', border: '2px solid var(--primary)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, padding: 0
-              }}>
-                <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-primary)' }}>ORCH</span>
-              </div>
-              {[
-                { angle: 180, color: '#F59E0B' },
-                { angle: 216, color: '#10B981' },
-                { angle: 252, color: '#3B82F6' },
-                { angle: 288, color: '#06B6D4' },
-                { angle: 324, color: '#8B5CF6' }
-              ].map((agent, i) => {
-                const r = 140;
-                const rad = agent.angle * (Math.PI / 180);
-                const x = `calc(50% + ${Math.cos(rad) * r}px)`;
-                const y = `calc(100% - 40px + ${Math.sin(rad) * r}px)`;
-                return (
-                  <motion.div key={i}
-                    animate={{ boxShadow: [`0 0 0 rgba(0,0,0,0)`, `0 0 20px ${agent.color}`, `0 0 0 rgba(0,0,0,0)`] }}
-                    transition={{ duration: 2, repeat: Infinity, delay: i * 0.4 }}
-                    className="card"
-                    style={{
-                      position: 'absolute', left: x, top: y, transform: 'translate(-50%, -50%)',
-                      width: 48, height: 48, borderRadius: '50%', border: `2px solid ${agent.color}`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0
-                    }}
-                  >
-                    <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-primary)' }}>A{i+1}</span>
-                  </motion.div>
-                );
-              })}
-            </div>
+      {/* Right: visual card */}
+      <div style={{ order: index % 2 === 0 ? 1 : 0, display: 'flex', justifyContent: 'center' }}>
+        <div className="card" style={{
+          width: '100%', maxWidth: 360,
+          boxShadow: '0 12px 40px rgba(0,0,0,0.06)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem',
+          padding: '2rem',
+          textAlign: 'center',
+        }}>
+          <div style={{
+            width: 48, height: 48, borderRadius: 12,
+            background: `${step.color}15`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: step.color,
+          }}>
+            <Icon size={22} />
           </div>
-
-          {/* Panel 3: Settle */}
-          <div style={{ width: '100vw', height: '100%', display: 'flex', padding: '0 5vw', alignItems: 'center' }}>
-            <div style={{ flex: 1, paddingRight: '4rem' }}>
-              <div style={{ color: '#10B981', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', marginBottom: '1rem' }}>03</div>
-              <h2 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1.5rem', fontFamily: 'var(--font-display)', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>On-Chain Verdict</h2>
-              <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: 480 }}>
-                Juror agents deliberate and vote. The ReputationRegistry weights each vote by historical accuracy. The final verdict writes to the VotingContract on Casper testnet with an immutable deploy hash.
-              </p>
-            </div>
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-              <BlockchainRecord />
-            </div>
+          <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+            {step.detail}
           </div>
-
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '0.4rem',
+            fontSize: '0.7rem', color: step.color, fontWeight: 600,
+          }}>
+            <CheckCircle2 size={14} />
+            Verified on-chain
+          </div>
         </div>
       </div>
+    </motion.div>
+  );
+};
+
+export const HowItWorks: React.FC = () => {
+  return (
+    <section id="how-it-works" style={{
+      padding: '6rem 2rem',
+      background: 'var(--bg-main)',
+      borderTop: '1px solid var(--border-color)',
+    }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        {/* Section header */}
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <div className="badge" style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+            background: 'var(--primary-bg)',
+            border: '1px solid rgba(255, 59, 59, 0.15)',
+            marginBottom: '1.5rem',
+          }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              How It Works
+            </span>
+          </div>
+          <h2 style={{
+            fontSize: 'clamp(1.8rem, 4vw, 3rem)',
+            fontWeight: 800, lineHeight: 1.1,
+            letterSpacing: '-0.03em',
+            color: 'var(--text-primary)',
+            marginBottom: '1rem',
+          }}>
+            Four steps to a trustless verdict
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>
+            From filing to settlement, every step is coordinated by AI agents and recorded on the Casper blockchain.
+          </p>
+        </div>
+
+        {/* Steps */}
+        {STEPS.map((step, i) => (
+          <StepCard key={step.num} step={step} index={i} />
+        ))}
+      </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .hiw-step-row {
+            grid-template-columns: 1fr !important;
+          }
+          .hiw-step-row > * {
+            order: unset !important;
+          }
+        }
+      `}</style>
     </section>
   );
 };

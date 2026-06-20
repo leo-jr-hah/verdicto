@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import verdictLogo from '../../assets/Verdict logo.jpeg';
 
 export const Footer: React.FC = () => {
   return (
@@ -9,11 +10,13 @@ export const Footer: React.FC = () => {
         {/* Brand */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-            <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M16 2 L16 30 M8 10 L8 22 M24 10 L24 22 M4 10 L12 10 M20 10 L28 10 M2 26 L30 26" />
-            </svg>
+            <img
+              src={verdictLogo}
+              alt="Verdict"
+              style={{ width: '28px', height: '28px', borderRadius: '6px', objectFit: 'cover' }}
+            />
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-primary)' }}>
-              Casper RWA Court
+              Verdict
             </span>
           </div>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '16px' }}>
@@ -59,17 +62,6 @@ export const Footer: React.FC = () => {
         </div>
 
       </div>
-
-      <style>{`
-        .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; }
-        .footer-link:hover { color: var(--primary) !important; }
-        @media (max-width: 1024px) {
-          .footer-grid { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 640px) {
-          .footer-grid { grid-template-columns: 1fr; }
-        }
-      `}</style>
     </footer>
   );
 };

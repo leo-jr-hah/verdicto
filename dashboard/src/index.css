@@ -2053,3 +2053,31 @@ button {
     grid-column: auto;
   }
 }
+
+/* ── Landing: Navigation ─────────────────────────────────────────────────── */
+
+@media (min-width: 768px) {
+  .desktop-nav { display: flex !important; }
+}
+@media (max-width: 767px) {
+  .mobile-toggle { display: block !important; }
+}
+
+/* ── Landing: Footer ─────────────────────────────────────────────────────── */
+
+.footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; }
+.footer-link:hover { color: var(--primary) !important; }
+@media (max-width: 1024px) {
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  .footer-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Landing: How It Works responsive ────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .hiw-steps-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

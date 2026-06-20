@@ -2,9 +2,6 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronDown } from 'lucide-react';
-import { ScrambleText } from './UIComponents';
-import { LiveAssessmentVisual } from './LiveAssessmentVisual';
-import { GradientOrb } from './Backgrounds';
 
 export const HeroSection: React.FC = () => {
   return (
@@ -16,10 +13,6 @@ export const HeroSection: React.FC = () => {
       position: 'relative',
       textAlign: 'center',
     }}>
-      {/* Gradient orbs */}
-      <GradientOrb color1="rgba(255,59,59,0.1)" color2="rgba(139,92,246,0.06)" size={700} x="30%" y="20%" delay={0} />
-      <GradientOrb color1="rgba(59,130,246,0.08)" color2="rgba(6,182,212,0.05)" size={500} x="70%" y="60%" delay={2} />
-
       {/* Eyebrow badge */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -32,7 +25,6 @@ export const HeroSection: React.FC = () => {
           border: '1px solid rgba(255, 59, 59, 0.15)',
           padding: '0.375rem 1rem',
           marginBottom: '2rem',
-          position: 'relative', zIndex: 1,
         }}
       >
         <motion.div
@@ -58,15 +50,11 @@ export const HeroSection: React.FC = () => {
           maxWidth: 800,
           margin: '0 auto 1.5rem',
           fontFamily: 'var(--font-display)',
-          position: 'relative', zIndex: 1,
         }}
       >
-        <ScrambleText text="AI-Powered Asset" delay={400} speed={0.4} /><br />
-        <span style={{ color: 'var(--primary)' }}>
-          <ScrambleText text="Assessment" delay={700} speed={0.35} />
-        </span>
-        {' '}
-        <ScrambleText text="on Chain" delay={1000} speed={0.4} />
+        AI-Powered Asset{' '}
+        <span style={{ color: 'var(--primary)' }}>Assessment</span>{' '}
+        on Chain
       </motion.h1>
 
       {/* Subheadline */}
@@ -80,20 +68,19 @@ export const HeroSection: React.FC = () => {
           lineHeight: 1.65,
           maxWidth: 560,
           margin: '0 auto 2.5rem',
-          position: 'relative', zIndex: 1,
         }}
       >
-        Five independent AI agents analyze real market data, cross-validate
-        methodologies, and deliver a consensus valuation, cryptographically
-        recorded on the Casper blockchain in 60 seconds.
+        Two valuation agents and three specialized jurors analyze real market data,
+        cross-validate methodologies, and deliver a trust-weighted verdict,
+        cryptographically recorded on the Casper blockchain in 60 seconds.
       </motion.p>
 
-      {/* CTAs using design system classes */}
+      {/* CTAs */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4 }}
-        style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '4rem', position: 'relative', zIndex: 1 }}
+        style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '4rem' }}
       >
         <Link to="/assess" className="btn btn-primary" style={{ padding: '0.875rem 1.75rem', fontSize: '0.95rem' }}>
           Value an Asset <ArrowRight size={16} />
@@ -107,22 +94,12 @@ export const HeroSection: React.FC = () => {
         </button>
       </motion.div>
 
-      {/* Live assessment visual */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, delay: 0.6 }}
-        style={{ width: '100%', maxWidth: 520, position: 'relative', zIndex: 1 }}
-      >
-        <LiveAssessmentVisual />
-      </motion.div>
-
       {/* Scroll cue */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 3 }}
-        style={{ position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}
+        transition={{ delay: 1.5 }}
+        style={{ position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)' }}
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}

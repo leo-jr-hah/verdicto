@@ -81,11 +81,11 @@ const DEMO_QUESTIONS = [
 // ─── Agent Cards ─────────────────────────────────────────────────────────────
 
 const AGENT_PROFILES = [
-  { name: 'Comps Specialist', role: 'Market Data Analyst', color: '#6366f1' },
-  { name: 'Income Specialist', role: 'DCF & Cash Flow', color: '#8b5cf6' },
-  { name: 'Evidence Reviewer', role: 'Data Quality Auditor', color: '#06b6d4' },
-  { name: 'Trend Analyst', role: 'Macro & Sentiment', color: '#f59e0b' },
-  { name: 'Case Researcher', role: 'Historical Precedent', color: '#10b981' },
+  { name: 'Valuation Agent A', role: 'Comparable Sales', color: '#EC4899' },
+  { name: 'Valuation Agent B', role: 'DCF & Cash Flow', color: '#F97316' },
+  { name: 'Evidence Analyst', role: 'Data Quality Auditor', color: '#10B981' },
+  { name: 'Market Interpreter', role: 'Macro & Sentiment', color: '#06B6D4' },
+  { name: 'Precedent Researcher', role: 'Historical Precedent', color: '#8B5CF6' },
 ];
 
 // ─── Simulate Prediction ─────────────────────────────────────────────────────
@@ -126,24 +126,24 @@ function simulatePrediction(question: string, timeframe: string): PredictionResu
 
 function generateReasoning(agentName: string, prob: number): string {
   const templates: Record<string, string[]> = {
-    'Comps Specialist': [
-      `Based on 12 comparable transactions in the target market, the probability is assessed at ${(prob * 100).toFixed(0)}%. Recent sales data shows strong momentum.`,
+    'Valuation Agent A': [
+      `Based on 12 comparable transactions from RentCast, the probability is assessed at ${(prob * 100).toFixed(0)}%. Recent sales data shows strong momentum.`,
       `Analyzed 8 similar outcomes in the past 24 months. Market conditions suggest ${(prob * 100).toFixed(0)}% likelihood. Demand indicators are mixed.`,
     ],
-    'Income Specialist': [
-      `Cash flow projections and DCF analysis indicate ${(prob * 100).toFixed(0)}% probability. Discount rate adjusted for current risk environment.`,
+    'Valuation Agent B': [
+      `Cash flow projections and DCF analysis using FRED data indicate ${(prob * 100).toFixed(0)}% probability. Discount rate adjusted for current risk environment.`,
       `Revenue trajectory and yield analysis suggest ${(prob * 100).toFixed(0)}% chance. Operating margins support the assessment.`,
     ],
-    'Evidence Reviewer': [
-      `Data quality is high — 4/5 sources verified. Confidence in the ${(prob * 100).toFixed(0)}% estimate is strong. No significant outliers detected.`,
+    'Evidence Analyst': [
+      `Data quality is high — 4/5 sources verified via MiMo LLM. Confidence in the ${(prob * 100).toFixed(0)}% estimate is strong. No significant outliers detected.`,
       `Evidence chain is solid. 3 independent data sources corroborate the ${(prob * 100).toFixed(0)}% assessment. Minor gaps in historical data noted.`,
     ],
-    'Trend Analyst': [
-      `Macro trends and sentiment analysis indicate ${(prob * 100).toFixed(0)}% probability. Interest rate environment is a key variable.`,
+    'Market Interpreter': [
+      `Macro trends and sentiment analysis via MiMo LLM indicate ${(prob * 100).toFixed(0)}% probability. Interest rate environment is a key variable.`,
       `Market cycle positioning suggests ${(prob * 100).toFixed(0)}% likelihood. Seasonal patterns and demand indicators align.`,
     ],
-    'Case Researcher': [
-      `Found 6 historical precedents with similar conditions. Outcome distribution suggests ${(prob * 100).toFixed(0)}% probability. Precedent accuracy: 72%.`,
+    'Precedent Researcher': [
+      `Found 6 historical precedents via Vectra vector search. Outcome distribution suggests ${(prob * 100).toFixed(0)}% probability. Precedent accuracy: 72%.`,
       `Historical case analysis of 9 comparable scenarios supports ${(prob * 100).toFixed(0)}% probability. Resolution patterns are consistent.`,
     ],
   };

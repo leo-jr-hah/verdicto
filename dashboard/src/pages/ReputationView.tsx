@@ -51,8 +51,8 @@ interface AgentReputation {
 
 const AGENTS: AgentReputation[] = [
   {
-    agentId: 'evidence',
-    agentName: 'Evidence Reviewer',
+    agentId: 'evidence-analyst',
+    agentName: 'Evidence Analyst',
     currentScore: 850,
     previousScore: 820,
     history: [
@@ -63,13 +63,13 @@ const AGENTS: AgentReputation[] = [
     rank: 1,
     totalAssessments: 156,
     successRate: 94,
-    description: 'Validates raw data points and cross-references sources for accuracy.',
-    methodology: 'Multi-source verification with confidence scoring',
+    description: 'Cross-references raw data points using MiMo LLM reasoning and flags inconsistencies.',
+    methodology: 'MiMo LLM-powered evidence validation with confidence scoring',
     strengths: ['Data validation', 'Source cross-referencing', 'Outlier detection'],
   },
   {
-    agentId: 'precedent',
-    agentName: 'Case Researcher',
+    agentId: 'precedent-researcher',
+    agentName: 'Precedent Researcher',
     currentScore: 790,
     previousScore: 780,
     history: [
@@ -80,13 +80,13 @@ const AGENTS: AgentReputation[] = [
     rank: 2,
     totalAssessments: 142,
     successRate: 91,
-    description: 'Searches historical comparable assets using RAG-powered retrieval.',
-    methodology: 'Retrieval-Augmented Generation with historical precedent matching',
-    strengths: ['Case law research', 'Historical comparisons', 'RAG-powered retrieval'],
+    description: 'Searches historical disputes via Vectra vector database for relevant precedents.',
+    methodology: 'Vectra RAG with vector similarity search',
+    strengths: ['Case law research', 'Historical comparisons', 'Vector search'],
   },
   {
-    agentId: 'market',
-    agentName: 'Trend Analyst',
+    agentId: 'market-interpreter',
+    agentName: 'Market Data Interpreter',
     currentScore: 760,
     previousScore: 755,
     history: [
@@ -97,13 +97,13 @@ const AGENTS: AgentReputation[] = [
     rank: 3,
     totalAssessments: 128,
     successRate: 89,
-    description: 'Provides macro-economic context and market trend interpretation.',
-    methodology: 'Time-series analysis with macro-economic indicators',
+    description: 'Evaluates macro trends and market timing using MiMo LLM and live market feeds.',
+    methodology: 'MiMo LLM + time-series analysis with macro-economic indicators',
     strengths: ['Market trends', 'Economic indicators', 'Price forecasting'],
   },
   {
-    agentId: 'valuation-a',
-    agentName: 'Comps Specialist',
+    agentId: 'valuation-agent-a',
+    agentName: 'Valuation Agent A',
     currentScore: 720,
     previousScore: 710,
     history: [
@@ -114,13 +114,13 @@ const AGENTS: AgentReputation[] = [
     rank: 4,
     totalAssessments: 98,
     successRate: 87,
-    description: 'Analyzes comparable sales and market listings to estimate asset value.',
-    methodology: 'Comparable sales analysis with adjustment factors',
+    description: 'Pulls comparable sales from RentCast and adjusts for property differences.',
+    methodology: 'RentCast API comparable sales analysis',
     strengths: ['Sales comparisons', 'Market listings', 'Value estimation'],
   },
   {
-    agentId: 'valuation-b',
-    agentName: 'Income Specialist',
+    agentId: 'valuation-agent-b',
+    agentName: 'Valuation Agent B',
     currentScore: 710,
     previousScore: 705,
     history: [
@@ -131,8 +131,8 @@ const AGENTS: AgentReputation[] = [
     rank: 5,
     totalAssessments: 87,
     successRate: 85,
-    description: 'Projects future cash flows and applies discounted cash flow (DCF) analysis.',
-    methodology: 'Discounted Cash Flow (DCF) with risk-adjusted discount rates',
+    description: 'Projects future cash flows using FRED economic data and applies DCF analysis.',
+    methodology: 'FRED API + Discounted Cash Flow with risk-adjusted discount rates',
     strengths: ['Cash flow projection', 'DCF analysis', 'Risk assessment'],
   },
 ];

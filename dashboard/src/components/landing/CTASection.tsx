@@ -36,7 +36,7 @@ export const CTASection: React.FC = () => {
           </h2>
           
           <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '40px' }}>
-            Connect your Casper wallet and file a dispute in under 2 minutes. Five agents will analyze, deliberate, and settle.
+            Connect your Casper wallet and file a dispute in under 2 minutes. Two valuation agents and three jurors will analyze, deliberate, and settle.
           </p>
 
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>

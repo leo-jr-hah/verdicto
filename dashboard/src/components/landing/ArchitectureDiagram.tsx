@@ -2,7 +2,7 @@ import React, { useRef, useLayoutEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Reveal } from './Reveal';
-import { Wallet, Cpu, BarChart2, Search, FileText, Activity, Database, Shield, Globe } from 'lucide-react';
+import { Wallet, Cpu, BarChart2, TrendingUp, Search, FileText, Activity, Database, Shield, Globe } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -146,15 +146,15 @@ export const ArchitectureDiagram: React.FC = () => {
           {/* Nodes */}
           <SvgNode id="n1" x="100" y="100" label="User Wallet" type="Human" Icon={Wallet} borderColor="#9CA3AF" />
           <SvgNode id="n2" x="500" y="100" label="Orchestrator" type="Orchestrator" Icon={Cpu} borderColor="#FF3B3B" />
-          <SvgNode id="n3" x="300" y="250" label="Comps Specialist" type="Valuation" Icon={BarChart2} borderColor="#F59E0B" />
-          <SvgNode id="n4" x="500" y="250" label="DCF Specialist" type="Valuation" Icon={BarChart2} borderColor="#F59E0B" />
-          <SvgNode id="n5" x="700" y="250" label="Evidence Reviewer" type="Juror" Icon={FileText} borderColor="#3B82F6" />
-          <SvgNode id="n6" x="600" y="400" label="Market Analyst" type="Juror" Icon={Activity} borderColor="#3B82F6" />
-          <SvgNode id="n7" x="800" y="400" label="Precedent Researcher" type="Juror" Icon={Search} borderColor="#3B82F6" />
-          <SvgNode id="n8" x="960" y="400" label="Vectra DB" type="External" Icon={Database} borderColor="#06B6D4" />
-          <SvgNode id="n9" x="350" y="500" label="VotingContract" type="Contract" Icon={Shield} borderColor="#10B981" />
-          <SvgNode id="n10" x="650" y="500" label="EscrowContract" type="Contract" Icon={Shield} borderColor="#10B981" />
-          <SvgNode id="n11" x="500" y="580" label="ReputationRegistry" type="Contract" Icon={Shield} borderColor="#10B981" />
+          <SvgNode id="n3" x="300" y="250" label="Agent A (Comps)" type="Valuation" Icon={BarChart2} borderColor="#EC4899" />
+          <SvgNode id="n4" x="700" y="250" label="Agent B (DCF)" type="Valuation" Icon={TrendingUp} borderColor="#F97316" />
+          <SvgNode id="n5" x="300" y="400" label="Evidence Analyst" type="Juror" Icon={FileText} borderColor="#10B981" />
+          <SvgNode id="n6" x="500" y="400" label="Market Interpreter" type="Juror" Icon={Activity} borderColor="#06B6D4" />
+          <SvgNode id="n7" x="700" y="400" label="Precedent Researcher" type="Juror" Icon={Search} borderColor="#8B5CF6" />
+          <SvgNode id="n8" x="900" y="400" label="Vectra DB" type="External" Icon={Database} borderColor="#06B6D4" />
+          <SvgNode id="n9" x="400" y="540" label="VotingContract" type="Contract" Icon={Shield} borderColor="#10B981" />
+          <SvgNode id="n10" x="600" y="540" label="EscrowContract" type="Contract" Icon={Shield} borderColor="#F59E0B" />
+          <SvgNode id="n11" x="500" y="580" label="Trust Framework" type="Contract" Icon={Shield} borderColor="#10B981" />
           <SvgNode id="n12" x="100" y="580" label="CSPR.cloud" type="Data" Icon={Globe} borderColor="#8B5CF6" />
         </svg>
       </div>

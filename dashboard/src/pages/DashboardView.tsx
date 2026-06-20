@@ -7,11 +7,11 @@ import { LiveContractPanel } from '../components/LiveContractPanel';
 import { X402PaymentStream } from '../components/X402PaymentStream';
 
 const AGENTS = [
-  { name: 'Comps Specialist', color: '#EC4899', role: 'Valuation', method: 'Comparable Sales', initials: 'CS' },
-  { name: 'Income Specialist', color: '#F97316', role: 'Valuation', method: 'DCF Analysis', initials: 'IS' },
-  { name: 'Evidence Reviewer', color: '#10B981', role: 'Analysis', method: 'Data Validation', initials: 'ER' },
-  { name: 'Trend Analyst', color: '#06B6D4', role: 'Analysis', method: 'Market Context', initials: 'TA' },
-  { name: 'Case Researcher', color: '#8B5CF6', role: 'Analysis', method: 'Comparable Research', initials: 'CR' },
+  { name: 'Valuation Agent A', color: '#EC4899', role: 'Valuation', method: 'Comparable Sales', initials: 'VA' },
+  { name: 'Valuation Agent B', color: '#F97316', role: 'Valuation', method: 'DCF Analysis', initials: 'VB' },
+  { name: 'Evidence Analyst', color: '#10B981', role: 'Analysis', method: 'Data Validation', initials: 'EA' },
+  { name: 'Market Interpreter', color: '#06B6D4', role: 'Analysis', method: 'Market Context', initials: 'MI' },
+  { name: 'Precedent Researcher', color: '#8B5CF6', role: 'Analysis', method: 'Precedent Search', initials: 'PR' },
 ];
 
 const QUICK_ACTIONS = [

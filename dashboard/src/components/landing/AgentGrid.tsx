@@ -28,12 +28,12 @@ export const AgentGrid: React.FC = () => {
               color: 'var(--text-primary)',
               marginBottom: '1rem',
             }}>
-              Five specialists. No coordination.<br />
+              Two valuations. Three jurors.<br />
               <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Every analysis formed independently.</span>
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>
-              Each agent is given the same data but operates in isolation, preventing
-              groupthink and ensuring genuinely independent valuations.
+              Two valuation agents produce independent estimates using different methodologies.
+              Three specialized jurors then evaluate which is more credible, weighted by on-chain trust scores.
             </p>
           </div>
         </Reveal>

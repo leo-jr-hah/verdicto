@@ -153,11 +153,11 @@ export const LiveContractPanel: React.FC = () => {
         setState({
           disputes: { total: 47, pending: 3, deliberating: 2, voting: 1, resolved: 41 },
           agents: [
-            { id: 'comps-specialist', name: 'Comps Specialist', reputation: 847, totalAssessments: 156, accuracy: 92 },
-            { id: 'income-specialist', name: 'Income Specialist', reputation: 812, totalAssessments: 143, accuracy: 89 },
-            { id: 'evidence-reviewer', name: 'Evidence Reviewer', reputation: 891, totalAssessments: 167, accuracy: 94 },
-            { id: 'trend-analyst', name: 'Trend Analyst', reputation: 778, totalAssessments: 134, accuracy: 87 },
-            { id: 'case-researcher', name: 'Case Researcher', reputation: 856, totalAssessments: 152, accuracy: 91 },
+            { id: 'valuation-agent-a', name: 'Valuation Agent A', reputation: 847, totalAssessments: 156, accuracy: 92 },
+            { id: 'valuation-agent-b', name: 'Valuation Agent B', reputation: 812, totalAssessments: 143, accuracy: 89 },
+            { id: 'evidence-analyst', name: 'Evidence Analyst', reputation: 891, totalAssessments: 167, accuracy: 94 },
+            { id: 'market-interpreter', name: 'Market Interpreter', reputation: 778, totalAssessments: 134, accuracy: 87 },
+            { id: 'precedent-researcher', name: 'Precedent Researcher', reputation: 856, totalAssessments: 152, accuracy: 91 },
           ],
           escrow: { totalStaked: 125_000_000_000, totalSettled: 98_500_000_000, activeDisputes: 6 },
           receipts: { total: 234, verified: 228, pending: 6 },

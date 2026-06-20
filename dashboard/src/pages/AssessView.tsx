@@ -784,16 +784,16 @@ export const AssessView: React.FC = () => {
     timers.push(setTimeout(() => addLog('info', 'Initializing dual-agent valuation pipeline...'), 600));
     timers.push(setTimeout(() => addLog('data', `Fetching market data for ${assetType}...`), 1200));
     timers.push(setTimeout(() => addLog('data', `Querying RentCast API for comparable properties...`), 1800));
-    timers.push(setTimeout(() => addLog('agent', 'Comps Specialist: analyzing comparable sales in target market...'), 2400));
-    timers.push(setTimeout(() => addLog('agent', 'Comps Specialist: found 12 comparable transactions, computing median...'), 3200));
-    timers.push(setTimeout(() => addLog('agent', 'Income Specialist: projecting 10-year cash flow model...'), 3600));
+    timers.push(setTimeout(() => addLog('agent', 'Valuation Agent A: analyzing comparable sales in target market...'), 2400));
+    timers.push(setTimeout(() => addLog('agent', 'Valuation Agent A: found 12 comparable transactions, computing median...'), 3200));
+    timers.push(setTimeout(() => addLog('agent', 'Valuation Agent B: projecting 10-year cash flow model...'), 3600));
     timers.push(setTimeout(() => addLog('data', `Querying FRED API for mortgage rates and CPI data...`), 4200));
-    timers.push(setTimeout(() => addLog('agent', 'Income Specialist: applying 8.5% discount rate to projected NOI...'), 4800));
+    timers.push(setTimeout(() => addLog('agent', 'Valuation Agent B: applying 8.5% discount rate to projected NOI...'), 4800));
     timers.push(setTimeout(() => addLog('info', 'Comparing valuations and computing divergence...'), 5500));
     timers.push(setTimeout(() => addLog('data', `Agent A value: ${(Math.random() * 500000 + 200000).toFixed(0)} | Agent B value: ${(Math.random() * 500000 + 200000).toFixed(0)}`), 6000));
-    timers.push(setTimeout(() => addLog('agent', 'Running agent deliberation: Evidence Reviewer validating data sources...'), 6800));
-    timers.push(setTimeout(() => addLog('agent', 'Running agent deliberation: Trend Analyst assessing market conditions...'), 7400));
-    timers.push(setTimeout(() => addLog('agent', 'Running agent deliberation: Case Researcher searching comparables...'), 8000));
+    timers.push(setTimeout(() => addLog('agent', 'Running juror deliberation: Evidence Analyst validating data sources...'), 6800));
+    timers.push(setTimeout(() => addLog('agent', 'Running juror deliberation: Market Interpreter assessing market conditions...'), 7400));
+    timers.push(setTimeout(() => addLog('agent', 'Running juror deliberation: Precedent Researcher searching precedents...'), 8000));
     timers.push(setTimeout(() => addLog('success', 'Assessment complete. Generating report...'), 8800));
 
     return () => timers.forEach(clearTimeout);
@@ -1198,10 +1198,10 @@ export const AssessView: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {[
                     { step: '1', title: 'You provide asset details', desc: 'Name, type, asking price, and relevant attributes.' },
-                    { step: '2', title: 'Two AI agents analyze independently', desc: 'Comps Specialist uses comparable sales. Income Specialist uses cash flow projections.' },
-                    { step: '3', title: 'Divergence is measured', desc: 'If agents disagree by more than 15%, additional analysis agents review the case.' },
-                    { step: '4', title: 'Analysis agents review', desc: 'Evidence Reviewer, Trend Analyst, and Case Researcher each provide independent analysis.' },
-                    { step: '5', title: 'Final valuation is issued', desc: 'The assessed value is recorded with a cryptographic receipt on Casper testnet.' },
+                    { step: '2', title: 'Two AI agents analyze independently', desc: 'Valuation Agent A uses comparable sales (RentCast). Valuation Agent B uses DCF (FRED).' },
+                    { step: '3', title: 'Divergence is measured', desc: 'If agents disagree by more than 15%, three jurors review the case.' },
+                    { step: '4', title: 'Jurors deliberate', desc: 'Evidence Analyst, Market Interpreter, and Precedent Researcher each vote with trust-weighted scores.' },
+                    { step: '5', title: 'Final verdict is issued', desc: 'The verdict (full_refund / split_fifty / full_release) is committed to Casper with an HMAC receipt chain.' },
                   ].map((item) => (
                     <div key={item.step} style={{ display: 'flex', gap: '0.75rem' }}>
                       <div style={{
