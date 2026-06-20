@@ -4,8 +4,39 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+// ─── Env Validation (fail fast with clear messages) ──────────────────────────
+const REQUIRED_ENV = [
+  'CSPRCLOUD_API_KEY',
+  'DEPLOYER_PRIVATE_KEY',
+  'REPUTATION_CONTRACT_HASH',
+  'ESCROW_CONTRACT_HASH',
+] as const;
+
+const OPTIONAL_ENV = [
+  'OPENAI_API_KEY',
+  'GROQ_API_KEY',
+  'MIMO_API_KEY',
+  'ALLOWED_ORIGINS',
+  'CASPER_CHAIN_NAME',
+] as const;
+
+function validateEnv() {
+  const missing = REQUIRED_ENV.filter(k => !process.env[k]);
+  if (missing.length > 0) {
+    console.error(`\n❌ Missing required environment variables:\n   ${missing.map(k => `  • ${k}`).join('\n')}\n`);
+    console.error('   Copy .env.example to .env and fill in the values.\n');
+    process.exit(1);
+  }
+  const optionalPresent = OPTIONAL_ENV.filter(k => process.env[k]);
+  if (optionalPresent.length > 0) {
+    console.log(`✅ Optional env vars configured: ${optionalPresent.join(', ')}`);
+  }
+  console.log('✅ All required environment variables present.\n');
+}
+validateEnv();
+
 import axios from 'axios';
-import { execFileSync } from 'child_process';
+import { execFile } from 'child_process';
 import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
@@ -109,11 +140,11 @@ function parseSseResponse(raw: string): any {
   return raw; // not SSE — return as-is
 }
 
-// ─── Casper Transfer (execFileSync — no shell injection) ─────────────────────
+// ─── Casper Transfer (async execFile — no shell injection, non-blocking) ──────
 
 /**
  * Execute and broadcast a Casper Native Transfer via casper-client CLI.
- * Uses execFileSync to avoid shell injection from env-var-derived arguments.
+ * Uses async execFile (non-blocking) to avoid shell injection from env-var-derived arguments.
  */
 async function executeCasperTransfer(targetPublicKeyHex: string, amountMotes: number, transferId: number): Promise<string> {
   const deployerKeyPath = process.env.DEPLOYER_PRIVATE_KEY;
@@ -128,17 +159,25 @@ async function executeCasperTransfer(targetPublicKeyHex: string, amountMotes: nu
   const networkName = process.env.CASPER_CHAIN_NAME || 'casper-test';
   const tempFile = path.resolve(process.cwd(), `deploy-${transferId}.json`);
 
-  // execFileSync passes args as an array — no shell interpolation
-  execFileSync('casper-client', [
-    'make-transfer',
-    '--chain-name', networkName,
-    '--secret-key', absoluteKeyPath,
-    '--payment-amount', String(DEPLOY_PAYMENT_MOTES),
-    '--transfer-id', String(transferId),
-    '--amount', String(amountMotes),
-    '--target-account', targetPublicKeyHex,
-    '-o', tempFile,
-  ], { encoding: 'utf-8', stdio: 'pipe' });
+  // async execFile passes args as an array — no shell interpolation, non-blocking
+  const stdout = await new Promise<string>((resolve, reject) => {
+    execFile('casper-client', [
+      'make-transfer',
+      '--chain-name', networkName,
+      '--secret-key', absoluteKeyPath,
+      '--payment-amount', String(DEPLOY_PAYMENT_MOTES),
+      '--transfer-id', String(transferId),
+      '--amount', String(amountMotes),
+      '--target-account', targetPublicKeyHex,
+      '-o', tempFile,
+    ], { encoding: 'utf-8' }, (error: Error | null, stdout: string, stderr: string) => {
+      if (error) {
+        reject(new Error(`casper-client failed: ${stderr || error.message}`));
+      } else {
+        resolve(stdout);
+      }
+    });
+  });
 
   const deployJson = fs.readFileSync(tempFile, 'utf8');
   fs.unlinkSync(tempFile);

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Users, Activity, Scale, TrendingUp, Shield, Zap, ArrowRight, BarChart3, CheckCircle2, Wifi, WifiOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { fetchTransactions, createWebSocket, type TransactionEntry, type WSMessage } from '../services/api';
+import { LiveContractPanel } from '../components/LiveContractPanel';
+import { X402PaymentStream } from '../components/X402PaymentStream';
 
 const AGENTS = [
   { name: 'Comps Specialist', color: '#EC4899', role: 'Valuation', method: 'Comparable Sales', initials: 'CS' },
@@ -124,6 +126,16 @@ export const DashboardView: React.FC = () => {
             </motion.div>
           ))}
         </div>
+      </div>
+
+      {/* ── Live Contract State ───────────────────────────────────────────────── */}
+      <div className="section">
+        <LiveContractPanel />
+      </div>
+
+      {/* ── x402 Payment Stream ──────────────────────────────────────────────── */}
+      <div className="section">
+        <X402PaymentStream />
       </div>
 
       {/* ── Quick Actions ───────────────────────────────────────────────────── */}

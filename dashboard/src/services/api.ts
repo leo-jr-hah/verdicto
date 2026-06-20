@@ -230,6 +230,47 @@ export async function verifyReceiptChain(disputeId: string): Promise<ReceiptVeri
   }
 }
 
+// ─── Contract State ──────────────────────────────────────────────────────────
+
+export interface ContractState {
+  disputes: {
+    total: number;
+    pending: number;
+    deliberating: number;
+    voting: number;
+    resolved: number;
+  };
+  agents: Array<{
+    id: string;
+    name: string;
+    reputation: number;
+    totalAssessments: number;
+    accuracy: number;
+  }>;
+  escrow: {
+    totalStaked: number;
+    totalSettled: number;
+    activeDisputes: number;
+  };
+  receipts: {
+    total: number;
+    verified: number;
+    pending: number;
+  };
+  lastUpdated: number;
+}
+
+export async function fetchContractState(): Promise<ContractState | null> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/contract-state`);
+    const data = await handleResponse<{ success: boolean; state: ContractState }>(res);
+    return data.state || null;
+  } catch (err) {
+    console.error('[API] Failed to fetch contract state:', err);
+    return null;
+  }
+}
+
 // ─── WebSocket ───────────────────────────────────────────────────────────────
 
 export type WSMessageType = 'transaction' | 'dispute_started' | 'valuation_result' | 'juror_vote' | 'final_verdict' | 'agent_thought' | 'receipt_created';

@@ -31,7 +31,9 @@ import {
   type FormErrors,
 } from '../hooks/useAssessment';
 import type { AssetType, AssessmentResult, AssessmentRequest, DemoAsset } from '../services/api';
+import { MultiMethodologyDashboard } from '../components/MultiMethodologyDashboard';
 import { useWallet } from '../contexts/CSPRClickContext';
+import { PLATFORM_WALLET, ASSESSMENT_FEE_CSPR } from '../config/casper';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -289,7 +291,18 @@ const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, 
             </div>
             {log.detail && (
               <div style={{ marginLeft: '5.5rem', color: '#8b949e', fontSize: '0.68rem', marginTop: '0.1rem' }}>
-                {log.detail}
+                {log.detail.startsWith('Verify:') ? (
+                  <a
+                    href={log.detail.replace('Verify: ', '')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#58a6ff', textDecoration: 'underline' }}
+                  >
+                    {log.detail}
+                  </a>
+                ) : (
+                  log.detail
+                )}
               </div>
             )}
           </motion.div>
@@ -314,7 +327,7 @@ const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, 
 
 // ─── Assessment Fee ──────────────────────────────────────────────────────────
 
-const ASSESSMENT_FEE_CSPR = 2.5;
+// ASSESSMENT_FEE_CSPR is now imported from config/casper.ts
 
 // ─── Payment Confirmation Modal ──────────────────────────────────────────────
 
@@ -643,52 +656,9 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
         </div>
       </div>
 
-      {/* Valuations */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-        {[
-          { label: 'Valuation A', data: result.valuationA, color: '#6366f1' },
-          { label: 'Valuation B', data: result.valuationB, color: '#8b5cf6' },
-        ].map(({ label, data, color }) => (
-          <div
-            key={label}
-            style={{
-              background: 'var(--bg-surface)',
-              borderRadius: '10px',
-              border: '1px solid var(--border-color)',
-              padding: '1.25rem',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <span style={{ fontWeight: 600, fontSize: '0.85rem', color }}>{label}</span>
-              <span style={{
-                fontSize: '0.7rem',
-                padding: '0.2rem 0.5rem',
-                borderRadius: '4px',
-                background: `${color}15`,
-                color,
-                fontWeight: 600,
-              }}>
-                {data.method.replace('_', ' ')}
-              </span>
-            </div>
-            <p style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-              {formatCurrency(data.value)}
-            </p>
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.75rem' }}>
-              <div>
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Confidence</p>
-                <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>{Math.round(data.confidence * 100)}%</p>
-              </div>
-              <div>
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Source</p>
-                <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>{data.source}</p>
-              </div>
-            </div>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-              {data.reasoning}
-            </p>
-          </div>
-        ))}
+      {/* Multi-Methodology Dashboard — 5 agents debating */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <MultiMethodologyDashboard result={result} />
       </div>
 
       {/* Verdict */}
@@ -925,8 +895,8 @@ export const AssessView: React.FC = () => {
 
     try {
       // Sign the payment via wallet — this opens the wallet popup
-      const { paymentProof } = await wallet.signPayment(
-        '020306722d77bfb1a14e9e3e8c8e5b3e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e',
+      const { paymentProof, deployHash } = await wallet.signPayment(
+        PLATFORM_WALLET,
         ASSESSMENT_FEE_CSPR,
       );
 
@@ -934,6 +904,8 @@ export const AssessView: React.FC = () => {
       setShowPaymentModal(false);
       setLogs([]);
       logIdRef.current = 0;
+      // Show the deploy hash in logs — user can verify on-chain
+      addLog('success', `Payment signed — deploy: ${deployHash.substring(0, 16)}...`, `View on explorer: https://testnet.cspr.live/deploy/${deployHash}`);
       assess(request, paymentProof);
     } catch (err: any) {
       if (err?.message?.includes('cancelled')) {

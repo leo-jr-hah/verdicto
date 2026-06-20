@@ -1,7 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { Shield, CheckCircle2 } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { ReputationGraph } from '../components/ReputationGraph';
+import React, { useState } from 'react';
+import { Shield, TrendingUp, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+/** Simple inline sparkline for per-agent score history */
+const MiniSparkline: React.FC<{ data: number[]; color?: string; height?: number }> = ({
+  data,
+  color = '#60a5fa',
+  height = 60,
+}) => {
+  if (data.length < 2) return null;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const width = 280;
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * width;
+    const y = height - ((v - min) / range) * (height - 8) - 4;
+    return `${x},${y}`;
+  }).join(' ');
+  return (
+    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={`spark-${color.replace('#', '')}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <polygon
+        points={`0,${height} ${points} ${width},${height}`}
+        fill={`url(#spark-${color.replace('#', '')})`}
+      />
+      <polyline points={points} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+};
 
 interface AgentReputation {
   agentId: string;
@@ -13,347 +45,331 @@ interface AgentReputation {
   rank: number;
   totalAssessments: number;
   successRate: number;
+  methodology: string;
+  strengths: string[];
 }
 
-export const ReputationView: React.FC = () => {
-  const [agents, setAgents] = useState<AgentReputation[]>([
-    {
-      agentId: 'evidence',
-      agentName: 'Evidence Reviewer',
-      currentScore: 850,
-      previousScore: 820,
-      history: [
-        { timestamp: Date.now() - 3600000, score: 820, reason: 'Assessment #123 completed' },
-        { timestamp: Date.now() - 7200000, score: 835, reason: 'Assessment #122 completed' },
-        { timestamp: Date.now() - 10800000, score: 850, reason: 'Assessment #121 completed' }
-      ],
-      rank: 1,
-      totalAssessments: 156,
-      successRate: 94,
-      description: 'Validates raw data points and cross-references sources for accuracy.'
-    },
-    {
-      agentId: 'precedent',
-      agentName: 'Case Researcher',
-      currentScore: 790,
-      previousScore: 780,
-      history: [
-        { timestamp: Date.now() - 3600000, score: 780, reason: 'Assessment #123 completed' },
-        { timestamp: Date.now() - 7200000, score: 785, reason: 'Assessment #122 completed' },
-        { timestamp: Date.now() - 10800000, score: 790, reason: 'Assessment #121 completed' }
-      ],
-      rank: 2,
-      totalAssessments: 142,
-      successRate: 91,
-      description: 'Searches historical comparable assets using RAG-powered retrieval.'
-    },
-    {
-      agentId: 'market',
-      agentName: 'Trend Analyst',
-      currentScore: 760,
-      previousScore: 755,
-      history: [
-        { timestamp: Date.now() - 3600000, score: 755, reason: 'Assessment #123 completed' },
-        { timestamp: Date.now() - 7200000, score: 758, reason: 'Assessment #122 completed' },
-        { timestamp: Date.now() - 10800000, score: 760, reason: 'Assessment #121 completed' }
-      ],
-      rank: 3,
-      totalAssessments: 128,
-      successRate: 89,
-      description: 'Provides macro-economic context and market trend interpretation.'
-    },
-    {
-      agentId: 'valuation-a',
-      agentName: 'Comps Specialist',
-      currentScore: 720,
-      previousScore: 710,
-      history: [
-        { timestamp: Date.now() - 3600000, score: 710, reason: 'Assessment #123 completed' },
-        { timestamp: Date.now() - 7200000, score: 715, reason: 'Assessment #122 completed' },
-        { timestamp: Date.now() - 10800000, score: 720, reason: 'Assessment #121 completed' }
-      ],
-      rank: 4,
-      totalAssessments: 98,
-      successRate: 87,
-      description: 'Analyzes comparable sales and market listings to estimate asset value.'
-    },
-    {
-      agentId: 'valuation-b',
-      agentName: 'Income Specialist',
-      currentScore: 710,
-      previousScore: 705,
-      history: [
-        { timestamp: Date.now() - 3600000, score: 705, reason: 'Assessment #123 completed' },
-        { timestamp: Date.now() - 7200000, score: 708, reason: 'Assessment #122 completed' },
-        { timestamp: Date.now() - 10800000, score: 710, reason: 'Assessment #121 completed' }
-      ],
-      rank: 5,
-      totalAssessments: 87,
-      successRate: 85,
-      description: 'Projects future cash flows and applies discounted cash flow (DCF) analysis.'
-    }
-  ]);
+const AGENTS: AgentReputation[] = [
+  {
+    agentId: 'evidence',
+    agentName: 'Evidence Reviewer',
+    currentScore: 850,
+    previousScore: 820,
+    history: [
+      { timestamp: Date.now() - 3600000, score: 820, reason: 'Assessment #123 completed' },
+      { timestamp: Date.now() - 7200000, score: 835, reason: 'Assessment #122 completed' },
+      { timestamp: Date.now() - 10800000, score: 850, reason: 'Assessment #121 completed' },
+    ],
+    rank: 1,
+    totalAssessments: 156,
+    successRate: 94,
+    description: 'Validates raw data points and cross-references sources for accuracy.',
+    methodology: 'Multi-source verification with confidence scoring',
+    strengths: ['Data validation', 'Source cross-referencing', 'Outlier detection'],
+  },
+  {
+    agentId: 'precedent',
+    agentName: 'Case Researcher',
+    currentScore: 790,
+    previousScore: 780,
+    history: [
+      { timestamp: Date.now() - 3600000, score: 780, reason: 'Assessment #123 completed' },
+      { timestamp: Date.now() - 7200000, score: 785, reason: 'Assessment #122 completed' },
+      { timestamp: Date.now() - 10800000, score: 790, reason: 'Assessment #121 completed' },
+    ],
+    rank: 2,
+    totalAssessments: 142,
+    successRate: 91,
+    description: 'Searches historical comparable assets using RAG-powered retrieval.',
+    methodology: 'Retrieval-Augmented Generation with historical precedent matching',
+    strengths: ['Case law research', 'Historical comparisons', 'RAG-powered retrieval'],
+  },
+  {
+    agentId: 'market',
+    agentName: 'Trend Analyst',
+    currentScore: 760,
+    previousScore: 755,
+    history: [
+      { timestamp: Date.now() - 3600000, score: 755, reason: 'Assessment #123 completed' },
+      { timestamp: Date.now() - 7200000, score: 758, reason: 'Assessment #122 completed' },
+      { timestamp: Date.now() - 10800000, score: 760, reason: 'Assessment #121 completed' },
+    ],
+    rank: 3,
+    totalAssessments: 128,
+    successRate: 89,
+    description: 'Provides macro-economic context and market trend interpretation.',
+    methodology: 'Time-series analysis with macro-economic indicators',
+    strengths: ['Market trends', 'Economic indicators', 'Price forecasting'],
+  },
+  {
+    agentId: 'valuation-a',
+    agentName: 'Comps Specialist',
+    currentScore: 720,
+    previousScore: 710,
+    history: [
+      { timestamp: Date.now() - 3600000, score: 710, reason: 'Assessment #123 completed' },
+      { timestamp: Date.now() - 7200000, score: 715, reason: 'Assessment #122 completed' },
+      { timestamp: Date.now() - 10800000, score: 720, reason: 'Assessment #121 completed' },
+    ],
+    rank: 4,
+    totalAssessments: 98,
+    successRate: 87,
+    description: 'Analyzes comparable sales and market listings to estimate asset value.',
+    methodology: 'Comparable sales analysis with adjustment factors',
+    strengths: ['Sales comparisons', 'Market listings', 'Value estimation'],
+  },
+  {
+    agentId: 'valuation-b',
+    agentName: 'Income Specialist',
+    currentScore: 710,
+    previousScore: 705,
+    history: [
+      { timestamp: Date.now() - 3600000, score: 705, reason: 'Assessment #123 completed' },
+      { timestamp: Date.now() - 7200000, score: 708, reason: 'Assessment #122 completed' },
+      { timestamp: Date.now() - 10800000, score: 710, reason: 'Assessment #121 completed' },
+    ],
+    rank: 5,
+    totalAssessments: 87,
+    successRate: 85,
+    description: 'Projects future cash flows and applies discounted cash flow (DCF) analysis.',
+    methodology: 'Discounted Cash Flow (DCF) with risk-adjusted discount rates',
+    strengths: ['Cash flow projection', 'DCF analysis', 'Risk assessment'],
+  },
+];
 
-  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
-
-  // Listen for reputation updates via WebSocket
-  useEffect(() => {
-    const ws = new WebSocket('ws://localhost:3010');
-    
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      
-      if (data.type === 'reputation_update') {
-        setAgents(prev => prev.map(agent => {
-          if (agent.agentId === data.payload.agentId) {
-            return {
-              ...agent,
-              currentScore: data.payload.newScore,
-              previousScore: agent.currentScore,
-              history: [
-                ...agent.history,
-                { timestamp: Date.now(), score: data.payload.newScore, reason: data.payload.reason }
-              ].slice(-20) // Keep last 20 entries
-            };
-          }
-          return agent;
-        }));
-      }
-    };
-
-    return () => ws.close();
-  }, []);
-
-  const avgResolutionTime = '14s';
-  const topPerformer = agents[0];
+const AgentTab: React.FC<{
+  agent: AgentReputation;
+  isSelected: boolean;
+  onClick: () => void;
+}> = ({ agent, isSelected, onClick }) => {
+  const scoreDelta = agent.currentScore - agent.previousScore;
+  const scoreColor = scoreDelta > 0 ? '#22c55e' : scoreDelta < 0 ? '#ef4444' : 'var(--text-tertiary)';
+  const scoreIcon = scoreDelta > 0 ? '▲' : scoreDelta < 0 ? '▼' : '—';
 
   return (
-    <div>
-      {/* Header */}
-      <div className="page-header">
-        <div className="page-header-row">
-          <div>
-            <h1 className="page-title">AI Agents</h1>
-            <p className="page-subtitle">Meet the autonomous analysts behind every valuation. Track their accuracy, speed, and track record.</p>
+    <div
+      onClick={onClick}
+      style={{
+        background: isSelected ? 'rgba(59, 130, 246, 0.1)' : 'rgba(20, 20, 30, 0.6)',
+        border: `1px solid ${isSelected ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255,255,255,0.06)'}`,
+        borderRadius: 12,
+        padding: '16px 20px',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+      }}
+    >
+      {/* Tab Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{
+            width: 40,
+            height: 40,
+            borderRadius: 10,
+            background: isSelected ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255,255,255,0.05)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <Shield size={20} color={isSelected ? '#60a5fa' : 'var(--text-tertiary)'} />
           </div>
-          <div className="page-header-actions">
-            <div className="badge badge-success" style={{ padding: '6px 14px' }}>
-              <CheckCircle2 size={14} />
-              All Agents Verified
+          <div>
+            <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+              {agent.agentName}
+            </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
+              Rank #{agent.rank} • {agent.totalAssessments} assessments
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Stats Row */}
-      <div className="section">
-        <div className="grid-3">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="enterprise-card" 
-          style={{ background: 'var(--text-primary)', color: 'white' }}
-        >
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Top Performer
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          {/* Score */}
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              {agent.currentScore}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: scoreColor, fontWeight: 600 }}>
+              {scoreIcon} {Math.abs(scoreDelta)} pts
+            </div>
           </div>
-          <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
-            {topPerformer.agentName}
-          </h3>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)' }}>
-            <Shield size={16} /> Score: {topPerformer.currentScore}
+
+          {/* Success Rate */}
+          <div style={{
+            padding: '4px 10px',
+            borderRadius: 8,
+            background: agent.successRate >= 90 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(234, 179, 8, 0.15)',
+            color: agent.successRate >= 90 ? '#22c55e' : '#eab308',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+          }}>
+            {agent.successRate}%
           </div>
-        </motion.div>
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="enterprise-card"
-        >
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Honesty Score
-          </div>
-          <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: '#10B981' }}>
-            100%
-          </h3>
-          <div style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
-            Zero penalties recorded
-          </div>
-        </motion.div>
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="enterprise-card"
-        >
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Avg Speed
-          </div>
-          <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
-            {avgResolutionTime}
-          </h3>
-          <div style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
-            Per case resolution
-          </div>
-        </motion.div>
+
+          {/* Expand Icon */}
+          {isSelected ? (
+            <ChevronUp size={18} color="var(--text-tertiary)" />
+          ) : (
+            <ChevronDown size={18} color="var(--text-tertiary)" />
+          )}
         </div>
       </div>
 
-      {/* Reputation Graph Component */}
-      <div className="section">
-        <ReputationGraph agents={agents} />
-      </div>
-
-      {/* Agent Details Table */}
-      <div className="section">
-        <div className="table-container">
-        {/* Selected Agent Detail Panel */}
-        {selectedAgent && (() => {
-          const agent = agents.find(a => a.agentId === selectedAgent);
-          if (!agent) return null;
-          return (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              style={{
-                padding: '1.25rem 1.5rem',
-                background: 'var(--bg-main)',
-                borderBottom: '1px solid var(--border-color)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '1rem',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{
-                  width: '40px', height: '40px', borderRadius: '50%',
-                  background: 'var(--primary)', color: 'white',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '0.8rem', fontWeight: 700, flexShrink: 0,
-                }}>
-                  {agent.agentName.substring(0, 2).toUpperCase()}
+      {/* Expandable Explanation */}
+      <AnimatePresence>
+        {isSelected && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{
+              marginTop: 16,
+              paddingTop: 16,
+              borderTop: '1px solid rgba(255,255,255,0.06)',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 16,
+            }}>
+              {/* Description */}
+              <div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 4, fontWeight: 600 }}>
+                  ROLE
                 </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>{agent.agentName}</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{agent.description}</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  {agent.description}
                 </div>
               </div>
-              <button
-                onClick={() => setSelectedAgent(null)}
-                style={{
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  color: 'var(--text-tertiary)', fontSize: '1.1rem', padding: '0.25rem',
-                }}
-              >
-                ✕
-              </button>
-            </motion.div>
-          );
-        })()}
 
-        <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-tertiary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Agent</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Role</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Score</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Accuracy</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Cases</th>
-              <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {agents.map((agent, i) => (
-              <motion.tr 
-                key={agent.agentId}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.1 }}
-                onClick={() => setSelectedAgent(selectedAgent === agent.agentId ? null : agent.agentId)}
-                style={{ 
-                  borderBottom: '1px solid var(--border-color)',
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  background: selectedAgent === agent.agentId ? 'var(--bg-main)' : 'transparent',
-                  transition: 'background 0.15s ease',
-                }}
-              >
-                <td data-label="Agent" style={{ padding: '1.25rem 1.5rem', fontWeight: 600, fontFamily: 'var(--font-sans)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '50%',
-                      background: 'var(--bg-surface-alt)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      color: 'var(--text-secondary)'
+              {/* Methodology */}
+              <div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 4, fontWeight: 600 }}>
+                  METHODOLOGY
+                </div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  {agent.methodology}
+                </div>
+              </div>
+
+              {/* Strengths */}
+              <div style={{ gridColumn: 'span 2' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 8, fontWeight: 600 }}>
+                  STRENGTHS
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {agent.strengths.map((s, i) => (
+                    <span key={i} style={{
+                      padding: '4px 10px',
+                      borderRadius: 6,
+                      background: 'rgba(255,255,255,0.05)',
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.8rem',
                     }}>
-                      {agent.agentName.substring(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <span style={{ color: 'var(--text-primary)' }}>{agent.agentName}</span>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>{agent.description}</div>
-                    </div>
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Score History */}
+              <div style={{ gridColumn: 'span 2' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 8, fontWeight: 600 }}>
+                  SCORE HISTORY
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <MiniSparkline
+                      data={[...agent.history].reverse().map(h => h.score)}
+                      color={scoreDelta >= 0 ? '#22c55e' : '#ef4444'}
+                      height={60}
+                    />
                   </div>
-                </td>
-                <td data-label="Role" style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>
-                  {agent.agentId.includes('valuation') ? 'Valuation' : 'Juror'}
-                </td>
-                <td data-label="Score" style={{ padding: '1.25rem 1.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{
-                      width: '60px',
-                      height: '6px',
-                      background: 'var(--bg-surface-alt)',
-                      borderRadius: '3px',
-                      overflow: 'hidden'
-                    }}>
-                      <div style={{
-                        width: `${agent.currentScore / 10}%`,
-                        height: '100%',
-                        background: agent.currentScore >= 800 ? '#10B981' : agent.currentScore >= 700 ? '#F59E0B' : '#EF4444',
-                        borderRadius: '3px'
-                      }} />
-                    </div>
-                    <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{agent.currentScore}</span>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
+                    {agent.history.length} data points
                   </div>
-                </td>
-                <td data-label="Accuracy" style={{ padding: '1.25rem 1.5rem', color: '#10B981', fontWeight: 600 }}>
-                  {agent.successRate}%
-                </td>
-                <td data-label="Cases" style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>
-                  {agent.totalAssessments}
-                </td>
-                <td data-label="Status" style={{ padding: '1.25rem 1.5rem' }}>
-                  <span style={{ 
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    padding: '0.25rem 0.6rem',
-                    background: 'rgba(16, 185, 129, 0.1)',
-                    color: '#10B981',
-                    borderRadius: '999px',
-                    fontSize: '0.75rem',
-                    fontWeight: 600
-                  }}>
-                    <CheckCircle2 size={12} />
-                    Active
-                  </span>
-                </td>
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
-        </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export const ReputationView: React.FC = () => {
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+
+  return (
+    <div style={{ padding: '32px', maxWidth: 900, margin: '0 auto' }}>
+      {/* Header */}
+      <div style={{ marginBottom: 32 }}>
+        <h1 style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
+          AI Agents
+        </h1>
+        <p style={{ color: 'var(--text-tertiary)', fontSize: '0.95rem' }}>
+          Click on any agent to view their methodology, strengths, and reputation history.
+        </p>
+      </div>
+
+      {/* Stats Bar */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: 16,
+        marginBottom: 32,
+      }}>
+        {[
+          { label: 'Total Agents', value: AGENTS.length, icon: <Shield size={18} /> },
+          { label: 'Avg Score', value: Math.round(AGENTS.reduce((s, a) => s + a.currentScore, 0) / AGENTS.length), icon: <TrendingUp size={18} /> },
+          { label: 'Avg Success', value: `${Math.round(AGENTS.reduce((s, a) => s + a.successRate, 0) / AGENTS.length)}%`, icon: <CheckCircle2 size={18} /> },
+        ].map((stat, i) => (
+          <div key={i} style={{
+            background: 'rgba(20, 20, 30, 0.6)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: 12,
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+          }}>
+            <div style={{
+              width: 36,
+              height: 36,
+              borderRadius: 8,
+              background: 'rgba(59, 130, 246, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#60a5fa',
+            }}>
+              {stat.icon}
+            </div>
+            <div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                {stat.value}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                {stat.label}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Agent Tabs */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {AGENTS.map((agent) => (
+          <AgentTab
+            key={agent.agentId}
+            agent={agent}
+            isSelected={selectedAgentId === agent.agentId}
+            onClick={() => setSelectedAgentId(
+              selectedAgentId === agent.agentId ? null : agent.agentId
+            )}
+          />
+        ))}
       </div>
     </div>
   );

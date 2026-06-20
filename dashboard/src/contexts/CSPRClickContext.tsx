@@ -267,8 +267,9 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, [clearState]);
 
   /**
-   * Sign a native CSPR transfer deploy via the wallet extension.
-   * Returns a base64-encoded payment proof that the backend x402 middleware expects.
+   * Sign a native CSPR transfer deploy via the wallet extension,
+   * then broadcast it to the Casper testnet via RPC.
+   * Returns a base64-encoded payment proof with the confirmed deploy hash.
    */
   const signPayment = useCallback(async (
     recipientAddress: string,
@@ -306,11 +307,47 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
     // The wallet returns a hex string; SDK accepts it at runtime despite TS typing
     const signedDeploy = Deploy.setSignature(deploy, result.signature as unknown as Uint8Array, PublicKey.fromHex(publicKey));
 
-    // Get the deploy hash
+    // Get the deploy JSON with signature
     const signedDeployJson = Deploy.toJSON(signedDeploy);
     const deployHash = (signedDeployJson as any).hash || (signedDeployJson as any).deploy?.hash || '';
 
+    // ── Attempt to broadcast the signed deploy to Casper testnet ──
+    // NOTE: Direct browser → RPC calls often fail due to CORS restrictions.
+    // In production, the backend would relay the signed deploy.
+    // For the hackathon, we try the broadcast but gracefully handle CORS failures.
+    let confirmedHash = deployHash;
+    let broadcastSuccess = false;
+
+    try {
+      const CSPR_TESTNET_RPC = 'https://node.testnet.cspr.cloud/rpc';
+      const rpcPayload = {
+        jsonrpc: '2.0',
+        id: Date.now(),
+        method: 'account_put_deploy',
+        params: [signedDeployJson],
+      };
+
+      const rpcResponse = await fetch(CSPR_TESTNET_RPC, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(rpcPayload),
+      });
+
+      const rpcResult = await rpcResponse.json();
+
+      if (rpcResult.error) {
+        console.warn('RPC broadcast error (deploy still signed):', rpcResult.error);
+      } else {
+        confirmedHash = rpcResult.result?.deploy_hash || deployHash;
+        broadcastSuccess = true;
+      }
+    } catch (fetchErr) {
+      // CORS or network error — expected in browser context
+      console.warn('Deploy broadcast failed (CORS/network). Deploy is signed and valid as proof.', fetchErr);
+    }
+
     // Build the payment proof (base64-encoded JSON)
+    // The signed deploy itself is cryptographic proof of payment intent
     const paymentProof = {
       scheme: 'casper',
       payload: {
@@ -319,12 +356,13 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
         amount: amountCSPR.toString(),
         network: 'casper:testnet',
       },
-      deployHash,
+      deployHash: confirmedHash,
+      broadcast: broadcastSuccess,
     };
 
     const proofHeader = btoa(JSON.stringify(paymentProof));
 
-    return { paymentProof: proofHeader, deployHash };
+    return { paymentProof: proofHeader, deployHash: confirmedHash };
   }, [publicKey]);
 
   return (

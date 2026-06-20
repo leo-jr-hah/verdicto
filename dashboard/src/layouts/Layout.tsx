@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Menu, X, Bot, LayoutDashboard, Users, Scale, History, Cpu, ChevronRight, Droplets } from 'lucide-react';
+import { Moon, Sun, Menu, X, Bot, LayoutDashboard, Users, Scale, History, Cpu, ChevronRight, Droplets, Target, Map } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from '../components/Logo';
 import { ConnectionStatus } from '../components/ConnectionStatus';
@@ -18,6 +18,7 @@ const NAV_SECTIONS = [
     title: 'TOOLS',
     items: [
       { name: 'Value Asset', path: '/assess', icon: Scale },
+      { name: 'Predict', path: '/predict', icon: Target },
     ],
   },
   {
@@ -26,6 +27,7 @@ const NAV_SECTIONS = [
       { name: 'Agents', path: '/reputation', icon: Users },
       { name: 'History', path: '/transactions', icon: History },
       { name: 'How It Works', path: '/architecture', icon: Cpu },
+      { name: 'Roadmap', path: '/roadmap', icon: Map },
     ],
   },
 ];
