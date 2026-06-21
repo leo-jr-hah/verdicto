@@ -12,7 +12,7 @@ const CONTRACTS = [
   {
     name: 'EscrowContract',
     hash: '83bf2bab...',
-    description: "Locks the filer's 0.1 CSPR dispute fee at filing time. Upon verdict, routes funds to winning agents and returns surplus to the filer."
+    description: "Collects the 2.5 CSPR assessment fee via x402 micropayment. Upon verdict completion, routes payments to participating agents and records the settlement on-chain."
   },
   {
     name: 'ReputationRegistry',
@@ -40,7 +40,7 @@ export const ContractCards: React.FC = () => {
           <p style={{
             fontSize: '1.1rem', color: 'var(--text-secondary)', maxWidth: 600, margin: '0 auto', lineHeight: 1.6
           }}>
-            Three specialized Odra contracts handle every dispute end to end.
+            Three specialized Odra contracts handle every assessment end to end.
           </p>
         </div>
       </Reveal>

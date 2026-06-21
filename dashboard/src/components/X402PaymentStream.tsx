@@ -36,11 +36,6 @@ function formatTime(timestamp: number): string {
   });
 }
 
-function shortenHash(hash: string): string {
-  if (hash.length <= 16) return hash;
-  return `${hash.slice(0, 8)}...${hash.slice(-8)}`;
-}
-
 // ─── Demo Payments ───────────────────────────────────────────────────────────
 
 const DEMO_PAYMENTS: PaymentEvent[] = [
@@ -56,50 +51,50 @@ const DEMO_PAYMENTS: PaymentEvent[] = [
   },
   {
     id: 'pay-2',
-    from: 'Escrow Contract',
+    from: 'Escrow',
     to: 'Valuation Agent A',
     amount: 500_000_000,
-    tool: 'x402 Agent Payment',
+    tool: 'Agent Reward',
     txHash: '02b3c4d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef01',
     timestamp: Date.now() - 90000,
     status: 'confirmed',
   },
   {
     id: 'pay-3',
-    from: 'Escrow Contract',
+    from: 'Escrow',
     to: 'Valuation Agent B',
     amount: 500_000_000,
-    tool: 'x402 Agent Payment',
+    tool: 'Agent Reward',
     txHash: '03c4d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef0123',
     timestamp: Date.now() - 60000,
     status: 'confirmed',
   },
   {
     id: 'pay-4',
-    from: 'Escrow Contract',
+    from: 'Escrow',
     to: 'Evidence Analyst',
     amount: 400_000_000,
-    tool: 'x402 Juror Payment',
+    tool: 'Analyst Reward',
     txHash: '04d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef012345',
     timestamp: Date.now() - 30000,
     status: 'confirmed',
   },
   {
     id: 'pay-5',
-    from: 'Escrow Contract',
+    from: 'Escrow',
     to: 'Market Interpreter',
     amount: 400_000_000,
-    tool: 'x402 Juror Payment',
+    tool: 'Analyst Reward',
     txHash: '05e6f7890123456789abcdef0123456789abcdef0123456789abcdef01234567',
     timestamp: Date.now() - 15000,
     status: 'confirmed',
   },
   {
     id: 'pay-6',
-    from: 'Escrow Contract',
+    from: 'Escrow',
     to: 'Precedent Researcher',
     amount: 400_000_000,
-    tool: 'x402 Juror Payment',
+    tool: 'Analyst Reward',
     txHash: '06f7890123456789abcdef0123456789abcdef0123456789abcdef0123456789',
     timestamp: Date.now() - 5000,
     status: 'pending',
@@ -149,10 +144,6 @@ const PaymentRow: React.FC<{ payment: PaymentEvent; index: number }> = ({ paymen
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.15rem' }}>
           <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>{payment.tool}</span>
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>•</span>
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>
-            {shortenHash(payment.txHash)}
-          </span>
         </div>
       </div>
 
@@ -213,7 +204,7 @@ export const X402PaymentStream: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Zap size={20} color="#8b5cf6" />
           <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-            x402 Payment Stream
+            Payment Activity
           </h2>
           <div style={{
             display: 'flex', alignItems: 'center', gap: '0.3rem',
@@ -300,7 +291,7 @@ export const X402PaymentStream: React.FC = () => {
         marginTop: '1rem', fontSize: '0.75rem', color: 'var(--text-tertiary)',
       }}>
         <Clock size={12} />
-        Payments are streamed in real-time via WebSocket when connected to the orchestrator
+        Updates arrive automatically
       </div>
 
       <style>{`

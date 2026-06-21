@@ -721,8 +721,17 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const app = express();
-  app.use(cors({ origin: ALLOWED_ORIGINS }));
-  app.use(express.json());
+  app.use(cors({ origin: ALLOWED_ORIGINS, methods: ['GET', 'POST', 'OPTIONS'] }));
+  app.use(express.json({ limit: '16kb' }));
+
+  // ── Security headers ─────────────────────────────────────────────────────
+  app.use((_req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    next();
+  });
 
   // Simple in-memory rate limiter: max 5 dispute starts per minute per IP
   const disputeTimestamps = new Map<string, number[]>();

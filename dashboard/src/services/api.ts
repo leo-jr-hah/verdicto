@@ -187,14 +187,134 @@ export async function submitAssessment(
   }
 }
 
+// ─── Frontend fallback demos (shown when backend is unreachable) ─────────────
+
+const FALLBACK_DEMOS: DemoAsset[] = [
+  // ── Real Estate (5) ──────────────────────────────────────────────────────
+  {
+    type: 'real-estate',
+    name: 'Miami Beachfront Condo',
+    description: '2BR/2BA oceanfront unit at 123 Ocean Dr, Miami Beach. Built 2019, floor-to-ceiling impact glass, private balcony with Atlantic views.',
+    askingPrice: 1_250_000,
+    location: '123 Ocean Dr, Miami Beach, FL 33339',
+    sqft: 1200,
+  },
+  {
+    type: 'real-estate',
+    name: 'Brooklyn Brownstone Duplex',
+    description: 'Owner\'s duplex in Bed-Stuy, 3BR/2.5BA, original crown moldings, updated kitchen with Viking appliances, private backyard.',
+    askingPrice: 1_875_000,
+    location: '287 Hancock St, Brooklyn, NY 11216',
+    sqft: 2400,
+  },
+  {
+    type: 'real-estate',
+    name: 'Austin Suburban Ranch',
+    description: '4BR/3BA single-family on 0.5 acres in Cedar Park. Open floor plan, quartz counters, 3-car garage, pool.',
+    askingPrice: 685_000,
+    location: '456 Ranch Rd, Cedar Park, TX 78613',
+    sqft: 2800,
+  },
+  {
+    type: 'real-estate',
+    name: 'Denver Loft Conversion',
+    description: 'Industrial loft in RiNo arts district, 1BR/1BA, exposed brick, 14-ft ceilings, rooftop deck access, built 2021.',
+    askingPrice: 520_000,
+    location: '2960 Walnut St, Denver, CO 80205',
+    sqft: 950,
+  },
+  {
+    type: 'real-estate',
+    name: 'San Francisco Victorian TIC',
+    description: '2BR/1BA top-floor Victorian flat in Hayes Valley, bay windows, hardwood floors, updated plumbing & electrical.',
+    askingPrice: 1_150_000,
+    location: '415 Page St, San Francisco, CA 94117',
+    sqft: 1100,
+  },
+  // ── Art (5) ──────────────────────────────────────────────────────────────
+  {
+    type: 'art',
+    name: 'Contemporary Oil on Canvas',
+    description: 'Large-scale abstract expressionist work, 48×60 inches, signed and dated 2021. Exhibited at Miami Basel satellite fair.',
+    askingPrice: 45_000,
+    artistOrMedium: 'Oil on Canvas',
+  },
+  {
+    type: 'art',
+    name: 'Japanese Woodblock Print',
+    description: 'Early 20th century shin-hanga landscape by Kawase Hasui, edition 24/100, excellent condition with original mat.',
+    askingPrice: 8_500,
+    artistOrMedium: 'Woodblock Print',
+  },
+  {
+    type: 'art',
+    name: 'Bronze Sculpture, Standing Figure',
+    description: 'Lost-wax cast bronze, 36 inches tall, by mid-century American sculptor. Foundry mark and edition number on base.',
+    askingPrice: 32_000,
+    artistOrMedium: 'Bronze Sculpture',
+  },
+  {
+    type: 'art',
+    name: 'Vintage Analog Photography Collection',
+    description: 'Set of 12 gelatin silver prints, 16×20 each, documenting 1970s NYC street life. Artist proof, signed verso.',
+    askingPrice: 18_500,
+    artistOrMedium: 'Gelatin Silver Print',
+  },
+  {
+    type: 'art',
+    name: 'Digital Art NFT, Generative Series',
+    description: 'On-chain generative artwork from a curated Art Blocks collection, minted 2022. Token #417 of 500.',
+    askingPrice: 6_200,
+    artistOrMedium: 'Generative Digital Art',
+  },
+  // ── Commodity (5) ────────────────────────────────────────────────────────
+  {
+    type: 'commodity',
+    name: '10 oz Gold Bar',
+    description: 'LBMA-certified 10 troy oz gold bar, .9999 fine, serial verified, sealed in assay card.',
+    askingPrice: 23_500,
+    weightOz: 10,
+  },
+  {
+    type: 'commodity',
+    name: '100 oz Silver Bar',
+    description: 'COMEX-approved 100 troy oz silver bar, .999 fine, with serial number and certificate.',
+    askingPrice: 2_800,
+    weightOz: 100,
+  },
+  {
+    type: 'commodity',
+    name: '1 oz Platinum Coin',
+    description: 'American Platinum Eagle, 1 oz .9995 fine, 2023 issue, BU condition in original mint tube.',
+    askingPrice: 1_050,
+    weightOz: 1,
+  },
+  {
+    type: 'commodity',
+    name: '1 kg Gold Bar',
+    description: 'PAMP Suisse 1 kilogram gold bar, .9999 fine, individually serialized with Veriscan technology.',
+    askingPrice: 74_000,
+    weightOz: 32.15,
+  },
+  {
+    type: 'commodity',
+    name: '500 oz Silver Monster Box',
+    description: 'Sealed US Mint monster box containing 500 American Silver Eagle coins, 2024 issue, .999 fine.',
+    askingPrice: 16_500,
+    weightOz: 500,
+  },
+];
+
 export async function fetchDemoAssets(): Promise<DemoAsset[]> {
   try {
     const res = await fetch(`${ORCHESTRATOR_URL}/api/assess/demo`);
     const data = await handleResponse<{ success: boolean; assets: DemoAsset[] }>(res);
-    return data.assets || [];
+    const assets = data.assets || [];
+    // If backend returned data, use it; otherwise fall back to frontend demos
+    return assets.length > 0 ? assets : FALLBACK_DEMOS;
   } catch (err) {
-    console.error('[API] Failed to fetch demo assets:', err);
-    return [];
+    console.warn('[API] Backend unreachable — using built-in demo assets');
+    return FALLBACK_DEMOS;
   }
 }
 

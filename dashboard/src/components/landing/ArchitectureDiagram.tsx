@@ -1,171 +1,409 @@
-import React, { useRef, useLayoutEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Reveal } from './Reveal';
-import { Wallet, Cpu, BarChart2, TrendingUp, Search, FileText, Activity, Database, Shield, Globe } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  User, Brain, Database, Shield, Scale, Gavel, FileCheck, Link2, 
+  Search, TrendingUp, BookOpen, Zap 
+} from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
+/**
+ * ArchitectureDiagram — "How Verdict Works"
+ * 
+ * A clean, properly-connected vertical flow diagram showing the real pipeline:
+ * 
+ *   User → Orchestrator → Data Sources → x402 Payment
+ *                                       ↓
+ *                     ┌─────────────────┼─────────────────┐
+ *                     ↓                 ↓                 ↓
+ *              Comps Specialist   DCF Specialist     MiMo LLM
+ *                     └─────────────────┼─────────────────┘
+ *                                       ↓
+ *                     ┌─────────────────┼─────────────────┐
+ *                     ↓                 ↓                 ↓
+ *              Evidence Analyst  Market Interpreter  Precedent Researcher
+ *                     └─────────────────┼─────────────────┘
+ *                                       ↓
+ *                    Trust Framework → HMAC Receipt Chain → Verdict
+ *                                                          ↓
+ *                                                    Casper Blockchain
+ */
 
-// Utility to render an SVG node
-const SvgNode = ({ id, x, y, label, Icon, borderColor }: any) => (
-  <g className="arch-node" id={id} transform={`translate(${x}, ${y})`} style={{ opacity: 0 }}>
-    <rect x="-75" y="-20" width="150" height="40" rx="12" fill="var(--bg-elevated)" stroke="var(--border-color)" strokeWidth="1" />
-    <path d={`M -75 -8 L -75 8`} stroke={borderColor} strokeWidth="8" strokeLinecap="round" />
-    <g transform="translate(-55, -8)">
-      {Icon && <Icon size={16} color={borderColor} />}
-      {!Icon && <text x="8" y="12" fontSize="12" fill={borderColor} fontWeight="bold" textAnchor="middle">CSPR</text>}
-    </g>
-    <text x="-30" y="4" fontSize="12" fill="var(--text-primary)" fontWeight="600" dominantBaseline="middle">{label}</text>
-  </g>
-);
+// ─── Step definitions ──────────────────────────────────────────────────────
+
+interface FlowNode {
+  id: string;
+  label: string;
+  sublabel: string;
+  icon: React.ReactNode;
+  accentColor: string;
+  row: number;
+  col: number;
+}
+
+const NODES: FlowNode[] = [
+  // Row 0: Entry
+  { id: 'user', label: 'You', sublabel: 'Submit your asset', icon: <User size={18} />, accentColor: '#3B82F6', row: 0, col: 0 },
+  { id: 'orchestrator', label: 'Orchestrator', sublabel: 'Routes assessment', icon: <Brain size={18} />, accentColor: '#8B5CF6', row: 0, col: 1 },
+  
+  // Row 1: Data & Payment
+  { id: 'datasources', label: 'Data Sources', sublabel: 'RentCast · Met · CoinGecko · FRED', icon: <Database size={18} />, accentColor: '#06B6D4', row: 1, col: 0 },
+  { id: 'x402', label: 'x402 Payment', sublabel: '2.5 CSPR per assessment', icon: <Zap size={18} />, accentColor: '#F59E0B', row: 1, col: 1 },
+  
+  // Row 2: Valuation Agents
+  { id: 'comps', label: 'Comps Specialist', sublabel: 'Comparable sales analysis', icon: <Search size={18} />, accentColor: '#10B981', row: 2, col: 0 },
+  { id: 'dcf', label: 'DCF Specialist', sublabel: 'Discounted cash flow', icon: <TrendingUp size={18} />, accentColor: '#10B981', row: 2, col: 1 },
+  { id: 'llm', label: 'MiMo LLM', sublabel: 'AI reasoning engine', icon: <Brain size={18} />, accentColor: '#10B981', row: 2, col: 2 },
+  
+  // Row 3: Jurors
+  { id: 'evidence', label: 'Evidence Analyst', sublabel: 'Cross-references data', icon: <Shield size={18} />, accentColor: '#EC4899', row: 3, col: 0 },
+  { id: 'market', label: 'Market Interpreter', sublabel: 'Macro trends & timing', icon: <TrendingUp size={18} />, accentColor: '#EC4899', row: 3, col: 1 },
+  { id: 'precedent', label: 'Precedent Researcher', sublabel: 'Historical comparisons', icon: <BookOpen size={18} />, accentColor: '#EC4899', row: 3, col: 2 },
+  
+  // Row 4: Settlement
+  { id: 'trust', label: 'Trust Framework', sublabel: '5-dimension scoring', icon: <Scale size={18} />, accentColor: '#F59E0B', row: 4, col: 0 },
+  { id: 'hmac', label: 'HMAC Receipt Chain', sublabel: 'Tamper-proof audit trail', icon: <FileCheck size={18} />, accentColor: '#F59E0B', row: 4, col: 1 },
+  { id: 'verdict', label: 'Verdict', sublabel: 'Final valuation', icon: <Gavel size={18} />, accentColor: '#EF4444', row: 4, col: 2 },
+  
+  // Row 5: On-chain
+  { id: 'blockchain', label: 'Casper Blockchain', sublabel: 'Immutable on-chain record', icon: <Link2 size={18} />, accentColor: '#3B82F6', row: 5, col: 1 },
+];
+
+interface FlowEdge {
+  from: string;
+  to: string;
+  animated?: boolean;
+}
+
+const EDGES: FlowEdge[] = [
+  // Row 0 connections
+  { from: 'user', to: 'orchestrator', animated: true },
+  
+  // Row 0 → Row 1
+  { from: 'orchestrator', to: 'datasources', animated: true },
+  { from: 'orchestrator', to: 'x402', animated: true },
+  
+  // Row 1 → Row 2
+  { from: 'datasources', to: 'comps', animated: true },
+  { from: 'datasources', to: 'dcf', animated: true },
+  { from: 'datasources', to: 'llm', animated: true },
+  
+  // Row 2 → Row 3 (parallel flow)
+  { from: 'comps', to: 'evidence', animated: true },
+  { from: 'comps', to: 'market', animated: true },
+  { from: 'comps', to: 'precedent', animated: true },
+  { from: 'dcf', to: 'evidence', animated: true },
+  { from: 'dcf', to: 'market', animated: true },
+  { from: 'dcf', to: 'precedent', animated: true },
+  { from: 'llm', to: 'evidence', animated: true },
+  { from: 'llm', to: 'market', animated: true },
+  { from: 'llm', to: 'precedent', animated: true },
+  
+  // Row 3 → Row 4
+  { from: 'evidence', to: 'trust', animated: true },
+  { from: 'market', to: 'trust', animated: true },
+  { from: 'precedent', to: 'trust', animated: true },
+  { from: 'trust', to: 'hmac', animated: true },
+  { from: 'hmac', to: 'verdict', animated: true },
+  
+  // Row 4 → Row 5
+  { from: 'verdict', to: 'blockchain', animated: true },
+];
+
+// ─── Layout constants ──────────────────────────────────────────────────────
+
+const NODE_W = 180;
+const NODE_H = 64;
+const COL_GAP = 280;
+const ROW_GAP = 120;
+const PAD_X = 60;
+const PAD_Y = 60;
+const SVG_W = PAD_X * 2 + 3 * COL_GAP;
+const SVG_H = PAD_Y * 2 + 6 * ROW_GAP + NODE_H;
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+
+function getNodeCenter(node: FlowNode): { x: number; y: number } {
+  const row = node.row;
+  const col = node.col;
+  
+  // Count nodes in this row
+  const nodesInRow = NODES.filter(n => n.row === row);
+  const colsInRow = nodesInRow.length;
+  
+  // Center the row horizontally
+  const totalRowWidth = (colsInRow - 1) * COL_GAP;
+  const startX = (SVG_W - totalRowWidth) / 2;
+  
+  return {
+    x: startX + col * COL_GAP + NODE_W / 2,
+    y: PAD_Y + row * ROW_GAP + NODE_H / 2,
+  };
+}
+
+function getNodeById(id: string): FlowNode | undefined {
+  return NODES.find(n => n.id === id);
+}
+
+// ─── Component ─────────────────────────────────────────────────────────────
 
 export const ArchitectureDiagram: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-  useLayoutEffect(() => {
-    if (!svgRef.current || !containerRef.current) return;
-    
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: 'top 70%',
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
         }
-      });
+      },
+      { threshold: 0.1 }
+    );
 
-      // Phase 1: Reveal nodes
-      tl.to('.arch-node', {
-        opacity: 1,
-        scale: 1,
-        duration: 0.4,
-        stagger: 0.05,
-        ease: 'back.out(1.5)',
-        onStart: () => {
-          gsap.set('.arch-node', { scale: 0.8 });
-        }
-      });
+    if (svgRef.current) {
+      observer.observe(svgRef.current);
+    }
 
-      // Phase 2: Draw edges
-      const paths = document.querySelectorAll('.arch-edge');
-      paths.forEach(path => {
-        const length = (path as SVGPathElement).getTotalLength();
-        gsap.set(path, { strokeDasharray: length, strokeDashoffset: length, opacity: 0.6 });
-      });
-
-      tl.to('.arch-edge', {
-        strokeDashoffset: 0,
-        duration: 1,
-        stagger: 0.1,
-        ease: 'power2.inOut'
-      }, '-=0.2');
-
-      // Phase 3: Packet Flow (looping)
-      tl.add(() => {
-        // This is a simplified fallback for motionPath if it's not registered
-        // Actually, since motionPath is not requested to be installed, we will use simple dash offsets or opacity for packets
-        // Instead of motion path, we animate stroke-dashoffset on a clone of the path with a short dash array
-        const packetPaths = document.querySelectorAll('.packet-path');
-        packetPaths.forEach(path => {
-          const length = (path as SVGPathElement).getTotalLength();
-          const color = path.getAttribute('data-color') || '#FF3B3B';
-          gsap.set(path, { 
-            strokeDasharray: `8 ${length}`, 
-            strokeDashoffset: length,
-            stroke: color,
-            strokeWidth: 3,
-            opacity: 1
-          });
-          gsap.to(path, {
-            strokeDashoffset: 0,
-            duration: 2,
-            repeat: -1,
-            ease: 'none',
-            delay: Math.random() * 1
-          });
-        });
-
-      }, '+=0');
-
-      // Ambient pulsing
-      gsap.to('.arch-node rect', {
-        fill: 'var(--bg-surface)',
-        duration: 3,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
-        stagger: 0.2
-      });
-
-    }, containerRef);
-
-    return () => ctx.revert();
+    return () => observer.disconnect();
   }, []);
 
+  // Get connected nodes for hover highlighting
+  const connectedNodes = hoveredNode
+    ? new Set([
+        hoveredNode,
+        ...EDGES.filter(e => e.from === hoveredNode || e.to === hoveredNode).flatMap(e => [e.from, e.to]),
+      ])
+    : null;
+
   return (
-    <section style={{ width: '100%', maxWidth: 1200, margin: '0 auto', padding: '96px 32px' }}>
-      <Reveal direction="up" delay={0}>
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+    <section style={{
+      padding: '80px 32px',
+      background: 'var(--bg-main)',
+    }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
+          style={{ marginBottom: 48 }}
+        >
           <h2 style={{
-            fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-primary)',
-            marginBottom: '16px', fontFamily: 'var(--font-display)', letterSpacing: '-0.02em'
+            fontSize: '2rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            marginBottom: 12,
           }}>
             How Verdict Works
           </h2>
+          <p style={{
+            fontSize: '1rem',
+            color: 'var(--text-secondary)',
+            maxWidth: 600,
+            margin: '0 auto',
+            lineHeight: 1.6,
+          }}>
+            Every assessment follows this pipeline — from asset submission to immutable on-chain verdict.
+          </p>
+        </motion.div>
+
+        {/* Flow Diagram */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          overflow: 'auto',
+        }}>
+          <svg
+            ref={svgRef}
+            width={SVG_W}
+            height={SVG_H}
+            viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+            }}
+          >
+            {/* Background Grid */}
+            <defs>
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--border-color-subtle)" strokeWidth="0.5" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+
+            {/* Edges */}
+            {EDGES.map((edge, i) => {
+              const fromNode = getNodeById(edge.from);
+              const toNode = getNodeById(edge.to);
+              if (!fromNode || !toNode) return null;
+
+              const from = getNodeCenter(fromNode);
+              const to = getNodeCenter(toNode);
+
+              const isHighlighted = connectedNodes && (
+                connectedNodes.has(edge.from) && connectedNodes.has(edge.to)
+              );
+
+              return (
+                <g key={`edge-${i}`}>
+                  {/* Edge line */}
+                  <line
+                    x1={from.x}
+                    y1={from.y}
+                    x2={to.x}
+                    y2={to.y}
+                    stroke={isHighlighted ? 'var(--primary)' : 'var(--border-color)'}
+                    strokeWidth={isHighlighted ? 2 : 1}
+                    strokeDasharray={isHighlighted ? 'none' : '4 4'}
+                    style={{
+                      transition: 'all 0.2s ease',
+                    }}
+                  />
+
+                  {/* Animated packet */}
+                  {edge.animated && isVisible && (
+                    <circle r="3" fill="var(--primary)" opacity="0.8">
+                      <animateMotion
+                        dur={`${2 + i * 0.1}s`}
+                        repeatCount="indefinite"
+                        path={`M${from.x},${from.y} L${to.x},${to.y}`}
+                      />
+                    </circle>
+                  )}
+                </g>
+              );
+            })}
+
+            {/* Nodes */}
+            {NODES.map((node) => {
+              const center = getNodeCenter(node);
+              const isHovered = hoveredNode === node.id;
+              const isConnected = connectedNodes?.has(node.id);
+
+              return (
+                <g
+                  key={node.id}
+                  transform={`translate(${center.x - NODE_W / 2}, ${center.y - NODE_H / 2})`}
+                  onMouseEnter={() => setHoveredNode(node.id)}
+                  onMouseLeave={() => setHoveredNode(null)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {/* Node background */}
+                  <rect
+                    width={NODE_W}
+                    height={NODE_H}
+                    rx={8}
+                    fill={isHovered ? 'var(--bg-surface)' : 'var(--bg-elevated)'}
+                    stroke={isHovered ? node.accentColor : isConnected ? 'var(--primary)' : 'var(--border-color)'}
+                    strokeWidth={isHovered ? 2 : 1}
+                    style={{
+                      transition: 'all 0.2s ease',
+                      filter: isHovered ? `drop-shadow(0 4px 12px ${node.accentColor}33)` : 'none',
+                    }}
+                  />
+
+                  {/* Left accent bar */}
+                  <rect
+                    x={0}
+                    y={0}
+                    width={4}
+                    height={NODE_H}
+                    rx={2}
+                    fill={node.accentColor}
+                    opacity={isHovered ? 1 : 0.6}
+                    style={{ transition: 'opacity 0.2s ease' }}
+                  />
+
+                  {/* Icon */}
+                  <foreignObject x={16} y={20} width={24} height={24}>
+                    <div style={{ color: node.accentColor }}>
+                      {node.icon}
+                    </div>
+                  </foreignObject>
+
+                  {/* Label */}
+                  <text
+                    x={40}
+                    y={26}
+                    fontSize={13}
+                    fontWeight={600}
+                    fill="var(--text-primary)"
+                    fontFamily="var(--font-sans)"
+                  >
+                    {node.label}
+                  </text>
+
+                  {/* Sublabel */}
+                  <text
+                    x={40}
+                    y={44}
+                    fontSize={10}
+                    fill="var(--text-tertiary)"
+                    fontFamily="var(--font-sans)"
+                  >
+                    {node.sublabel}
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* Row labels */}
+            {['ENTRY', 'DATA & PAY', 'VALUATION', 'DELIBERATION', 'SETTLEMENT', 'CHAIN'].map((label, i) => (
+              <text
+                key={label}
+                x={24}
+                y={PAD_Y + i * ROW_GAP + NODE_H / 2 + 4}
+                fontSize={9}
+                fontWeight={600}
+                fill="var(--text-tertiary)"
+                fontFamily="var(--font-sans)"
+                letterSpacing="0.05em"
+                textAnchor="start"
+              >
+                {label}
+              </text>
+            ))}
+          </svg>
         </div>
-      </Reveal>
 
-      <div ref={containerRef} style={{ width: '100%', overflowX: 'auto' }}>
-        <svg ref={svgRef} viewBox="0 0 1000 600" style={{ width: '100%', minWidth: 800, height: 'auto' }}>
-          {/* Edges */}
-          <g fill="none" stroke="var(--border-color)" strokeWidth="1.5">
-            {/* User -> Orchestrator */}
-            <path id="e1" className="arch-edge" d="M 200 100 L 425 100" />
-            {/* Orchestrator -> Data Sources */}
-            <path id="e2" className="arch-edge" d="M 425 120 C 350 170, 250 170, 225 200" />
-            {/* Orchestrator -> Comps Specialist */}
-            <path id="e3" className="arch-edge" d="M 425 120 C 350 170, 300 170, 300 230" />
-            {/* Orchestrator -> DCF Specialist */}
-            <path id="e4" className="arch-edge" d="M 575 120 C 650 170, 700 170, 700 230" />
-            {/* Comps Specialist -> Jurors */}
-            <path id="e5" className="arch-edge" d="M 300 270 C 300 310, 200 310, 200 350" />
-            <path id="e6" className="arch-edge" d="M 300 270 C 300 310, 500 310, 500 350" />
-            <path id="e7" className="arch-edge" d="M 300 270 C 300 310, 800 310, 800 350" />
-            {/* DCF Specialist -> Jurors */}
-            <path id="e8" className="arch-edge" d="M 700 270 C 700 310, 200 310, 200 350" />
-            <path id="e9" className="arch-edge" d="M 700 270 C 700 310, 500 310, 500 350" />
-            <path id="e10" className="arch-edge" d="M 700 270 C 700 310, 800 310, 800 350" />
-            {/* Jurors -> Verdict */}
-            <path id="e11" className="arch-edge" d="M 200 390 C 200 430, 500 430, 500 440" />
-            <path id="e12" className="arch-edge" d="M 500 390 L 500 440" />
-            <path id="e13" className="arch-edge" d="M 800 390 C 800 430, 500 430, 500 440" />
-            {/* Verdict -> Blockchain */}
-            <path id="e14" className="arch-edge" d="M 500 480 L 500 520" />
-          </g>
-
-          {/* Packet Paths (Overlay for animation) */}
-          <g fill="none">
-            <path className="packet-path" data-color="#FF3B3B" d="M 425 120 C 350 170, 300 170, 300 230" />
-            <path className="packet-path" data-color="#FF3B3B" d="M 575 120 C 650 170, 700 170, 700 230" />
-            <path className="packet-path" data-color="#3B82F6" d="M 300 270 C 300 310, 500 310, 500 350" />
-            <path className="packet-path" data-color="#3B82F6" d="M 700 270 C 700 310, 500 310, 500 350" />
-            <path className="packet-path" data-color="#10B981" d="M 500 390 L 500 440" />
-            <path className="packet-path" data-color="#10B981" d="M 500 480 L 500 520" />
-          </g>
-
-          {/* Nodes */}
-          <SvgNode id="n1" x={200} y={100} label="Your Asset" Icon={Wallet} borderColor="#FF3B3B" />
-          <SvgNode id="n2" x={500} y={100} label="Orchestrator" Icon={Cpu} borderColor="#8B5CF6" />
-          <SvgNode id="n3" x={225} y={200} label="Data Sources" Icon={Database} borderColor="#6366f1" />
-          <SvgNode id="n4" x={300} y={250} label="Comps Specialist" Icon={BarChart2} borderColor="#EC4899" />
-          <SvgNode id="n5" x={700} y={250} label="DCF Specialist" Icon={TrendingUp} borderColor="#F97316" />
-          <SvgNode id="n6" x={200} y={370} label="Evidence Analyst" Icon={FileText} borderColor="#10B981" />
-          <SvgNode id="n7" x={500} y={370} label="Market Interpreter" Icon={Activity} borderColor="#06B6D4" />
-          <SvgNode id="n8" x={800} y={370} label="Precedent Researcher" Icon={Search} borderColor="#8B5CF6" />
-          <SvgNode id="n9" x={500} y={460} label="Verdict" Icon={Shield} borderColor="#10B981" />
-          <SvgNode id="n10" x={500} y={540} label="Casper Blockchain" Icon={Globe} borderColor="#22D3EE" />
-        </svg>
+        {/* Legend */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          viewport={{ once: true }}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 24,
+            marginTop: 32,
+            flexWrap: 'wrap',
+          }}
+        >
+          {[
+            { color: '#10B981', label: 'Valuation Agents' },
+            { color: '#EC4899', label: 'Jurors' },
+            { color: '#F59E0B', label: 'Trust & Payment' },
+            { color: '#3B82F6', label: 'Blockchain' },
+          ].map((item) => (
+            <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                width: 12,
+                height: 12,
+                borderRadius: 3,
+                background: item.color,
+              }} />
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                {item.label}
+              </span>
+            </div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );
 };
+
+export default ArchitectureDiagram;

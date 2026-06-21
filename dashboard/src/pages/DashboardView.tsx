@@ -7,11 +7,11 @@ import { LiveContractPanel } from '../components/LiveContractPanel';
 import { X402PaymentStream } from '../components/X402PaymentStream';
 
 const AGENTS = [
-  { name: 'Valuation Agent A', color: '#EC4899', role: 'Valuation', method: 'Comparable Sales', initials: 'VA' },
-  { name: 'Valuation Agent B', color: '#F97316', role: 'Valuation', method: 'DCF Analysis', initials: 'VB' },
-  { name: 'Evidence Analyst', color: '#10B981', role: 'Analysis', method: 'Data Validation', initials: 'EA' },
+  { name: 'Valuation Agent A', color: '#EC4899', role: 'Valuation', method: 'Market Comparables', initials: 'VA' },
+  { name: 'Valuation Agent B', color: '#F97316', role: 'Valuation', method: 'Income Analysis', initials: 'VB' },
+  { name: 'Evidence Analyst', color: '#10B981', role: 'Analysis', method: 'Document Review', initials: 'EA' },
   { name: 'Market Interpreter', color: '#06B6D4', role: 'Analysis', method: 'Market Context', initials: 'MI' },
-  { name: 'Precedent Researcher', color: '#8B5CF6', role: 'Analysis', method: 'Precedent Search', initials: 'PR' },
+  { name: 'Precedent Researcher', color: '#8B5CF6', role: 'Analysis', method: 'Case Research', initials: 'PR' },
 ];
 
 const QUICK_ACTIONS = [
@@ -85,7 +85,7 @@ export const DashboardView: React.FC = () => {
         <div className="page-header-row">
           <div>
             <h1 className="page-title">Dashboard</h1>
-            <p className="page-subtitle">Real-time overview of the Verdict dispute resolution protocol.</p>
+            <p className="page-subtitle">Real-time overview of your Verdict platform activity.</p>
           </div>
           <div className="page-header-actions">
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: wsConnected ? 'var(--success)' : 'var(--text-tertiary)' }}>
@@ -105,9 +105,9 @@ export const DashboardView: React.FC = () => {
         <div className="stat-grid">
           {[
             { label: 'Total Cases', value: totalCases, icon: BarChart3, color: 'var(--text-primary)', bg: 'var(--bg-surface-alt)' },
-            { label: 'On-Chain', value: onChainCount, icon: CheckCircle2, color: 'var(--success)', bg: 'rgba(16, 185, 129, 0.08)' },
+            { label: 'Verified', value: onChainCount, icon: CheckCircle2, color: 'var(--success)', bg: 'rgba(16, 185, 129, 0.08)' },
             { label: 'Active Agents', value: 5, icon: Zap, color: 'var(--purple)', bg: 'rgba(139, 92, 246, 0.08)' },
-            { label: 'Data Sources', value: 3, icon: TrendingUp, color: 'var(--warning)', bg: 'rgba(245, 158, 11, 0.08)' },
+            { label: 'Live Feeds', value: 3, icon: TrendingUp, color: 'var(--warning)', bg: 'rgba(245, 158, 11, 0.08)' },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -128,12 +128,12 @@ export const DashboardView: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Live Contract State ───────────────────────────────────────────────── */}
+      {/* ── Protocol Overview ──────────────────────────────────────────────────── */}
       <div className="section">
         <LiveContractPanel />
       </div>
 
-      {/* ── x402 Payment Stream ──────────────────────────────────────────────── */}
+      {/* ── Payment Activity ──────────────────────────────────────────────────── */}
       <div className="section">
         <X402PaymentStream />
       </div>
@@ -259,12 +259,12 @@ export const DashboardView: React.FC = () => {
 
         {/* Right Sidebar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--content-gap)' }}>
-          {/* System Status */}
+          {/* Platform Status */}
           <div className="card">
-            <div className="card-title" style={{ marginBottom: '16px' }}>System Status</div>
+            <div className="card-title" style={{ marginBottom: '16px' }}>Platform Status</div>
             {[
-              { label: 'Orchestrator', status: 'online', detail: 'Port 3011' },
-              { label: 'WebSocket', status: wsConnected ? 'online' : 'offline', detail: wsConnected ? 'Connected' : 'Disconnected' },
+              { label: 'Engine', status: 'online', detail: 'Connected' },
+              { label: 'Live Updates', status: wsConnected ? 'online' : 'offline', detail: wsConnected ? 'Connected' : 'Disconnected' },
               { label: 'Casper Network', status: 'online', detail: 'Testnet' },
             ].map((item, i) => (
               <div key={item.label} style={{

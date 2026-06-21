@@ -145,7 +145,7 @@ export const X402PaymentFlow: React.FC = () => {
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {[
-                '0.03 CSPR per juror per dispute',
+                '2.5 CSPR per assessment',
                 'HMAC-signed receipt chain',
                 'Verifiable on testnet.cspr.live'
               ].map((text, i) => (

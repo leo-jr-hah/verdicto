@@ -41,7 +41,7 @@ export const TestnetProof: React.FC = () => {
             </h2>
             
             <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '32px' }}>
-              All three smart contracts are live. Disputes have been filed, resolved, and recorded. Every deploy hash is verifiable on the public explorer.
+              All three smart contracts are live. Assessments have been submitted, analyzed, and recorded. Every deploy hash is verifiable on the public explorer.
             </p>
             
             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>

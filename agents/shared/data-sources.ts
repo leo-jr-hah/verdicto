@@ -15,13 +15,12 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import type { AssetType, AssetListing } from './types.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-
-export type AssetType = 'real-estate' | 'art' | 'commodity';
 
 export interface AssetData {
   type: AssetType;
@@ -32,18 +31,6 @@ export interface AssetData {
   marketContext: any;
   source: string;
   timestamp: number;
-}
-
-export interface AssetListing {
-  id: string;
-  type: AssetType;
-  name: string;
-  description: string;
-  askingPrice: number;
-  location?: string;
-  artist?: string;
-  weight?: number;
-  documents?: string[];
 }
 
 // ─── Real Estate (RentCast API) ──────────────────────────────────────────────

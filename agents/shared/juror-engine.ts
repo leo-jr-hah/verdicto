@@ -10,11 +10,12 @@
  */
 
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { casperX402Middleware } from './x402-middleware.js';
-import { askJuror } from './mimo-client.js';
+import { askJuror, sanitizeForPrompt } from './mimo-client.js';
 import type { AssetType } from './types.js';
 
 export interface JurorConfig {
@@ -41,7 +42,53 @@ Respond ONLY as a JSON object in this format: {"vote": "A"|"B"|"split", "confide
 
 export function createJurorServer(config: JurorConfig) {
   const app = express();
-  app.use(express.json());
+  app.use(express.json({ limit: '16kb' }));
+
+  // ── CORS — restrict to known origins ─────────────────────────────────────
+  const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',');
+  app.use((req, res, next) => {
+    const origin = req.headers.origin || '';
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, payment-signature, x-payment-proof');
+    res.setHeader('Access-Control-Max-Age', '86400');
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(204);
+    }
+    next();
+  });
+
+  // ── Security headers ─────────────────────────────────────────────────────
+  app.use((_req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    next();
+  });
+
+  // ── Rate limiting ────────────────────────────────────────────────────────
+  // 30 requests per minute per IP on MCP endpoint (LLM calls are expensive)
+  const mcpLimiter = rateLimit({
+    windowMs: 60_000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later' },
+  });
+
+  // 100 requests per minute on health endpoint
+  const healthLimiter = rateLimit({
+    windowMs: 60_000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  app.use('/mcp', mcpLimiter);
+  app.use('/health', healthLimiter);
 
   app.use('/mcp', casperX402Middleware({
     recipientAddress: config.publicKey,
@@ -72,9 +119,9 @@ export function createJurorServer(config: JurorConfig) {
 
       const systemPrompt = buildJurorSystemPrompt(config, resolvedAssetType);
 
-      let userPrompt = `Dispute: ${dispute_id} | Asset: ${asset_id} | Type: ${resolvedAssetType} | Location: ${location} | Units: ${spot_count}
-Valuation A (Comparable/Appraisal): $${valuation_a.toLocaleString()}
-Valuation B (DCF/Market): $${valuation_b.toLocaleString()}
+      let userPrompt = `Dispute: ${sanitizeForPrompt(dispute_id)} | Asset: ${sanitizeForPrompt(asset_id)} | Type: ${resolvedAssetType} | Location: ${sanitizeForPrompt(location)} | Units: ${spot_count}
+Valuation A (Comparable/Appraisal): ${valuation_a.toLocaleString()}
+Valuation B (DCF/Market): ${valuation_b.toLocaleString()}
 Divergence: ${Math.abs(((valuation_a - valuation_b) / Math.min(valuation_a, valuation_b)) * 100).toFixed(1)}%
 Analyze the evidence from your perspective.`;
 
@@ -89,7 +136,8 @@ Analyze the evidence from your perspective.`;
       }
 
       if (isRound2) {
-        userPrompt += `\n\nThis is ROUND 2 of deliberation. Here is what your peers said in Round 1:\n${peer_reasoning.join('\n')}\nGiven your peers' reasoning, do you maintain your position or shift your vote? Explain why.`;
+        const sanitizedReasoning = peer_reasoning.map(r => sanitizeForPrompt(r)).join('\n');
+        userPrompt += `\n\nThis is ROUND 2 of deliberation. Here is what your peers said in Round 1:\n${sanitizedReasoning}\nGiven your peers' reasoning, do you maintain your position or shift your vote? Explain why.`;
       }
 
       console.log(`[${config.name}] 🤔 Reasoning about dispute ${dispute_id} (${resolvedAssetType}, Round ${isRound2 ? 2 : 1})...`);

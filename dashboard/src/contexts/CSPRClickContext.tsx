@@ -280,6 +280,21 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
       throw new Error('Wallet not connected');
     }
 
+    // ── Input validation before signing ──────────────────────────────────
+    if (!recipientAddress || typeof recipientAddress !== 'string') {
+      throw new Error('Invalid recipient address');
+    }
+    // Casper public key hex must be 64+ chars (66 for ED25519 with prefix)
+    if (recipientAddress.length < 64 || !/^[0-9a-fA-F]+$/.test(recipientAddress)) {
+      throw new Error('Recipient address must be a valid hex public key (64+ chars)');
+    }
+    if (typeof amountCSPR !== 'number' || isNaN(amountCSPR) || amountCSPR <= 0) {
+      throw new Error('Payment amount must be a positive number');
+    }
+    if (amountCSPR > 100) {
+      throw new Error('Payment amount exceeds maximum (100 CSPR). Aborting for safety.');
+    }
+
     // Convert CSPR to motes (1 CSPR = 10^9 motes)
     const amountMotes = Math.floor(amountCSPR * 1e9).toString();
 

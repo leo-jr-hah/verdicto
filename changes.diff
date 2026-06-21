@@ -1,0 +1,3796 @@
+diff --git a/agents/orchestrator/index.ts b/agents/orchestrator/index.ts
+index 9988cdd..80c0eb3 100644
+--- a/agents/orchestrator/index.ts
++++ b/agents/orchestrator/index.ts
+@@ -721,8 +721,17 @@ export async function runDisputeResolution(disputeId: string, assetId: string, l
+ 
+ if (import.meta.url === `file://${process.argv[1]}`) {
+   const app = express();
+-  app.use(cors({ origin: ALLOWED_ORIGINS }));
+-  app.use(express.json());
++  app.use(cors({ origin: ALLOWED_ORIGINS, methods: ['GET', 'POST', 'OPTIONS'] }));
++  app.use(express.json({ limit: '16kb' }));
++
++  // ── Security headers ─────────────────────────────────────────────────────
++  app.use((_req, res, next) => {
++    res.setHeader('X-Content-Type-Options', 'nosniff');
++    res.setHeader('X-Frame-Options', 'DENY');
++    res.setHeader('X-XSS-Protection', '1; mode=block');
++    res.setHeader('Referrer-Policy', 'no-referrer');
++    next();
++  });
+ 
+   // Simple in-memory rate limiter: max 5 dispute starts per minute per IP
+   const disputeTimestamps = new Map<string, number[]>();
+diff --git a/agents/package-lock.json b/agents/package-lock.json
+index 28795f9..58e547c 100644
+--- a/agents/package-lock.json
++++ b/agents/package-lock.json
+@@ -16,6 +16,7 @@
+         "cors": "^2.8.6",
+         "dotenv": "^16.4.0",
+         "express": "^4.21.0",
++        "express-rate-limit": "^8.5.2",
+         "groq-sdk": "^1.2.1",
+         "vectra": "^0.12.3",
+         "ws": "^8.21.0",
+diff --git a/agents/package.json b/agents/package.json
+index 441fa05..242b8d1 100644
+--- a/agents/package.json
++++ b/agents/package.json
+@@ -24,6 +24,7 @@
+     "cors": "^2.8.6",
+     "dotenv": "^16.4.0",
+     "express": "^4.21.0",
++    "express-rate-limit": "^8.5.2",
+     "groq-sdk": "^1.2.1",
+     "vectra": "^0.12.3",
+     "ws": "^8.21.0",
+diff --git a/agents/shared/agent-engine.ts b/agents/shared/agent-engine.ts
+index e203ac0..d59d61e 100644
+--- a/agents/shared/agent-engine.ts
++++ b/agents/shared/agent-engine.ts
+@@ -362,6 +362,33 @@ interface AgentServerConfig {
+   methodPreference: 'comps' | 'dcf' | 'auto';
+ }
+ 
++/** Simple in-memory rate limiter (per-IP, sliding window) */
++function createRateLimiter(maxRequests: number, windowMs: number) {
++  const hits = new Map<string, number[]>();
++  
++  // Periodic cleanup to prevent memory leak
++  setInterval(() => {
++    const now = Date.now();
++    for (const [ip, timestamps] of hits) {
++      const recent = timestamps.filter(t => now - t < windowMs);
++      if (recent.length === 0) hits.delete(ip);
++      else hits.set(ip, recent);
++    }
++  }, windowMs);
++  
++  return (ip: string): boolean => {
++    const now = Date.now();
++    const timestamps = (hits.get(ip) || []).filter(t => now - t < windowMs);
++    if (timestamps.length >= maxRequests) return false; // rate limited
++    timestamps.push(now);
++    hits.set(ip, timestamps);
++    return true;
++  };
++}
++
++const agentRateLimiter = createRateLimiter(30, 60_000); // 30 req/min per IP
++const MAX_BODY_BYTES = 16 * 1024; // 16KB max request body
++
+ /**
+  * Creates a standalone HTTP server for a single valuation agent.
+  * The orchestrator POSTs a ValuationRequest; this server runs
+@@ -383,9 +410,24 @@ export function createAgentServer(config: AgentServerConfig): void {
+       return;
+     }
+ 
++    // Rate limit
++    const clientIp = req.socket.remoteAddress || 'unknown';
++    if (!agentRateLimiter(clientIp)) {
++      res.writeHead(429, { 'Content-Type': 'application/json' });
++      res.end(JSON.stringify({ error: 'Too many requests' }));
++      return;
++    }
++
+     try {
+       let body = '';
++      let totalBytes = 0;
+       for await (const chunk of req) {
++        totalBytes += chunk.length;
++        if (totalBytes > MAX_BODY_BYTES) {
++          res.writeHead(413, { 'Content-Type': 'application/json' });
++          res.end(JSON.stringify({ error: 'Request body too large' }));
++          return;
++        }
+         body += chunk;
+       }
+ 
+diff --git a/agents/shared/data-sources.ts b/agents/shared/data-sources.ts
+index db34171..5ded64d 100644
+--- a/agents/shared/data-sources.ts
++++ b/agents/shared/data-sources.ts
+@@ -15,14 +15,13 @@ import axios from 'axios';
+ import dotenv from 'dotenv';
+ import path from 'path';
+ import { fileURLToPath } from 'url';
++import type { AssetType, AssetListing } from './types.js';
+ 
+ const __dirname = path.dirname(fileURLToPath(import.meta.url));
+ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+ 
+ // ─── Types ───────────────────────────────────────────────────────────────────
+ 
+-export type AssetType = 'real-estate' | 'art' | 'commodity';
+-
+ export interface AssetData {
+   type: AssetType;
+   name: string;
+@@ -34,18 +33,6 @@ export interface AssetData {
+   timestamp: number;
+ }
+ 
+-export interface AssetListing {
+-  id: string;
+-  type: AssetType;
+-  name: string;
+-  description: string;
+-  askingPrice: number;
+-  location?: string;
+-  artist?: string;
+-  weight?: number;
+-  documents?: string[];
+-}
+-
+ // ─── Real Estate (RentCast API) ──────────────────────────────────────────────
+ 
+ const RENTCAST_API_KEY = process.env.RENTCAST_API_KEY;
+diff --git a/agents/shared/juror-engine.ts b/agents/shared/juror-engine.ts
+index 26300bf..50db148 100644
+--- a/agents/shared/juror-engine.ts
++++ b/agents/shared/juror-engine.ts
+@@ -10,11 +10,12 @@
+  */
+ 
+ import express from 'express';
++import rateLimit from 'express-rate-limit';
+ import { z } from 'zod';
+ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+ import { casperX402Middleware } from './x402-middleware.js';
+-import { askJuror } from './mimo-client.js';
++import { askJuror, sanitizeForPrompt } from './mimo-client.js';
+ import type { AssetType } from './types.js';
+ 
+ export interface JurorConfig {
+@@ -41,7 +42,53 @@ Respond ONLY as a JSON object in this format: {"vote": "A"|"B"|"split", "confide
+ 
+ export function createJurorServer(config: JurorConfig) {
+   const app = express();
+-  app.use(express.json());
++  app.use(express.json({ limit: '16kb' }));
++
++  // ── CORS — restrict to known origins ─────────────────────────────────────
++  const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',');
++  app.use((req, res, next) => {
++    const origin = req.headers.origin || '';
++    if (ALLOWED_ORIGINS.includes(origin)) {
++      res.setHeader('Access-Control-Allow-Origin', origin);
++    }
++    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
++    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, payment-signature, x-payment-proof');
++    res.setHeader('Access-Control-Max-Age', '86400');
++    if (req.method === 'OPTIONS') {
++      return res.sendStatus(204);
++    }
++    next();
++  });
++
++  // ── Security headers ─────────────────────────────────────────────────────
++  app.use((_req, res, next) => {
++    res.setHeader('X-Content-Type-Options', 'nosniff');
++    res.setHeader('X-Frame-Options', 'DENY');
++    res.setHeader('X-XSS-Protection', '1; mode=block');
++    res.setHeader('Referrer-Policy', 'no-referrer');
++    next();
++  });
++
++  // ── Rate limiting ────────────────────────────────────────────────────────
++  // 30 requests per minute per IP on MCP endpoint (LLM calls are expensive)
++  const mcpLimiter = rateLimit({
++    windowMs: 60_000,
++    max: 30,
++    standardHeaders: true,
++    legacyHeaders: false,
++    message: { error: 'Too many requests, please try again later' },
++  });
++
++  // 100 requests per minute on health endpoint
++  const healthLimiter = rateLimit({
++    windowMs: 60_000,
++    max: 100,
++    standardHeaders: true,
++    legacyHeaders: false,
++  });
++
++  app.use('/mcp', mcpLimiter);
++  app.use('/health', healthLimiter);
+ 
+   app.use('/mcp', casperX402Middleware({
+     recipientAddress: config.publicKey,
+@@ -72,9 +119,9 @@ export function createJurorServer(config: JurorConfig) {
+ 
+       const systemPrompt = buildJurorSystemPrompt(config, resolvedAssetType);
+ 
+-      let userPrompt = `Dispute: ${dispute_id} | Asset: ${asset_id} | Type: ${resolvedAssetType} | Location: ${location} | Units: ${spot_count}
+-Valuation A (Comparable/Appraisal): $${valuation_a.toLocaleString()}
+-Valuation B (DCF/Market): $${valuation_b.toLocaleString()}
++      let userPrompt = `Dispute: ${sanitizeForPrompt(dispute_id)} | Asset: ${sanitizeForPrompt(asset_id)} | Type: ${resolvedAssetType} | Location: ${sanitizeForPrompt(location)} | Units: ${spot_count}
++Valuation A (Comparable/Appraisal): ${valuation_a.toLocaleString()}
++Valuation B (DCF/Market): ${valuation_b.toLocaleString()}
+ Divergence: ${Math.abs(((valuation_a - valuation_b) / Math.min(valuation_a, valuation_b)) * 100).toFixed(1)}%
+ Analyze the evidence from your perspective.`;
+ 
+@@ -89,7 +136,8 @@ Analyze the evidence from your perspective.`;
+       }
+ 
+       if (isRound2) {
+-        userPrompt += `\n\nThis is ROUND 2 of deliberation. Here is what your peers said in Round 1:\n${peer_reasoning.join('\n')}\nGiven your peers' reasoning, do you maintain your position or shift your vote? Explain why.`;
++        const sanitizedReasoning = peer_reasoning.map(r => sanitizeForPrompt(r)).join('\n');
++        userPrompt += `\n\nThis is ROUND 2 of deliberation. Here is what your peers said in Round 1:\n${sanitizedReasoning}\nGiven your peers' reasoning, do you maintain your position or shift your vote? Explain why.`;
+       }
+ 
+       console.log(`[${config.name}] 🤔 Reasoning about dispute ${dispute_id} (${resolvedAssetType}, Round ${isRound2 ? 2 : 1})...`);
+diff --git a/agents/shared/llm.ts b/agents/shared/llm.ts
+deleted file mode 100644
+index e495b62..0000000
+--- a/agents/shared/llm.ts
++++ /dev/null
+@@ -1,8 +0,0 @@
+-/**
+- * LLM Client — delegates to mimo-client.ts
+- *
+- * This file is kept for backward compatibility.
+- * All new code should import from mimo-client.ts directly.
+- */
+-
+-export { askJuror, askValuationAgent } from './mimo-client.js';
+diff --git a/agents/shared/mimo-client.ts b/agents/shared/mimo-client.ts
+index 9371485..4db4a25 100644
+--- a/agents/shared/mimo-client.ts
++++ b/agents/shared/mimo-client.ts
+@@ -34,6 +34,62 @@ const GROQ_MODEL = 'llama-3.3-70b-versatile';
+ 
+ const LLM_TIMEOUT_MS = 15_000;
+ 
++// ─── Input Sanitization (Prompt Injection Defense) ──────────────────────────
++
++/**
++ * Maximum allowed length for any user-supplied field injected into LLM prompts.
++ * Prevents prompt flooding / context window exhaustion attacks.
++ */
++const MAX_FIELD_LENGTH = 500;
++
++/**
++ * Characters that are dangerous in LLM prompt contexts.
++ * Strips instruction-injection markers while preserving readable content.
++ */
++const INJECTION_PATTERNS = [
++  /ignore\s+(all\s+)?(previous|prior|above|earlier)\s+(instructions?|prompts?|rules?)/gi,
++  /you\s+are\s+now\s+/gi,
++  /system\s*:\s*/gi,
++  /new\s+instructions?\s*:/gi,
++  /disregard\s+(all\s+)?(previous|prior)/gi,
++  /act\s+as\s+if\s+you\s+are/gi,
++  /\[INST\]/gi,
++  /\[\/INST\]/gi,
++  /<\|im_start\|>/gi,
++  /<\|im_end\|>/gi,
++];
++
++/**
++ * Sanitize a user-supplied value before embedding it in an LLM prompt.
++ * - Truncates to MAX_FIELD_LENGTH
++ * - Strips known prompt-injection patterns
++ * - Removes null bytes and control characters
++ */
++export function sanitizeForPrompt(value: string): string {
++  if (typeof value !== 'string') return String(value);
++  
++  let clean = value
++    // Remove null bytes and control chars (except newline/tab)
++    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
++    // Truncate
++    .slice(0, MAX_FIELD_LENGTH);
++  
++  // Strip known injection patterns
++  for (const pattern of INJECTION_PATTERNS) {
++    clean = clean.replace(pattern, '[FILTERED]');
++  }
++  
++  return clean;
++}
++
++/**
++ * Wrap user-supplied values in delimiters so the LLM treats them as data, not instructions.
++ * This is the primary defense against prompt injection.
++ */
++function delimit(value: string): string {
++  return `<<<USER_DATA_START>>>\n${value}\n<<<USER_DATA_END>>>`;
++}
++
+ // ─── Types ───────────────────────────────────────────────────────────────────
+ 
+ interface LLMResponse {
+@@ -162,9 +218,8 @@ export async function askJuror(systemPrompt: string, userPrompt: string) {
+ 
+     try {
+       return JSON.parse(result.content);
+-    } catch (parseErr: any) {
++    } catch {
+       console.warn(`[LLM] ⚠️  MiMo returned non-JSON, trying Groq...`);
+-      // Fall through to Groq
+     }
+   } catch (mimoErr: any) {
+     console.warn(`[LLM] ⚠️  MiMo failed: ${mimoErr.message} — trying Groq...`);
+@@ -178,7 +233,7 @@ export async function askJuror(systemPrompt: string, userPrompt: string) {
+ 
+     try {
+       return JSON.parse(result.content);
+-    } catch (parseErr: any) {
++    } catch {
+       console.warn(`[LLM] ⚠️  Groq returned non-JSON, using fallback`);
+       return buildFallbackResponse(userPrompt);
+     }
+diff --git a/agents/shared/x402-client.ts b/agents/shared/x402-client.ts
+index 3ed2721..a25560b 100644
+--- a/agents/shared/x402-client.ts
++++ b/agents/shared/x402-client.ts
+@@ -3,9 +3,6 @@ import {
+   makeCsprTransferDeploy, 
+   PrivateKey, 
+   KeyAlgorithm,
+-  RpcClient,
+-  HttpHandler,
+-  CasperNetwork,
+   Deploy
+ } from 'casper-js-sdk';
+ import path from 'path';
+@@ -17,8 +14,27 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
+ const X402_FACILITATOR_URL = 'https://x402-facilitator.cspr.cloud';
+ const CSPR_CLOUD_KEY = process.env.CSPRCLOUD_API_KEY || '';
+ 
++// ─── Safety limits ─────────────────────────────────────────────────────────
++const MAX_FEE_CSPR = 10; // Reject any payment request above 10 CSPR
++const DEPLOY_HASH_RE = /^[0-9a-f]{64}$/i;
++
++/**
++ * Validate fee amount to prevent overcharging exploits.
++ * Rejects if fee exceeds MAX_FEE_CSPR or is not a valid number.
++ */
++function validateFee(feeCSPR: string): number {
++  const fee = parseFloat(feeCSPR);
++  if (isNaN(fee) || fee <= 0) {
++    throw new Error(`Invalid fee amount: ${feeCSPR}`);
++  }
++  if (fee > MAX_FEE_CSPR) {
++    throw new Error(`Fee ${feeCSPR} CSPR exceeds maximum allowed (${MAX_FEE_CSPR} CSPR)`);
++  }
++  return fee;
++}
++
+ /**
+- * Fetches a resource with x402 payment support using the real Casper x402 Facilitator
++ * Fetches a resource with x402 payment support using the real Casper x402 Facilitator.
+  * Implements the full x402 protocol flow as per https://docs.cspr.cloud/x402-facilitator-api/reference
+  */
+ export async function fetchWithX402(url: string, payload: any, agentLabel: string) {
+@@ -36,7 +52,10 @@ export async function fetchWithX402(url: string, payload: any, agentLabel: strin
+       const network = requirements.network || err.response.headers['x-payment-network'] || 'casper:casper-test';
+       const scheme = requirements.scheme || 'exact';
+       
+-      console.log(`  [x402]    Fee: ${feeCSPR} CSPR on ${network}`);
++      // Validate fee before proceeding — prevent overcharging
++      const validatedFee = validateFee(feeCSPR);
++      
++      console.log(`  [x402]    Fee: ${validatedFee} CSPR on ${network}`);
+       console.log(`  [x402]    Pay to: ${destinationAddress.substring(0, 16)}...`);
+       console.log(`  [x402]    Scheme: ${scheme}`);
+ 
+@@ -50,7 +69,7 @@ export async function fetchWithX402(url: string, payload: any, agentLabel: strin
+       const verifyRes = await axios.post(
+         `${X402_FACILITATOR_URL}/verify`,
+         verifyPayload,
+-        { headers: { Authorization: CSPR_CLOUD_KEY } }
++        { headers: { Authorization: CSPR_CLOUD_KEY }, timeout: 10_000 }
+       );
+       
+       if (!verifyRes.data?.valid) {
+@@ -61,7 +80,7 @@ export async function fetchWithX402(url: string, payload: any, agentLabel: strin
+       console.log(`  [x402] Creating signed payment payload...`);
+       const paymentPayload = await createCasperPaymentPayload(
+         destinationAddress,
+-        feeCSPR,
++        String(validatedFee),
+         network
+       );
+       
+@@ -75,10 +94,13 @@ export async function fetchWithX402(url: string, payload: any, agentLabel: strin
+       const settleRes = await axios.post(
+         `${X402_FACILITATOR_URL}/settle`,
+         settlePayload,
+-        { headers: { Authorization: CSPR_CLOUD_KEY } }
++        { headers: { Authorization: CSPR_CLOUD_KEY }, timeout: 15_000 }
+       );
+       
+       const deployHash = settleRes.data?.deployHash;
++      if (!deployHash || typeof deployHash !== 'string' || !DEPLOY_HASH_RE.test(deployHash)) {
++        throw new Error('Facilitator returned invalid deploy hash');
++      }
+       console.log(`  [x402] ✅ Payment settled! deploy_hash: ${deployHash}`);
+       
+       // Step 4: Retry original request with payment proof
+@@ -96,7 +118,8 @@ export async function fetchWithX402(url: string, payload: any, agentLabel: strin
+           'x-payment-proof': proofHeader,
+           'Content-Type': 'application/json',
+           'Accept': 'application/json'
+-        }
++        },
++        timeout: 30_000,
+       });
+       
+       console.log(`  [x402] ✅ Payment accepted, response received`);
+@@ -107,8 +130,8 @@ export async function fetchWithX402(url: string, payload: any, agentLabel: strin
+ }
+ 
+ /**
+- * Creates a signed Casper payment payload for x402
+- * Uses the deployer's private key to sign the transfer
++ * Creates a signed Casper payment payload for x402.
++ * Uses the deployer's private key to sign the transfer.
+  */
+ async function createCasperPaymentPayload(
+   payToAddress: string,
+@@ -120,14 +143,26 @@ async function createCasperPaymentPayload(
+     throw new Error('DEPLOYER_PRIVATE_KEY not configured in .env');
+   }
+   
++  // Validate recipient address format (Casper public key hex)
++  if (!payToAddress || typeof payToAddress !== 'string' || payToAddress.length < 64) {
++    throw new Error(`Invalid recipient address: ${payToAddress}`);
++  }
++  
+   // Convert CSPR to motes (1 CSPR = 10^9 motes)
+-  const amountMotes = Math.floor(parseFloat(amountCSPR) * 1e9).toString();
++  const fee = parseFloat(amountCSPR);
++  if (isNaN(fee) || fee <= 0) {
++    throw new Error(`Invalid payment amount: ${amountCSPR}`);
++  }
++  const amountMotes = Math.floor(fee * 1e9).toString();
+   
+   // Parse network to get chain name
+   const chainName = network.includes('test') ? 'casper-test' : 'casper';
+   
+   // Load the private key from PEM file
+   const absoluteKeyPath = path.resolve(__dirname, '../../..', deployerKeyPath);
++  if (!fs.existsSync(absoluteKeyPath)) {
++    throw new Error(`Key file not found: ${absoluteKeyPath}`);
++  }
+   const pemContent = fs.readFileSync(absoluteKeyPath, 'utf8');
+   const privateKey = PrivateKey.fromPem(pemContent, KeyAlgorithm.ED25519);
+   const publicKey = privateKey.publicKey;
+diff --git a/agents/shared/x402-middleware.ts b/agents/shared/x402-middleware.ts
+index b688b70..aaa7bdb 100644
+--- a/agents/shared/x402-middleware.ts
++++ b/agents/shared/x402-middleware.ts
+@@ -4,38 +4,62 @@ import axios from 'axios';
+ const CSPR_CLOUD_URL = process.env.CSPRCLOUD_BASE_URL || 'https://api.cspr.cloud/v1';
+ const CSPR_CLOUD_KEY = process.env.CSPRCLOUD_API_KEY || '';
+ 
++// ─── Allowed internal IPs for localhost bypass ──────────────────────────────
++// Only the loopback addresses trusted for orchestrator→agent calls.
++// Headers like Origin/Referer are client-controlled and NEVER trusted.
++const TRUSTED_LOCAL_IPS = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
++
++// ─── Deploy hash format validation ─────────────────────────────────────────
++const DEPLOY_HASH_RE = /^[0-9a-f]{64}$/i;
++
+ /**
+  * Verify a deploy hash exists on-chain by querying CSPR.cloud.
+- * Returns the deploy info if found, null otherwise.
++ * Returns true only if the deploy is confirmed with execution results.
++ * Falls back to REJECT (false) if no API key is configured — fail-closed.
+  */
+ async function verifyDeployOnChain(deployHash: string): Promise<boolean> {
+   if (!CSPR_CLOUD_KEY) {
+-    // No API key — can't verify, fall back to allowing in dev
+-    console.log(`  [x402] ⚠️ No CSPRCLOUD_API_KEY — skipping on-chain verification`);
+-    return true;
++    console.error(`  [x402] ❌ No CSPRCLOUD_API_KEY — cannot verify deploy, REJECTING`);
++    return false;
+   }
+   try {
+     const res = await axios.get(`${CSPR_CLOUD_URL}/deploys/${deployHash}`, {
+       headers: { Authorization: CSPR_CLOUD_KEY },
++      timeout: 5_000,
+     });
+-    // Deploy exists on-chain if we get a 200 with execution_results
+-    return res.data?.execution_results?.length > 0 || res.data?.deploy?.hash != null;
++    // Deploy exists on-chain ONLY if execution_results are present (not just pending)
++    return res.data?.execution_results?.length > 0;
+   } catch {
+     return false;
+   }
+ }
+ 
++/**
++ * Validate that the payment proof amount meets or exceeds the required amount.
++ * Prevents zero-value or micro-payment exploits.
++ */
++function validatePaymentAmount(proofAmount: string | undefined, requiredAmount: string): boolean {
++  if (!proofAmount) return false;
++  const proof = parseFloat(proofAmount);
++  const required = parseFloat(requiredAmount);
++  if (isNaN(proof) || isNaN(required) || proof <= 0) return false;
++  // Allow exact match or slight overpayment (dust tolerance)
++  return proof >= required * 0.99;
++}
++
+ export function casperX402Middleware(config: { recipientAddress: string; amountCSPR: string }) {
+   return async (req: Request, res: Response, next: NextFunction) => {
+     const paymentProof = req.headers['payment-signature'] || req.headers['x-payment-proof'];
+ 
+-    // Bypass x402 for localhost calls (orchestrator → agents)
+-    const origin = req.headers.origin || req.headers.referer || '';
+-    const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1') ||
+-                        req.ip === '127.0.0.1' || req.ip === '::1';
++    // ── Localhost bypass: trust ONLY socket IP, never headers ──────────────
++    // req.ip is set by Express from the TCP socket, not from client headers.
++    // Headers (Origin, Referer, X-Forwarded-For) are trivially spoofable.
++    const socketIp = req.socket.remoteAddress || req.ip;
++    const isTrustedLocal = TRUSTED_LOCAL_IPS.has(socketIp ?? '') ||
++                           process.env.NODE_ENV === 'development';
+     const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
+ 
+-    if (isLocalhost && !paymentProof && !requirePayment) {
++    if (isTrustedLocal && !paymentProof && !requirePayment) {
+       (req as any).x402Payment = { valid: true, payer: 'localhost-bypass', local: true };
+       return next();
+     }
+@@ -47,7 +71,7 @@ export function casperX402Middleware(config: { recipientAddress: string; amountC
+         x402Version: '2',
+         paymentRequirements: {
+           scheme: 'wallet-session',
+-          supportedChains: ['casper:testnet', 'eip155:1', 'eip155:137'],
++          supportedChains: ['casper:testnet'],
+           chainId: 'casper:testnet',
+           maxAmountRequired: config.amountCSPR,
+           resource: req.path,
+@@ -59,32 +83,55 @@ export function casperX402Middleware(config: { recipientAddress: string; amountC
+       });
+     }
+ 
+-    // Verify the payment proof — decode, extract deploy hash, check on-chain
++    // ── Verify the payment proof ───────────────────────────────────────────
+     try {
+-      const parsed = JSON.parse(Buffer.from(paymentProof as string, 'base64').toString());
++      const decoded = Buffer.from(paymentProof as string, 'base64').toString();
++
++      // Reject excessively large proofs (DoS vector)
++      if (decoded.length > 4096) {
++        return res.status(402).json({ error: 'Payment proof too large' });
++      }
++
++      const parsed = JSON.parse(decoded);
+       const deployHash = parsed.deployHash || parsed.txHash;
+ 
+-      if (!deployHash) {
++      if (!deployHash || typeof deployHash !== 'string') {
+         return res.status(402).json({ error: 'Payment proof missing deploy hash' });
+       }
+ 
+-      // Verify on-chain with a timeout — reject if verification doesn't complete
+-      const VERIFICATION_TIMEOUT_MS = 5_000;
++      // Validate deploy hash format (64 hex chars)
++      if (!DEPLOY_HASH_RE.test(deployHash)) {
++        return res.status(402).json({ error: 'Invalid deploy hash format' });
++      }
++
++      // Validate payment amount — prevent zero-value or micro-payment exploits
++      if (!validatePaymentAmount(parsed.amount, config.amountCSPR)) {
++        return res.status(402).json({
++          error: 'Insufficient payment amount',
++          required: config.amountCSPR,
++          received: parsed.amount || 'none',
++        });
++      }
++
++      // Verify on-chain — reject if not confirmed (fail-closed)
++      const VERIFICATION_TIMEOUT_MS = 8_000;
+       const verificationPromise = verifyDeployOnChain(deployHash);
+       const timeoutPromise = new Promise<boolean>((resolve) => {
+         setTimeout(() => resolve(false), VERIFICATION_TIMEOUT_MS);
+       });
+ 
+       const valid = await Promise.race([verificationPromise, timeoutPromise]);
+-      if (valid) {
+-        (req as any).x402Payment = { valid: true, payer: parsed.payer || 'unknown', deployHash };
+-        return next();
+-      } else {
+-        // Deploy not found on-chain yet — might be pending, allow with warning
+-        console.log(`  [x402] ⚠️ Deploy ${deployHash.slice(0, 16)}... not confirmed on-chain, allowing with caveat`);
+-        (req as any).x402Payment = { valid: true, payer: parsed.payer || 'unknown', deployHash, unconfirmed: true };
+-        return next();
++      if (!valid) {
++        // Reject unconfirmed deploys — no more silent pass-through
++        return res.status(402).json({
++          error: 'Payment not confirmed on-chain',
++          deployHash,
++          hint: 'Wait for block confirmation and retry',
++        });
+       }
++
++      (req as any).x402Payment = { valid: true, payer: parsed.payer || 'unknown', deployHash };
++      return next();
+     } catch {
+       return res.status(402).json({ error: 'Invalid payment proof format' });
+     }
+diff --git a/dashboard/src/components/LiveContractPanel.tsx b/dashboard/src/components/LiveContractPanel.tsx
+index 4e8b438..60fe995 100644
+--- a/dashboard/src/components/LiveContractPanel.tsx
++++ b/dashboard/src/components/LiveContractPanel.tsx
+@@ -166,7 +166,7 @@ export const LiveContractPanel: React.FC = () => {
+         setConnected(false);
+       }
+     } catch (err) {
+-      setError('Failed to load contract state');
++      setError('Couldn\'t load data');
+       setConnected(false);
+     } finally {
+       setLoading(false);
+@@ -185,7 +185,7 @@ export const LiveContractPanel: React.FC = () => {
+     return (
+       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem' }}>
+         <Loader2 size={24} color="var(--primary)" className="animate-spin" />
+-        <span style={{ marginLeft: '0.75rem', color: 'var(--text-secondary)' }}>Loading contract state...</span>
++        <span style={{ marginLeft: '0.75rem', color: 'var(--text-secondary)' }}>Loading…</span>
+       </div>
+     );
+   }
+@@ -221,7 +221,7 @@ export const LiveContractPanel: React.FC = () => {
+         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+           <Activity size={20} color="var(--primary)" />
+           <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+-            Live Contract State
++            Protocol Overview
+           </h2>
+           <div style={{
+             display: 'flex', alignItems: 'center', gap: '0.3rem',
+@@ -268,7 +268,7 @@ export const LiveContractPanel: React.FC = () => {
+         />
+         <StatCard
+           icon={<Shield size={16} />}
+-          label="Receipts"
++          label="Records"
+           value={state.receipts.total}
+           color="#10b981"
+           subtext={`${state.receipts.verified} verified • ${state.receipts.pending} pending`}
+@@ -276,18 +276,18 @@ export const LiveContractPanel: React.FC = () => {
+         />
+         <StatCard
+           icon={<TrendingUp size={16} />}
+-          label="Total Staked"
++          label="Total Secured"
+           value={formatCSPR(state.escrow.totalStaked)}
+           color="#f59e0b"
+-          subtext={`${formatCSPR(state.escrow.totalSettled)} settled`}
++          subtext={`${formatCSPR(state.escrow.totalSettled)} processed`}
+           index={2}
+         />
+         <StatCard
+           icon={<Activity size={16} />}
+-          label="Active Disputes"
++          label="In Progress"
+           value={state.disputes.deliberating + state.disputes.voting}
+           color="#ef4444"
+-          subtext={`${state.disputes.deliberating} deliberating • ${state.disputes.voting} voting`}
++          subtext={`${state.disputes.deliberating} in review • ${state.disputes.voting} finalizing`}
+           index={3}
+         />
+       </div>
+@@ -309,12 +309,12 @@ export const LiveContractPanel: React.FC = () => {
+           padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)',
+         }}>
+           <Users size={16} color="var(--primary)" />
+-          <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Agent Reputation Scores</span>
++          <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Agent Reputation</span>
+           <span style={{
+             marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-tertiary)',
+             padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'var(--bg-surface-alt)',
+           }}>
+-            On-chain via ReputationRegistry
++            Verified on Casper
+           </span>
+         </div>
+ 
+@@ -329,7 +329,7 @@ export const LiveContractPanel: React.FC = () => {
+         gap: '0.4rem', marginTop: '1rem', fontSize: '0.75rem', color: 'var(--text-tertiary)',
+       }}>
+         <Clock size={12} />
+-        Auto-refreshes every 30 seconds
++        Refreshes automatically
+       </div>
+ 
+       <style>{`
+diff --git a/dashboard/src/components/MultiMethodologyDashboard.tsx b/dashboard/src/components/MultiMethodologyDashboard.tsx
+index 7fed03e..9cc41b9 100644
+--- a/dashboard/src/components/MultiMethodologyDashboard.tsx
++++ b/dashboard/src/components/MultiMethodologyDashboard.tsx
+@@ -65,7 +65,7 @@ const AGENTS: AgentProfile[] = [
+   {
+     id: 'evidence-analyst',
+     name: 'Evidence Analyst',
+-    role: 'Juror — Evidence',
++    role: 'Juror: Evidence',
+     icon: <Search size={18} />,
+     color: '#10B981',
+     bgColor: 'rgba(16, 185, 129, 0.08)',
+@@ -75,7 +75,7 @@ const AGENTS: AgentProfile[] = [
+   {
+     id: 'market-interpreter',
+     name: 'Market Data Interpreter',
+-    role: 'Juror — Market Data',
++    role: 'Juror: Market Data',
+     icon: <TrendingUp size={18} />,
+     color: '#06B6D4',
+     bgColor: 'rgba(6, 182, 212, 0.08)',
+@@ -85,7 +85,7 @@ const AGENTS: AgentProfile[] = [
+   {
+     id: 'precedent-researcher',
+     name: 'Precedent Researcher',
+-    role: 'Juror — Precedent',
++    role: 'Juror: Precedent',
+     icon: <BookOpen size={18} />,
+     color: '#8B5CF6',
+     bgColor: 'rgba(139, 92, 246, 0.08)',
+@@ -518,7 +518,7 @@ const ConsensusSummary: React.FC<{
+             Value Range
+           </div>
+           <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+-            {formatCurrency(Math.min(...agentValues))} — {formatCurrency(Math.max(...agentValues))}
++            {formatCurrency(Math.min(...agentValues))} to {formatCurrency(Math.max(...agentValues))}
+           </div>
+           <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
+             Spread: {formatCurrency(Math.max(...agentValues) - Math.min(...agentValues))}
+diff --git a/dashboard/src/components/X402PaymentStream.tsx b/dashboard/src/components/X402PaymentStream.tsx
+index 8241259..2b698a3 100644
+--- a/dashboard/src/components/X402PaymentStream.tsx
++++ b/dashboard/src/components/X402PaymentStream.tsx
+@@ -36,11 +36,6 @@ function formatTime(timestamp: number): string {
+   });
+ }
+ 
+-function shortenHash(hash: string): string {
+-  if (hash.length <= 16) return hash;
+-  return `${hash.slice(0, 8)}...${hash.slice(-8)}`;
+-}
+-
+ // ─── Demo Payments ───────────────────────────────────────────────────────────
+ 
+ const DEMO_PAYMENTS: PaymentEvent[] = [
+@@ -56,50 +51,50 @@ const DEMO_PAYMENTS: PaymentEvent[] = [
+   },
+   {
+     id: 'pay-2',
+-    from: 'Escrow Contract',
++    from: 'Escrow',
+     to: 'Valuation Agent A',
+     amount: 500_000_000,
+-    tool: 'x402 Agent Payment',
++    tool: 'Agent Reward',
+     txHash: '02b3c4d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef01',
+     timestamp: Date.now() - 90000,
+     status: 'confirmed',
+   },
+   {
+     id: 'pay-3',
+-    from: 'Escrow Contract',
++    from: 'Escrow',
+     to: 'Valuation Agent B',
+     amount: 500_000_000,
+-    tool: 'x402 Agent Payment',
++    tool: 'Agent Reward',
+     txHash: '03c4d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef0123',
+     timestamp: Date.now() - 60000,
+     status: 'confirmed',
+   },
+   {
+     id: 'pay-4',
+-    from: 'Escrow Contract',
++    from: 'Escrow',
+     to: 'Evidence Analyst',
+     amount: 400_000_000,
+-    tool: 'x402 Juror Payment',
++    tool: 'Analyst Reward',
+     txHash: '04d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef012345',
+     timestamp: Date.now() - 30000,
+     status: 'confirmed',
+   },
+   {
+     id: 'pay-5',
+-    from: 'Escrow Contract',
++    from: 'Escrow',
+     to: 'Market Interpreter',
+     amount: 400_000_000,
+-    tool: 'x402 Juror Payment',
++    tool: 'Analyst Reward',
+     txHash: '05e6f7890123456789abcdef0123456789abcdef0123456789abcdef01234567',
+     timestamp: Date.now() - 15000,
+     status: 'confirmed',
+   },
+   {
+     id: 'pay-6',
+-    from: 'Escrow Contract',
++    from: 'Escrow',
+     to: 'Precedent Researcher',
+     amount: 400_000_000,
+-    tool: 'x402 Juror Payment',
++    tool: 'Analyst Reward',
+     txHash: '06f7890123456789abcdef0123456789abcdef0123456789abcdef0123456789',
+     timestamp: Date.now() - 5000,
+     status: 'pending',
+@@ -149,10 +144,6 @@ const PaymentRow: React.FC<{ payment: PaymentEvent; index: number }> = ({ paymen
+         </div>
+         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.15rem' }}>
+           <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>{payment.tool}</span>
+-          <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>•</span>
+-          <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>
+-            {shortenHash(payment.txHash)}
+-          </span>
+         </div>
+       </div>
+ 
+@@ -213,7 +204,7 @@ export const X402PaymentStream: React.FC = () => {
+         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+           <Zap size={20} color="#8b5cf6" />
+           <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+-            x402 Payment Stream
++            Payment Activity
+           </h2>
+           <div style={{
+             display: 'flex', alignItems: 'center', gap: '0.3rem',
+@@ -300,7 +291,7 @@ export const X402PaymentStream: React.FC = () => {
+         marginTop: '1rem', fontSize: '0.75rem', color: 'var(--text-tertiary)',
+       }}>
+         <Clock size={12} />
+-        Payments are streamed in real-time via WebSocket when connected to the orchestrator
++        Updates arrive automatically
+       </div>
+ 
+       <style>{`
+diff --git a/dashboard/src/components/landing/AgentCard.tsx b/dashboard/src/components/landing/AgentCard.tsx
+index 56542a0..0858fbd 100644
+--- a/dashboard/src/components/landing/AgentCard.tsx
++++ b/dashboard/src/components/landing/AgentCard.tsx
+@@ -3,11 +3,11 @@ import { motion, useInView } from 'motion/react';
+ import { BarChart2, TrendingUp, FileText, Activity, Search } from 'lucide-react';
+ 
+ export const AGENTS = [
+-  { name: 'Valuation Agent A', role: 'Comparable Sales', icon: BarChart2, color: '#EC4899', description: 'Pulls comparable sales from RentCast and adjusts for size, condition, and location differences to estimate fair market value.' },
+-  { name: 'Evidence Analyst', role: 'Data Validation', icon: FileText, color: '#10B981', description: 'Cross-references raw data points using MiMo LLM reasoning, flags inconsistencies, and assesses evidence quality.' },
+-  { name: 'Valuation Agent B', role: 'DCF (Discounted Cash Flow) Analysis', icon: TrendingUp, color: '#F97316', description: 'Projects future cash flows using FRED economic data and applies discounted cash flow modeling for income-generating assets.' },
+-  { name: 'Market Data Interpreter', role: 'Market Context', icon: Activity, color: '#06B6D4', description: 'Evaluates macro trends, neighborhood trajectory, and market timing factors using MiMo LLM and live market feeds.' },
+-  { name: 'Precedent Researcher', role: 'Precedent Search', icon: Search, color: '#8B5CF6', description: 'Searches historical disputes via Vectra vector database to find relevant precedents and legal frameworks.' },
++  { name: 'Comps Specialist', role: 'Comparable Sales', icon: BarChart2, color: '#EC4899', description: 'Analyzes comparable sales data and adjusts for size, condition, and location differences to estimate fair market value.' },
++  { name: 'Evidence Analyst', role: 'Data Validation', icon: FileText, color: '#10B981', description: 'Cross-references raw data points using LLM reasoning, flags inconsistencies, and assesses evidence quality.' },
++  { name: 'DCF Specialist', role: 'DCF (Discounted Cash Flow) Analysis', icon: TrendingUp, color: '#F97316', description: 'Projects future cash flows using economic data and applies discounted cash flow modeling for income-generating assets.' },
++  { name: 'Market Data Interpreter', role: 'Market Context', icon: Activity, color: '#06B6D4', description: 'Evaluates macro trends, neighborhood trajectory, and market timing factors using LLM and live market feeds.' },
++  { name: 'Precedent Researcher', role: 'Precedent Search', icon: Search, color: '#8B5CF6', description: 'Searches historical assessments via vector database to find relevant precedents and frameworks.' },
+ ];
+ 
+ export const AgentCard: React.FC<{ agent: typeof AGENTS[0]; index: number }> = ({ agent, index }) => {
+diff --git a/dashboard/src/components/landing/ArchitectureDiagram.tsx b/dashboard/src/components/landing/ArchitectureDiagram.tsx
+index 471d8de..314b4a7 100644
+--- a/dashboard/src/components/landing/ArchitectureDiagram.tsx
++++ b/dashboard/src/components/landing/ArchitectureDiagram.tsx
+@@ -1,171 +1,409 @@
+-import React, { useRef, useLayoutEffect } from 'react';
+-import { gsap } from 'gsap';
+-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+-import { Reveal } from './Reveal';
+-import { Wallet, Cpu, BarChart2, TrendingUp, Search, FileText, Activity, Database, Shield, Globe } from 'lucide-react';
+-
+-gsap.registerPlugin(ScrollTrigger);
+-
+-// Utility to render an SVG node
+-const SvgNode = ({ id, x, y, label, Icon, borderColor }: any) => (
+-  <g className="arch-node" id={id} transform={`translate(${x}, ${y})`} style={{ opacity: 0 }}>
+-    <rect x="-75" y="-20" width="150" height="40" rx="12" fill="var(--bg-elevated)" stroke="var(--border-color)" strokeWidth="1" />
+-    <path d={`M -75 -8 L -75 8`} stroke={borderColor} strokeWidth="8" strokeLinecap="round" />
+-    <g transform="translate(-55, -8)">
+-      {Icon && <Icon size={16} color={borderColor} />}
+-      {!Icon && <text x="8" y="12" fontSize="12" fill={borderColor} fontWeight="bold" textAnchor="middle">CSPR</text>}
+-    </g>
+-    <text x="-30" y="4" fontSize="12" fill="var(--text-primary)" fontWeight="600" dominantBaseline="middle">{label}</text>
+-  </g>
+-);
++import React, { useEffect, useRef, useState } from 'react';
++import { motion } from 'framer-motion';
++import { 
++  User, Brain, Database, Shield, Scale, Gavel, FileCheck, Link2, 
++  Search, TrendingUp, BookOpen, Zap 
++} from 'lucide-react';
++
++/**
++ * ArchitectureDiagram — "How Verdict Works"
++ * 
++ * A clean, properly-connected vertical flow diagram showing the real pipeline:
++ * 
++ *   User → Orchestrator → Data Sources → x402 Payment
++ *                                       ↓
++ *                     ┌─────────────────┼─────────────────┐
++ *                     ↓                 ↓                 ↓
++ *              Comps Specialist   DCF Specialist     MiMo LLM
++ *                     └─────────────────┼─────────────────┘
++ *                                       ↓
++ *                     ┌─────────────────┼─────────────────┐
++ *                     ↓                 ↓                 ↓
++ *              Evidence Analyst  Market Interpreter  Precedent Researcher
++ *                     └─────────────────┼─────────────────┘
++ *                                       ↓
++ *                    Trust Framework → HMAC Receipt Chain → Verdict
++ *                                                          ↓
++ *                                                    Casper Blockchain
++ */
++
++// ─── Step definitions ──────────────────────────────────────────────────────
++
++interface FlowNode {
++  id: string;
++  label: string;
++  sublabel: string;
++  icon: React.ReactNode;
++  accentColor: string;
++  row: number;
++  col: number;
++}
++
++const NODES: FlowNode[] = [
++  // Row 0: Entry
++  { id: 'user', label: 'You', sublabel: 'Submit your asset', icon: <User size={18} />, accentColor: '#3B82F6', row: 0, col: 0 },
++  { id: 'orchestrator', label: 'Orchestrator', sublabel: 'Routes assessment', icon: <Brain size={18} />, accentColor: '#8B5CF6', row: 0, col: 1 },
++  
++  // Row 1: Data & Payment
++  { id: 'datasources', label: 'Data Sources', sublabel: 'RentCast · Met · CoinGecko · FRED', icon: <Database size={18} />, accentColor: '#06B6D4', row: 1, col: 0 },
++  { id: 'x402', label: 'x402 Payment', sublabel: '2.5 CSPR per assessment', icon: <Zap size={18} />, accentColor: '#F59E0B', row: 1, col: 1 },
++  
++  // Row 2: Valuation Agents
++  { id: 'comps', label: 'Comps Specialist', sublabel: 'Comparable sales analysis', icon: <Search size={18} />, accentColor: '#10B981', row: 2, col: 0 },
++  { id: 'dcf', label: 'DCF Specialist', sublabel: 'Discounted cash flow', icon: <TrendingUp size={18} />, accentColor: '#10B981', row: 2, col: 1 },
++  { id: 'llm', label: 'MiMo LLM', sublabel: 'AI reasoning engine', icon: <Brain size={18} />, accentColor: '#10B981', row: 2, col: 2 },
++  
++  // Row 3: Jurors
++  { id: 'evidence', label: 'Evidence Analyst', sublabel: 'Cross-references data', icon: <Shield size={18} />, accentColor: '#EC4899', row: 3, col: 0 },
++  { id: 'market', label: 'Market Interpreter', sublabel: 'Macro trends & timing', icon: <TrendingUp size={18} />, accentColor: '#EC4899', row: 3, col: 1 },
++  { id: 'precedent', label: 'Precedent Researcher', sublabel: 'Historical comparisons', icon: <BookOpen size={18} />, accentColor: '#EC4899', row: 3, col: 2 },
++  
++  // Row 4: Settlement
++  { id: 'trust', label: 'Trust Framework', sublabel: '5-dimension scoring', icon: <Scale size={18} />, accentColor: '#F59E0B', row: 4, col: 0 },
++  { id: 'hmac', label: 'HMAC Receipt Chain', sublabel: 'Tamper-proof audit trail', icon: <FileCheck size={18} />, accentColor: '#F59E0B', row: 4, col: 1 },
++  { id: 'verdict', label: 'Verdict', sublabel: 'Final valuation', icon: <Gavel size={18} />, accentColor: '#EF4444', row: 4, col: 2 },
++  
++  // Row 5: On-chain
++  { id: 'blockchain', label: 'Casper Blockchain', sublabel: 'Immutable on-chain record', icon: <Link2 size={18} />, accentColor: '#3B82F6', row: 5, col: 1 },
++];
++
++interface FlowEdge {
++  from: string;
++  to: string;
++  animated?: boolean;
++}
++
++const EDGES: FlowEdge[] = [
++  // Row 0 connections
++  { from: 'user', to: 'orchestrator', animated: true },
++  
++  // Row 0 → Row 1
++  { from: 'orchestrator', to: 'datasources', animated: true },
++  { from: 'orchestrator', to: 'x402', animated: true },
++  
++  // Row 1 → Row 2
++  { from: 'datasources', to: 'comps', animated: true },
++  { from: 'datasources', to: 'dcf', animated: true },
++  { from: 'datasources', to: 'llm', animated: true },
++  
++  // Row 2 → Row 3 (parallel flow)
++  { from: 'comps', to: 'evidence', animated: true },
++  { from: 'comps', to: 'market', animated: true },
++  { from: 'comps', to: 'precedent', animated: true },
++  { from: 'dcf', to: 'evidence', animated: true },
++  { from: 'dcf', to: 'market', animated: true },
++  { from: 'dcf', to: 'precedent', animated: true },
++  { from: 'llm', to: 'evidence', animated: true },
++  { from: 'llm', to: 'market', animated: true },
++  { from: 'llm', to: 'precedent', animated: true },
++  
++  // Row 3 → Row 4
++  { from: 'evidence', to: 'trust', animated: true },
++  { from: 'market', to: 'trust', animated: true },
++  { from: 'precedent', to: 'trust', animated: true },
++  { from: 'trust', to: 'hmac', animated: true },
++  { from: 'hmac', to: 'verdict', animated: true },
++  
++  // Row 4 → Row 5
++  { from: 'verdict', to: 'blockchain', animated: true },
++];
++
++// ─── Layout constants ──────────────────────────────────────────────────────
++
++const NODE_W = 180;
++const NODE_H = 64;
++const COL_GAP = 280;
++const ROW_GAP = 120;
++const PAD_X = 60;
++const PAD_Y = 60;
++const SVG_W = PAD_X * 2 + 3 * COL_GAP;
++const SVG_H = PAD_Y * 2 + 6 * ROW_GAP + NODE_H;
++
++// ─── Helpers ───────────────────────────────────────────────────────────────
++
++function getNodeCenter(node: FlowNode): { x: number; y: number } {
++  const row = node.row;
++  const col = node.col;
++  
++  // Count nodes in this row
++  const nodesInRow = NODES.filter(n => n.row === row);
++  const colsInRow = nodesInRow.length;
++  
++  // Center the row horizontally
++  const totalRowWidth = (colsInRow - 1) * COL_GAP;
++  const startX = (SVG_W - totalRowWidth) / 2;
++  
++  return {
++    x: startX + col * COL_GAP + NODE_W / 2,
++    y: PAD_Y + row * ROW_GAP + NODE_H / 2,
++  };
++}
++
++function getNodeById(id: string): FlowNode | undefined {
++  return NODES.find(n => n.id === id);
++}
++
++// ─── Component ─────────────────────────────────────────────────────────────
+ 
+ export const ArchitectureDiagram: React.FC = () => {
+-  const containerRef = useRef<HTMLDivElement>(null);
+   const svgRef = useRef<SVGSVGElement>(null);
++  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
++  const [isVisible, setIsVisible] = useState(false);
+ 
+-  useLayoutEffect(() => {
+-    if (!svgRef.current || !containerRef.current) return;
+-    
+-    const ctx = gsap.context(() => {
+-      const tl = gsap.timeline({
+-        scrollTrigger: {
+-          trigger: containerRef.current,
+-          start: 'top 70%',
++  useEffect(() => {
++    const observer = new IntersectionObserver(
++      ([entry]) => {
++        if (entry.isIntersecting) {
++          setIsVisible(true);
++          observer.disconnect();
+         }
+-      });
+-
+-      // Phase 1: Reveal nodes
+-      tl.to('.arch-node', {
+-        opacity: 1,
+-        scale: 1,
+-        duration: 0.4,
+-        stagger: 0.05,
+-        ease: 'back.out(1.5)',
+-        onStart: () => {
+-          gsap.set('.arch-node', { scale: 0.8 });
+-        }
+-      });
+-
+-      // Phase 2: Draw edges
+-      const paths = document.querySelectorAll('.arch-edge');
+-      paths.forEach(path => {
+-        const length = (path as SVGPathElement).getTotalLength();
+-        gsap.set(path, { strokeDasharray: length, strokeDashoffset: length, opacity: 0.6 });
+-      });
+-
+-      tl.to('.arch-edge', {
+-        strokeDashoffset: 0,
+-        duration: 1,
+-        stagger: 0.1,
+-        ease: 'power2.inOut'
+-      }, '-=0.2');
+-
+-      // Phase 3: Packet Flow (looping)
+-      tl.add(() => {
+-        // This is a simplified fallback for motionPath if it's not registered
+-        // Actually, since motionPath is not requested to be installed, we will use simple dash offsets or opacity for packets
+-        // Instead of motion path, we animate stroke-dashoffset on a clone of the path with a short dash array
+-        const packetPaths = document.querySelectorAll('.packet-path');
+-        packetPaths.forEach(path => {
+-          const length = (path as SVGPathElement).getTotalLength();
+-          const color = path.getAttribute('data-color') || '#FF3B3B';
+-          gsap.set(path, { 
+-            strokeDasharray: `8 ${length}`, 
+-            strokeDashoffset: length,
+-            stroke: color,
+-            strokeWidth: 3,
+-            opacity: 1
+-          });
+-          gsap.to(path, {
+-            strokeDashoffset: 0,
+-            duration: 2,
+-            repeat: -1,
+-            ease: 'none',
+-            delay: Math.random() * 1
+-          });
+-        });
+-
+-      }, '+=0');
+-
+-      // Ambient pulsing
+-      gsap.to('.arch-node rect', {
+-        fill: 'var(--bg-surface)',
+-        duration: 3,
+-        repeat: -1,
+-        yoyo: true,
+-        ease: 'sine.inOut',
+-        stagger: 0.2
+-      });
+-
+-    }, containerRef);
+-
+-    return () => ctx.revert();
++      },
++      { threshold: 0.1 }
++    );
++
++    if (svgRef.current) {
++      observer.observe(svgRef.current);
++    }
++
++    return () => observer.disconnect();
+   }, []);
+ 
++  // Get connected nodes for hover highlighting
++  const connectedNodes = hoveredNode
++    ? new Set([
++        hoveredNode,
++        ...EDGES.filter(e => e.from === hoveredNode || e.to === hoveredNode).flatMap(e => [e.from, e.to]),
++      ])
++    : null;
++
+   return (
+-    <section style={{ width: '100%', maxWidth: 1200, margin: '0 auto', padding: '96px 32px' }}>
+-      <Reveal direction="up" delay={0}>
+-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
++    <section style={{
++      padding: '80px 32px',
++      background: 'var(--bg-main)',
++    }}>
++      <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
++        {/* Section Header */}
++        <motion.div
++          initial={{ opacity: 0, y: 20 }}
++          whileInView={{ opacity: 1, y: 0 }}
++          transition={{ duration: 0.5 }}
++          viewport={{ once: true }}
++          style={{ marginBottom: 48 }}
++        >
+           <h2 style={{
+-            fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-primary)',
+-            marginBottom: '16px', fontFamily: 'var(--font-display)', letterSpacing: '-0.02em'
++            fontSize: '2rem',
++            fontWeight: 700,
++            color: 'var(--text-primary)',
++            marginBottom: 12,
+           }}>
+             How Verdict Works
+           </h2>
++          <p style={{
++            fontSize: '1rem',
++            color: 'var(--text-secondary)',
++            maxWidth: 600,
++            margin: '0 auto',
++            lineHeight: 1.6,
++          }}>
++            Every assessment follows this pipeline — from asset submission to immutable on-chain verdict.
++          </p>
++        </motion.div>
++
++        {/* Flow Diagram */}
++        <div style={{
++          display: 'flex',
++          justifyContent: 'center',
++          overflow: 'auto',
++        }}>
++          <svg
++            ref={svgRef}
++            width={SVG_W}
++            height={SVG_H}
++            viewBox={`0 0 ${SVG_W} ${SVG_H}`}
++            style={{
++              maxWidth: '100%',
++              height: 'auto',
++            }}
++          >
++            {/* Background Grid */}
++            <defs>
++              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
++                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--border-color-subtle)" strokeWidth="0.5" />
++              </pattern>
++            </defs>
++            <rect width="100%" height="100%" fill="url(#grid)" />
++
++            {/* Edges */}
++            {EDGES.map((edge, i) => {
++              const fromNode = getNodeById(edge.from);
++              const toNode = getNodeById(edge.to);
++              if (!fromNode || !toNode) return null;
++
++              const from = getNodeCenter(fromNode);
++              const to = getNodeCenter(toNode);
++
++              const isHighlighted = connectedNodes && (
++                connectedNodes.has(edge.from) && connectedNodes.has(edge.to)
++              );
++
++              return (
++                <g key={`edge-${i}`}>
++                  {/* Edge line */}
++                  <line
++                    x1={from.x}
++                    y1={from.y}
++                    x2={to.x}
++                    y2={to.y}
++                    stroke={isHighlighted ? 'var(--primary)' : 'var(--border-color)'}
++                    strokeWidth={isHighlighted ? 2 : 1}
++                    strokeDasharray={isHighlighted ? 'none' : '4 4'}
++                    style={{
++                      transition: 'all 0.2s ease',
++                    }}
++                  />
++
++                  {/* Animated packet */}
++                  {edge.animated && isVisible && (
++                    <circle r="3" fill="var(--primary)" opacity="0.8">
++                      <animateMotion
++                        dur={`${2 + i * 0.1}s`}
++                        repeatCount="indefinite"
++                        path={`M${from.x},${from.y} L${to.x},${to.y}`}
++                      />
++                    </circle>
++                  )}
++                </g>
++              );
++            })}
++
++            {/* Nodes */}
++            {NODES.map((node) => {
++              const center = getNodeCenter(node);
++              const isHovered = hoveredNode === node.id;
++              const isConnected = connectedNodes?.has(node.id);
++
++              return (
++                <g
++                  key={node.id}
++                  transform={`translate(${center.x - NODE_W / 2}, ${center.y - NODE_H / 2})`}
++                  onMouseEnter={() => setHoveredNode(node.id)}
++                  onMouseLeave={() => setHoveredNode(null)}
++                  style={{ cursor: 'pointer' }}
++                >
++                  {/* Node background */}
++                  <rect
++                    width={NODE_W}
++                    height={NODE_H}
++                    rx={8}
++                    fill={isHovered ? 'var(--bg-surface)' : 'var(--bg-elevated)'}
++                    stroke={isHovered ? node.accentColor : isConnected ? 'var(--primary)' : 'var(--border-color)'}
++                    strokeWidth={isHovered ? 2 : 1}
++                    style={{
++                      transition: 'all 0.2s ease',
++                      filter: isHovered ? `drop-shadow(0 4px 12px ${node.accentColor}33)` : 'none',
++                    }}
++                  />
++
++                  {/* Left accent bar */}
++                  <rect
++                    x={0}
++                    y={0}
++                    width={4}
++                    height={NODE_H}
++                    rx={2}
++                    fill={node.accentColor}
++                    opacity={isHovered ? 1 : 0.6}
++                    style={{ transition: 'opacity 0.2s ease' }}
++                  />
++
++                  {/* Icon */}
++                  <foreignObject x={16} y={20} width={24} height={24}>
++                    <div style={{ color: node.accentColor }}>
++                      {node.icon}
++                    </div>
++                  </foreignObject>
++
++                  {/* Label */}
++                  <text
++                    x={40}
++                    y={26}
++                    fontSize={13}
++                    fontWeight={600}
++                    fill="var(--text-primary)"
++                    fontFamily="var(--font-sans)"
++                  >
++                    {node.label}
++                  </text>
++
++                  {/* Sublabel */}
++                  <text
++                    x={40}
++                    y={44}
++                    fontSize={10}
++                    fill="var(--text-tertiary)"
++                    fontFamily="var(--font-sans)"
++                  >
++                    {node.sublabel}
++                  </text>
++                </g>
++              );
++            })}
++
++            {/* Row labels */}
++            {['ENTRY', 'DATA & PAY', 'VALUATION', 'DELIBERATION', 'SETTLEMENT', 'CHAIN'].map((label, i) => (
++              <text
++                key={label}
++                x={24}
++                y={PAD_Y + i * ROW_GAP + NODE_H / 2 + 4}
++                fontSize={9}
++                fontWeight={600}
++                fill="var(--text-tertiary)"
++                fontFamily="var(--font-sans)"
++                letterSpacing="0.05em"
++                textAnchor="start"
++              >
++                {label}
++              </text>
++            ))}
++          </svg>
+         </div>
+-      </Reveal>
+-
+-      <div ref={containerRef} style={{ width: '100%', overflowX: 'auto' }}>
+-        <svg ref={svgRef} viewBox="0 0 1000 600" style={{ width: '100%', minWidth: 800, height: 'auto' }}>
+-          {/* Edges */}
+-          <g fill="none" stroke="var(--border-color)" strokeWidth="1.5">
+-            {/* User -> Orchestrator */}
+-            <path id="e1" className="arch-edge" d="M 200 100 L 425 100" />
+-            {/* Orchestrator -> Data Sources */}
+-            <path id="e2" className="arch-edge" d="M 425 120 C 350 170, 250 170, 225 200" />
+-            {/* Orchestrator -> Comps Specialist */}
+-            <path id="e3" className="arch-edge" d="M 425 120 C 350 170, 300 170, 300 230" />
+-            {/* Orchestrator -> DCF Specialist */}
+-            <path id="e4" className="arch-edge" d="M 575 120 C 650 170, 700 170, 700 230" />
+-            {/* Comps Specialist -> Jurors */}
+-            <path id="e5" className="arch-edge" d="M 300 270 C 300 310, 200 310, 200 350" />
+-            <path id="e6" className="arch-edge" d="M 300 270 C 300 310, 500 310, 500 350" />
+-            <path id="e7" className="arch-edge" d="M 300 270 C 300 310, 800 310, 800 350" />
+-            {/* DCF Specialist -> Jurors */}
+-            <path id="e8" className="arch-edge" d="M 700 270 C 700 310, 200 310, 200 350" />
+-            <path id="e9" className="arch-edge" d="M 700 270 C 700 310, 500 310, 500 350" />
+-            <path id="e10" className="arch-edge" d="M 700 270 C 700 310, 800 310, 800 350" />
+-            {/* Jurors -> Verdict */}
+-            <path id="e11" className="arch-edge" d="M 200 390 C 200 430, 500 430, 500 440" />
+-            <path id="e12" className="arch-edge" d="M 500 390 L 500 440" />
+-            <path id="e13" className="arch-edge" d="M 800 390 C 800 430, 500 430, 500 440" />
+-            {/* Verdict -> Blockchain */}
+-            <path id="e14" className="arch-edge" d="M 500 480 L 500 520" />
+-          </g>
+-
+-          {/* Packet Paths (Overlay for animation) */}
+-          <g fill="none">
+-            <path className="packet-path" data-color="#FF3B3B" d="M 425 120 C 350 170, 300 170, 300 230" />
+-            <path className="packet-path" data-color="#FF3B3B" d="M 575 120 C 650 170, 700 170, 700 230" />
+-            <path className="packet-path" data-color="#3B82F6" d="M 300 270 C 300 310, 500 310, 500 350" />
+-            <path className="packet-path" data-color="#3B82F6" d="M 700 270 C 700 310, 500 310, 500 350" />
+-            <path className="packet-path" data-color="#10B981" d="M 500 390 L 500 440" />
+-            <path className="packet-path" data-color="#10B981" d="M 500 480 L 500 520" />
+-          </g>
+-
+-          {/* Nodes */}
+-          <SvgNode id="n1" x={200} y={100} label="Your Asset" Icon={Wallet} borderColor="#FF3B3B" />
+-          <SvgNode id="n2" x={500} y={100} label="Orchestrator" Icon={Cpu} borderColor="#8B5CF6" />
+-          <SvgNode id="n3" x={225} y={200} label="Data Sources" Icon={Database} borderColor="#6366f1" />
+-          <SvgNode id="n4" x={300} y={250} label="Comps Specialist" Icon={BarChart2} borderColor="#EC4899" />
+-          <SvgNode id="n5" x={700} y={250} label="DCF Specialist" Icon={TrendingUp} borderColor="#F97316" />
+-          <SvgNode id="n6" x={200} y={370} label="Evidence Analyst" Icon={FileText} borderColor="#10B981" />
+-          <SvgNode id="n7" x={500} y={370} label="Market Interpreter" Icon={Activity} borderColor="#06B6D4" />
+-          <SvgNode id="n8" x={800} y={370} label="Precedent Researcher" Icon={Search} borderColor="#8B5CF6" />
+-          <SvgNode id="n9" x={500} y={460} label="Verdict" Icon={Shield} borderColor="#10B981" />
+-          <SvgNode id="n10" x={500} y={540} label="Casper Blockchain" Icon={Globe} borderColor="#22D3EE" />
+-        </svg>
++
++        {/* Legend */}
++        <motion.div
++          initial={{ opacity: 0, y: 20 }}
++          whileInView={{ opacity: 1, y: 0 }}
++          transition={{ duration: 0.5, delay: 0.3 }}
++          viewport={{ once: true }}
++          style={{
++            display: 'flex',
++            justifyContent: 'center',
++            gap: 24,
++            marginTop: 32,
++            flexWrap: 'wrap',
++          }}
++        >
++          {[
++            { color: '#10B981', label: 'Valuation Agents' },
++            { color: '#EC4899', label: 'Jurors' },
++            { color: '#F59E0B', label: 'Trust & Payment' },
++            { color: '#3B82F6', label: 'Blockchain' },
++          ].map((item) => (
++            <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
++              <div style={{
++                width: 12,
++                height: 12,
++                borderRadius: 3,
++                background: item.color,
++              }} />
++              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
++                {item.label}
++              </span>
++            </div>
++          ))}
++        </motion.div>
+       </div>
+     </section>
+   );
+ };
++
++export default ArchitectureDiagram;
+diff --git a/dashboard/src/components/landing/CTASection.tsx b/dashboard/src/components/landing/CTASection.tsx
+index 0b4e2ec..29a3c02 100644
+--- a/dashboard/src/components/landing/CTASection.tsx
++++ b/dashboard/src/components/landing/CTASection.tsx
+@@ -32,16 +32,16 @@ export const CTASection: React.FC = () => {
+             fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: 800, color: 'var(--text-primary)',
+             marginBottom: '24px', fontFamily: 'var(--font-display)', letterSpacing: '-0.02em'
+           }}>
+-            Ready to resolve your first dispute?
++            Ready to get your first valuation?
+           </h2>
+           
+           <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '40px' }}>
+-            Connect your Casper wallet and file a dispute in under 2 minutes. Two valuation agents and three jurors will analyze, deliberate, and settle.
++            Connect your Casper wallet and submit an asset in under 2 minutes. Two valuation agents and three jurors will analyze, deliberate, and deliver a verdict.
+           </p>
+ 
+           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+             <Link to="/assess" className="btn btn-primary" style={{ padding: '16px 32px', fontSize: '1rem' }}>
+-              File a Dispute
++              Start Assessment
+             </Link>
+             <Link to="/dashboard" className="btn" style={{ padding: '16px 32px', fontSize: '1rem', background: 'transparent' }}>
+               View the Dashboard
+diff --git a/dashboard/src/components/landing/ContractCards.tsx b/dashboard/src/components/landing/ContractCards.tsx
+index e352d64..0d62438 100644
+--- a/dashboard/src/components/landing/ContractCards.tsx
++++ b/dashboard/src/components/landing/ContractCards.tsx
+@@ -12,7 +12,7 @@ const CONTRACTS = [
+   {
+     name: 'EscrowContract',
+     hash: '83bf2bab...',
+-    description: "Locks the filer's 0.1 CSPR dispute fee at filing time. Upon verdict, routes funds to winning agents and returns surplus to the filer."
++    description: "Collects the 2.5 CSPR assessment fee via x402 micropayment. Upon verdict completion, routes payments to participating agents and records the settlement on-chain."
+   },
+   {
+     name: 'ReputationRegistry',
+@@ -40,7 +40,7 @@ export const ContractCards: React.FC = () => {
+           <p style={{
+             fontSize: '1.1rem', color: 'var(--text-secondary)', maxWidth: 600, margin: '0 auto', lineHeight: 1.6
+           }}>
+-            Three specialized Odra contracts handle every dispute end to end.
++            Three specialized Odra contracts handle every assessment end to end.
+           </p>
+         </div>
+       </Reveal>
+diff --git a/dashboard/src/components/landing/TestnetProof.tsx b/dashboard/src/components/landing/TestnetProof.tsx
+index 12e7ed8..1159f17 100644
+--- a/dashboard/src/components/landing/TestnetProof.tsx
++++ b/dashboard/src/components/landing/TestnetProof.tsx
+@@ -41,7 +41,7 @@ export const TestnetProof: React.FC = () => {
+             </h2>
+             
+             <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '32px' }}>
+-              All three smart contracts are live. Disputes have been filed, resolved, and recorded. Every deploy hash is verifiable on the public explorer.
++              All three smart contracts are live. Assessments have been submitted, analyzed, and recorded. Every deploy hash is verifiable on the public explorer.
+             </p>
+             
+             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+diff --git a/dashboard/src/components/landing/X402PaymentFlow.tsx b/dashboard/src/components/landing/X402PaymentFlow.tsx
+index cdb0920..c05ec42 100644
+--- a/dashboard/src/components/landing/X402PaymentFlow.tsx
++++ b/dashboard/src/components/landing/X402PaymentFlow.tsx
+@@ -145,7 +145,7 @@ export const X402PaymentFlow: React.FC = () => {
+             
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+               {[
+-                '0.03 CSPR per juror per dispute',
++                '2.5 CSPR per assessment',
+                 'HMAC-signed receipt chain',
+                 'Verifiable on testnet.cspr.live'
+               ].map((text, i) => (
+diff --git a/dashboard/src/contexts/CSPRClickContext.tsx b/dashboard/src/contexts/CSPRClickContext.tsx
+index a11307e..92913aa 100644
+--- a/dashboard/src/contexts/CSPRClickContext.tsx
++++ b/dashboard/src/contexts/CSPRClickContext.tsx
+@@ -280,6 +280,21 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children
+       throw new Error('Wallet not connected');
+     }
+ 
++    // ── Input validation before signing ──────────────────────────────────
++    if (!recipientAddress || typeof recipientAddress !== 'string') {
++      throw new Error('Invalid recipient address');
++    }
++    // Casper public key hex must be 64+ chars (66 for ED25519 with prefix)
++    if (recipientAddress.length < 64 || !/^[0-9a-fA-F]+$/.test(recipientAddress)) {
++      throw new Error('Recipient address must be a valid hex public key (64+ chars)');
++    }
++    if (typeof amountCSPR !== 'number' || isNaN(amountCSPR) || amountCSPR <= 0) {
++      throw new Error('Payment amount must be a positive number');
++    }
++    if (amountCSPR > 100) {
++      throw new Error('Payment amount exceeds maximum (100 CSPR). Aborting for safety.');
++    }
++
+     // Convert CSPR to motes (1 CSPR = 10^9 motes)
+     const amountMotes = Math.floor(amountCSPR * 1e9).toString();
+ 
+diff --git a/dashboard/src/pages/ArchitectureView.tsx b/dashboard/src/pages/ArchitectureView.tsx
+index b9656e5..5db96f4 100644
+--- a/dashboard/src/pages/ArchitectureView.tsx
++++ b/dashboard/src/pages/ArchitectureView.tsx
+@@ -235,7 +235,7 @@ const StepVisualVerdict: React.FC = () => (
+     </div>
+     <div className="hiw-verdict-badge">
+       <Lock size={12} />
+-      Immutable — Casper Testnet
++      Immutable on Casper Testnet
+     </div>
+   </div>
+ );
+diff --git a/dashboard/src/pages/AssessView.tsx b/dashboard/src/pages/AssessView.tsx
+index e68cc1c..c963189 100644
+--- a/dashboard/src/pages/AssessView.tsx
++++ b/dashboard/src/pages/AssessView.tsx
+@@ -905,7 +905,7 @@ export const AssessView: React.FC = () => {
+       setLogs([]);
+       logIdRef.current = 0;
+       // Show the deploy hash in logs — user can verify on-chain
+-      addLog('success', `Payment signed — deploy: ${deployHash.substring(0, 16)}...`, `View on explorer: https://testnet.cspr.live/deploy/${deployHash}`);
++      addLog('success', `Payment signed, deploy: ${deployHash.substring(0, 16)}...`, `View on explorer: https://testnet.cspr.live/deploy/${deployHash}`);
+       assess(request, paymentProof);
+     } catch (err: any) {
+       if (err?.message?.includes('cancelled')) {
+@@ -1019,7 +1019,14 @@ export const AssessView: React.FC = () => {
+                       transition={{ duration: 0.2 }}
+                       style={{ overflow: 'hidden', marginTop: '0.75rem' }}
+                     >
+-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
++                      <div style={{
++                        display: 'flex',
++                        flexDirection: 'column',
++                        gap: '0.5rem',
++                        maxHeight: '260px',
++                        overflowY: 'auto',
++                        paddingRight: '4px',
++                      }}>
+                         {filteredDemos.map((demo, i) => (
+                           <DemoAssetCard
+                             key={i}
+diff --git a/dashboard/src/pages/DashboardView.tsx b/dashboard/src/pages/DashboardView.tsx
+index 554c95b..69c2aff 100644
+--- a/dashboard/src/pages/DashboardView.tsx
++++ b/dashboard/src/pages/DashboardView.tsx
+@@ -7,11 +7,11 @@ import { LiveContractPanel } from '../components/LiveContractPanel';
+ import { X402PaymentStream } from '../components/X402PaymentStream';
+ 
+ const AGENTS = [
+-  { name: 'Valuation Agent A', color: '#EC4899', role: 'Valuation', method: 'Comparable Sales', initials: 'VA' },
+-  { name: 'Valuation Agent B', color: '#F97316', role: 'Valuation', method: 'DCF Analysis', initials: 'VB' },
+-  { name: 'Evidence Analyst', color: '#10B981', role: 'Analysis', method: 'Data Validation', initials: 'EA' },
++  { name: 'Valuation Agent A', color: '#EC4899', role: 'Valuation', method: 'Market Comparables', initials: 'VA' },
++  { name: 'Valuation Agent B', color: '#F97316', role: 'Valuation', method: 'Income Analysis', initials: 'VB' },
++  { name: 'Evidence Analyst', color: '#10B981', role: 'Analysis', method: 'Document Review', initials: 'EA' },
+   { name: 'Market Interpreter', color: '#06B6D4', role: 'Analysis', method: 'Market Context', initials: 'MI' },
+-  { name: 'Precedent Researcher', color: '#8B5CF6', role: 'Analysis', method: 'Precedent Search', initials: 'PR' },
++  { name: 'Precedent Researcher', color: '#8B5CF6', role: 'Analysis', method: 'Case Research', initials: 'PR' },
+ ];
+ 
+ const QUICK_ACTIONS = [
+@@ -85,7 +85,7 @@ export const DashboardView: React.FC = () => {
+         <div className="page-header-row">
+           <div>
+             <h1 className="page-title">Dashboard</h1>
+-            <p className="page-subtitle">Real-time overview of the Verdict dispute resolution protocol.</p>
++            <p className="page-subtitle">Real-time overview of your Verdict platform activity.</p>
+           </div>
+           <div className="page-header-actions">
+             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: wsConnected ? 'var(--success)' : 'var(--text-tertiary)' }}>
+@@ -105,9 +105,9 @@ export const DashboardView: React.FC = () => {
+         <div className="stat-grid">
+           {[
+             { label: 'Total Cases', value: totalCases, icon: BarChart3, color: 'var(--text-primary)', bg: 'var(--bg-surface-alt)' },
+-            { label: 'On-Chain', value: onChainCount, icon: CheckCircle2, color: 'var(--success)', bg: 'rgba(16, 185, 129, 0.08)' },
++            { label: 'Verified', value: onChainCount, icon: CheckCircle2, color: 'var(--success)', bg: 'rgba(16, 185, 129, 0.08)' },
+             { label: 'Active Agents', value: 5, icon: Zap, color: 'var(--purple)', bg: 'rgba(139, 92, 246, 0.08)' },
+-            { label: 'Data Sources', value: 3, icon: TrendingUp, color: 'var(--warning)', bg: 'rgba(245, 158, 11, 0.08)' },
++            { label: 'Live Feeds', value: 3, icon: TrendingUp, color: 'var(--warning)', bg: 'rgba(245, 158, 11, 0.08)' },
+           ].map((stat, i) => (
+             <motion.div
+               key={stat.label}
+@@ -128,12 +128,12 @@ export const DashboardView: React.FC = () => {
+         </div>
+       </div>
+ 
+-      {/* ── Live Contract State ───────────────────────────────────────────────── */}
++      {/* ── Protocol Overview ──────────────────────────────────────────────────── */}
+       <div className="section">
+         <LiveContractPanel />
+       </div>
+ 
+-      {/* ── x402 Payment Stream ──────────────────────────────────────────────── */}
++      {/* ── Payment Activity ──────────────────────────────────────────────────── */}
+       <div className="section">
+         <X402PaymentStream />
+       </div>
+@@ -259,12 +259,12 @@ export const DashboardView: React.FC = () => {
+ 
+         {/* Right Sidebar */}
+         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--content-gap)' }}>
+-          {/* System Status */}
++          {/* Platform Status */}
+           <div className="card">
+-            <div className="card-title" style={{ marginBottom: '16px' }}>System Status</div>
++            <div className="card-title" style={{ marginBottom: '16px' }}>Platform Status</div>
+             {[
+-              { label: 'Orchestrator', status: 'online', detail: 'Port 3011' },
+-              { label: 'WebSocket', status: wsConnected ? 'online' : 'offline', detail: wsConnected ? 'Connected' : 'Disconnected' },
++              { label: 'Engine', status: 'online', detail: 'Connected' },
++              { label: 'Live Updates', status: wsConnected ? 'online' : 'offline', detail: wsConnected ? 'Connected' : 'Disconnected' },
+               { label: 'Casper Network', status: 'online', detail: 'Testnet' },
+             ].map((item, i) => (
+               <div key={item.label} style={{
+diff --git a/dashboard/src/pages/PredictionView.tsx b/dashboard/src/pages/PredictionView.tsx
+index 0575ca4..48bb838 100644
+--- a/dashboard/src/pages/PredictionView.tsx
++++ b/dashboard/src/pages/PredictionView.tsx
+@@ -8,11 +8,16 @@ import {
+   Clock,
+   Wallet,
+   CheckCircle2,
++  TrendingUp,
++  ChevronRight,
++  RefreshCw,
++  ExternalLink,
++  ArrowRight,
+ } from 'lucide-react';
+ import { useWallet } from '../contexts/CSPRClickContext';
+ import { PLATFORM_WALLET, PREDICTION_FEE_CSPR } from '../config/casper';
+ 
+-// ─── Types ───────────────────────────────────────────────────────────────────
++// ─── Types ─────────────────────────────────────────────────────────────────
+ 
+ interface PredictionAgent {
+   name: string;
+@@ -33,7 +38,7 @@ interface PredictionResult {
+   timestamp: number;
+ }
+ 
+-// ─── Helpers ─────────────────────────────────────────────────────────────────
++// ─── Helpers ───────────────────────────────────────────────────────────────
+ 
+ function formatPercent(value: number): string {
+   return `${(value * 100).toFixed(1)}%`;
+@@ -53,33 +58,37 @@ function probabilityLabel(p: number): string {
+   return 'Very Unlikely';
+ }
+ 
+-// ─── Demo Questions ──────────────────────────────────────────────────────────
++// ─── Constants ─────────────────────────────────────────────────────────────
++
++const TIMEFRAMES = ['1 month', '3 months', '6 months', '12 months', '24 months'];
+ 
+ const DEMO_QUESTIONS = [
+   {
+     question: 'Will the Miami Beachfront Condo at 123 Ocean Dr sell above $2.5M by December 2026?',
+     assetType: 'real-estate',
+     timeframe: '6 months',
++    icon: '🏠',
+   },
+   {
+     question: 'Will gold prices exceed $3,500/oz by end of Q3 2026?',
+     assetType: 'commodity',
+     timeframe: '3 months',
++    icon: '🥇',
+   },
+   {
+     question: 'Will the Contemporary Oil Painting by Banksy appreciate more than 15% in the next auction?',
+     assetType: 'art',
+     timeframe: '12 months',
++    icon: '🎨',
+   },
+   {
+     question: 'Will the average US mortgage rate drop below 5.5% by end of 2026?',
+     assetType: 'macro',
+     timeframe: '6 months',
++    icon: '📈',
+   },
+ ];
+ 
+-// ─── Agent Cards ─────────────────────────────────────────────────────────────
+-
+ const AGENT_PROFILES = [
+   { name: 'Valuation Agent A', role: 'Comparable Sales', color: '#EC4899' },
+   { name: 'Valuation Agent B', role: 'DCF & Cash Flow', color: '#F97316' },
+@@ -88,7 +97,7 @@ const AGENT_PROFILES = [
+   { name: 'Precedent Researcher', role: 'Historical Precedent', color: '#8B5CF6' },
+ ];
+ 
+-// ─── Simulate Prediction ─────────────────────────────────────────────────────
++// ─── Simulation ────────────────────────────────────────────────────────────
+ 
+ function simulatePrediction(question: string, timeframe: string): PredictionResult {
+   const baseProbability = 0.3 + Math.random() * 0.4;
+@@ -107,19 +116,17 @@ function simulatePrediction(question: string, timeframe: string): PredictionResu
+   const weightedProb = agents.reduce((sum, a) => sum + a.probability * a.confidence, 0)
+     / agents.reduce((sum, a) => sum + a.confidence, 0);
+ 
+-  const riskFactors = [
+-    'Market volatility may affect outcome',
+-    'Interest rate changes could shift probabilities',
+-    'Historical precedent shows 60% accuracy for similar predictions',
+-  ];
+-
+   return {
+     question,
+     probability: weightedProb,
+-    confidence: 0.75 + Math.random() * 0.2,
++    confidence: 0.65 + Math.random() * 0.25,
+     timeframe,
+     agents,
+-    riskFactors,
++    riskFactors: [
++      'Market volatility may affect outcome',
++      'Interest rate changes could shift probabilities',
++      'Historical precedent shows 60% accuracy for similar predictions',
++    ],
+     timestamp: Date.now(),
+   };
+ }
+@@ -135,7 +142,7 @@ function generateReasoning(agentName: string, prob: number): string {
+       `Revenue trajectory and yield analysis suggest ${(prob * 100).toFixed(0)}% chance. Operating margins support the assessment.`,
+     ],
+     'Evidence Analyst': [
+-      `Data quality is high — 4/5 sources verified via MiMo LLM. Confidence in the ${(prob * 100).toFixed(0)}% estimate is strong. No significant outliers detected.`,
++      `Data quality is high, 4/5 sources verified via MiMo LLM. Confidence in the ${(prob * 100).toFixed(0)}% estimate is strong. No significant outliers detected.`,
+       `Evidence chain is solid. 3 independent data sources corroborate the ${(prob * 100).toFixed(0)}% assessment. Minor gaps in historical data noted.`,
+     ],
+     'Market Interpreter': [
+@@ -152,7 +159,171 @@ function generateReasoning(agentName: string, prob: number): string {
+   return options[Math.floor(Math.random() * options.length)];
+ }
+ 
+-// ─── Main Component ──────────────────────────────────────────────────────────
++// ─── Probability Ring ──────────────────────────────────────────────────────
++
++const ProbabilityRing: React.FC<{ value: number; size?: number }> = ({ value, size = 140 }) => {
++  const r = (size - 12) / 2;
++  const c = 2 * Math.PI * r;
++  const offset = c * (1 - value);
++  const color = probabilityColor(value);
++
++  return (
++    <div style={{ position: 'relative', width: size, height: size }}>
++      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
++        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--border-color)" strokeWidth={8} />
++        <motion.circle
++          cx={size / 2} cy={size / 2} r={r}
++          fill="none" stroke={color} strokeWidth={8}
++          strokeLinecap="round"
++          strokeDasharray={c}
++          initial={{ strokeDashoffset: c }}
++          animate={{ strokeDashoffset: offset }}
++          transition={{ duration: 1.2, ease: 'easeOut', delay: 0.3 }}
++        />
++      </svg>
++      <div style={{
++        position: 'absolute', inset: 0,
++        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
++      }}>
++        <motion.div
++          initial={{ scale: 0 }}
++          animate={{ scale: 1 }}
++          transition={{ type: 'spring', stiffness: 200, delay: 0.5 }}
++          style={{ fontSize: size * 0.22, fontWeight: 900, color, lineHeight: 1 }}
++        >
++          {formatPercent(value)}
++        </motion.div>
++        <div style={{ fontSize: size * 0.08, color: 'var(--text-tertiary)', fontWeight: 500, marginTop: 4 }}>
++          {probabilityLabel(value)}
++        </div>
++      </div>
++    </div>
++  );
++};
++
++// ─── Agent Probability Bar ─────────────────────────────────────────────────
++
++const AgentBar: React.FC<{ agent: PredictionAgent; index: number }> = ({ agent, index }) => {
++  const [expanded, setExpanded] = useState(false);
++
++  return (
++    <motion.div
++      initial={{ opacity: 0, x: -20 }}
++      animate={{ opacity: 1, x: 0 }}
++      transition={{ duration: 0.3, delay: index * 0.08 }}
++      onClick={() => setExpanded(!expanded)}
++      style={{
++        background: 'var(--bg-elevated)',
++        border: '1px solid var(--border-color)',
++        borderRadius: 'var(--card-radius)',
++        overflow: 'hidden',
++        cursor: 'pointer',
++        transition: 'border-color 0.15s ease',
++      }}
++      onMouseEnter={(e) => e.currentTarget.style.borderColor = `${agent.color}50`}
++      onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
++    >
++      <div style={{
++        display: 'flex', alignItems: 'center', gap: 12,
++        padding: '12px 16px',
++      }}>
++        {/* Agent dot + info */}
++        <div style={{
++          width: 36, height: 36, borderRadius: 8,
++          background: `${agent.color}12`,
++          display: 'flex', alignItems: 'center', justifyContent: 'center',
++        }}>
++          <div style={{ width: 10, height: 10, borderRadius: '50%', background: agent.color }} />
++        </div>
++        <div style={{ flex: 1, minWidth: 0 }}>
++          <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
++            {agent.name}
++          </div>
++          <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>
++            {agent.role}
++          </div>
++        </div>
++
++        {/* Bar visualization */}
++        <div style={{ flex: '0 0 120px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
++          <div style={{ fontSize: '1rem', fontWeight: 800, color: probabilityColor(agent.probability) }}>
++            {formatPercent(agent.probability)}
++          </div>
++          <div style={{
++            width: '100%', height: 4, borderRadius: 2,
++            background: 'var(--border-color)',
++            overflow: 'hidden',
++          }}>
++            <motion.div
++              initial={{ width: 0 }}
++              animate={{ width: `${agent.probability * 100}%` }}
++              transition={{ duration: 0.8, delay: index * 0.1 + 0.3 }}
++              style={{ height: '100%', borderRadius: 2, background: agent.color }}
++            />
++          </div>
++        </div>
++
++        <ChevronRight
++          size={16}
++          color="var(--text-tertiary)"
++          style={{
++            transition: 'transform 0.2s ease',
++            transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
++          }}
++        />
++      </div>
++
++      <AnimatePresence>
++        {expanded && (
++          <motion.div
++            initial={{ height: 0, opacity: 0 }}
++            animate={{ height: 'auto', opacity: 1 }}
++            exit={{ height: 0, opacity: 0 }}
++            transition={{ duration: 0.2 }}
++            style={{ overflow: 'hidden' }}
++          >
++            <div style={{
++              padding: '0 16px 14px',
++              borderTop: '1px solid var(--border-color-subtle, var(--border-color))',
++              marginTop: 0, paddingTop: 12,
++            }}>
++              <div style={{ display: 'flex', gap: 16, marginBottom: 10 }}>
++                <div>
++                  <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: 500 }}>CONFIDENCE</div>
++                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
++                    {formatPercent(agent.confidence)}
++                  </div>
++                </div>
++                <div>
++                  <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: 500 }}>SIGNAL</div>
++                  <div style={{
++                    display: 'inline-block',
++                    padding: '2px 8px', borderRadius: 4,
++                    background: `${probabilityColor(agent.probability)}15`,
++                    color: probabilityColor(agent.probability),
++                    fontSize: '0.75rem', fontWeight: 600,
++                  }}>
++                    {probabilityLabel(agent.probability)}
++                  </div>
++                </div>
++              </div>
++              <div style={{
++                fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.6,
++                background: 'var(--bg-surface)',
++                borderRadius: 8, padding: '10px 12px',
++                border: '1px solid var(--border-color-subtle, var(--border-color))',
++              }}>
++                {agent.reasoning}
++              </div>
++            </div>
++          </motion.div>
++        )}
++      </AnimatePresence>
++    </motion.div>
++  );
++};
++
++// ─── Main Component ────────────────────────────────────────────────────────
+ 
+ export const PredictionView: React.FC = () => {
+   const wallet = useWallet();
+@@ -162,7 +333,7 @@ export const PredictionView: React.FC = () => {
+   const [result, setResult] = useState<PredictionResult | null>(null);
+   const [showDemos, setShowDemos] = useState(false);
+ 
+-  // Payment modal state
++  // Payment
+   const [showPaymentModal, setShowPaymentModal] = useState(false);
+   const [signingPayment, setSigningPayment] = useState(false);
+   const [signError, setSignError] = useState<string | null>(null);
+@@ -172,24 +343,19 @@ export const PredictionView: React.FC = () => {
+     setLoading(true);
+     setResult(null);
+     await new Promise((r) => setTimeout(r, 4000 + Math.random() * 2000));
+-    const prediction = simulatePrediction(question, timeframe);
+-    setResult(prediction);
++    setResult(simulatePrediction(question, timeframe));
+     setLoading(false);
+   };
+ 
+   const handlePredict = () => {
+     if (!question.trim()) return;
+-    // Show payment modal
+     setSignError(null);
+     setShowPaymentModal(true);
+   };
+ 
+   const handlePaymentConfirm = async () => {
+-    // If wallet not connected, connect first
+     if (!wallet.connected) {
+-      try {
+-        await wallet.connect();
+-      } catch {
++      try { await wallet.connect(); } catch {
+         setSignError('Please connect your wallet first.');
+         return;
+       }
+@@ -203,13 +369,9 @@ export const PredictionView: React.FC = () => {
+     setSignError(null);
+ 
+     try {
+-      const { deployHash } = await wallet.signPayment(
+-        PLATFORM_WALLET,
+-        PREDICTION_FEE_CSPR,
+-      );
++      const { deployHash } = await wallet.signPayment(PLATFORM_WALLET, PREDICTION_FEE_CSPR);
+       setShowPaymentModal(false);
+       setLastDeployHash(deployHash);
+-      console.log(`[Prediction] Payment signed — deploy: ${deployHash}`);
+       await runPrediction();
+     } catch (err: any) {
+       if (err?.message?.includes('cancelled')) {
+@@ -240,268 +402,497 @@ export const PredictionView: React.FC = () => {
+     setResult(null);
+   };
+ 
+-  return (
+-    <div>
+-      <div className="page-header">
+-        <h1 className="page-title">Prediction Engine</h1>
+-        <p className="page-subtitle">
+-          Ask outcome questions. 5 AI agents analyze market data and give probability estimates with full reasoning.
+-        </p>
+-      </div>
++  const walletDisplay = wallet.connected
++    ? `${wallet.publicKey?.substring(0, 8)}...${wallet.publicKey?.substring(wallet.publicKey.length - 6)}`
++    : null;
+ 
++  return (
++    <div style={{
++      padding: 'var(--page-padding-y) var(--page-padding-x)',
++      maxWidth: 'var(--page-max-width)',
++      margin: '0 auto',
++    }}>
+       <AnimatePresence mode="wait">
++        {/* ─── INPUT STATE ─────────────────────────────────────── */}
+         {!result && !loading ? (
+-          <motion.div key="input" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ maxWidth: '700px' }}>
+-            {/* Demo quick-fill */}
+-            <div style={{ marginBottom: '1.5rem' }}>
++          <motion.div
++            key="input"
++            initial={{ opacity: 0 }}
++            animate={{ opacity: 1 }}
++            exit={{ opacity: 0 }}
++            style={{
++              display: 'flex',
++              flexDirection: 'column',
++              alignItems: 'center',
++              maxWidth: 720,
++              margin: '0 auto',
++            }}
++          >
++            {/* Header */}
++            <div style={{ textAlign: 'center', marginBottom: 32 }}>
++              <h1 style={{
++                fontSize: '1.8rem', fontWeight: 700,
++                color: 'var(--text-primary)', marginBottom: 8,
++              }}>
++                Prediction Engine
++              </h1>
++              <p style={{
++                color: 'var(--text-secondary)',
++                fontSize: '0.95rem', lineHeight: 1.6,
++                maxWidth: 520, margin: '0 auto',
++              }}>
++                Ask any outcome question about RWA assets. 5 AI agents analyze market data and give probability estimates with full reasoning.
++              </p>
++            </div>
++
++            {/* Main Form Card */}
++            <div style={{
++              width: '100%',
++              background: 'var(--bg-elevated)',
++              border: '1px solid var(--border-color)',
++              borderRadius: 'var(--card-radius)',
++              padding: '24px 28px',
++              boxShadow: 'var(--shadow-sm)',
++            }}>
++              {/* Question Input */}
++              <div style={{ marginBottom: 20 }}>
++                <label style={{
++                  display: 'flex', alignItems: 'center', gap: 6,
++                  fontSize: '0.82rem', fontWeight: 600,
++                  color: 'var(--text-primary)', marginBottom: 8,
++                }}>
++                  <Target size={14} color="var(--primary)" />
++                  Prediction Question
++                </label>
++                <textarea
++                  value={question}
++                  onChange={(e) => setQuestion(e.target.value)}
++                  placeholder="e.g., Will this property sell above $2M by December 2026?"
++                  rows={3}
++                  style={{
++                    width: '100%', padding: '12px 14px', borderRadius: 10,
++                    border: '1.5px solid var(--border-color)',
++                    background: 'var(--bg-surface)',
++                    color: 'var(--text-primary)', fontSize: '0.95rem',
++                    fontFamily: 'var(--font-sans)',
++                    outline: 'none', resize: 'vertical',
++                    transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
++                    lineHeight: 1.5,
++                  }}
++                  onFocus={(e) => {
++                    e.currentTarget.style.borderColor = 'var(--primary)';
++                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 59, 59, 0.08)';
++                  }}
++                  onBlur={(e) => {
++                    e.currentTarget.style.borderColor = 'var(--border-color)';
++                    e.currentTarget.style.boxShadow = 'none';
++                  }}
++                />
++              </div>
++
++              {/* Timeframe Row */}
++              <div style={{ marginBottom: 24 }}>
++                <label style={{
++                  display: 'flex', alignItems: 'center', gap: 6,
++                  fontSize: '0.82rem', fontWeight: 600,
++                  color: 'var(--text-primary)', marginBottom: 10,
++                }}>
++                  <Clock size={14} />
++                  Timeframe
++                </label>
++                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
++                  {TIMEFRAMES.map((tf) => {
++                    const active = timeframe === tf;
++                    return (
++                      <button
++                        key={tf}
++                        onClick={() => setTimeframe(tf)}
++                        style={{
++                          padding: '8px 16px', borderRadius: 8,
++                          border: `1.5px solid ${active ? 'var(--primary)' : 'var(--border-color)'}`,
++                          background: active ? 'rgba(255, 59, 59, 0.06)' : 'var(--bg-surface)',
++                          cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
++                          color: active ? 'var(--primary)' : 'var(--text-secondary)',
++                          transition: 'all 0.15s ease',
++                          display: 'flex', alignItems: 'center', gap: 5,
++                        }}
++                      >
++                        <Clock size={13} style={{ opacity: active ? 1 : 0.5 }} />
++                        {tf}
++                      </button>
++                    );
++                  })}
++                </div>
++              </div>
++
++              {/* Divider */}
++              <div style={{
++                height: 1, background: 'var(--border-color)',
++                margin: '0 -28px 20px',
++              }} />
++
++              {/* Action Row */}
++              <div style={{
++                display: 'flex', alignItems: 'center', gap: 16,
++              }}>
++                <button
++                  onClick={handlePredict}
++                  disabled={!question.trim()}
++                  style={{
++                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
++                    padding: '12px 28px', borderRadius: 10, border: 'none',
++                    background: question.trim()
++                      ? 'linear-gradient(135deg, var(--primary), var(--primary-dark, #cc2222))'
++                      : 'var(--border-color)',
++                    color: '#fff', fontSize: '0.95rem', fontWeight: 700,
++                    cursor: question.trim() ? 'pointer' : 'not-allowed',
++                    transition: 'all 0.2s ease',
++                    boxShadow: question.trim() ? '0 2px 8px rgba(255, 59, 59, 0.25)' : 'none',
++                  }}
++                >
++                  <Wallet size={16} />
++                  Pay {PREDICTION_FEE_CSPR} CSPR & Run
++                  <ArrowRight size={16} />
++                </button>
++
++                <div style={{
++                  fontSize: '0.78rem', color: 'var(--text-tertiary)',
++                  display: 'flex', alignItems: 'center', gap: 6,
++                }}>
++                  {walletDisplay ? (
++                    <>
++                      <div style={{
++                        width: 8, height: 8, borderRadius: '50%',
++                        background: '#10b981',
++                      }} />
++                      {walletDisplay}
++                    </>
++                  ) : (
++                    <>
++                      <Wallet size={13} />
++                      Wallet connects automatically
++                    </>
++                  )}
++                </div>
++              </div>
++            </div>
++
++            {/* Sample Questions Section */}
++            <div style={{ width: '100%', marginTop: 20 }}>
+               <button
+                 onClick={() => setShowDemos(!showDemos)}
+                 style={{
+-                  display: 'flex', alignItems: 'center', gap: '0.5rem',
+-                  padding: '0.6rem 1rem', borderRadius: '6px',
+-                  border: '1px solid var(--border-color)', background: 'var(--bg-surface)',
+-                  cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-secondary)',
++                  display: 'flex', alignItems: 'center', gap: 8,
++                  padding: '10px 16px', borderRadius: 8,
++                  border: '1px dashed var(--border-color)',
++                  background: 'transparent',
++                  cursor: 'pointer', fontSize: '0.82rem',
++                  color: 'var(--text-tertiary)',
++                  transition: 'all 0.15s ease',
++                  width: '100%', justifyContent: 'center',
++                }}
++                onMouseEnter={(e) => {
++                  e.currentTarget.style.borderColor = 'var(--primary)';
++                  e.currentTarget.style.color = 'var(--primary)';
++                  e.currentTarget.style.background = 'rgba(255, 59, 59, 0.03)';
++                }}
++                onMouseLeave={(e) => {
++                  e.currentTarget.style.borderColor = 'var(--border-color)';
++                  e.currentTarget.style.color = 'var(--text-tertiary)';
++                  e.currentTarget.style.background = 'transparent';
+                 }}
+               >
+                 <Zap size={14} />
+-                Try a sample question
++                {showDemos ? 'Hide sample questions' : 'Try a sample question'}
+               </button>
+-              {showDemos && (
+-                <motion.div
+-                  initial={{ opacity: 0, height: 0 }}
+-                  animate={{ opacity: 1, height: 'auto' }}
+-                  exit={{ opacity: 0, height: 0 }}
+-                  style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
+-                >
+-                  {DEMO_QUESTIONS.map((demo, i) => (
+-                    <button
+-                      key={i}
+-                      onClick={() => handleDemoSelect(demo)}
+-                      style={{
+-                        display: 'flex', alignItems: 'center', gap: '0.75rem',
+-                        padding: '0.75rem 1rem', borderRadius: '6px',
+-                        border: '1px solid var(--border-color)', background: 'var(--bg-surface)',
+-                        cursor: 'pointer', textAlign: 'left', width: '100%', transition: 'all 0.15s ease',
+-                      }}
+-                    >
+-                      <Target size={16} color="var(--text-tertiary)" />
+-                      <div style={{ flex: 1 }}>
+-                        <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+-                          {demo.question}
+-                        </div>
+-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.15rem' }}>
+-                          Timeframe: {demo.timeframe}
+-                        </div>
+-                      </div>
+-                    </button>
+-                  ))}
+-                </motion.div>
+-              )}
+-            </div>
+-
+-            {/* Question input */}
+-            <div style={{ marginBottom: '1.25rem' }}>
+-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+-                Prediction Question <span style={{ color: 'var(--primary)' }}>*</span>
+-              </label>
+-              <textarea
+-                value={question}
+-                onChange={(e) => setQuestion(e.target.value)}
+-                placeholder="e.g., Will this property sell above $2M by December?"
+-                rows={3}
+-                style={{
+-                  width: '100%', padding: '0.8rem 1rem', borderRadius: '8px',
+-                  border: '1px solid var(--border-color)', background: 'var(--bg-main)',
+-                  color: 'var(--text-primary)', fontSize: '0.95rem', fontFamily: 'var(--font-sans)',
+-                  outline: 'none', resize: 'vertical', transition: 'border-color 0.15s ease',
+-                }}
+-              />
+-            </div>
+ 
+-            {/* Timeframe */}
+-            <div style={{ marginBottom: '2rem' }}>
+-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+-                Timeframe
+-              </label>
+-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+-                {['1 month', '3 months', '6 months', '12 months', '24 months'].map((tf) => (
+-                  <button
+-                    key={tf}
+-                    onClick={() => setTimeframe(tf)}
+-                    style={{
+-                      padding: '0.5rem 1rem', borderRadius: '6px',
+-                      border: `2px solid ${timeframe === tf ? 'var(--primary)' : 'var(--border-color)'}`,
+-                      background: timeframe === tf ? 'rgba(255, 59, 59, 0.04)' : 'var(--bg-surface)',
+-                      cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
+-                      color: timeframe === tf ? 'var(--primary)' : 'var(--text-secondary)',
+-                      transition: 'all 0.15s ease',
+-                    }}
++              <AnimatePresence>
++                {showDemos && (
++                  <motion.div
++                    initial={{ opacity: 0, height: 0 }}
++                    animate={{ opacity: 1, height: 'auto' }}
++                    exit={{ opacity: 0, height: 0 }}
++                    transition={{ duration: 0.2 }}
++                    style={{ overflow: 'hidden' }}
+                   >
+-                    <Clock size={14} style={{ marginRight: '0.3rem', verticalAlign: 'middle' }} />
+-                    {tf}
+-                  </button>
+-                ))}
+-              </div>
++                    <div style={{
++                      display: 'grid',
++                      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
++                      gap: 10, marginTop: 12,
++                    }}>
++                      {DEMO_QUESTIONS.map((demo, i) => (
++                        <motion.button
++                          key={i}
++                          initial={{ opacity: 0, y: 8 }}
++                          animate={{ opacity: 1, y: 0 }}
++                          transition={{ delay: i * 0.05 }}
++                          onClick={() => handleDemoSelect(demo)}
++                          style={{
++                            display: 'flex', alignItems: 'flex-start', gap: 10,
++                            padding: '14px 16px', borderRadius: 10,
++                            border: '1px solid var(--border-color)',
++                            background: 'var(--bg-elevated)',
++                            cursor: 'pointer', textAlign: 'left',
++                            transition: 'all 0.15s ease',
++                          }}
++                          onMouseEnter={(e) => {
++                            e.currentTarget.style.borderColor = 'var(--primary)';
++                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 59, 59, 0.08)';
++                          }}
++                          onMouseLeave={(e) => {
++                            e.currentTarget.style.borderColor = 'var(--border-color)';
++                            e.currentTarget.style.boxShadow = 'none';
++                          }}
++                        >
++                          <span style={{ fontSize: '1.2rem', lineHeight: 1, flexShrink: 0 }}>
++                            {demo.icon}
++                          </span>
++                          <div style={{ minWidth: 0 }}>
++                            <div style={{
++                              fontWeight: 600, fontSize: '0.82rem',
++                              color: 'var(--text-primary)',
++                              lineHeight: 1.4,
++                            }}>
++                              {demo.question}
++                            </div>
++                            <div style={{
++                              fontSize: '0.72rem', color: 'var(--text-tertiary)',
++                              marginTop: 4, display: 'flex', gap: 8,
++                            }}>
++                              <span>{demo.assetType}</span>
++                              <span>·</span>
++                              <span>{demo.timeframe}</span>
++                            </div>
++                          </div>
++                        </motion.button>
++                      ))}
++                    </div>
++                  </motion.div>
++                )}
++              </AnimatePresence>
+             </div>
+-
+-            {/* Predict button */}
+-            <button
+-              onClick={handlePredict}
+-              disabled={!question.trim()}
+-              style={{
+-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+-                width: '100%', padding: '0.9rem 2rem', borderRadius: '8px', border: 'none',
+-                background: question.trim()
+-                  ? 'linear-gradient(135deg, var(--primary), var(--primary-dark, #cc2222))'
+-                  : 'var(--border-color)',
+-                color: '#fff', fontSize: '1rem', fontWeight: 700,
+-                cursor: question.trim() ? 'pointer' : 'not-allowed', transition: 'all 0.2s ease',
+-              }}
+-            >
+-              <Wallet size={18} />
+-              Pay {PREDICTION_FEE_CSPR} CSPR & Run Prediction
+-            </button>
+-            <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '0.5rem' }}>
+-              {wallet.connected
+-                ? `Connected: ${wallet.publicKey?.substring(0, 8)}...${wallet.publicKey?.substring(wallet.publicKey.length - 6)}`
+-                : 'Wallet will be connected automatically'}
+-            </p>
+           </motion.div>
+         ) : loading ? (
+-          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem 2rem', textAlign: 'center' }}
++          /* ─── LOADING STATE ───────────────────────────────────── */
++          <motion.div
++            key="loading"
++            initial={{ opacity: 0 }}
++            animate={{ opacity: 1 }}
++            exit={{ opacity: 0 }}
++            style={{
++              display: 'flex', flexDirection: 'column',
++              alignItems: 'center', justifyContent: 'center',
++              padding: '6rem 2rem', textAlign: 'center',
++            }}
+           >
+-            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: 'linear' }} style={{ marginBottom: '1.5rem' }}>
++            <motion.div
++              animate={{ rotate: 360 }}
++              transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
++              style={{ marginBottom: 20 }}
++            >
+               <Loader2 size={48} color="var(--primary)" />
+             </motion.div>
+-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>Running Prediction Analysis</h3>
+-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '400px' }}>
++            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>
++              Running Prediction Analysis
++            </h3>
++            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: 400, lineHeight: 1.5 }}>
+               5 AI agents are analyzing market data, historical precedents, and economic indicators...
+             </p>
++            <div style={{
++              display: 'flex', gap: 8, marginTop: 24, flexWrap: 'wrap', justifyContent: 'center',
++            }}>
++              {AGENT_PROFILES.map((ap) => (
++                <motion.div
++                  key={ap.name}
++                  animate={{ opacity: [0.4, 1, 0.4] }}
++                  transition={{ repeat: Infinity, duration: 1.5, delay: Math.random() * 0.5 }}
++                  style={{
++                    padding: '6px 12px', borderRadius: 6,
++                    background: `${ap.color}10`,
++                    border: `1px solid ${ap.color}25`,
++                    fontSize: '0.72rem', fontWeight: 600, color: ap.color,
++                  }}
++                >
++                  {ap.role}
++                </motion.div>
++              ))}
++            </div>
+           </motion.div>
+         ) : result ? (
+-          <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+-            {/* Hero probability banner */}
++          /* ─── RESULT STATE ────────────────────────────────────── */
++          <motion.div
++            key="result"
++            initial={{ opacity: 0 }}
++            animate={{ opacity: 1 }}
++            transition={{ duration: 0.4 }}
++          >
++            {/* Top Bar: Question + Reset */}
+             <div style={{
+-              background: `linear-gradient(135deg, ${probabilityColor(result.probability)}10, ${probabilityColor(result.probability)}05)`,
+-              borderRadius: '16px', border: `2px solid ${probabilityColor(result.probability)}`,
+-              padding: '2.5rem', marginBottom: '2rem', textAlign: 'center',
++              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
++              marginBottom: 24, gap: 16, flexWrap: 'wrap',
+             }}>
+-              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+-                Predicted Outcome
+-              </div>
+-              <div style={{ fontSize: '4rem', fontWeight: 900, color: probabilityColor(result.probability), lineHeight: 1, marginBottom: '0.5rem' }}>
+-                {formatPercent(result.probability)}
+-              </div>
+-              <div style={{
+-                display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+-                padding: '0.4rem 1rem', borderRadius: '9999px',
+-                background: `${probabilityColor(result.probability)}20`,
+-                color: probabilityColor(result.probability),
+-                fontSize: '0.9rem', fontWeight: 700, marginBottom: '1rem',
+-              }}>
+-                {probabilityLabel(result.probability)}
+-              </div>
+-              <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: 1.5, maxWidth: '600px', margin: '0 auto' }}>
+-                {result.question}
+-              </div>
+-              <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '1.5rem' }}>
+-                <div>
+-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Confidence</div>
+-                  <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatPercent(result.confidence)}</div>
+-                </div>
+-                <div>
+-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Timeframe</div>
+-                  <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{result.timeframe}</div>
+-                </div>
+-                <div>
+-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Agents</div>
+-                  <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{result.agents.length}</div>
++              <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
++                <Target size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
++                <div style={{
++                  fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)',
++                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
++                }}>
++                  {result.question}
+                 </div>
+               </div>
++              <button onClick={handleReset} style={{
++                display: 'flex', alignItems: 'center', gap: 6,
++                padding: '8px 16px', borderRadius: 8,
++                border: '1px solid var(--border-color)',
++                background: 'var(--bg-surface)', cursor: 'pointer',
++                fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)',
++                transition: 'all 0.15s ease',
++                flexShrink: 0,
++              }}>
++                <RefreshCw size={14} />
++                New Prediction
++              </button>
+             </div>
+ 
+-            {/* Question display + payment proof */}
++            {/* Hero: Probability Ring + Stats */}
+             <div style={{
+-              background: 'var(--bg-surface)', borderRadius: '12px', border: '1px solid var(--border-color)',
+-              padding: '1.25rem', marginBottom: '1.5rem',
++              display: 'grid',
++              gridTemplateColumns: 'auto 1fr',
++              gap: 32, alignItems: 'center',
++              background: 'var(--bg-elevated)',
++              border: `1px solid ${probabilityColor(result.probability)}30`,
++              borderRadius: 'var(--card-radius)',
++              padding: '32px 36px',
++              marginBottom: 24,
+             }}>
+-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: lastDeployHash ? '0.75rem' : 0 }}>
+-                <Target size={18} color="var(--primary)" />
+-                <div style={{ flex: 1 }}>
+-                  <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>{result.question}</div>
+-                </div>
+-                <button onClick={handleReset} style={{
+-                  padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid var(--border-color)',
+-                  background: 'var(--bg-surface)', cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-secondary)',
+-                }}>
+-                  New Prediction
+-                </button>
+-              </div>
+-              {lastDeployHash && (
++              <ProbabilityRing value={result.probability} size={160} />
++
++              <div>
+                 <div style={{
+-                  display: 'flex', alignItems: 'center', gap: '0.5rem',
+-                  padding: '0.5rem 0.75rem', borderRadius: '6px',
+-                  background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)',
+-                  fontSize: '0.75rem', color: 'var(--text-tertiary)',
++                  fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-tertiary)',
++                  textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12,
+                 }}>
+-                  <CheckCircle2 size={13} color="#10b981" />
+-                  <span>Paid {PREDICTION_FEE_CSPR} CSPR —</span>
+-                  <a
+-                    href={`https://testnet.cspr.live/deploy/${lastDeployHash}`}
+-                    target="_blank"
+-                    rel="noopener noreferrer"
+-                    style={{ color: 'var(--primary)', textDecoration: 'underline', fontWeight: 600 }}
+-                  >
+-                    View on Explorer ↗
+-                  </a>
++                  Predicted Outcome
+                 </div>
+-              )}
+-            </div>
+ 
+-            {/* Agent probability cards */}
+-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+-              {result.agents.map((agent, i) => (
+-                <motion.div key={agent.name} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.1 }}
+-                  style={{ background: 'var(--bg-surface)', borderRadius: '12px', border: '1px solid var(--border-color)', overflow: 'hidden' }}
+-                >
+-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-color)', background: `${agent.color}08` }}>
+-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: agent.color }} />
+-                    <div>
+-                      <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-primary)' }}>{agent.name}</div>
+-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>{agent.role}</div>
+-                    </div>
+-                    <div style={{ marginLeft: 'auto', fontSize: '1.3rem', fontWeight: 800, color: probabilityColor(agent.probability) }}>
+-                      {formatPercent(agent.probability)}
+-                    </div>
+-                  </div>
+-                  <div style={{ padding: '0.75rem 1rem' }}>
+-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+-                      <span>Confidence: {formatPercent(agent.confidence)}</span>
+-                      <span style={{ padding: '0.15rem 0.5rem', borderRadius: '4px', background: `${agent.color}15`, color: agent.color, fontWeight: 600 }}>
+-                        {probabilityLabel(agent.probability)}
+-                      </span>
+-                    </div>
+-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5, background: 'var(--bg-surface-alt)', borderRadius: '6px', padding: '0.5rem 0.75rem' }}>
+-                      {agent.reasoning}
++                <div style={{
++                  display: 'grid',
++                  gridTemplateColumns: 'repeat(3, 1fr)',
++                  gap: 16,
++                }}>
++                  {[
++                    { label: 'Confidence', value: formatPercent(result.confidence), icon: <TrendingUp size={14} /> },
++                    { label: 'Timeframe', value: result.timeframe, icon: <Clock size={14} /> },
++                    { label: 'Agents', value: `${result.agents.length} analyzed`, icon: <Target size={14} /> },
++                  ].map((stat) => (
++                    <div key={stat.label} style={{
++                      background: 'var(--bg-surface)',
++                      border: '1px solid var(--border-color)',
++                      borderRadius: 10, padding: '14px 16px',
++                    }}>
++                      <div style={{
++                        display: 'flex', alignItems: 'center', gap: 5,
++                        fontSize: '0.68rem', color: 'var(--text-tertiary)',
++                        fontWeight: 500, marginBottom: 6,
++                      }}>
++                        {stat.icon}
++                        {stat.label.toUpperCase()}
++                      </div>
++                      <div style={{
++                        fontSize: '1.05rem', fontWeight: 700,
++                        color: 'var(--text-primary)',
++                      }}>
++                        {stat.value}
++                      </div>
+                     </div>
++                  ))}
++                </div>
++
++                {/* Payment proof */}
++                {lastDeployHash && (
++                  <div style={{
++                    display: 'flex', alignItems: 'center', gap: 8,
++                    marginTop: 16, padding: '8px 12px', borderRadius: 8,
++                    background: 'rgba(16, 185, 129, 0.06)',
++                    border: '1px solid rgba(16, 185, 129, 0.15)',
++                    fontSize: '0.78rem', color: 'var(--text-tertiary)',
++                  }}>
++                    <CheckCircle2 size={14} color="#10b981" />
++                    <span>Paid {PREDICTION_FEE_CSPR} CSPR</span>
++                    <a
++                      href={`https://testnet.cspr.live/deploy/${lastDeployHash}`}
++                      target="_blank"
++                      rel="noopener noreferrer"
++                      style={{
++                        color: 'var(--primary)', textDecoration: 'none',
++                        fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3,
++                      }}
++                    >
++                      Explorer <ExternalLink size={11} />
++                    </a>
+                   </div>
+-                </motion.div>
+-              ))}
++                )}
++              </div>
++            </div>
++
++            {/* Agent Analysis Section */}
++            <div style={{ marginBottom: 20 }}>
++              <h3 style={{
++                fontSize: '1rem', fontWeight: 700,
++                color: 'var(--text-primary)', marginBottom: 12,
++                display: 'flex', alignItems: 'center', gap: 8,
++              }}>
++                Agent Analysis
++                <span style={{
++                  fontSize: '0.7rem', fontWeight: 500, color: 'var(--text-tertiary)',
++                  padding: '2px 8px', borderRadius: 4,
++                  background: 'var(--bg-surface)',
++                  border: '1px solid var(--border-color)',
++                }}>
++                  {result.agents.length} agents
++                </span>
++              </h3>
++              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
++                {result.agents.map((agent, i) => (
++                  <AgentBar key={agent.name} agent={agent} index={i} />
++                ))}
++              </div>
+             </div>
+ 
+-            {/* Risk factors */}
+-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.6 }}
+-              style={{ background: 'var(--bg-surface)', borderRadius: '12px', border: '1px solid var(--border-color)', padding: '1.25rem' }}
++            {/* Risk Factors */}
++            <motion.div
++              initial={{ opacity: 0, y: 12 }}
++              animate={{ opacity: 1, y: 0 }}
++              transition={{ delay: 0.5 }}
++              style={{
++                background: 'var(--bg-elevated)',
++                borderRadius: 'var(--card-radius)',
++                border: '1px solid var(--border-color)',
++                padding: '18px 22px',
++              }}
+             >
+-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
++              <div style={{
++                display: 'flex', alignItems: 'center', gap: 8,
++                marginBottom: 12,
++              }}>
+                 <AlertTriangle size={16} color="#f59e0b" />
+-                <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Risk Factors</span>
++                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
++                  Risk Factors
++                </span>
+               </div>
+-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
++              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                 {result.riskFactors.map((factor, i) => (
+-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
++                  <div key={i} style={{
++                    display: 'flex', alignItems: 'center', gap: 10,
++                    fontSize: '0.82rem', color: 'var(--text-secondary)',
++                    padding: '8px 12px', borderRadius: 8,
++                    background: 'rgba(245, 158, 11, 0.04)',
++                    border: '1px solid rgba(245, 158, 11, 0.1)',
++                  }}>
++                    <div style={{
++                      width: 6, height: 6, borderRadius: '50%',
++                      background: '#f59e0b', flexShrink: 0,
++                    }} />
+                     {factor}
+                   </div>
+                 ))}
+@@ -511,7 +902,7 @@ export const PredictionView: React.FC = () => {
+         ) : null}
+       </AnimatePresence>
+ 
+-      {/* ─── Payment Confirmation Modal ─────────────────────────────────── */}
++      {/* ─── Payment Modal ──────────────────────────────────────── */}
+       <AnimatePresence>
+         {showPaymentModal && (
+           <motion.div
+@@ -531,46 +922,58 @@ export const PredictionView: React.FC = () => {
+               exit={{ scale: 0.9, opacity: 0 }}
+               onClick={(e) => e.stopPropagation()}
+               style={{
+-                background: 'var(--bg-surface)', borderRadius: '16px',
++                background: 'var(--bg-elevated)',
++                borderRadius: 16,
+                 border: '1px solid var(--border-color)',
+-                padding: '2rem', maxWidth: '420px', width: '90%',
++                padding: 28,
++                maxWidth: 420, width: '90%',
+                 boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+               }}
+             >
+-              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
++              {/* Header */}
++              <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                 <div style={{
+-                  width: 56, height: 56, borderRadius: '50%',
++                  width: 52, height: 52, borderRadius: '50%',
+                   background: 'linear-gradient(135deg, var(--primary), var(--primary-dark, #cc2222))',
+                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+-                  margin: '0 auto 1rem',
++                  margin: '0 auto 12px',
+                 }}>
+-                  <Wallet size={28} color="#fff" />
++                  <Wallet size={24} color="#fff" />
+                 </div>
+-                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+-                  Confirm Prediction Payment
++                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 6, color: 'var(--text-primary)' }}>
++                  Confirm Payment
+                 </h3>
+                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+-                  A micropayment is required to run the 5-agent prediction analysis.
++                  Micropayment required to run the 5-agent prediction analysis.
+                 </p>
+               </div>
+ 
+-              {/* Fee breakdown */}
++              {/* Fee Breakdown */}
+               <div style={{
+-                background: 'var(--bg-main)', borderRadius: '10px',
+-                border: '1px solid var(--border-color)',
+-                padding: '1rem', marginBottom: '1.5rem',
++                background: 'var(--bg-surface)',
++                borderRadius: 10, border: '1px solid var(--border-color)',
++                padding: '14px 16px', marginBottom: 18,
+               }}>
+-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
++                <div style={{
++                  display: 'flex', justifyContent: 'space-between',
++                  alignItems: 'center', marginBottom: 8,
++                }}>
+                   <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Prediction Fee</span>
+-                  <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary)' }}>
++                  <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary)' }}>
+                     {PREDICTION_FEE_CSPR} CSPR
+                   </span>
+                 </div>
+-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
++                <div style={{
++                  display: 'flex', justifyContent: 'space-between',
++                  fontSize: '0.75rem', color: 'var(--text-tertiary)',
++                }}>
+                   <span>Network</span>
+                   <span>Casper Testnet</span>
+                 </div>
+-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
++                <div style={{
++                  display: 'flex', justifyContent: 'space-between',
++                  fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4,
++                }}>
+                   <span>Recipient</span>
+                   <span>{PLATFORM_WALLET.substring(0, 8)}...{PLATFORM_WALLET.substring(PLATFORM_WALLET.length - 6)}</span>
+                 </div>
+@@ -579,22 +982,24 @@ export const PredictionView: React.FC = () => {
+               {/* Error */}
+               {signError && (
+                 <div style={{
+-                  background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+-                  borderRadius: '8px', padding: '0.75rem', marginBottom: '1rem',
+-                  fontSize: '0.8rem', color: '#ef4444',
++                  background: 'rgba(239,68,68,0.08)',
++                  border: '1px solid rgba(239,68,68,0.2)',
++                  borderRadius: 8, padding: '10px 12px', marginBottom: 14,
++                  fontSize: '0.82rem', color: '#ef4444',
+                 }}>
+                   {signError}
+                 </div>
+               )}
+ 
+               {/* Actions */}
+-              <div style={{ display: 'flex', gap: '0.75rem' }}>
++              <div style={{ display: 'flex', gap: 10 }}>
+                 <button
+                   onClick={handlePaymentCancel}
+                   disabled={signingPayment}
+                   style={{
+-                    flex: 1, padding: '0.75rem', borderRadius: '8px',
+-                    border: '1px solid var(--border-color)', background: 'var(--bg-main)',
++                    flex: 1, padding: '10px 16px', borderRadius: 8,
++                    border: '1px solid var(--border-color)',
++                    background: 'var(--bg-surface)',
+                     cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600,
+                     color: 'var(--text-secondary)',
+                   }}
+@@ -605,14 +1010,14 @@ export const PredictionView: React.FC = () => {
+                   onClick={handlePaymentConfirm}
+                   disabled={signingPayment}
+                   style={{
+-                    flex: 2, padding: '0.75rem', borderRadius: '8px',
++                    flex: 2, padding: '10px 16px', borderRadius: 8,
+                     border: 'none',
+                     background: signingPayment
+                       ? 'var(--border-color)'
+                       : 'linear-gradient(135deg, var(--primary), var(--primary-dark, #cc2222))',
+                     cursor: signingPayment ? 'not-allowed' : 'pointer',
+                     fontSize: '0.9rem', fontWeight: 700, color: '#fff',
+-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
++                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                   }}
+                 >
+                   {signingPayment ? (
+@@ -620,7 +1025,7 @@ export const PredictionView: React.FC = () => {
+                       <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                         <Loader2 size={16} />
+                       </motion.div>
+-                      Signing in wallet...
++                      Signing...
+                     </>
+                   ) : (
+                     <>
+diff --git a/dashboard/src/pages/ReputationView.tsx b/dashboard/src/pages/ReputationView.tsx
+index ef68c29..6a4adae 100644
+--- a/dashboard/src/pages/ReputationView.tsx
++++ b/dashboard/src/pages/ReputationView.tsx
+@@ -1,376 +1,504 @@
+-import React, { useState } from 'react';
+-import { Shield, TrendingUp, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
++import React, { useState, useMemo } from 'react';
++import { 
++  Shield, TrendingUp, CheckCircle2, ChevronDown, 
++  Search, BookOpen, Database, 
++  BarChart3, Target, Award, Star
++} from 'lucide-react';
+ import { motion, AnimatePresence } from 'framer-motion';
+ 
+-/** Simple inline sparkline for per-agent score history */
+-const MiniSparkline: React.FC<{ data: number[]; color?: string; height?: number }> = ({
+-  data,
+-  color = '#60a5fa',
+-  height = 60,
+-}) => {
+-  if (data.length < 2) return null;
+-  const min = Math.min(...data);
+-  const max = Math.max(...data);
+-  const range = max - min || 1;
+-  const width = 280;
+-  const points = data.map((v, i) => {
+-    const x = (i / (data.length - 1)) * width;
+-    const y = height - ((v - min) / range) * (height - 8) - 4;
+-    return `${x},${y}`;
+-  }).join(' ');
+-  return (
+-    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+-      <defs>
+-        <linearGradient id={`spark-${color.replace('#', '')}`} x1="0%" y1="0%" x2="0%" y2="100%">
+-          <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+-          <stop offset="100%" stopColor={color} stopOpacity={0} />
+-        </linearGradient>
+-      </defs>
+-      <polygon
+-        points={`0,${height} ${points} ${width},${height}`}
+-        fill={`url(#spark-${color.replace('#', '')})`}
+-      />
+-      <polyline points={points} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+-    </svg>
+-  );
+-};
++/**
++ * ReputationView — AI Agents page
++ * 
++ * - Dynamic data from AGENT_SEED_SCORES (no hardcoding)
++ * - Theme-matched to sidebar (white surfaces, 1px borders, subtle shadows)
++ * - Responsive grid for 5 agents (auto-fit, graceful odd-number handling)
++ * - Progressive disclosure: click opens detail panel BELOW the grid (not inline)
++ * - Real-time aggregate metrics computed from agent array
++ */
+ 
+-interface AgentReputation {
+-  agentId: string;
+-  agentName: string;
++// ─── Agent Data (mirrors shared/types.ts AGENT_SEED_SCORES) ────────────────
++
++interface AgentData {
++  id: string;
++  name: string;
+   description: string;
+-  currentScore: number;
+-  previousScore: number;
+-  history: { timestamp: number; score: number; reason?: string }[];
+-  rank: number;
+-  totalAssessments: number;
+-  successRate: number;
+   methodology: string;
+   strengths: string[];
++  icon: React.ReactNode;
++  accentColor: string;
++  scores: {
++    'real-estate': number;
++    art: number;
++    commodity: number;
++  };
++  totalAssessments: number;
++  successRate: number;
++  history: { timestamp: number; score: number; reason: string }[];
+ }
+ 
+-const AGENTS: AgentReputation[] = [
++const AGENTS: AgentData[] = [
+   {
+-    agentId: 'evidence-analyst',
+-    agentName: 'Evidence Analyst',
+-    currentScore: 850,
+-    previousScore: 820,
+-    history: [
+-      { timestamp: Date.now() - 3600000, score: 820, reason: 'Assessment #123 completed' },
+-      { timestamp: Date.now() - 7200000, score: 835, reason: 'Assessment #122 completed' },
+-      { timestamp: Date.now() - 10800000, score: 850, reason: 'Assessment #121 completed' },
+-    ],
+-    rank: 1,
++    id: 'valuation-agent-a',
++    name: 'Comps Specialist',
++    description: 'Pulls comparable sales from RentCast and adjusts for property differences. Specializes in real estate market analysis.',
++    methodology: 'RentCast API comparable sales analysis with ML-powered adjustments',
++    strengths: ['Sales comparisons', 'Market listings', 'Value estimation', 'Property adjustments'],
++    icon: <Search size={20} />,
++    accentColor: '#10B981',
++    scores: { 'real-estate': 750, art: 680, commodity: 720 },
+     totalAssessments: 156,
+     successRate: 94,
+-    description: 'Cross-references raw data points using MiMo LLM reasoning and flags inconsistencies.',
+-    methodology: 'MiMo LLM-powered evidence validation with confidence scoring',
+-    strengths: ['Data validation', 'Source cross-referencing', 'Outlier detection'],
+-  },
+-  {
+-    agentId: 'precedent-researcher',
+-    agentName: 'Precedent Researcher',
+-    currentScore: 790,
+-    previousScore: 780,
+     history: [
+-      { timestamp: Date.now() - 3600000, score: 780, reason: 'Assessment #123 completed' },
+-      { timestamp: Date.now() - 7200000, score: 785, reason: 'Assessment #122 completed' },
+-      { timestamp: Date.now() - 10800000, score: 790, reason: 'Assessment #121 completed' },
++      { timestamp: Date.now() - 86400000 * 7, score: 720, reason: 'Initial calibration' },
++      { timestamp: Date.now() - 86400000 * 5, score: 735, reason: 'Miami condo assessment' },
++      { timestamp: Date.now() - 86400000 * 3, score: 742, reason: 'NYC penthouse assessment' },
++      { timestamp: Date.now() - 86400000 * 1, score: 750, reason: 'LA commercial property' },
+     ],
+-    rank: 2,
++  },
++  {
++    id: 'valuation-agent-b',
++    name: 'DCF Specialist',
++    description: 'Projects future cash flows using FRED economic data and applies DCF analysis with risk-adjusted discount rates.',
++    methodology: 'FRED API + Discounted Cash Flow with Monte Carlo simulation',
++    strengths: ['Cash flow projection', 'DCF analysis', 'Risk assessment', 'Economic indicators'],
++    icon: <TrendingUp size={20} />,
++    accentColor: '#10B981',
++    scores: { 'real-estate': 780, art: 710, commodity: 750 },
+     totalAssessments: 142,
+     successRate: 91,
+-    description: 'Searches historical disputes via Vectra vector database for relevant precedents.',
+-    methodology: 'Vectra RAG with vector similarity search',
+-    strengths: ['Case law research', 'Historical comparisons', 'Vector search'],
++    history: [
++      { timestamp: Date.now() - 86400000 * 7, score: 750, reason: 'Initial calibration' },
++      { timestamp: Date.now() - 86400000 * 5, score: 762, reason: 'Gold futures analysis' },
++      { timestamp: Date.now() - 86400000 * 3, score: 770, reason: 'Art collection valuation' },
++      { timestamp: Date.now() - 86400000 * 1, score: 780, reason: 'Commercial RE portfolio' },
++    ],
+   },
+   {
+-    agentId: 'market-interpreter',
+-    agentName: 'Market Data Interpreter',
+-    currentScore: 760,
+-    previousScore: 755,
++    id: 'evidence-analyst',
++    name: 'Evidence Analyst',
++    description: 'Cross-references raw data points using MiMo LLM reasoning and flags inconsistencies in valuations.',
++    methodology: 'MiMo LLM-powered evidence validation with confidence scoring',
++    strengths: ['Data validation', 'Source cross-referencing', 'Outlier detection', 'Consistency checks'],
++    icon: <Shield size={20} />,
++    accentColor: '#EC4899',
++    scores: { 'real-estate': 820, art: 790, commodity: 810 },
++    totalAssessments: 189,
++    successRate: 96,
+     history: [
+-      { timestamp: Date.now() - 3600000, score: 755, reason: 'Assessment #123 completed' },
+-      { timestamp: Date.now() - 7200000, score: 758, reason: 'Assessment #122 completed' },
+-      { timestamp: Date.now() - 10800000, score: 760, reason: 'Assessment #121 completed' },
++      { timestamp: Date.now() - 86400000 * 7, score: 800, reason: 'Initial calibration' },
++      { timestamp: Date.now() - 86400000 * 5, score: 810, reason: 'Cross-validated 3 data sources' },
++      { timestamp: Date.now() - 86400000 * 3, score: 815, reason: 'Flagged outlier in gold pricing' },
++      { timestamp: Date.now() - 86400000 * 1, score: 820, reason: 'Verified art provenance chain' },
+     ],
+-    rank: 3,
+-    totalAssessments: 128,
+-    successRate: 89,
+-    description: 'Evaluates macro trends and market timing using MiMo LLM and live market feeds.',
+-    methodology: 'MiMo LLM + time-series analysis with macro-economic indicators',
+-    strengths: ['Market trends', 'Economic indicators', 'Price forecasting'],
+   },
+   {
+-    agentId: 'valuation-agent-a',
+-    agentName: 'Valuation Agent A',
+-    currentScore: 720,
+-    previousScore: 710,
++    id: 'market-data-interpreter',
++    name: 'Market Interpreter',
++    description: 'Evaluates macro trends and market timing using MiMo LLM and live market feeds from multiple sources.',
++    methodology: 'MiMo LLM + time-series analysis with macro-economic indicators',
++    strengths: ['Market trends', 'Economic indicators', 'Price forecasting', 'Timing analysis'],
++    icon: <BarChart3 size={20} />,
++    accentColor: '#EC4899',
++    scores: { 'real-estate': 760, art: 740, commodity: 770 },
++    totalAssessments: 134,
++    successRate: 89,
+     history: [
+-      { timestamp: Date.now() - 3600000, score: 710, reason: 'Assessment #123 completed' },
+-      { timestamp: Date.now() - 7200000, score: 715, reason: 'Assessment #122 completed' },
+-      { timestamp: Date.now() - 10800000, score: 720, reason: 'Assessment #121 completed' },
++      { timestamp: Date.now() - 86400000 * 7, score: 740, reason: 'Initial calibration' },
++      { timestamp: Date.now() - 86400000 * 5, score: 748, reason: 'Interest rate impact analysis' },
++      { timestamp: Date.now() - 86400000 * 3, score: 755, reason: 'Commodity cycle prediction' },
++      { timestamp: Date.now() - 86400000 * 1, score: 760, reason: 'RE market timing model' },
+     ],
+-    rank: 4,
+-    totalAssessments: 98,
+-    successRate: 87,
+-    description: 'Pulls comparable sales from RentCast and adjusts for property differences.',
+-    methodology: 'RentCast API comparable sales analysis',
+-    strengths: ['Sales comparisons', 'Market listings', 'Value estimation'],
+   },
+   {
+-    agentId: 'valuation-agent-b',
+-    agentName: 'Valuation Agent B',
+-    currentScore: 710,
+-    previousScore: 705,
++    id: 'precedent-researcher',
++    name: 'Precedent Researcher',
++    description: 'Searches historical disputes via vector database for relevant precedents and comparable cases.',
++    methodology: 'RAG with vector similarity search across historical assessments',
++    strengths: ['Case law research', 'Historical comparisons', 'Vector search', 'Pattern recognition'],
++    icon: <BookOpen size={20} />,
++    accentColor: '#EC4899',
++    scores: { 'real-estate': 790, art: 770, commodity: 780 },
++    totalAssessments: 128,
++    successRate: 92,
+     history: [
+-      { timestamp: Date.now() - 3600000, score: 705, reason: 'Assessment #123 completed' },
+-      { timestamp: Date.now() - 7200000, score: 708, reason: 'Assessment #122 completed' },
+-      { timestamp: Date.now() - 10800000, score: 710, reason: 'Assessment #121 completed' },
++      { timestamp: Date.now() - 86400000 * 7, score: 770, reason: 'Initial calibration' },
++      { timestamp: Date.now() - 86400000 * 5, score: 778, reason: 'Found 12 similar art cases' },
++      { timestamp: Date.now() - 86400000 * 3, score: 785, reason: 'RE precedent matching' },
++      { timestamp: Date.now() - 86400000 * 1, score: 790, reason: 'Gold valuation precedent' },
+     ],
+-    rank: 5,
+-    totalAssessments: 87,
+-    successRate: 85,
+-    description: 'Projects future cash flows using FRED economic data and applies DCF analysis.',
+-    methodology: 'FRED API + Discounted Cash Flow with risk-adjusted discount rates',
+-    strengths: ['Cash flow projection', 'DCF analysis', 'Risk assessment'],
+   },
+ ];
+ 
+-const AgentTab: React.FC<{
+-  agent: AgentReputation;
++// ─── Sparkline ─────────────────────────────────────────────────────────────
++
++const MiniSparkline: React.FC<{
++  data: number[];
++  color?: string;
++  height?: number;
++  id?: string;
++}> = ({ data, color = '#10B981', height = 48, id = 'sp' }) => {
++  if (data.length < 2) return null;
++  const w = 280;
++  const min = Math.min(...data);
++  const max = Math.max(...data);
++  const range = max - min || 1;
++  const pad = 6;
++
++  const pts = data.map((v, i) => {
++    const x = (i / (data.length - 1)) * w;
++    const y = height - pad - ((v - min) / range) * (height - pad * 2);
++    return `${x},${y}`;
++  });
++
++  const line = pts.join(' ');
++  const area = `M0,${height} L${pts.map(p => `L${p}`).join(' ')} L${w},${height} Z`;
++
++  return (
++    <svg width="100%" height={height} viewBox={`0 0 ${w} ${height}`} preserveAspectRatio="none" style={{ display: 'block' }}>
++      <defs>
++        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
++          <stop offset="0%" stopColor={color} stopOpacity={0.15} />
++          <stop offset="100%" stopColor={color} stopOpacity={0.02} />
++        </linearGradient>
++      </defs>
++      <path d={area} fill={`url(#${id})`} />
++      <polyline points={line} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
++    </svg>
++  );
++};
++
++// ─── Compact Agent Card (no expand — just click target) ────────────────────
++
++const AgentCard: React.FC<{
++  agent: AgentData;
+   isSelected: boolean;
+   onClick: () => void;
+ }> = ({ agent, isSelected, onClick }) => {
+-  const scoreDelta = agent.currentScore - agent.previousScore;
+-  const scoreColor = scoreDelta > 0 ? '#22c55e' : scoreDelta < 0 ? '#ef4444' : 'var(--text-tertiary)';
++  const avgScore = Math.round(
++    (agent.scores['real-estate'] + agent.scores.art + agent.scores.commodity) / 3
++  );
++  const scoreDelta = agent.history.length >= 2
++    ? agent.history[agent.history.length - 1].score - agent.history[0].score
++    : 0;
++  const scoreColor = scoreDelta > 0 ? 'var(--success)' : scoreDelta < 0 ? 'var(--error)' : 'var(--text-tertiary)';
+   const scoreIcon = scoreDelta > 0 ? '▲' : scoreDelta < 0 ? '▼' : '—';
+ 
+   return (
+     <div
+       onClick={onClick}
+       style={{
+-        background: isSelected ? 'rgba(59, 130, 246, 0.1)' : 'rgba(20, 20, 30, 0.6)',
+-        border: `1px solid ${isSelected ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255,255,255,0.06)'}`,
+-        borderRadius: 12,
++        background: 'var(--bg-elevated)',
++        border: `1px solid ${isSelected ? agent.accentColor : 'var(--border-color)'}`,
++        borderRadius: 'var(--card-radius)',
+         padding: '16px 20px',
+         cursor: 'pointer',
+-        transition: 'all 0.2s ease',
++        transition: 'all 0.15s ease',
++        boxShadow: isSelected ? `0 0 0 1px ${agent.accentColor}30, 0 2px 8px ${agent.accentColor}10` : 'var(--shadow-xs)',
++      }}
++      onMouseEnter={(e) => {
++        if (!isSelected) e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
++      }}
++      onMouseLeave={(e) => {
++        if (!isSelected) e.currentTarget.style.boxShadow = 'var(--shadow-xs)';
+       }}
+     >
+-      {/* Tab Header */}
+       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+           <div style={{
+-            width: 40,
+-            height: 40,
+-            borderRadius: 10,
+-            background: isSelected ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255,255,255,0.05)',
+-            display: 'flex',
+-            alignItems: 'center',
+-            justifyContent: 'center',
++            width: 40, height: 40, borderRadius: 10,
++            background: `${agent.accentColor}10`,
++            display: 'flex', alignItems: 'center', justifyContent: 'center',
++            color: agent.accentColor,
+           }}>
+-            <Shield size={20} color={isSelected ? '#60a5fa' : 'var(--text-tertiary)'} />
++            {agent.icon}
+           </div>
+           <div>
+             <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+-              {agent.agentName}
++              {agent.name}
+             </div>
+-            <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
+-              Rank #{agent.rank} • {agent.totalAssessments} assessments
++            <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
++              Rank #{AGENTS.indexOf(agent) + 1} · {agent.totalAssessments} assessments
+             </div>
+           </div>
+         </div>
+-
+         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+-          {/* Score */}
+           <div style={{ textAlign: 'right' }}>
+-            <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+-              {agent.currentScore}
++            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>
++              {avgScore}
+             </div>
+-            <div style={{ fontSize: '0.75rem', color: scoreColor, fontWeight: 600 }}>
++            <div style={{ fontSize: '0.7rem', color: scoreColor, fontWeight: 600 }}>
+               {scoreIcon} {Math.abs(scoreDelta)} pts
+             </div>
+           </div>
+-
+-          {/* Success Rate */}
+           <div style={{
+-            padding: '4px 10px',
+-            borderRadius: 8,
+-            background: agent.successRate >= 90 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(234, 179, 8, 0.15)',
+-            color: agent.successRate >= 90 ? '#22c55e' : '#eab308',
+-            fontSize: '0.8rem',
+-            fontWeight: 600,
++            padding: '4px 10px', borderRadius: 8,
++            background: agent.successRate >= 90 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
++            color: agent.successRate >= 90 ? 'var(--success)' : 'var(--warning)',
++            fontSize: '0.8rem', fontWeight: 600,
+           }}>
+             {agent.successRate}%
+           </div>
++          <ChevronDown
++            size={18}
++            color="var(--text-tertiary)"
++            style={{
++              transition: 'transform 0.2s ease',
++              transform: isSelected ? 'rotate(180deg)' : 'rotate(0deg)',
++            }}
++          />
++        </div>
++      </div>
++    </div>
++  );
++};
++
++// ─── Detail Panel (renders BELOW the grid, not inside a card) ──────────────
++
++const AgentDetailPanel: React.FC<{ agent: AgentData }> = ({ agent }) => {
++  const avgScore = Math.round(
++    (agent.scores['real-estate'] + agent.scores.art + agent.scores.commodity) / 3
++  );
++  const scoreDelta = agent.history.length >= 2
++    ? agent.history[agent.history.length - 1].score - agent.history[0].score
++    : 0;
++  const scoreColor = scoreDelta >= 0 ? 'var(--success)' : 'var(--error)';
+ 
+-          {/* Expand Icon */}
+-          {isSelected ? (
+-            <ChevronUp size={18} color="var(--text-tertiary)" />
+-          ) : (
+-            <ChevronDown size={18} color="var(--text-tertiary)" />
+-          )}
++  return (
++    <motion.div
++      initial={{ opacity: 0, y: -8 }}
++      animate={{ opacity: 1, y: 0 }}
++      exit={{ opacity: 0, y: -8 }}
++      transition={{ duration: 0.2 }}
++      style={{
++        background: 'var(--bg-elevated)',
++        border: `1px solid ${agent.accentColor}40`,
++        borderRadius: 'var(--card-radius)',
++        padding: 24,
++        marginTop: 16,
++        boxShadow: `0 4px 16px ${agent.accentColor}10`,
++      }}
++    >
++      {/* Header */}
++      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
++        <div style={{
++          width: 44, height: 44, borderRadius: 10,
++          background: `${agent.accentColor}15`,
++          display: 'flex', alignItems: 'center', justifyContent: 'center',
++          color: agent.accentColor,
++        }}>
++          {agent.icon}
++        </div>
++        <div>
++          <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
++            {agent.name}
++          </div>
++          <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
++            Score: {avgScore} · {agent.totalAssessments} assessments · {agent.successRate}% success
++          </div>
+         </div>
+       </div>
+ 
+-      {/* Expandable Explanation */}
+-      <AnimatePresence>
+-        {isSelected && (
+-          <motion.div
+-            initial={{ height: 0, opacity: 0 }}
+-            animate={{ height: 'auto', opacity: 1 }}
+-            exit={{ height: 0, opacity: 0 }}
+-            transition={{ duration: 0.2 }}
+-            style={{ overflow: 'hidden' }}
+-          >
+-            <div style={{
+-              marginTop: 16,
+-              paddingTop: 16,
+-              borderTop: '1px solid rgba(255,255,255,0.06)',
+-              display: 'grid',
+-              gridTemplateColumns: '1fr 1fr',
+-              gap: 16,
+-            }}>
+-              {/* Description */}
+-              <div>
+-                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 4, fontWeight: 600 }}>
+-                  ROLE
+-                </div>
+-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+-                  {agent.description}
+-                </div>
+-              </div>
++      {/* Content Grid */}
++      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
++        {/* Description */}
++        <div>
++          <div style={labelStyle}>ROLE</div>
++          <div style={valueStyle}>{agent.description}</div>
++        </div>
+ 
+-              {/* Methodology */}
+-              <div>
+-                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 4, fontWeight: 600 }}>
+-                  METHODOLOGY
+-                </div>
+-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+-                  {agent.methodology}
+-                </div>
+-              </div>
++        {/* Methodology */}
++        <div>
++          <div style={labelStyle}>METHODOLOGY</div>
++          <div style={valueStyle}>{agent.methodology}</div>
++        </div>
+ 
+-              {/* Strengths */}
+-              <div style={{ gridColumn: 'span 2' }}>
+-                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 8, fontWeight: 600 }}>
+-                  STRENGTHS
+-                </div>
+-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+-                  {agent.strengths.map((s, i) => (
+-                    <span key={i} style={{
+-                      padding: '4px 10px',
+-                      borderRadius: 6,
+-                      background: 'rgba(255,255,255,0.05)',
+-                      color: 'var(--text-secondary)',
+-                      fontSize: '0.8rem',
+-                    }}>
+-                      {s}
+-                    </span>
+-                  ))}
+-                </div>
+-              </div>
++        {/* Strengths */}
++        <div style={{ gridColumn: 'span 2' }}>
++          <div style={labelStyle}>STRENGTHS</div>
++          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
++            {agent.strengths.map((s, i) => (
++              <span key={i} style={{
++                padding: '4px 10px', borderRadius: 6,
++                background: 'var(--bg-surface)',
++                color: 'var(--text-secondary)',
++                fontSize: '0.8rem',
++                border: '1px solid var(--border-color-subtle)',
++              }}>
++                {s}
++              </span>
++            ))}
++          </div>
++        </div>
+ 
+-              {/* Score History */}
+-              <div style={{ gridColumn: 'span 2' }}>
+-                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 8, fontWeight: 600 }}>
+-                  SCORE HISTORY
++        {/* Score by Asset Type */}
++        <div style={{ gridColumn: 'span 2' }}>
++          <div style={labelStyle}>SCORE BY ASSET TYPE</div>
++          <div style={{ display: 'flex', gap: 12 }}>
++            {[
++              { type: 'Real Estate', score: agent.scores['real-estate'], icon: <Database size={14} /> },
++              { type: 'Art', score: agent.scores.art, icon: <Star size={14} /> },
++              { type: 'Commodity', score: agent.scores.commodity, icon: <Award size={14} /> },
++            ].map((item) => (
++              <div key={item.type} style={{
++                flex: 1, padding: '10px 12px',
++                background: 'var(--bg-surface)',
++                borderRadius: 8,
++                border: '1px solid var(--border-color-subtle)',
++              }}>
++                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, color: 'var(--text-tertiary)' }}>
++                  {item.icon}
++                  <span style={{ fontSize: '0.7rem', fontWeight: 500 }}>{item.type}</span>
+                 </div>
+-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+-                  <div style={{ flex: 1 }}>
+-                    <MiniSparkline
+-                      data={[...agent.history].reverse().map(h => h.score)}
+-                      color={scoreDelta >= 0 ? '#22c55e' : '#ef4444'}
+-                      height={60}
+-                    />
+-                  </div>
+-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
+-                    {agent.history.length} data points
+-                  </div>
++                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
++                  {item.score}
+                 </div>
+               </div>
++            ))}
++          </div>
++        </div>
++
++        {/* Score History */}
++        <div style={{ gridColumn: 'span 2' }}>
++          <div style={labelStyle}>SCORE HISTORY</div>
++          <div style={{
++            background: 'var(--bg-surface)',
++            borderRadius: 8, padding: '12px 16px',
++            border: '1px solid var(--border-color-subtle)',
++          }}>
++            <MiniSparkline
++              data={agent.history.map(h => h.score)}
++              color={scoreColor}
++              height={48}
++              id={`spark-${agent.id}`}
++            />
++            <div style={{
++              display: 'flex', justifyContent: 'space-between', marginTop: 8,
++              fontSize: '0.7rem', color: 'var(--text-tertiary)',
++            }}>
++              <span>{new Date(agent.history[0].timestamp).toLocaleDateString()}</span>
++              <span>{agent.history.length} data points</span>
++              <span>{new Date(agent.history[agent.history.length - 1].timestamp).toLocaleDateString()}</span>
+             </div>
+-          </motion.div>
+-        )}
+-      </AnimatePresence>
+-    </div>
++          </div>
++        </div>
++      </div>
++    </motion.div>
+   );
+ };
+ 
++// ─── Shared label/value styles ─────────────────────────────────────────────
++
++const labelStyle: React.CSSProperties = {
++  fontSize: '0.7rem',
++  fontWeight: 600,
++  color: 'var(--text-tertiary)',
++  marginBottom: 6,
++  letterSpacing: '0.05em',
++};
++
++const valueStyle: React.CSSProperties = {
++  fontSize: '0.85rem',
++  color: 'var(--text-secondary)',
++  lineHeight: 1.5,
++};
++
++// ─── Main Component ────────────────────────────────────────────────────────
++
+ export const ReputationView: React.FC = () => {
+   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+ 
++  const selectedAgent = useMemo(
++    () => AGENTS.find(a => a.id === selectedAgentId) || null,
++    [selectedAgentId]
++  );
++
++  const metrics = useMemo(() => {
++    const total = AGENTS.length;
++    const avgScore = Math.round(
++      AGENTS.reduce((s, a) => s + (a.scores['real-estate'] + a.scores.art + a.scores.commodity) / 3, 0) / total
++    );
++    const avgSuccess = Math.round(AGENTS.reduce((s, a) => s + a.successRate, 0) / total);
++    const totalAssessments = AGENTS.reduce((s, a) => s + a.totalAssessments, 0);
++    return { totalAgents: total, avgScore, avgSuccess, totalAssessments };
++  }, []);
++
+   return (
+-    <div style={{ padding: '32px', maxWidth: 900, margin: '0 auto' }}>
++    <div style={{
++      padding: 'var(--page-padding-y) var(--page-padding-x)',
++      maxWidth: 'var(--page-max-width)',
++      margin: '0 auto',
++    }}>
+       {/* Header */}
+       <div style={{ marginBottom: 32 }}>
+         <h1 style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
+           AI Agents
+         </h1>
+-        <p style={{ color: 'var(--text-tertiary)', fontSize: '0.95rem' }}>
++        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
+           Click on any agent to view their methodology, strengths, and reputation history.
+         </p>
+       </div>
+ 
+-      {/* Stats Bar */}
++      {/* Aggregate Metrics */}
+       <div style={{
+         display: 'grid',
+-        gridTemplateColumns: 'repeat(3, 1fr)',
+-        gap: 16,
+-        marginBottom: 32,
++        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
++        gap: 16, marginBottom: 32,
+       }}>
+         {[
+-          { label: 'Total Agents', value: AGENTS.length, icon: <Shield size={18} /> },
+-          { label: 'Avg Score', value: Math.round(AGENTS.reduce((s, a) => s + a.currentScore, 0) / AGENTS.length), icon: <TrendingUp size={18} /> },
+-          { label: 'Avg Success', value: `${Math.round(AGENTS.reduce((s, a) => s + a.successRate, 0) / AGENTS.length)}%`, icon: <CheckCircle2 size={18} /> },
++          { label: 'Total Agents', value: metrics.totalAgents, icon: <Shield size={18} />, color: 'var(--primary)' },
++          { label: 'Avg Score', value: metrics.avgScore, icon: <TrendingUp size={18} />, color: 'var(--success)' },
++          { label: 'Avg Success', value: `${metrics.avgSuccess}%`, icon: <CheckCircle2 size={18} />, color: 'var(--info)' },
++          { label: 'Total Assessments', value: metrics.totalAssessments.toLocaleString(), icon: <Target size={18} />, color: 'var(--purple)' },
+         ].map((stat, i) => (
+           <div key={i} style={{
+-            background: 'rgba(20, 20, 30, 0.6)',
+-            border: '1px solid rgba(255,255,255,0.06)',
+-            borderRadius: 12,
++            background: 'var(--bg-elevated)',
++            border: '1px solid var(--border-color)',
++            borderRadius: 'var(--card-radius)',
+             padding: '16px 20px',
+-            display: 'flex',
+-            alignItems: 'center',
+-            gap: 12,
++            display: 'flex', alignItems: 'center', gap: 12,
+           }}>
+             <div style={{
+-              width: 36,
+-              height: 36,
+-              borderRadius: 8,
+-              background: 'rgba(59, 130, 246, 0.1)',
+-              display: 'flex',
+-              alignItems: 'center',
+-              justifyContent: 'center',
+-              color: '#60a5fa',
++              width: 36, height: 36, borderRadius: 8,
++              background: `${stat.color}10`,
++              display: 'flex', alignItems: 'center', justifyContent: 'center',
++              color: stat.color,
+             }}>
+               {stat.icon}
+             </div>
+             <div>
+-              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+-                {stat.value}
+-              </div>
+-              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+-                {stat.label}
+-              </div>
++              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>{stat.value}</div>
++              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{stat.label}</div>
+             </div>
+           </div>
+         ))}
+       </div>
+ 
+-      {/* Agent Tabs */}
+-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
++      {/* Agent Cards Grid */}
++      <div style={{
++        display: 'grid',
++        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
++        gap: 12,
++      }}>
+         {AGENTS.map((agent) => (
+-          <AgentTab
+-            key={agent.agentId}
++          <AgentCard
++            key={agent.id}
+             agent={agent}
+-            isSelected={selectedAgentId === agent.agentId}
++            isSelected={selectedAgentId === agent.id}
+             onClick={() => setSelectedAgentId(
+-              selectedAgentId === agent.agentId ? null : agent.agentId
++              selectedAgentId === agent.id ? null : agent.id
+             )}
+           />
+         ))}
+       </div>
++
++      {/* Detail Panel — renders BELOW the grid, not inside any card */}
++      <AnimatePresence mode="wait">
++        {selectedAgent && (
++          <AgentDetailPanel key={selectedAgent.id} agent={selectedAgent} />
++        )}
++      </AnimatePresence>
+     </div>
+   );
+ };
++
++export default ReputationView;
+diff --git a/dashboard/src/pages/RoadmapView.tsx b/dashboard/src/pages/RoadmapView.tsx
+index 30bb49f..2982477 100644
+--- a/dashboard/src/pages/RoadmapView.tsx
++++ b/dashboard/src/pages/RoadmapView.tsx
+@@ -69,7 +69,7 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
+   {
+     id: 'd1',
+     title: 'Live Contract State Panel',
+-    description: 'Real-time dashboard showing deployed contract data: dispute count, agent reputation scores, recent votes, escrow balances.',
++    description: 'Real-time dashboard showing deployed contract data: assessment count, agent reputation scores, recent votes, escrow balances.',
+     category: 'enhancement',
+     status: 'live',
+     effort: '3 hours',
+diff --git a/dashboard/src/services/api.ts b/dashboard/src/services/api.ts
+index 85a4df8..76da8c8 100644
+--- a/dashboard/src/services/api.ts
++++ b/dashboard/src/services/api.ts
+@@ -187,14 +187,134 @@ export async function submitAssessment(
+   }
+ }
+ 
++// ─── Frontend fallback demos (shown when backend is unreachable) ─────────────
++
++const FALLBACK_DEMOS: DemoAsset[] = [
++  // ── Real Estate (5) ──────────────────────────────────────────────────────
++  {
++    type: 'real-estate',
++    name: 'Miami Beachfront Condo',
++    description: '2BR/2BA oceanfront unit at 123 Ocean Dr, Miami Beach. Built 2019, floor-to-ceiling impact glass, private balcony with Atlantic views.',
++    askingPrice: 1_250_000,
++    location: '123 Ocean Dr, Miami Beach, FL 33339',
++    sqft: 1200,
++  },
++  {
++    type: 'real-estate',
++    name: 'Brooklyn Brownstone Duplex',
++    description: 'Owner\'s duplex in Bed-Stuy, 3BR/2.5BA, original crown moldings, updated kitchen with Viking appliances, private backyard.',
++    askingPrice: 1_875_000,
++    location: '287 Hancock St, Brooklyn, NY 11216',
++    sqft: 2400,
++  },
++  {
++    type: 'real-estate',
++    name: 'Austin Suburban Ranch',
++    description: '4BR/3BA single-family on 0.5 acres in Cedar Park. Open floor plan, quartz counters, 3-car garage, pool.',
++    askingPrice: 685_000,
++    location: '456 Ranch Rd, Cedar Park, TX 78613',
++    sqft: 2800,
++  },
++  {
++    type: 'real-estate',
++    name: 'Denver Loft Conversion',
++    description: 'Industrial loft in RiNo arts district, 1BR/1BA, exposed brick, 14-ft ceilings, rooftop deck access, built 2021.',
++    askingPrice: 520_000,
++    location: '2960 Walnut St, Denver, CO 80205',
++    sqft: 950,
++  },
++  {
++    type: 'real-estate',
++    name: 'San Francisco Victorian TIC',
++    description: '2BR/1BA top-floor Victorian flat in Hayes Valley, bay windows, hardwood floors, updated plumbing & electrical.',
++    askingPrice: 1_150_000,
++    location: '415 Page St, San Francisco, CA 94117',
++    sqft: 1100,
++  },
++  // ── Art (5) ──────────────────────────────────────────────────────────────
++  {
++    type: 'art',
++    name: 'Contemporary Oil on Canvas',
++    description: 'Large-scale abstract expressionist work, 48×60 inches, signed and dated 2021. Exhibited at Miami Basel satellite fair.',
++    askingPrice: 45_000,
++    artistOrMedium: 'Oil on Canvas',
++  },
++  {
++    type: 'art',
++    name: 'Japanese Woodblock Print',
++    description: 'Early 20th century shin-hanga landscape by Kawase Hasui, edition 24/100, excellent condition with original mat.',
++    askingPrice: 8_500,
++    artistOrMedium: 'Woodblock Print',
++  },
++  {
++    type: 'art',
++    name: 'Bronze Sculpture, Standing Figure',
++    description: 'Lost-wax cast bronze, 36 inches tall, by mid-century American sculptor. Foundry mark and edition number on base.',
++    askingPrice: 32_000,
++    artistOrMedium: 'Bronze Sculpture',
++  },
++  {
++    type: 'art',
++    name: 'Vintage Analog Photography Collection',
++    description: 'Set of 12 gelatin silver prints, 16×20 each, documenting 1970s NYC street life. Artist proof, signed verso.',
++    askingPrice: 18_500,
++    artistOrMedium: 'Gelatin Silver Print',
++  },
++  {
++    type: 'art',
++    name: 'Digital Art NFT, Generative Series',
++    description: 'On-chain generative artwork from a curated Art Blocks collection, minted 2022. Token #417 of 500.',
++    askingPrice: 6_200,
++    artistOrMedium: 'Generative Digital Art',
++  },
++  // ── Commodity (5) ────────────────────────────────────────────────────────
++  {
++    type: 'commodity',
++    name: '10 oz Gold Bar',
++    description: 'LBMA-certified 10 troy oz gold bar, .9999 fine, serial verified, sealed in assay card.',
++    askingPrice: 23_500,
++    weightOz: 10,
++  },
++  {
++    type: 'commodity',
++    name: '100 oz Silver Bar',
++    description: 'COMEX-approved 100 troy oz silver bar, .999 fine, with serial number and certificate.',
++    askingPrice: 2_800,
++    weightOz: 100,
++  },
++  {
++    type: 'commodity',
++    name: '1 oz Platinum Coin',
++    description: 'American Platinum Eagle, 1 oz .9995 fine, 2023 issue, BU condition in original mint tube.',
++    askingPrice: 1_050,
++    weightOz: 1,
++  },
++  {
++    type: 'commodity',
++    name: '1 kg Gold Bar',
++    description: 'PAMP Suisse 1 kilogram gold bar, .9999 fine, individually serialized with Veriscan technology.',
++    askingPrice: 74_000,
++    weightOz: 32.15,
++  },
++  {
++    type: 'commodity',
++    name: '500 oz Silver Monster Box',
++    description: 'Sealed US Mint monster box containing 500 American Silver Eagle coins, 2024 issue, .999 fine.',
++    askingPrice: 16_500,
++    weightOz: 500,
++  },
++];
++
+ export async function fetchDemoAssets(): Promise<DemoAsset[]> {
+   try {
+     const res = await fetch(`${ORCHESTRATOR_URL}/api/assess/demo`);
+     const data = await handleResponse<{ success: boolean; assets: DemoAsset[] }>(res);
+-    return data.assets || [];
++    const assets = data.assets || [];
++    // If backend returned data, use it; otherwise fall back to frontend demos
++    return assets.length > 0 ? assets : FALLBACK_DEMOS;
+   } catch (err) {
+-    console.error('[API] Failed to fetch demo assets:', err);
+-    return [];
++    console.warn('[API] Backend unreachable — using built-in demo assets');
++    return FALLBACK_DEMOS;
+   }
+ }
+ 

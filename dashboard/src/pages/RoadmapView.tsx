@@ -69,7 +69,7 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
   {
     id: 'd1',
     title: 'Live Contract State Panel',
-    description: 'Real-time dashboard showing deployed contract data: dispute count, agent reputation scores, recent votes, escrow balances.',
+    description: 'Real-time dashboard showing deployed contract data: assessment count, agent reputation scores, recent votes, escrow balances.',
     category: 'enhancement',
     status: 'live',
     effort: '3 hours',

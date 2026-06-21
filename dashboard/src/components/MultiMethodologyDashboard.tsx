@@ -65,7 +65,7 @@ const AGENTS: AgentProfile[] = [
   {
     id: 'evidence-analyst',
     name: 'Evidence Analyst',
-    role: 'Juror — Evidence',
+    role: 'Juror: Evidence',
     icon: <Search size={18} />,
     color: '#10B981',
     bgColor: 'rgba(16, 185, 129, 0.08)',
@@ -75,7 +75,7 @@ const AGENTS: AgentProfile[] = [
   {
     id: 'market-interpreter',
     name: 'Market Data Interpreter',
-    role: 'Juror — Market Data',
+    role: 'Juror: Market Data',
     icon: <TrendingUp size={18} />,
     color: '#06B6D4',
     bgColor: 'rgba(6, 182, 212, 0.08)',
@@ -85,7 +85,7 @@ const AGENTS: AgentProfile[] = [
   {
     id: 'precedent-researcher',
     name: 'Precedent Researcher',
-    role: 'Juror — Precedent',
+    role: 'Juror: Precedent',
     icon: <BookOpen size={18} />,
     color: '#8B5CF6',
     bgColor: 'rgba(139, 92, 246, 0.08)',
@@ -518,7 +518,7 @@ const ConsensusSummary: React.FC<{
             Value Range
           </div>
           <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-            {formatCurrency(Math.min(...agentValues))} — {formatCurrency(Math.max(...agentValues))}
+            {formatCurrency(Math.min(...agentValues))} to {formatCurrency(Math.max(...agentValues))}
           </div>
           <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
             Spread: {formatCurrency(Math.max(...agentValues) - Math.min(...agentValues))}

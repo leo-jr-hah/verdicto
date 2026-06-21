@@ -905,7 +905,7 @@ export const AssessView: React.FC = () => {
       setLogs([]);
       logIdRef.current = 0;
       // Show the deploy hash in logs — user can verify on-chain
-      addLog('success', `Payment signed — deploy: ${deployHash.substring(0, 16)}...`, `View on explorer: https://testnet.cspr.live/deploy/${deployHash}`);
+      addLog('success', `Payment signed, deploy: ${deployHash.substring(0, 16)}...`, `View on explorer: https://testnet.cspr.live/deploy/${deployHash}`);
       assess(request, paymentProof);
     } catch (err: any) {
       if (err?.message?.includes('cancelled')) {
@@ -1019,7 +1019,14 @@ export const AssessView: React.FC = () => {
                       transition={{ duration: 0.2 }}
                       style={{ overflow: 'hidden', marginTop: '0.75rem' }}
                     >
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.5rem',
+                        maxHeight: '260px',
+                        overflowY: 'auto',
+                        paddingRight: '4px',
+                      }}>
                         {filteredDemos.map((demo, i) => (
                           <DemoAssetCard
                             key={i}

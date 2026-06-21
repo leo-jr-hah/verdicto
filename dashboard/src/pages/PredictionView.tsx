@@ -8,11 +8,16 @@ import {
   Clock,
   Wallet,
   CheckCircle2,
+  TrendingUp,
+  ChevronRight,
+  RefreshCw,
+  ExternalLink,
+  ArrowRight,
 } from 'lucide-react';
 import { useWallet } from '../contexts/CSPRClickContext';
 import { PLATFORM_WALLET, PREDICTION_FEE_CSPR } from '../config/casper';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Types ─────────────────────────────────────────────────────────────────
 
 interface PredictionAgent {
   name: string;
@@ -33,7 +38,7 @@ interface PredictionResult {
   timestamp: number;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ───────────────────────────────────────────────────────────────
 
 function formatPercent(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
@@ -53,32 +58,36 @@ function probabilityLabel(p: number): string {
   return 'Very Unlikely';
 }
 
-// ─── Demo Questions ──────────────────────────────────────────────────────────
+// ─── Constants ─────────────────────────────────────────────────────────────
+
+const TIMEFRAMES = ['1 month', '3 months', '6 months', '12 months', '24 months'];
 
 const DEMO_QUESTIONS = [
   {
     question: 'Will the Miami Beachfront Condo at 123 Ocean Dr sell above $2.5M by December 2026?',
     assetType: 'real-estate',
     timeframe: '6 months',
+    icon: '🏠',
   },
   {
     question: 'Will gold prices exceed $3,500/oz by end of Q3 2026?',
     assetType: 'commodity',
     timeframe: '3 months',
+    icon: '🥇',
   },
   {
     question: 'Will the Contemporary Oil Painting by Banksy appreciate more than 15% in the next auction?',
     assetType: 'art',
     timeframe: '12 months',
+    icon: '🎨',
   },
   {
     question: 'Will the average US mortgage rate drop below 5.5% by end of 2026?',
     assetType: 'macro',
     timeframe: '6 months',
+    icon: '📈',
   },
 ];
-
-// ─── Agent Cards ─────────────────────────────────────────────────────────────
 
 const AGENT_PROFILES = [
   { name: 'Valuation Agent A', role: 'Comparable Sales', color: '#EC4899' },
@@ -88,7 +97,7 @@ const AGENT_PROFILES = [
   { name: 'Precedent Researcher', role: 'Historical Precedent', color: '#8B5CF6' },
 ];
 
-// ─── Simulate Prediction ─────────────────────────────────────────────────────
+// ─── Simulation ────────────────────────────────────────────────────────────
 
 function simulatePrediction(question: string, timeframe: string): PredictionResult {
   const baseProbability = 0.3 + Math.random() * 0.4;
@@ -107,19 +116,17 @@ function simulatePrediction(question: string, timeframe: string): PredictionResu
   const weightedProb = agents.reduce((sum, a) => sum + a.probability * a.confidence, 0)
     / agents.reduce((sum, a) => sum + a.confidence, 0);
 
-  const riskFactors = [
-    'Market volatility may affect outcome',
-    'Interest rate changes could shift probabilities',
-    'Historical precedent shows 60% accuracy for similar predictions',
-  ];
-
   return {
     question,
     probability: weightedProb,
-    confidence: 0.75 + Math.random() * 0.2,
+    confidence: 0.65 + Math.random() * 0.25,
     timeframe,
     agents,
-    riskFactors,
+    riskFactors: [
+      'Market volatility may affect outcome',
+      'Interest rate changes could shift probabilities',
+      'Historical precedent shows 60% accuracy for similar predictions',
+    ],
     timestamp: Date.now(),
   };
 }
@@ -135,7 +142,7 @@ function generateReasoning(agentName: string, prob: number): string {
       `Revenue trajectory and yield analysis suggest ${(prob * 100).toFixed(0)}% chance. Operating margins support the assessment.`,
     ],
     'Evidence Analyst': [
-      `Data quality is high — 4/5 sources verified via MiMo LLM. Confidence in the ${(prob * 100).toFixed(0)}% estimate is strong. No significant outliers detected.`,
+      `Data quality is high, 4/5 sources verified via MiMo LLM. Confidence in the ${(prob * 100).toFixed(0)}% estimate is strong. No significant outliers detected.`,
       `Evidence chain is solid. 3 independent data sources corroborate the ${(prob * 100).toFixed(0)}% assessment. Minor gaps in historical data noted.`,
     ],
     'Market Interpreter': [
@@ -152,7 +159,171 @@ function generateReasoning(agentName: string, prob: number): string {
   return options[Math.floor(Math.random() * options.length)];
 }
 
-// ─── Main Component ──────────────────────────────────────────────────────────
+// ─── Probability Ring ──────────────────────────────────────────────────────
+
+const ProbabilityRing: React.FC<{ value: number; size?: number }> = ({ value, size = 140 }) => {
+  const r = (size - 12) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c * (1 - value);
+  const color = probabilityColor(value);
+
+  return (
+    <div style={{ position: 'relative', width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--border-color)" strokeWidth={8} />
+        <motion.circle
+          cx={size / 2} cy={size / 2} r={r}
+          fill="none" stroke={color} strokeWidth={8}
+          strokeLinecap="round"
+          strokeDasharray={c}
+          initial={{ strokeDashoffset: c }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 1.2, ease: 'easeOut', delay: 0.3 }}
+        />
+      </svg>
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 200, delay: 0.5 }}
+          style={{ fontSize: size * 0.22, fontWeight: 900, color, lineHeight: 1 }}
+        >
+          {formatPercent(value)}
+        </motion.div>
+        <div style={{ fontSize: size * 0.08, color: 'var(--text-tertiary)', fontWeight: 500, marginTop: 4 }}>
+          {probabilityLabel(value)}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Agent Probability Bar ─────────────────────────────────────────────────
+
+const AgentBar: React.FC<{ agent: PredictionAgent; index: number }> = ({ agent, index }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.08 }}
+      onClick={() => setExpanded(!expanded)}
+      style={{
+        background: 'var(--bg-elevated)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--card-radius)',
+        overflow: 'hidden',
+        cursor: 'pointer',
+        transition: 'border-color 0.15s ease',
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.borderColor = `${agent.color}50`}
+      onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
+    >
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        padding: '12px 16px',
+      }}>
+        {/* Agent dot + info */}
+        <div style={{
+          width: 36, height: 36, borderRadius: 8,
+          background: `${agent.color}12`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: agent.color }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+            {agent.name}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>
+            {agent.role}
+          </div>
+        </div>
+
+        {/* Bar visualization */}
+        <div style={{ flex: '0 0 120px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+          <div style={{ fontSize: '1rem', fontWeight: 800, color: probabilityColor(agent.probability) }}>
+            {formatPercent(agent.probability)}
+          </div>
+          <div style={{
+            width: '100%', height: 4, borderRadius: 2,
+            background: 'var(--border-color)',
+            overflow: 'hidden',
+          }}>
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${agent.probability * 100}%` }}
+              transition={{ duration: 0.8, delay: index * 0.1 + 0.3 }}
+              style={{ height: '100%', borderRadius: 2, background: agent.color }}
+            />
+          </div>
+        </div>
+
+        <ChevronRight
+          size={16}
+          color="var(--text-tertiary)"
+          style={{
+            transition: 'transform 0.2s ease',
+            transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
+          }}
+        />
+      </div>
+
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{
+              padding: '0 16px 14px',
+              borderTop: '1px solid var(--border-color-subtle, var(--border-color))',
+              marginTop: 0, paddingTop: 12,
+            }}>
+              <div style={{ display: 'flex', gap: 16, marginBottom: 10 }}>
+                <div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: 500 }}>CONFIDENCE</div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    {formatPercent(agent.confidence)}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', fontWeight: 500 }}>SIGNAL</div>
+                  <div style={{
+                    display: 'inline-block',
+                    padding: '2px 8px', borderRadius: 4,
+                    background: `${probabilityColor(agent.probability)}15`,
+                    color: probabilityColor(agent.probability),
+                    fontSize: '0.75rem', fontWeight: 600,
+                  }}>
+                    {probabilityLabel(agent.probability)}
+                  </div>
+                </div>
+              </div>
+              <div style={{
+                fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.6,
+                background: 'var(--bg-surface)',
+                borderRadius: 8, padding: '10px 12px',
+                border: '1px solid var(--border-color-subtle, var(--border-color))',
+              }}>
+                {agent.reasoning}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
+// ─── Main Component ────────────────────────────────────────────────────────
 
 export const PredictionView: React.FC = () => {
   const wallet = useWallet();
@@ -162,7 +333,7 @@ export const PredictionView: React.FC = () => {
   const [result, setResult] = useState<PredictionResult | null>(null);
   const [showDemos, setShowDemos] = useState(false);
 
-  // Payment modal state
+  // Payment
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [signingPayment, setSigningPayment] = useState(false);
   const [signError, setSignError] = useState<string | null>(null);
@@ -172,24 +343,19 @@ export const PredictionView: React.FC = () => {
     setLoading(true);
     setResult(null);
     await new Promise((r) => setTimeout(r, 4000 + Math.random() * 2000));
-    const prediction = simulatePrediction(question, timeframe);
-    setResult(prediction);
+    setResult(simulatePrediction(question, timeframe));
     setLoading(false);
   };
 
   const handlePredict = () => {
     if (!question.trim()) return;
-    // Show payment modal
     setSignError(null);
     setShowPaymentModal(true);
   };
 
   const handlePaymentConfirm = async () => {
-    // If wallet not connected, connect first
     if (!wallet.connected) {
-      try {
-        await wallet.connect();
-      } catch {
+      try { await wallet.connect(); } catch {
         setSignError('Please connect your wallet first.');
         return;
       }
@@ -203,13 +369,9 @@ export const PredictionView: React.FC = () => {
     setSignError(null);
 
     try {
-      const { deployHash } = await wallet.signPayment(
-        PLATFORM_WALLET,
-        PREDICTION_FEE_CSPR,
-      );
+      const { deployHash } = await wallet.signPayment(PLATFORM_WALLET, PREDICTION_FEE_CSPR);
       setShowPaymentModal(false);
       setLastDeployHash(deployHash);
-      console.log(`[Prediction] Payment signed — deploy: ${deployHash}`);
       await runPrediction();
     } catch (err: any) {
       if (err?.message?.includes('cancelled')) {
@@ -240,268 +402,497 @@ export const PredictionView: React.FC = () => {
     setResult(null);
   };
 
-  return (
-    <div>
-      <div className="page-header">
-        <h1 className="page-title">Prediction Engine</h1>
-        <p className="page-subtitle">
-          Ask outcome questions. 5 AI agents analyze market data and give probability estimates with full reasoning.
-        </p>
-      </div>
+  const walletDisplay = wallet.connected
+    ? `${wallet.publicKey?.substring(0, 8)}...${wallet.publicKey?.substring(wallet.publicKey.length - 6)}`
+    : null;
 
+  return (
+    <div style={{
+      padding: 'var(--page-padding-y) var(--page-padding-x)',
+      maxWidth: 'var(--page-max-width)',
+      margin: '0 auto',
+    }}>
       <AnimatePresence mode="wait">
+        {/* ─── INPUT STATE ─────────────────────────────────────── */}
         {!result && !loading ? (
-          <motion.div key="input" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ maxWidth: '700px' }}>
-            {/* Demo quick-fill */}
-            <div style={{ marginBottom: '1.5rem' }}>
+          <motion.div
+            key="input"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              maxWidth: 720,
+              margin: '0 auto',
+            }}
+          >
+            {/* Header */}
+            <div style={{ textAlign: 'center', marginBottom: 32 }}>
+              <h1 style={{
+                fontSize: '1.8rem', fontWeight: 700,
+                color: 'var(--text-primary)', marginBottom: 8,
+              }}>
+                Prediction Engine
+              </h1>
+              <p style={{
+                color: 'var(--text-secondary)',
+                fontSize: '0.95rem', lineHeight: 1.6,
+                maxWidth: 520, margin: '0 auto',
+              }}>
+                Ask any outcome question about RWA assets. 5 AI agents analyze market data and give probability estimates with full reasoning.
+              </p>
+            </div>
+
+            {/* Main Form Card */}
+            <div style={{
+              width: '100%',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--card-radius)',
+              padding: '24px 28px',
+              boxShadow: 'var(--shadow-sm)',
+            }}>
+              {/* Question Input */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  fontSize: '0.82rem', fontWeight: 600,
+                  color: 'var(--text-primary)', marginBottom: 8,
+                }}>
+                  <Target size={14} color="var(--primary)" />
+                  Prediction Question
+                </label>
+                <textarea
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  placeholder="e.g., Will this property sell above $2M by December 2026?"
+                  rows={3}
+                  style={{
+                    width: '100%', padding: '12px 14px', borderRadius: 10,
+                    border: '1.5px solid var(--border-color)',
+                    background: 'var(--bg-surface)',
+                    color: 'var(--text-primary)', fontSize: '0.95rem',
+                    fontFamily: 'var(--font-sans)',
+                    outline: 'none', resize: 'vertical',
+                    transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+                    lineHeight: 1.5,
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--primary)';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 59, 59, 0.08)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--border-color)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                />
+              </div>
+
+              {/* Timeframe Row */}
+              <div style={{ marginBottom: 24 }}>
+                <label style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  fontSize: '0.82rem', fontWeight: 600,
+                  color: 'var(--text-primary)', marginBottom: 10,
+                }}>
+                  <Clock size={14} />
+                  Timeframe
+                </label>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {TIMEFRAMES.map((tf) => {
+                    const active = timeframe === tf;
+                    return (
+                      <button
+                        key={tf}
+                        onClick={() => setTimeframe(tf)}
+                        style={{
+                          padding: '8px 16px', borderRadius: 8,
+                          border: `1.5px solid ${active ? 'var(--primary)' : 'var(--border-color)'}`,
+                          background: active ? 'rgba(255, 59, 59, 0.06)' : 'var(--bg-surface)',
+                          cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
+                          color: active ? 'var(--primary)' : 'var(--text-secondary)',
+                          transition: 'all 0.15s ease',
+                          display: 'flex', alignItems: 'center', gap: 5,
+                        }}
+                      >
+                        <Clock size={13} style={{ opacity: active ? 1 : 0.5 }} />
+                        {tf}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div style={{
+                height: 1, background: 'var(--border-color)',
+                margin: '0 -28px 20px',
+              }} />
+
+              {/* Action Row */}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 16,
+              }}>
+                <button
+                  onClick={handlePredict}
+                  disabled={!question.trim()}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    padding: '12px 28px', borderRadius: 10, border: 'none',
+                    background: question.trim()
+                      ? 'linear-gradient(135deg, var(--primary), var(--primary-dark, #cc2222))'
+                      : 'var(--border-color)',
+                    color: '#fff', fontSize: '0.95rem', fontWeight: 700,
+                    cursor: question.trim() ? 'pointer' : 'not-allowed',
+                    transition: 'all 0.2s ease',
+                    boxShadow: question.trim() ? '0 2px 8px rgba(255, 59, 59, 0.25)' : 'none',
+                  }}
+                >
+                  <Wallet size={16} />
+                  Pay {PREDICTION_FEE_CSPR} CSPR & Run
+                  <ArrowRight size={16} />
+                </button>
+
+                <div style={{
+                  fontSize: '0.78rem', color: 'var(--text-tertiary)',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                  {walletDisplay ? (
+                    <>
+                      <div style={{
+                        width: 8, height: 8, borderRadius: '50%',
+                        background: '#10b981',
+                      }} />
+                      {walletDisplay}
+                    </>
+                  ) : (
+                    <>
+                      <Wallet size={13} />
+                      Wallet connects automatically
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Sample Questions Section */}
+            <div style={{ width: '100%', marginTop: 20 }}>
               <button
                 onClick={() => setShowDemos(!showDemos)}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  padding: '0.6rem 1rem', borderRadius: '6px',
-                  border: '1px solid var(--border-color)', background: 'var(--bg-surface)',
-                  cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-secondary)',
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '10px 16px', borderRadius: 8,
+                  border: '1px dashed var(--border-color)',
+                  background: 'transparent',
+                  cursor: 'pointer', fontSize: '0.82rem',
+                  color: 'var(--text-tertiary)',
+                  transition: 'all 0.15s ease',
+                  width: '100%', justifyContent: 'center',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--primary)';
+                  e.currentTarget.style.color = 'var(--primary)';
+                  e.currentTarget.style.background = 'rgba(255, 59, 59, 0.03)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--border-color)';
+                  e.currentTarget.style.color = 'var(--text-tertiary)';
+                  e.currentTarget.style.background = 'transparent';
                 }}
               >
                 <Zap size={14} />
-                Try a sample question
+                {showDemos ? 'Hide sample questions' : 'Try a sample question'}
               </button>
-              {showDemos && (
+
+              <AnimatePresence>
+                {showDemos && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                      gap: 10, marginTop: 12,
+                    }}>
+                      {DEMO_QUESTIONS.map((demo, i) => (
+                        <motion.button
+                          key={i}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.05 }}
+                          onClick={() => handleDemoSelect(demo)}
+                          style={{
+                            display: 'flex', alignItems: 'flex-start', gap: 10,
+                            padding: '14px 16px', borderRadius: 10,
+                            border: '1px solid var(--border-color)',
+                            background: 'var(--bg-elevated)',
+                            cursor: 'pointer', textAlign: 'left',
+                            transition: 'all 0.15s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = 'var(--primary)';
+                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 59, 59, 0.08)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = 'var(--border-color)';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                        >
+                          <span style={{ fontSize: '1.2rem', lineHeight: 1, flexShrink: 0 }}>
+                            {demo.icon}
+                          </span>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{
+                              fontWeight: 600, fontSize: '0.82rem',
+                              color: 'var(--text-primary)',
+                              lineHeight: 1.4,
+                            }}>
+                              {demo.question}
+                            </div>
+                            <div style={{
+                              fontSize: '0.72rem', color: 'var(--text-tertiary)',
+                              marginTop: 4, display: 'flex', gap: 8,
+                            }}>
+                              <span>{demo.assetType}</span>
+                              <span>·</span>
+                              <span>{demo.timeframe}</span>
+                            </div>
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        ) : loading ? (
+          /* ─── LOADING STATE ───────────────────────────────────── */
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              padding: '6rem 2rem', textAlign: 'center',
+            }}
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
+              style={{ marginBottom: 20 }}
+            >
+              <Loader2 size={48} color="var(--primary)" />
+            </motion.div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>
+              Running Prediction Analysis
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: 400, lineHeight: 1.5 }}>
+              5 AI agents are analyzing market data, historical precedents, and economic indicators...
+            </p>
+            <div style={{
+              display: 'flex', gap: 8, marginTop: 24, flexWrap: 'wrap', justifyContent: 'center',
+            }}>
+              {AGENT_PROFILES.map((ap) => (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
+                  key={ap.name}
+                  animate={{ opacity: [0.4, 1, 0.4] }}
+                  transition={{ repeat: Infinity, duration: 1.5, delay: Math.random() * 0.5 }}
+                  style={{
+                    padding: '6px 12px', borderRadius: 6,
+                    background: `${ap.color}10`,
+                    border: `1px solid ${ap.color}25`,
+                    fontSize: '0.72rem', fontWeight: 600, color: ap.color,
+                  }}
                 >
-                  {DEMO_QUESTIONS.map((demo, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleDemoSelect(demo)}
+                  {ap.role}
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        ) : result ? (
+          /* ─── RESULT STATE ────────────────────────────────────── */
+          <motion.div
+            key="result"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            {/* Top Bar: Question + Reset */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              marginBottom: 24, gap: 16, flexWrap: 'wrap',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
+                <Target size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
+                <div style={{
+                  fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {result.question}
+                </div>
+              </div>
+              <button onClick={handleReset} style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 16px', borderRadius: 8,
+                border: '1px solid var(--border-color)',
+                background: 'var(--bg-surface)', cursor: 'pointer',
+                fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)',
+                transition: 'all 0.15s ease',
+                flexShrink: 0,
+              }}>
+                <RefreshCw size={14} />
+                New Prediction
+              </button>
+            </div>
+
+            {/* Hero: Probability Ring + Stats */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'auto 1fr',
+              gap: 32, alignItems: 'center',
+              background: 'var(--bg-elevated)',
+              border: `1px solid ${probabilityColor(result.probability)}30`,
+              borderRadius: 'var(--card-radius)',
+              padding: '32px 36px',
+              marginBottom: 24,
+            }}>
+              <ProbabilityRing value={result.probability} size={160} />
+
+              <div>
+                <div style={{
+                  fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-tertiary)',
+                  textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12,
+                }}>
+                  Predicted Outcome
+                </div>
+
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: 16,
+                }}>
+                  {[
+                    { label: 'Confidence', value: formatPercent(result.confidence), icon: <TrendingUp size={14} /> },
+                    { label: 'Timeframe', value: result.timeframe, icon: <Clock size={14} /> },
+                    { label: 'Agents', value: `${result.agents.length} analyzed`, icon: <Target size={14} /> },
+                  ].map((stat) => (
+                    <div key={stat.label} style={{
+                      background: 'var(--bg-surface)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 10, padding: '14px 16px',
+                    }}>
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: 5,
+                        fontSize: '0.68rem', color: 'var(--text-tertiary)',
+                        fontWeight: 500, marginBottom: 6,
+                      }}>
+                        {stat.icon}
+                        {stat.label.toUpperCase()}
+                      </div>
+                      <div style={{
+                        fontSize: '1.05rem', fontWeight: 700,
+                        color: 'var(--text-primary)',
+                      }}>
+                        {stat.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Payment proof */}
+                {lastDeployHash && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    marginTop: 16, padding: '8px 12px', borderRadius: 8,
+                    background: 'rgba(16, 185, 129, 0.06)',
+                    border: '1px solid rgba(16, 185, 129, 0.15)',
+                    fontSize: '0.78rem', color: 'var(--text-tertiary)',
+                  }}>
+                    <CheckCircle2 size={14} color="#10b981" />
+                    <span>Paid {PREDICTION_FEE_CSPR} CSPR</span>
+                    <a
+                      href={`https://testnet.cspr.live/deploy/${lastDeployHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       style={{
-                        display: 'flex', alignItems: 'center', gap: '0.75rem',
-                        padding: '0.75rem 1rem', borderRadius: '6px',
-                        border: '1px solid var(--border-color)', background: 'var(--bg-surface)',
-                        cursor: 'pointer', textAlign: 'left', width: '100%', transition: 'all 0.15s ease',
+                        color: 'var(--primary)', textDecoration: 'none',
+                        fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3,
                       }}
                     >
-                      <Target size={16} color="var(--text-tertiary)" />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                          {demo.question}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.15rem' }}>
-                          Timeframe: {demo.timeframe}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </motion.div>
-              )}
+                      Explorer <ExternalLink size={11} />
+                    </a>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Question input */}
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-                Prediction Question <span style={{ color: 'var(--primary)' }}>*</span>
-              </label>
-              <textarea
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="e.g., Will this property sell above $2M by December?"
-                rows={3}
-                style={{
-                  width: '100%', padding: '0.8rem 1rem', borderRadius: '8px',
-                  border: '1px solid var(--border-color)', background: 'var(--bg-main)',
-                  color: 'var(--text-primary)', fontSize: '0.95rem', fontFamily: 'var(--font-sans)',
-                  outline: 'none', resize: 'vertical', transition: 'border-color 0.15s ease',
-                }}
-              />
-            </div>
-
-            {/* Timeframe */}
-            <div style={{ marginBottom: '2rem' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-                Timeframe
-              </label>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {['1 month', '3 months', '6 months', '12 months', '24 months'].map((tf) => (
-                  <button
-                    key={tf}
-                    onClick={() => setTimeframe(tf)}
-                    style={{
-                      padding: '0.5rem 1rem', borderRadius: '6px',
-                      border: `2px solid ${timeframe === tf ? 'var(--primary)' : 'var(--border-color)'}`,
-                      background: timeframe === tf ? 'rgba(255, 59, 59, 0.04)' : 'var(--bg-surface)',
-                      cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
-                      color: timeframe === tf ? 'var(--primary)' : 'var(--text-secondary)',
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    <Clock size={14} style={{ marginRight: '0.3rem', verticalAlign: 'middle' }} />
-                    {tf}
-                  </button>
+            {/* Agent Analysis Section */}
+            <div style={{ marginBottom: 20 }}>
+              <h3 style={{
+                fontSize: '1rem', fontWeight: 700,
+                color: 'var(--text-primary)', marginBottom: 12,
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                Agent Analysis
+                <span style={{
+                  fontSize: '0.7rem', fontWeight: 500, color: 'var(--text-tertiary)',
+                  padding: '2px 8px', borderRadius: 4,
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-color)',
+                }}>
+                  {result.agents.length} agents
+                </span>
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {result.agents.map((agent, i) => (
+                  <AgentBar key={agent.name} agent={agent} index={i} />
                 ))}
               </div>
             </div>
 
-            {/* Predict button */}
-            <button
-              onClick={handlePredict}
-              disabled={!question.trim()}
+            {/* Risk Factors */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
               style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                width: '100%', padding: '0.9rem 2rem', borderRadius: '8px', border: 'none',
-                background: question.trim()
-                  ? 'linear-gradient(135deg, var(--primary), var(--primary-dark, #cc2222))'
-                  : 'var(--border-color)',
-                color: '#fff', fontSize: '1rem', fontWeight: 700,
-                cursor: question.trim() ? 'pointer' : 'not-allowed', transition: 'all 0.2s ease',
+                background: 'var(--bg-elevated)',
+                borderRadius: 'var(--card-radius)',
+                border: '1px solid var(--border-color)',
+                padding: '18px 22px',
               }}
             >
-              <Wallet size={18} />
-              Pay {PREDICTION_FEE_CSPR} CSPR & Run Prediction
-            </button>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '0.5rem' }}>
-              {wallet.connected
-                ? `Connected: ${wallet.publicKey?.substring(0, 8)}...${wallet.publicKey?.substring(wallet.publicKey.length - 6)}`
-                : 'Wallet will be connected automatically'}
-            </p>
-          </motion.div>
-        ) : loading ? (
-          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem 2rem', textAlign: 'center' }}
-          >
-            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: 'linear' }} style={{ marginBottom: '1.5rem' }}>
-              <Loader2 size={48} color="var(--primary)" />
-            </motion.div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>Running Prediction Analysis</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '400px' }}>
-              5 AI agents are analyzing market data, historical precedents, and economic indicators...
-            </p>
-          </motion.div>
-        ) : result ? (
-          <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            {/* Hero probability banner */}
-            <div style={{
-              background: `linear-gradient(135deg, ${probabilityColor(result.probability)}10, ${probabilityColor(result.probability)}05)`,
-              borderRadius: '16px', border: `2px solid ${probabilityColor(result.probability)}`,
-              padding: '2.5rem', marginBottom: '2rem', textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
-                Predicted Outcome
-              </div>
-              <div style={{ fontSize: '4rem', fontWeight: 900, color: probabilityColor(result.probability), lineHeight: 1, marginBottom: '0.5rem' }}>
-                {formatPercent(result.probability)}
-              </div>
               <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                padding: '0.4rem 1rem', borderRadius: '9999px',
-                background: `${probabilityColor(result.probability)}20`,
-                color: probabilityColor(result.probability),
-                fontSize: '0.9rem', fontWeight: 700, marginBottom: '1rem',
+                display: 'flex', alignItems: 'center', gap: 8,
+                marginBottom: 12,
               }}>
-                {probabilityLabel(result.probability)}
-              </div>
-              <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: 1.5, maxWidth: '600px', margin: '0 auto' }}>
-                {result.question}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '1.5rem' }}>
-                <div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Confidence</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatPercent(result.confidence)}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Timeframe</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{result.timeframe}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Agents</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{result.agents.length}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Question display + payment proof */}
-            <div style={{
-              background: 'var(--bg-surface)', borderRadius: '12px', border: '1px solid var(--border-color)',
-              padding: '1.25rem', marginBottom: '1.5rem',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: lastDeployHash ? '0.75rem' : 0 }}>
-                <Target size={18} color="var(--primary)" />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>{result.question}</div>
-                </div>
-                <button onClick={handleReset} style={{
-                  padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid var(--border-color)',
-                  background: 'var(--bg-surface)', cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-secondary)',
-                }}>
-                  New Prediction
-                </button>
-              </div>
-              {lastDeployHash && (
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  padding: '0.5rem 0.75rem', borderRadius: '6px',
-                  background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)',
-                  fontSize: '0.75rem', color: 'var(--text-tertiary)',
-                }}>
-                  <CheckCircle2 size={13} color="#10b981" />
-                  <span>Paid {PREDICTION_FEE_CSPR} CSPR —</span>
-                  <a
-                    href={`https://testnet.cspr.live/deploy/${lastDeployHash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: 'var(--primary)', textDecoration: 'underline', fontWeight: 600 }}
-                  >
-                    View on Explorer ↗
-                  </a>
-                </div>
-              )}
-            </div>
-
-            {/* Agent probability cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-              {result.agents.map((agent, i) => (
-                <motion.div key={agent.name} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.1 }}
-                  style={{ background: 'var(--bg-surface)', borderRadius: '12px', border: '1px solid var(--border-color)', overflow: 'hidden' }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-color)', background: `${agent.color}08` }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: agent.color }} />
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-primary)' }}>{agent.name}</div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>{agent.role}</div>
-                    </div>
-                    <div style={{ marginLeft: 'auto', fontSize: '1.3rem', fontWeight: 800, color: probabilityColor(agent.probability) }}>
-                      {formatPercent(agent.probability)}
-                    </div>
-                  </div>
-                  <div style={{ padding: '0.75rem 1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                      <span>Confidence: {formatPercent(agent.confidence)}</span>
-                      <span style={{ padding: '0.15rem 0.5rem', borderRadius: '4px', background: `${agent.color}15`, color: agent.color, fontWeight: 600 }}>
-                        {probabilityLabel(agent.probability)}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5, background: 'var(--bg-surface-alt)', borderRadius: '6px', padding: '0.5rem 0.75rem' }}>
-                      {agent.reasoning}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Risk factors */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.6 }}
-              style={{ background: 'var(--bg-surface)', borderRadius: '12px', border: '1px solid var(--border-color)', padding: '1.25rem' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                 <AlertTriangle size={16} color="#f59e0b" />
-                <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Risk Factors</span>
+                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                  Risk Factors
+                </span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {result.riskFactors.map((factor, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    fontSize: '0.82rem', color: 'var(--text-secondary)',
+                    padding: '8px 12px', borderRadius: 8,
+                    background: 'rgba(245, 158, 11, 0.04)',
+                    border: '1px solid rgba(245, 158, 11, 0.1)',
+                  }}>
+                    <div style={{
+                      width: 6, height: 6, borderRadius: '50%',
+                      background: '#f59e0b', flexShrink: 0,
+                    }} />
                     {factor}
                   </div>
                 ))}
@@ -511,7 +902,7 @@ export const PredictionView: React.FC = () => {
         ) : null}
       </AnimatePresence>
 
-      {/* ─── Payment Confirmation Modal ─────────────────────────────────── */}
+      {/* ─── Payment Modal ──────────────────────────────────────── */}
       <AnimatePresence>
         {showPaymentModal && (
           <motion.div
@@ -531,46 +922,58 @@ export const PredictionView: React.FC = () => {
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
               style={{
-                background: 'var(--bg-surface)', borderRadius: '16px',
+                background: 'var(--bg-elevated)',
+                borderRadius: 16,
                 border: '1px solid var(--border-color)',
-                padding: '2rem', maxWidth: '420px', width: '90%',
+                padding: 28,
+                maxWidth: 420, width: '90%',
                 boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
               }}
             >
-              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+              {/* Header */}
+              <div style={{ textAlign: 'center', marginBottom: 20 }}>
                 <div style={{
-                  width: 56, height: 56, borderRadius: '50%',
+                  width: 52, height: 52, borderRadius: '50%',
                   background: 'linear-gradient(135deg, var(--primary), var(--primary-dark, #cc2222))',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 1rem',
+                  margin: '0 auto 12px',
                 }}>
-                  <Wallet size={28} color="#fff" />
+                  <Wallet size={24} color="#fff" />
                 </div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-                  Confirm Prediction Payment
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 6, color: 'var(--text-primary)' }}>
+                  Confirm Payment
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  A micropayment is required to run the 5-agent prediction analysis.
+                  Micropayment required to run the 5-agent prediction analysis.
                 </p>
               </div>
 
-              {/* Fee breakdown */}
+              {/* Fee Breakdown */}
               <div style={{
-                background: 'var(--bg-main)', borderRadius: '10px',
-                border: '1px solid var(--border-color)',
-                padding: '1rem', marginBottom: '1.5rem',
+                background: 'var(--bg-surface)',
+                borderRadius: 10, border: '1px solid var(--border-color)',
+                padding: '14px 16px', marginBottom: 18,
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between',
+                  alignItems: 'center', marginBottom: 8,
+                }}>
                   <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Prediction Fee</span>
-                  <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary)' }}>
+                  <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary)' }}>
                     {PREDICTION_FEE_CSPR} CSPR
                   </span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between',
+                  fontSize: '0.75rem', color: 'var(--text-tertiary)',
+                }}>
                   <span>Network</span>
                   <span>Casper Testnet</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between',
+                  fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4,
+                }}>
                   <span>Recipient</span>
                   <span>{PLATFORM_WALLET.substring(0, 8)}...{PLATFORM_WALLET.substring(PLATFORM_WALLET.length - 6)}</span>
                 </div>
@@ -579,22 +982,24 @@ export const PredictionView: React.FC = () => {
               {/* Error */}
               {signError && (
                 <div style={{
-                  background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
-                  borderRadius: '8px', padding: '0.75rem', marginBottom: '1rem',
-                  fontSize: '0.8rem', color: '#ef4444',
+                  background: 'rgba(239,68,68,0.08)',
+                  border: '1px solid rgba(239,68,68,0.2)',
+                  borderRadius: 8, padding: '10px 12px', marginBottom: 14,
+                  fontSize: '0.82rem', color: '#ef4444',
                 }}>
                   {signError}
                 </div>
               )}
 
               {/* Actions */}
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', gap: 10 }}>
                 <button
                   onClick={handlePaymentCancel}
                   disabled={signingPayment}
                   style={{
-                    flex: 1, padding: '0.75rem', borderRadius: '8px',
-                    border: '1px solid var(--border-color)', background: 'var(--bg-main)',
+                    flex: 1, padding: '10px 16px', borderRadius: 8,
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-surface)',
                     cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600,
                     color: 'var(--text-secondary)',
                   }}
@@ -605,14 +1010,14 @@ export const PredictionView: React.FC = () => {
                   onClick={handlePaymentConfirm}
                   disabled={signingPayment}
                   style={{
-                    flex: 2, padding: '0.75rem', borderRadius: '8px',
+                    flex: 2, padding: '10px 16px', borderRadius: 8,
                     border: 'none',
                     background: signingPayment
                       ? 'var(--border-color)'
                       : 'linear-gradient(135deg, var(--primary), var(--primary-dark, #cc2222))',
                     cursor: signingPayment ? 'not-allowed' : 'pointer',
                     fontSize: '0.9rem', fontWeight: 700, color: '#fff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   }}
                 >
                   {signingPayment ? (
@@ -620,7 +1025,7 @@ export const PredictionView: React.FC = () => {
                       <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
                         <Loader2 size={16} />
                       </motion.div>
-                      Signing in wallet...
+                      Signing...
                     </>
                   ) : (
                     <>

@@ -34,6 +34,62 @@ const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 const LLM_TIMEOUT_MS = 15_000;
 
+// ─── Input Sanitization (Prompt Injection Defense) ──────────────────────────
+
+/**
+ * Maximum allowed length for any user-supplied field injected into LLM prompts.
+ * Prevents prompt flooding / context window exhaustion attacks.
+ */
+const MAX_FIELD_LENGTH = 500;
+
+/**
+ * Characters that are dangerous in LLM prompt contexts.
+ * Strips instruction-injection markers while preserving readable content.
+ */
+const INJECTION_PATTERNS = [
+  /ignore\s+(all\s+)?(previous|prior|above|earlier)\s+(instructions?|prompts?|rules?)/gi,
+  /you\s+are\s+now\s+/gi,
+  /system\s*:\s*/gi,
+  /new\s+instructions?\s*:/gi,
+  /disregard\s+(all\s+)?(previous|prior)/gi,
+  /act\s+as\s+if\s+you\s+are/gi,
+  /\[INST\]/gi,
+  /\[\/INST\]/gi,
+  /<\|im_start\|>/gi,
+  /<\|im_end\|>/gi,
+];
+
+/**
+ * Sanitize a user-supplied value before embedding it in an LLM prompt.
+ * - Truncates to MAX_FIELD_LENGTH
+ * - Strips known prompt-injection patterns
+ * - Removes null bytes and control characters
+ */
+export function sanitizeForPrompt(value: string): string {
+  if (typeof value !== 'string') return String(value);
+  
+  let clean = value
+    // Remove null bytes and control chars (except newline/tab)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    // Truncate
+    .slice(0, MAX_FIELD_LENGTH);
+  
+  // Strip known injection patterns
+  for (const pattern of INJECTION_PATTERNS) {
+    clean = clean.replace(pattern, '[FILTERED]');
+  }
+  
+  return clean;
+}
+
+/**
+ * Wrap user-supplied values in delimiters so the LLM treats them as data, not instructions.
+ * This is the primary defense against prompt injection.
+ */
+function delimit(value: string): string {
+  return `<<<USER_DATA_START>>>\n${value}\n<<<USER_DATA_END>>>`;
+}
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface LLMResponse {
@@ -162,9 +218,8 @@ export async function askJuror(systemPrompt: string, userPrompt: string) {
 
     try {
       return JSON.parse(result.content);
-    } catch (parseErr: any) {
+    } catch {
       console.warn(`[LLM] ⚠️  MiMo returned non-JSON, trying Groq...`);
-      // Fall through to Groq
     }
   } catch (mimoErr: any) {
     console.warn(`[LLM] ⚠️  MiMo failed: ${mimoErr.message} — trying Groq...`);
@@ -178,7 +233,7 @@ export async function askJuror(systemPrompt: string, userPrompt: string) {
 
     try {
       return JSON.parse(result.content);
-    } catch (parseErr: any) {
+    } catch {
       console.warn(`[LLM] ⚠️  Groq returned non-JSON, using fallback`);
       return buildFallbackResponse(userPrompt);
     }

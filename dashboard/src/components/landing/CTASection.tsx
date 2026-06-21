@@ -32,16 +32,16 @@ export const CTASection: React.FC = () => {
             fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: 800, color: 'var(--text-primary)',
             marginBottom: '24px', fontFamily: 'var(--font-display)', letterSpacing: '-0.02em'
           }}>
-            Ready to resolve your first dispute?
+            Ready to get your first valuation?
           </h2>
           
           <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '40px' }}>
-            Connect your Casper wallet and file a dispute in under 2 minutes. Two valuation agents and three jurors will analyze, deliberate, and settle.
+            Connect your Casper wallet and submit an asset in under 2 minutes. Two valuation agents and three jurors will analyze, deliberate, and deliver a verdict.
           </p>
 
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/assess" className="btn btn-primary" style={{ padding: '16px 32px', fontSize: '1rem' }}>
-              File a Dispute
+              Start Assessment
             </Link>
             <Link to="/dashboard" className="btn" style={{ padding: '16px 32px', fontSize: '1rem', background: 'transparent' }}>
               View the Dashboard

@@ -235,7 +235,7 @@ const StepVisualVerdict: React.FC = () => (
     </div>
     <div className="hiw-verdict-badge">
       <Lock size={12} />
-      Immutable — Casper Testnet
+      Immutable on Casper Testnet
     </div>
   </div>
 );

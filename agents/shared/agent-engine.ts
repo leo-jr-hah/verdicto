@@ -362,6 +362,33 @@ interface AgentServerConfig {
   methodPreference: 'comps' | 'dcf' | 'auto';
 }
 
+/** Simple in-memory rate limiter (per-IP, sliding window) */
+function createRateLimiter(maxRequests: number, windowMs: number) {
+  const hits = new Map<string, number[]>();
+  
+  // Periodic cleanup to prevent memory leak
+  setInterval(() => {
+    const now = Date.now();
+    for (const [ip, timestamps] of hits) {
+      const recent = timestamps.filter(t => now - t < windowMs);
+      if (recent.length === 0) hits.delete(ip);
+      else hits.set(ip, recent);
+    }
+  }, windowMs);
+  
+  return (ip: string): boolean => {
+    const now = Date.now();
+    const timestamps = (hits.get(ip) || []).filter(t => now - t < windowMs);
+    if (timestamps.length >= maxRequests) return false; // rate limited
+    timestamps.push(now);
+    hits.set(ip, timestamps);
+    return true;
+  };
+}
+
+const agentRateLimiter = createRateLimiter(30, 60_000); // 30 req/min per IP
+const MAX_BODY_BYTES = 16 * 1024; // 16KB max request body
+
 /**
  * Creates a standalone HTTP server for a single valuation agent.
  * The orchestrator POSTs a ValuationRequest; this server runs
@@ -383,9 +410,24 @@ export function createAgentServer(config: AgentServerConfig): void {
       return;
     }
 
+    // Rate limit
+    const clientIp = req.socket.remoteAddress || 'unknown';
+    if (!agentRateLimiter(clientIp)) {
+      res.writeHead(429, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Too many requests' }));
+      return;
+    }
+
     try {
       let body = '';
+      let totalBytes = 0;
       for await (const chunk of req) {
+        totalBytes += chunk.length;
+        if (totalBytes > MAX_BODY_BYTES) {
+          res.writeHead(413, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Request body too large' }));
+          return;
+        }
         body += chunk;
       }
 

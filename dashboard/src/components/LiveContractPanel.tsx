@@ -166,7 +166,7 @@ export const LiveContractPanel: React.FC = () => {
         setConnected(false);
       }
     } catch (err) {
-      setError('Failed to load contract state');
+      setError('Couldn\'t load data');
       setConnected(false);
     } finally {
       setLoading(false);
@@ -185,7 +185,7 @@ export const LiveContractPanel: React.FC = () => {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem' }}>
         <Loader2 size={24} color="var(--primary)" className="animate-spin" />
-        <span style={{ marginLeft: '0.75rem', color: 'var(--text-secondary)' }}>Loading contract state...</span>
+        <span style={{ marginLeft: '0.75rem', color: 'var(--text-secondary)' }}>Loading…</span>
       </div>
     );
   }
@@ -221,7 +221,7 @@ export const LiveContractPanel: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Activity size={20} color="var(--primary)" />
           <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-            Live Contract State
+            Protocol Overview
           </h2>
           <div style={{
             display: 'flex', alignItems: 'center', gap: '0.3rem',
@@ -268,7 +268,7 @@ export const LiveContractPanel: React.FC = () => {
         />
         <StatCard
           icon={<Shield size={16} />}
-          label="Receipts"
+          label="Records"
           value={state.receipts.total}
           color="#10b981"
           subtext={`${state.receipts.verified} verified • ${state.receipts.pending} pending`}
@@ -276,18 +276,18 @@ export const LiveContractPanel: React.FC = () => {
         />
         <StatCard
           icon={<TrendingUp size={16} />}
-          label="Total Staked"
+          label="Total Secured"
           value={formatCSPR(state.escrow.totalStaked)}
           color="#f59e0b"
-          subtext={`${formatCSPR(state.escrow.totalSettled)} settled`}
+          subtext={`${formatCSPR(state.escrow.totalSettled)} processed`}
           index={2}
         />
         <StatCard
           icon={<Activity size={16} />}
-          label="Active Disputes"
+          label="In Progress"
           value={state.disputes.deliberating + state.disputes.voting}
           color="#ef4444"
-          subtext={`${state.disputes.deliberating} deliberating • ${state.disputes.voting} voting`}
+          subtext={`${state.disputes.deliberating} in review • ${state.disputes.voting} finalizing`}
           index={3}
         />
       </div>
@@ -309,12 +309,12 @@ export const LiveContractPanel: React.FC = () => {
           padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)',
         }}>
           <Users size={16} color="var(--primary)" />
-          <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Agent Reputation Scores</span>
+          <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Agent Reputation</span>
           <span style={{
             marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-tertiary)',
             padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'var(--bg-surface-alt)',
           }}>
-            On-chain via ReputationRegistry
+            Verified on Casper
           </span>
         </div>
 
@@ -329,7 +329,7 @@ export const LiveContractPanel: React.FC = () => {
         gap: '0.4rem', marginTop: '1rem', fontSize: '0.75rem', color: 'var(--text-tertiary)',
       }}>
         <Clock size={12} />
-        Auto-refreshes every 30 seconds
+        Refreshes automatically
       </div>
 
       <style>{`

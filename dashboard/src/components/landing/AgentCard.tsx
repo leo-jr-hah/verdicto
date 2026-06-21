@@ -3,11 +3,11 @@ import { motion, useInView } from 'motion/react';
 import { BarChart2, TrendingUp, FileText, Activity, Search } from 'lucide-react';
 
 export const AGENTS = [
-  { name: 'Valuation Agent A', role: 'Comparable Sales', icon: BarChart2, color: '#EC4899', description: 'Pulls comparable sales from RentCast and adjusts for size, condition, and location differences to estimate fair market value.' },
-  { name: 'Evidence Analyst', role: 'Data Validation', icon: FileText, color: '#10B981', description: 'Cross-references raw data points using MiMo LLM reasoning, flags inconsistencies, and assesses evidence quality.' },
-  { name: 'Valuation Agent B', role: 'DCF (Discounted Cash Flow) Analysis', icon: TrendingUp, color: '#F97316', description: 'Projects future cash flows using FRED economic data and applies discounted cash flow modeling for income-generating assets.' },
-  { name: 'Market Data Interpreter', role: 'Market Context', icon: Activity, color: '#06B6D4', description: 'Evaluates macro trends, neighborhood trajectory, and market timing factors using MiMo LLM and live market feeds.' },
-  { name: 'Precedent Researcher', role: 'Precedent Search', icon: Search, color: '#8B5CF6', description: 'Searches historical disputes via Vectra vector database to find relevant precedents and legal frameworks.' },
+  { name: 'Comps Specialist', role: 'Comparable Sales', icon: BarChart2, color: '#EC4899', description: 'Analyzes comparable sales data and adjusts for size, condition, and location differences to estimate fair market value.' },
+  { name: 'Evidence Analyst', role: 'Data Validation', icon: FileText, color: '#10B981', description: 'Cross-references raw data points using LLM reasoning, flags inconsistencies, and assesses evidence quality.' },
+  { name: 'DCF Specialist', role: 'DCF (Discounted Cash Flow) Analysis', icon: TrendingUp, color: '#F97316', description: 'Projects future cash flows using economic data and applies discounted cash flow modeling for income-generating assets.' },
+  { name: 'Market Data Interpreter', role: 'Market Context', icon: Activity, color: '#06B6D4', description: 'Evaluates macro trends, neighborhood trajectory, and market timing factors using LLM and live market feeds.' },
+  { name: 'Precedent Researcher', role: 'Precedent Search', icon: Search, color: '#8B5CF6', description: 'Searches historical assessments via vector database to find relevant precedents and frameworks.' },
 ];
 
 export const AgentCard: React.FC<{ agent: typeof AGENTS[0]; index: number }> = ({ agent, index }) => {
