@@ -1,5 +1,5 @@
 /**
- * MiMo AI Client — Primary LLM for CASPER RWA Court
+ * MiMo AI Client — Primary LLM for Verdict
  * 
  * Uses Xiaomi MiMo V2 API (OpenAI-compatible endpoint).
  * Falls back to Groq if MiMo fails.

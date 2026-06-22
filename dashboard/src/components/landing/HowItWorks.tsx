@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
-import { Upload, BarChart3, Users, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Upload, BarChart3, Users, ShieldCheck, CheckCircle2, Landmark, Shield } from 'lucide-react';
 
 const STEPS = [
   {
@@ -34,6 +34,22 @@ const STEPS = [
     icon: ShieldCheck,
     description: 'Votes are weighted by each juror\'s on-chain trust score. The final verdict, along with every juror\'s reasoning and confidence, is committed to the Casper blockchain. An HMAC receipt chain ensures no reasoning was altered after the fact.',
     detail: 'Immutable On-Chain Certificate',
+  },
+  {
+    num: '05',
+    title: 'Borrow Against Your Asset',
+    color: '#F59E0B',
+    icon: Landmark,
+    description: 'Once your asset is valued and recorded on-chain, you can borrow against it instantly. The AI-calculated LTV ratio (60–85% depending on asset type and confidence) determines your loan amount. CSPR is disbursed directly to your wallet via a real on-chain transfer.',
+    detail: 'AI-Calculated LTV · Real CSPR Disbursement',
+  },
+  {
+    num: '06',
+    title: 'Insure Your Asset',
+    color: '#8B5CF6',
+    icon: Shield,
+    description: 'Protect your asset against value loss with AI-powered insurance. The risk engine evaluates market volatility, asset liquidity, and assessment confidence to calculate your premium and coverage. File claims anytime — the AI revalues your asset and pays out if the loss exceeds your deductible.',
+    detail: 'AI Risk Assessment · On-Chain Claims',
   },
 ];
 

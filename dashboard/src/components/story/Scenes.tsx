@@ -3,9 +3,9 @@ import { motion } from 'framer-motion';
 import { FileText, Database, GitMerge, ShieldCheck, CheckCircle2, Lock, Bot, Link as LinkIcon } from 'lucide-react';
 
 /* -------------------------------------------------------------------------- */
-/* SCENE 1: The Dispute                                                       */
+/* SCENE 1: The Valuation Gap                                                 */
 /* -------------------------------------------------------------------------- */
-export const Scene1Dispute: React.FC = () => {
+export const Scene1ValuationGap: React.FC = () => {
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
       {/* Background Grid */}
@@ -39,7 +39,7 @@ export const Scene1Dispute: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Tension / Dispute Line */}
+      {/* Tension / Valuation Gap Line */}
       <svg style={{ position: 'absolute', width: '200px', height: '100px', zIndex: 5 }}>
         <motion.path 
           d="M 0 50 Q 100 0 200 50" 
@@ -63,7 +63,7 @@ export const Scene1Dispute: React.FC = () => {
         />
       </svg>
       
-      {/* Floating Dispute Data */}
+      {/* Floating Valuation Data */}
       <motion.div
         animate={{ y: [-5, 5, -5] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}

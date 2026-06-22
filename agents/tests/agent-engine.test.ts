@@ -13,6 +13,78 @@ import type { ValuationResult } from '../shared/types.js';
 
 // ─── Mock external dependencies ──────────────────────────────────────────────
 
+vi.mock('../shared/mimo-client.js', () => ({
+  askValuationAgent: vi.fn().mockImplementation(async (systemPrompt: string, userPrompt: string) => {
+    // Return deterministic LLM responses that match test expectations
+    if (userPrompt.includes('commodity') || userPrompt.includes('COMMODITY')) {
+      if (userPrompt.includes('SPOT') || userPrompt.includes('spot')) {
+        return {
+          estimated_value: 33000,
+          confidence: 0.88,
+          reasoning: 'Spot price analysis for 10oz gold at $3,300/oz yields $33,000. Market conditions are stable with strong demand from institutional investors.',
+          methodology: 'market_price',
+          data_quality: 'strong',
+        };
+      }
+      return {
+        estimated_value: 34650,
+        confidence: 0.82,
+        reasoning: 'Physical appraisal for 10oz gold. Includes 5% premium for assay certification, delivery logistics, and secure storage above spot price.',
+        methodology: 'appraisal',
+        intrinsic_vs_market: 'fair',
+      };
+    }
+    if (userPrompt.includes('ART') || userPrompt.includes('art')) {
+      if (userPrompt.includes('FUNDAMENTAL') || userPrompt.includes('intrinsic')) {
+        return {
+          estimated_value: 7500,
+          confidence: 0.58,
+          reasoning: 'Intrinsic analysis of sculpture suggests market prices may be inflated by speculation. Fair value based on artistic merit and long-term collectibility.',
+          methodology: 'market_price',
+          intrinsic_vs_market: 'fair',
+        };
+      }
+      // Differentiate by medium in the prompt
+      if (userPrompt.toLowerCase().includes('sculpture')) {
+        return {
+          estimated_value: 12000,
+          confidence: 0.62,
+          reasoning: 'Comparable sales analysis of sculpture based on auction results and gallery pricing. Sculpture market is strong with limited supply.',
+          methodology: 'appraisal',
+          data_quality: 'moderate',
+        };
+      }
+      return {
+        estimated_value: 8500,
+        confidence: 0.62,
+        reasoning: 'Comparable sales analysis of oil painting based on auction results and gallery pricing. Medium demand in current market.',
+        methodology: 'appraisal',
+        data_quality: 'moderate',
+      };
+    }
+    // Real estate
+    if (userPrompt.includes('DCF') || userPrompt.includes('FUNDAMENTAL')) {
+      return {
+        estimated_value: 520000,
+        confidence: 0.75,
+        reasoning: 'DCF analysis for Miami, FL. Cap rate of 5.2% applied to estimated annual rent of $37,440. Mortgage rates at 6.8% pressure valuations downward.',
+        methodology: 'dcf',
+        intrinsic_vs_market: 'fair',
+      };
+    }
+    // Default: real estate comps
+    return {
+      estimated_value: 510000,
+      confidence: 0.82,
+      reasoning: 'Comparable sales in Miami, FL show average price of $510,000 across 2 recent transactions. Market is active with moderate inventory levels.',
+      methodology: 'comparable_sales',
+      data_quality: 'strong',
+      risk_factors: ['Interest rate sensitivity', 'Seasonal demand variation'],
+    };
+  }),
+  sanitizeForPrompt: vi.fn().mockImplementation((val: string) => val),
+}));
+
 vi.mock('../shared/data-sources.js', () => ({
   getRealEstateData: vi.fn().mockResolvedValue({
     comparables: [

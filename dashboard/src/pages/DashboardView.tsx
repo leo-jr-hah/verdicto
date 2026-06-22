@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Activity, Scale, TrendingUp, Shield, Zap, ArrowRight, BarChart3, CheckCircle2, Wifi, WifiOff } from 'lucide-react';
+import { Users, Activity, Scale, TrendingUp, Shield, Zap, ArrowRight, BarChart3, CheckCircle2, Wifi, WifiOff, Landmark } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { fetchTransactions, createWebSocket, type TransactionEntry, type WSMessage } from '../services/api';
 import { LiveContractPanel } from '../components/LiveContractPanel';
@@ -16,6 +16,8 @@ const AGENTS = [
 
 const QUICK_ACTIONS = [
   { label: 'Value an Asset', sub: 'Dual-agent valuation', to: '/assess', icon: Scale, primary: true },
+  { label: 'Borrow Against Asset', sub: 'AI-secured lending', to: '/borrow', icon: Landmark },
+  { label: 'Insure an Asset', sub: 'AI risk assessment', to: '/insure', icon: Shield },
   { label: 'Meet the Agents', sub: 'Track performance', to: '/reputation', icon: Users },
   { label: 'View History', sub: 'All assessments & transactions', to: '/transactions', icon: Activity },
 ];
@@ -200,7 +202,7 @@ export const DashboardView: React.FC = () => {
               <div className="empty-state" style={{ padding: '48px 24px' }}>
                 <Activity size={32} color="var(--text-tertiary)" />
                 <div className="empty-state-title" style={{ marginTop: '12px' }}>No activity yet</div>
-                <p className="empty-state-text">Run a dispute resolution to see activity here.</p>
+                <p className="empty-state-text">Run an assessment to see activity here.</p>
               </div>
             ) : (
               transactions.map((tx, i) => (

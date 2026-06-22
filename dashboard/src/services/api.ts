@@ -9,7 +9,7 @@ const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3010';
 
 export interface TransactionEntry {
   id: string;
-  type: 'ZK-Lite Commitment' | 'Native Transfer' | 'HMAC Receipt Chain' | 'ExecuteVerdict' | 'UpdateReputation' | 'InitiateDispute' | 'x402 Payment';
+  type: 'ZK-Lite Commitment' | 'Native Transfer' | 'HMAC Receipt Chain' | 'ExecuteVerdict' | 'UpdateReputation' | 'SubmitAssessment' | 'x402 Payment';
   action: string;
   hash: string;
   contract: string;
@@ -103,6 +103,89 @@ export interface DemoAsset {
   weightOz?: number;
 }
 
+// ─── Lending Types ───────────────────────────────────────────────────────────
+
+export interface Loan {
+  loanId: string;
+  assetId: string;
+  assetType: AssetType;
+  assetName: string;
+  assessedValue: number;
+  ltvRatio: number;
+  loanAmountCSPR: number;
+  status: 'active' | 'healthy' | 'warning' | 'liquidated' | 'repaid';
+  healthRatio: number;
+  repaidAmountCSPR: number;
+  createdAt: number;
+  lastRevaluedAt: number;
+  disbursementTxHash: string;
+  // Verdict Point 1: Trust-score-aware LTV breakdown
+  trustBreakdown: { confidence: number; valueRatio: number; ltvRange: string };
+  // Verdict Point 2: Escrow lock/release tx hashes
+  escrowLockTxHash?: string;
+  escrowReleaseTxHash?: string;
+  // Verdict Point 3: Revaluation history with juror deliberation
+  revaluationHistory: Array<{
+    timestamp: number;
+    previousValue: number;
+    newValue: number;
+    healthRatio: number;
+    status: string;
+    valuationA: { value: number; method: string; confidence: number; reasoning: string };
+    valuationB: { value: number; method: string; confidence: number; reasoning: string };
+    deliberationReceiptHash?: string;
+  }>;
+}
+
+export interface LoanCreateRequest {
+  borrowerPublicKey: string;
+  assetId: string;
+  assetType: AssetType;
+  assetName: string;
+  assessedValue: number;
+  askingPrice: number;
+  confidence: number;
+  assessmentId?: string;
+}
+
+export interface LoanCreateResponse {
+  loanId: string;
+  assetId: string;
+  assetName: string;
+  assetType: AssetType;
+  assessedValue: number;
+  ltvRatio: number;
+  loanAmountCSPR: number;
+  tier: string;
+  platformFeeCSPR: number;
+  status: string;
+  healthRatio: number;
+  disbursementTxHash: string;
+  broadcastSuccess: boolean;
+  createdAt: number;
+  // Verdict Point 1: Trust breakdown
+  trustBreakdown: { confidence: number; valueRatio: number; ltvRange: string };
+  // Verdict Point 2: Escrow
+  escrowLockTxHash?: string;
+}
+
+export interface RevaluationResult {
+  loanId: string;
+  previousValue: number;
+  newValue: number;
+  valueChangePercent: number;
+  healthRatio: number;
+  status: string;
+  marginCall: boolean;
+  liquidated: boolean;
+  valuationA: { value: number; method: string; confidence: number; reasoning: string };
+  valuationB: { value: number; method: string; confidence: number; reasoning: string };
+  // Verdict Point 3: Deliberation proof
+  divergence: number;
+  receiptHash: string;
+  commitmentTxHash: string;
+}
+
 // ─── Error Handling ──────────────────────────────────────────────────────────
 
 class ApiError extends Error {
@@ -130,6 +213,16 @@ async function handleResponse<T>(res: Response): Promise<T> {
       body
     );
   }
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const text = await res.text();
+    const preview = text.slice(0, 200);
+    throw new ApiError(
+      `Expected JSON but got ${contentType || 'unknown content-type'}. URL: ${res.url}. Response preview: ${preview}`,
+      res.status,
+      text
+    );
+  }
   return res.json();
 }
 
@@ -150,11 +243,11 @@ export async function fetchTransactions(): Promise<TransactionEntry[]> {
   }
 }
 
-// ─── Disputes ────────────────────────────────────────────────────────────────
+// ─── Assessments ─────────────────────────────────────────────────────────────
 
-export async function startDispute(): Promise<{ success: boolean; disputeId?: string; error?: string }> {
+export async function startAssessment(): Promise<{ success: boolean; assessmentId?: string; error?: string }> {
   try {
-    const res = await fetch(`${ORCHESTRATOR_URL}/api/disputes/start`, { method: 'POST' });
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/assessments/start`, { method: 'POST' });
     return await handleResponse(res);
   } catch (err: any) {
     return { success: false, error: err.message };
@@ -163,16 +256,46 @@ export async function startDispute(): Promise<{ success: boolean; disputeId?: st
 
 // ─── Assessment ──────────────────────────────────────────────────────────────
 
+/** x402 payment requirements returned by the backend when payment is needed */
+export interface X402PaymentRequirements {
+  x402Version: string;
+  paymentRequirements: {
+    scheme: string;
+    supportedChains: string[];
+    chainId: string;
+    maxAmountRequired: string;
+    resource: string;
+    description: string;
+    mimeType: string;
+    payTo: string;
+    sessionEnabled: boolean;
+  };
+}
+
+/** Result of submitAssessment — either success, payment required, or error */
+export type AssessmentResponse =
+  | { status: 'success'; assessment: AssessmentResult }
+  | { status: 'payment_required'; paymentRequirements: X402PaymentRequirements }
+  | { status: 'error'; error: string };
+
+/**
+ * Submit an assessment request to the orchestrator.
+ *
+ * x402 flow:
+ *   1. First call: no paymentProof → backend may return 402 with payment requirements
+ *   2. If 402: return payment requirements to the caller (UI shows payment modal)
+ *   3. User signs payment via wallet → caller retries with paymentProof
+ *   4. Second call: includes x-payment-proof header → backend verifies and proceeds
+ */
 export async function submitAssessment(
   request: AssessmentRequest,
   paymentProof?: string,
-): Promise<{ success: boolean; assessment?: AssessmentResult; error?: string }> {
+): Promise<AssessmentResponse> {
   try {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
     if (paymentProof) {
-      headers['payment-signature'] = paymentProof;
       headers['x-payment-proof'] = paymentProof;
     }
 
@@ -181,9 +304,27 @@ export async function submitAssessment(
       headers,
       body: JSON.stringify(request),
     });
-    return await handleResponse(res);
+
+    // Handle 402 Payment Required — return requirements for UI to handle
+    if (res.status === 402) {
+      const body = await res.json();
+      if (body.paymentRequirements) {
+        return {
+          status: 'payment_required',
+          paymentRequirements: body as X402PaymentRequirements,
+        };
+      }
+      // 402 without requirements — treat as error
+      return { status: 'error', error: body.error || 'Payment required' };
+    }
+
+    const body = await res.json();
+    if (body.success && body.assessment) {
+      return { status: 'success', assessment: body.assessment };
+    }
+    return { status: 'error', error: body.error || 'Assessment failed' };
   } catch (err: any) {
-    return { success: false, error: err.message };
+    return { status: 'error', error: err.message || 'Network error' };
   }
 }
 
@@ -324,7 +465,7 @@ export interface ReceiptVerificationResult {
   success: boolean;
   valid: boolean;
   receiptCount: number;
-  disputeId?: string;
+  assessmentId?: string;
   reason?: string;
   details: Array<{
     receiptId: string;
@@ -337,12 +478,12 @@ export interface ReceiptVerificationResult {
   }>;
 }
 
-export async function verifyReceiptChain(disputeId: string): Promise<ReceiptVerificationResult> {
+export async function verifyReceiptChain(assessmentId: string): Promise<ReceiptVerificationResult> {
   try {
     const res = await fetch(`${ORCHESTRATOR_URL}/api/receipts/verify`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ disputeId }),
+      body: JSON.stringify({ assessmentId }),
     });
     return await handleResponse(res);
   } catch (err: any) {
@@ -353,7 +494,7 @@ export async function verifyReceiptChain(disputeId: string): Promise<ReceiptVeri
 // ─── Contract State ──────────────────────────────────────────────────────────
 
 export interface ContractState {
-  disputes: {
+  assessments: {
     total: number;
     pending: number;
     deliberating: number;
@@ -367,10 +508,10 @@ export interface ContractState {
     totalAssessments: number;
     accuracy: number;
   }>;
-  escrow: {
-    totalStaked: number;
-    totalSettled: number;
-    activeDisputes: number;
+  payments: {
+    totalCollected: number;
+    totalProcessed: number;
+    activeAssessments: number;
   };
   receipts: {
     total: number;
@@ -393,7 +534,7 @@ export async function fetchContractState(): Promise<ContractState | null> {
 
 // ─── WebSocket ───────────────────────────────────────────────────────────────
 
-export type WSMessageType = 'transaction' | 'dispute_started' | 'valuation_result' | 'juror_vote' | 'final_verdict' | 'agent_thought' | 'receipt_created';
+export type WSMessageType = 'transaction' | 'assessment_started' | 'valuation_result' | 'juror_vote' | 'final_verdict' | 'agent_thought' | 'receipt_created';
 
 export interface WSMessage {
   type: WSMessageType;
@@ -422,4 +563,263 @@ export function createWebSocket(onMessage: (msg: WSMessage) => void): WebSocket 
   };
 
   return ws;
+}
+
+// ─── Lending API ─────────────────────────────────────────────────────────────
+
+/**
+ * Create a loan against a previously assessed asset.
+ * May return 402 if x402 payment is required.
+ */
+export async function createLoan(
+  request: LoanCreateRequest,
+  paymentProof?: string,
+): Promise<{ status: 'success' | 'payment_required' | 'error'; loan?: LoanCreateResponse; paymentRequirements?: X402PaymentRequirements; error?: string }> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (paymentProof) {
+    headers['x-payment-proof'] = paymentProof;
+  }
+
+  const res = await fetch(`${ORCHESTRATOR_URL}/api/loans/create`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(request),
+  });
+
+  const data = await res.json();
+
+  if (res.status === 402 && data.paymentRequirements) {
+    return { status: 'payment_required', paymentRequirements: data.paymentRequirements };
+  }
+
+  if (!res.ok || !data.success) {
+    return { status: 'error', error: data.error || `HTTP ${res.status}` };
+  }
+
+  return { status: 'success', loan: data.loan };
+}
+
+/**
+ * Fetch all loans, optionally filtered by borrower public key.
+ */
+export async function fetchLoans(borrowerPublicKey?: string): Promise<Loan[]> {
+  try {
+    const url = borrowerPublicKey
+      ? `${ORCHESTRATOR_URL}/api/loans?borrower=${encodeURIComponent(borrowerPublicKey)}`
+      : `${ORCHESTRATOR_URL}/api/loans`;
+    const res = await fetch(url);
+    const data = await handleResponse<{ success: boolean; loans: Loan[] }>(res);
+    return data.loans || [];
+  } catch (err) {
+    console.error('[API] Failed to fetch loans:', err);
+    return [];
+  }
+}
+
+/**
+ * Fetch a single loan by ID.
+ */
+export async function fetchLoan(loanId: string): Promise<Loan | null> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/loans/${loanId}`);
+    const data = await handleResponse<{ success: boolean; loan: Loan }>(res);
+    return data.loan || null;
+  } catch (err) {
+    console.error('[API] Failed to fetch loan:', err);
+    return null;
+  }
+}
+
+/**
+ * Repay part of a loan. Requires real CSPR transfer txHash.
+ */
+export async function repayLoan(
+  loanId: string,
+  amount: number,
+  txHash?: string,
+): Promise<{ success: boolean; loan?: any; error?: string }> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/loans/${loanId}/repay`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount, txHash }),
+    });
+    const data = await res.json();
+    return data;
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Trigger revaluation of a loan's collateral.
+ */
+export async function revalueLoan(
+  loanId: string,
+): Promise<{ success: boolean; revaluation?: RevaluationResult; error?: string }> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/loans/${loanId}/revalue`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await res.json();
+    return data;
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+// ─── Insurance Types ─────────────────────────────────────────────────────────
+
+export interface InsurancePolicy {
+  policyId: string;
+  assetId: string;
+  assetType: AssetType;
+  assetName: string;
+  assessedValue: number;
+  coverageAmount: number;
+  premiumCSPR: number;
+  deductiblePercent: number;
+  status: 'active' | 'expired' | 'claimed' | 'paid';
+  riskScore: number;
+  riskFactors: string[];
+  expiresAt: number;
+  createdAt: number;
+  claimHistory: Array<{
+    claimId: string;
+    amount: number;
+    reason: string;
+    status: 'pending' | 'approved' | 'denied' | 'paid';
+    filedAt: number;
+    resolvedAt?: number;
+  }>;
+}
+
+export interface InsuranceCreateRequest {
+  ownerPublicKey: string;
+  assetId: string;
+  assetType: AssetType;
+  assetName: string;
+  assessedValue: number;
+  askingPrice: number;
+  confidence: number;
+  coveragePercent?: number;
+  assessmentId?: string;
+}
+
+export interface InsuranceCreateResponse {
+  policyId: string;
+  assetId: string;
+  assetName: string;
+  assetType: AssetType;
+  assessedValue: number;
+  coverageAmount: number;
+  premiumCSPR: number;
+  deductiblePercent: number;
+  riskScore: number;
+  riskFactors: string[];
+  tier: string;
+  platformFeeCSPR: number;
+  status: string;
+  expiresAt: number;
+  createdAt: number;
+}
+
+export interface ClaimResult {
+  claimId: string;
+  policyId: string;
+  amount: number;
+  status: 'pending' | 'approved' | 'denied' | 'paid';
+  reason: string;
+  revaluation?: {
+    previousValue: number;
+    newValue: number;
+    lossPercent: number;
+  };
+}
+
+// ─── Insurance API ───────────────────────────────────────────────────────────
+
+/**
+ * Create an insurance policy for a previously assessed asset.
+ * May return 402 if x402 payment is required.
+ */
+export async function createInsurancePolicy(
+  request: InsuranceCreateRequest,
+  paymentProof?: string,
+): Promise<{ status: 'success' | 'payment_required' | 'error'; policy?: InsuranceCreateResponse; paymentRequirements?: X402PaymentRequirements; error?: string }> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (paymentProof) {
+    headers['x-payment-proof'] = paymentProof;
+  }
+
+  const res = await fetch(`${ORCHESTRATOR_URL}/api/insurance/create`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(request),
+  });
+
+  const data = await res.json();
+
+  if (res.status === 402 && data.paymentRequirements) {
+    return { status: 'payment_required', paymentRequirements: data.paymentRequirements };
+  }
+
+  if (!res.ok || !data.success) {
+    return { status: 'error', error: data.error || `HTTP ${res.status}` };
+  }
+
+  return { status: 'success', policy: data.policy };
+}
+
+/**
+ * Fetch all insurance policies, optionally filtered by owner public key.
+ */
+export async function fetchInsurancePolicies(ownerPublicKey?: string): Promise<InsurancePolicy[]> {
+  try {
+    const url = ownerPublicKey
+      ? `${ORCHESTRATOR_URL}/api/insurance?owner=${encodeURIComponent(ownerPublicKey)}`
+      : `${ORCHESTRATOR_URL}/api/insurance`;
+    const res = await fetch(url);
+    const data = await handleResponse<{ success: boolean; policies: InsurancePolicy[] }>(res);
+    return data.policies || [];
+  } catch (err) {
+    console.error('[API] Failed to fetch insurance policies:', err);
+    return [];
+  }
+}
+
+/**
+ * Fetch a single insurance policy by ID.
+ */
+export async function fetchInsurancePolicy(policyId: string): Promise<InsurancePolicy | null> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/insurance/${policyId}`);
+    const data = await handleResponse<{ success: boolean; policy: InsurancePolicy }>(res);
+    return data.policy || null;
+  } catch (err) {
+    console.error('[API] Failed to fetch insurance policy:', err);
+    return null;
+  }
+}
+
+/**
+ * File a claim against an insurance policy.
+ */
+export async function fileInsuranceClaim(
+  policyId: string,
+  reason: string,
+  requestedAmount?: number,
+): Promise<{ success: boolean; claim?: ClaimResult; error?: string }> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/insurance/${policyId}/claim`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason, requestedAmount }),
+    });
+    const data = await res.json();
+    return data;
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
 }

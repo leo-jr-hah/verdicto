@@ -17,7 +17,7 @@ pub struct ReputationCard {
     pub parking_score: u32,
     pub real_estate_score: u32,
     pub reliability_score: u32,
-    pub dispute_count: u32,
+    pub assessment_count: u32,
 }
 
 #[odra::event]
@@ -58,7 +58,7 @@ impl ReputationRegistry {
             parking_score: initial_parking,
             real_estate_score: initial_real_estate,
             reliability_score: reliability,
-            dispute_count: 0,
+            assessment_count: 0,
         });
 
         let count = self.agent_count.get_or_default();
@@ -79,7 +79,7 @@ impl ReputationRegistry {
         let new_score = ((card.parking_score as i32) + delta).max(0).min(1000) as u32;
         
         card.parking_score = new_score;
-        card.dispute_count += 1;
+        card.assessment_count += 1;
         card.reliability_score = (card.parking_score + card.real_estate_score) / 2;
         
         self.cards.set(&agent_id, card);
@@ -112,7 +112,7 @@ impl ReputationRegistry {
         let new_score = ((card.parking_score as i32) + delta).max(0).min(1000) as u32;
         
         card.parking_score = new_score;
-        card.dispute_count += 1;
+        card.assessment_count += 1;
         card.reliability_score = (card.parking_score + card.real_estate_score) / 2;
         
         self.cards.set(&agent_id, card);

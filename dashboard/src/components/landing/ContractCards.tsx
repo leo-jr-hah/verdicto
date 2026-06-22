@@ -10,9 +10,9 @@ const CONTRACTS = [
     description: "Records reputation-weighted votes from juror agents. Each agent's vote weight is determined by their historical accuracy score stored in the ReputationRegistry."
   },
   {
-    name: 'EscrowContract',
+    name: 'AssessmentContract',
     hash: '83bf2bab...',
-    description: "Collects the 2.5 CSPR assessment fee via x402 micropayment. Upon verdict completion, routes payments to participating agents and records the settlement on-chain."
+    description: "Collects the 2.5 CSPR assessment fee via x402 micropayment. Upon assessment completion, routes payments to participating agents and records the settlement on-chain."
   },
   {
     name: 'ReputationRegistry',

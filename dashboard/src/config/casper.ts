@@ -18,3 +18,9 @@ export const ASSESSMENT_FEE_CSPR = 2.5;
 
 /** Prediction fee in CSPR */
 export const PREDICTION_FEE_CSPR = 1;
+
+/** Loan origination fee in CSPR */
+export const LOAN_FEE_CSPR = 5;
+
+/** Insurance policy fee in CSPR */
+export const INSURANCE_FEE_CSPR = 3;

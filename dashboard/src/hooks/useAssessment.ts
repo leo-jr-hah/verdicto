@@ -4,6 +4,7 @@ import {
   fetchDemoAssets,
   type AssessmentRequest,
   type AssessmentResult,
+  type X402PaymentRequirements,
   type DemoAsset,
   type AssetType,
 } from '../services/api';
@@ -14,10 +15,15 @@ interface UseAssessmentState {
   result: AssessmentResult | null;
   demoAssets: DemoAsset[];
   demoLoading: boolean;
+  /** When set, the UI should show a payment modal with these requirements */
+  paymentRequired: X402PaymentRequirements | null;
 }
 
 interface UseAssessmentReturn extends UseAssessmentState {
-  assess: (request: AssessmentRequest, paymentProof?: string) => Promise<void>;
+  /** Step 1: Submit assessment (may trigger 402 → paymentRequired) */
+  assess: (request: AssessmentRequest) => Promise<void>;
+  /** Step 2: After wallet signs, retry with payment proof */
+  submitWithPaymentProof: (request: AssessmentRequest, paymentProof: string) => Promise<void>;
   loadDemoAssets: () => Promise<void>;
   reset: () => void;
   clearError: () => void;
@@ -30,6 +36,7 @@ export function useAssessment(): UseAssessmentReturn {
     result: null,
     demoAssets: [],
     demoLoading: false,
+    paymentRequired: null,
   });
 
   const abortRef = useRef<AbortController | null>(null);
@@ -41,21 +48,33 @@ export function useAssessment(): UseAssessmentReturn {
     };
   }, []);
 
-  const assess = useCallback(async (request: AssessmentRequest, paymentProof?: string) => {
+  /**
+   * Step 1: Submit assessment request.
+   * If the backend returns 402, stores payment requirements in state
+   * so the UI can show the payment modal.
+   */
+  const assess = useCallback(async (request: AssessmentRequest) => {
     // Cancel any in-flight request
     abortRef.current?.abort();
     abortRef.current = new AbortController();
 
-    setState(prev => ({ ...prev, loading: true, error: null, result: null }));
+    setState(prev => ({ ...prev, loading: true, error: null, result: null, paymentRequired: null }));
 
     try {
-      const response = await submitAssessment(request, paymentProof);
+      const response = await submitAssessment(request);
 
-      if (response.success && response.assessment) {
+      if (response.status === 'success') {
         setState(prev => ({
           ...prev,
           loading: false,
-          result: response.assessment!,
+          result: response.assessment,
+        }));
+      } else if (response.status === 'payment_required') {
+        // x402: backend wants payment — store requirements, stop loading
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          paymentRequired: response.paymentRequirements,
         }));
       } else {
         setState(prev => ({
@@ -70,6 +89,50 @@ export function useAssessment(): UseAssessmentReturn {
         ...prev,
         loading: false,
         error: err.message || 'Network error. Is the orchestrator running?',
+      }));
+    }
+  }, []);
+
+  /**
+   * Step 2: Retry assessment with payment proof (after wallet signs).
+   * This is called after the user approves the payment in their wallet.
+   */
+  const submitWithPaymentProof = useCallback(async (request: AssessmentRequest, paymentProof: string) => {
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+
+    setState(prev => ({ ...prev, loading: true, error: null, result: null, paymentRequired: null }));
+
+    try {
+      const response = await submitAssessment(request, paymentProof);
+
+      if (response.status === 'success') {
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          result: response.assessment,
+        }));
+      } else if (response.status === 'payment_required') {
+        // Still needs payment — proof was invalid
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          error: 'Payment verification failed. Please try again.',
+          paymentRequired: response.paymentRequirements,
+        }));
+      } else {
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          error: response.error || 'Assessment failed after payment.',
+        }));
+      }
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: err.message || 'Network error after payment.',
       }));
     }
   }, []);
@@ -93,6 +156,7 @@ export function useAssessment(): UseAssessmentReturn {
       result: null,
       demoAssets: state.demoAssets,
       demoLoading: false,
+      paymentRequired: null,
     });
   }, [state.demoAssets]);
 
@@ -100,7 +164,7 @@ export function useAssessment(): UseAssessmentReturn {
     setState(prev => ({ ...prev, error: null }));
   }, []);
 
-  return { ...state, assess, loadDemoAssets, reset, clearError };
+  return { ...state, assess, submitWithPaymentProof, loadDemoAssets, reset, clearError };
 }
 
 // ─── Validation Helpers ──────────────────────────────────────────────────────

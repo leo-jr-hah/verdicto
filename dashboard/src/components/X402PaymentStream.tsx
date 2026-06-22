@@ -42,7 +42,7 @@ const DEMO_PAYMENTS: PaymentEvent[] = [
   {
     id: 'pay-1',
     from: 'User Wallet',
-    to: 'Escrow Contract',
+    to: 'Platform Wallet',
     amount: 2_500_000_000,
     tool: 'Assessment Fee',
     txHash: '01a2b3c4d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef',
@@ -51,7 +51,7 @@ const DEMO_PAYMENTS: PaymentEvent[] = [
   },
   {
     id: 'pay-2',
-    from: 'Escrow',
+    from: 'Platform',
     to: 'Valuation Agent A',
     amount: 500_000_000,
     tool: 'Agent Reward',
@@ -61,7 +61,7 @@ const DEMO_PAYMENTS: PaymentEvent[] = [
   },
   {
     id: 'pay-3',
-    from: 'Escrow',
+    from: 'Platform',
     to: 'Valuation Agent B',
     amount: 500_000_000,
     tool: 'Agent Reward',
@@ -71,7 +71,7 @@ const DEMO_PAYMENTS: PaymentEvent[] = [
   },
   {
     id: 'pay-4',
-    from: 'Escrow',
+    from: 'Platform',
     to: 'Evidence Analyst',
     amount: 400_000_000,
     tool: 'Analyst Reward',
@@ -81,7 +81,7 @@ const DEMO_PAYMENTS: PaymentEvent[] = [
   },
   {
     id: 'pay-5',
-    from: 'Escrow',
+    from: 'Platform',
     to: 'Market Interpreter',
     amount: 400_000_000,
     tool: 'Analyst Reward',
@@ -91,7 +91,7 @@ const DEMO_PAYMENTS: PaymentEvent[] = [
   },
   {
     id: 'pay-6',
-    from: 'Escrow',
+    from: 'Platform',
     to: 'Precedent Researcher',
     amount: 400_000_000,
     tool: 'Analyst Reward',

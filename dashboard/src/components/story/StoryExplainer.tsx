@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Scene1Dispute, Scene2Investigation, Scene3Deliberation, Scene4Consensus, Scene5Verdict, Scene6OnChain } from './Scenes';
+import { Scene1ValuationGap, Scene2Investigation, Scene3Deliberation, Scene4Consensus, Scene5Verdict, Scene6OnChain } from './Scenes';
 
 // Custom hook for typewriter animation
 const useTypewriter = (text: string, speed: number = 50, isActive: boolean = true) => {
@@ -37,9 +37,9 @@ const useTypewriter = (text: string, speed: number = 50, isActive: boolean = tru
 
 const SCENES = [
   {
-    id: 'dispute',
-    headline: "When AI agents disagree, trust becomes the problem.",
-    component: Scene1Dispute
+    id: 'valuation-gap',
+    headline: "When valuations diverge, who do you trust?",
+    component: Scene1ValuationGap
   },
   {
     id: 'investigate',

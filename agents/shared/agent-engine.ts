@@ -1,17 +1,22 @@
 /**
- * Agent Engine — Valuation logic for all asset types
+ * Agent Engine — LLM-powered valuation agents for all asset types
  *
- * Supports:
- *   - Real Estate (RentCast API + comparable sales)
- *   - Fine Art (Met Museum API + auction comparables)
- *   - Commodities (CoinGecko API + spot prices)
+ * Each agent is a genuine AI agent that:
+ *   1. Fetches real market data from APIs
+ *   2. Reasons independently about the data using LLM (MiMo → Groq → fallback)
+ *   3. Has a unique specialization that shapes its analysis
+ *   4. Can genuinely disagree with the other agent
  *
- * Each valuation method returns a ValuationResult that
- * the orchestrator feeds to the juror deliberation.
+ * Agent A (Comps Specialist): focuses on market comparisons, recent transactions,
+ *   price per sqft, auction results, spot prices. Favors data-driven approaches.
+ *
+ * Agent B (Fundamentals Analyst): focuses on DCF, intrinsic value, macro context,
+ *   income potential, risk factors, supply/demand dynamics. Favors theory-driven approaches.
+ *
+ * If LLM is unavailable, falls back to deterministic calculations.
  */
 
 import http from 'http';
-import { getComparableSales } from './rentcast-client.js';
 import { getMortgageRate } from './fred-client.js';
 import {
   getRealEstateData,
@@ -19,7 +24,38 @@ import {
   getCommodityData,
   getMacroContext,
 } from './data-sources.js';
+import { askValuationAgent, sanitizeForPrompt } from './mimo-client.js';
 import type { ValuationResult, AssetType } from './types.js';
+
+// ─── Agent Specialization Prompts ────────────────────────────────────────────
+// Each agent has a distinct personality and analytical framework.
+// This is what makes them GENUINELY disagree — not just different formulas.
+
+const AGENT_A_SYSTEM = `You are Agent A, a Comps Specialist valuation agent in the Verdict autonomous assessment system.
+Your analytical philosophy: MARKET DATA IS KING. You believe the best predictor of value is what comparable assets actually sold for recently. You are skeptical of theoretical models — cap rates, DCF projections, and income approaches are useful but secondary to real transaction data.
+
+Your approach:
+- Prioritize comparable sales, recent transactions, and market signals
+- Weight price-per-sqft, auction results, and spot prices heavily
+- Flag when comps are thin or unreliable — adjust confidence accordingly
+- Be direct and data-driven. Cite specific numbers from the evidence.
+- If data is strong, be confident. If data is weak, say so and widen your range.
+
+You MUST respond as a JSON object:
+{"estimated_value": <number>, "confidence": <0.0-1.0>, "reasoning": "<2-4 sentences citing specific data points>", "methodology": "<brief description of your approach>", "data_quality": "<strong|moderate|weak>", "risk_factors": ["<factor1>", "<factor2>"]}`;
+
+const AGENT_B_SYSTEM = `You are Agent B, a Fundamentals Analyst valuation agent in the Verdict autonomous assessment system.
+Your analytical philosophy: INTRINSIC VALUE MATTERS. You believe market prices can be irrational — bubbles, panic, and illiquidity distort real value. You focus on what an asset is WORTH based on its fundamental characteristics, not just what the market says today.
+
+Your approach:
+- Prioritize income potential, replacement cost, and intrinsic value metrics
+- Use DCF analysis, cap rates, and risk-adjusted returns
+- Consider macroeconomic context: interest rates, inflation, market cycles
+- Be willing to disagree with market consensus if fundamentals justify it
+- Flag overvaluation or undervaluation relative to fundamentals
+
+You MUST respond as a JSON object:
+{"estimated_value": <number>, "confidence": <0.0-1.0>, "reasoning": "<2-4 sentences explaining your fundamental analysis>", "methodology": "<brief description of your approach>", "intrinsic_vs_market": "<undervalued|fair|overvalued>", "risk_factors": ["<factor1>", "<factor2>"]}`;
 
 // ─── Mock Data (fallback when APIs are unavailable) ──────────────────────────
 
@@ -59,168 +95,6 @@ function jitter(base: number, range: number): number {
   return Math.round(base * (1 + (Math.random() - 0.5) * range));
 }
 
-// ─── Real Estate Valuation ───────────────────────────────────────────────────
-
-export async function calcRealEstateComps(
-  agentName: string,
-  assetId: string,
-  location: string,
-  sqft?: number
-): Promise<ValuationResult> {
-  const city = normalizeLocation(location);
-  let estimatedValue: number;
-  let dataSource = 'Mock Data';
-  let compsCount = 0;
-  let confidence = 0.65;
-
-  try {
-    const data = await getRealEstateData(location);
-    if (data.comparables.length > 0) {
-      const avgPrice = data.comparables.reduce((sum, c) => sum + (c.price || 0), 0) / data.comparables.length;
-      estimatedValue = Math.round(avgPrice);
-      compsCount = data.comparables.length;
-      dataSource = 'RentCast API';
-      confidence = Math.min(0.95, 0.70 + compsCount * 0.03);
-    } else {
-      throw new Error('No comps returned');
-    }
-  } catch {
-    const mock = MOCK_REAL_ESTATE_COMPS[city] || MOCK_REAL_ESTATE_COMPS['miami'];
-    estimatedValue = sqft
-      ? Math.round(mock.avgPricePerSqft * sqft)
-      : jitter(mock.avgPrice, 0.15);
-    compsCount = 5;
-  }
-
-  return {
-    agent: agentName,
-    method: 'comparable_sales',
-    asset_id: assetId,
-    estimated_value: estimatedValue,
-    confidence,
-    per_spot_value: estimatedValue,
-    reasoning: `Comparable sales analysis for ${location}. Found ${compsCount} comparable properties. Data source: ${dataSource}. Estimated value based on average price per square foot in the area.`,
-    timestamp: Date.now(),
-    dataSource,
-  };
-}
-
-export async function calcRealEstateDCF(
-  agentName: string,
-  assetId: string,
-  location: string,
-  sqft?: number
-): Promise<ValuationResult> {
-  const city = normalizeLocation(location);
-  let mortgageRate = 0.068;
-  let dataSource = 'Mock Data';
-
-  try {
-    const rate = await getMortgageRate();
-    if (rate > 0) {
-      mortgageRate = rate;
-      dataSource = 'FRED API';
-    }
-  } catch {
-    // use default rate
-  }
-
-  const mock = MOCK_REAL_ESTATE_COMPS[city] || MOCK_REAL_ESTATE_COMPS['miami'];
-  const baseValue = sqft ? mock.avgPricePerSqft * sqft : mock.avgPrice;
-
-  // Simple DCF: annual rent estimate / cap rate
-  const monthlyRent = baseValue * 0.006; // 0.6% of value per month
-  const annualRent = monthlyRent * 12;
-  const capRate = 0.05 + (mortgageRate - 0.065) * 0.5; // cap rate adjusts with interest rates
-  const dcfValue = Math.round(annualRent / Math.max(capRate, 0.03));
-
-  return {
-    agent: agentName,
-    method: 'dcf',
-    asset_id: assetId,
-    estimated_value: jitter(dcfValue, 0.08),
-    confidence: 0.72,
-    per_spot_value: jitter(dcfValue, 0.08),
-    reasoning: `DCF analysis for ${location}. Mortgage rate: ${(mortgageRate * 100).toFixed(2)}% (${dataSource}). Monthly rent estimate: $${Math.round(monthlyRent)}. Cap rate: ${(capRate * 100).toFixed(1)}%.`,
-    timestamp: Date.now(),
-    dataSource,
-  };
-}
-
-// ─── Art Valuation ───────────────────────────────────────────────────────────
-
-export async function calcArtAppraisal(
-  agentName: string,
-  assetId: string,
-  artistOrMedium: string
-): Promise<ValuationResult> {
-  let estimatedValue: number;
-  let dataSource = 'Mock Data';
-  let compsCount = 0;
-  let confidence = 0.55;
-
-  try {
-    const data = await getArtData(artistOrMedium);
-    if (data.comparables.length > 0) {
-      // Met Museum doesn't provide prices, but we can use the number of
-      // comparable works as a signal for artist prominence
-      compsCount = data.comparables.length;
-      const medium = artistOrMedium.toLowerCase();
-      const mock = MOCK_ART_ESTIMATES[medium] || MOCK_ART_ESTIMATES['oil painting'];
-      // More museum works = more established artist = higher estimate
-      const prominenceMultiplier = Math.min(1.5, 1 + compsCount * 0.05);
-      estimatedValue = Math.round(jitter(mock.mid, 0.2) * prominenceMultiplier);
-      dataSource = 'Met Museum API';
-      confidence = Math.min(0.80, 0.50 + compsCount * 0.04);
-    } else {
-      throw new Error('No comparable artworks found');
-    }
-  } catch {
-    const medium = artistOrMedium.toLowerCase();
-    const mock = MOCK_ART_ESTIMATES[medium] || MOCK_ART_ESTIMATES['oil painting'];
-    estimatedValue = jitter(mock.mid, 0.25);
-    compsCount = 3;
-  }
-
-  return {
-    agent: agentName,
-    method: 'appraisal',
-    asset_id: assetId,
-    estimated_value: estimatedValue,
-    confidence,
-    per_spot_value: estimatedValue,
-    reasoning: `Art appraisal for "${artistOrMedium}". Found ${compsCount} comparable works in museum collections. Data source: ${dataSource}. Value reflects medium, artist prominence, and market conditions.`,
-    timestamp: Date.now(),
-    dataSource,
-  };
-}
-
-export async function calcArtMarketComparison(
-  agentName: string,
-  assetId: string,
-  artistOrMedium: string
-): Promise<ValuationResult> {
-  const medium = artistOrMedium.toLowerCase();
-  const mock = MOCK_ART_ESTIMATES[medium] || MOCK_ART_ESTIMATES['oil painting'];
-
-  // Market comparison uses auction data heuristics
-  const auctionEstimate = jitter(mock.high * 0.7, 0.15);
-
-  return {
-    agent: agentName,
-    method: 'market_price',
-    asset_id: assetId,
-    estimated_value: auctionEstimate,
-    confidence: 0.60,
-    per_spot_value: auctionEstimate,
-    reasoning: `Market comparison analysis for "${artistOrMedium}". Based on recent auction results for similar works. Upper range estimate reflects premium market conditions.`,
-    timestamp: Date.now(),
-    dataSource: 'Auction Heuristic',
-  };
-}
-
-// ─── Commodity Valuation ─────────────────────────────────────────────────────
-
 function detectCommodity(name: string): string {
   const lower = name.toLowerCase();
   if (lower.includes('silver')) return 'silver';
@@ -229,41 +103,469 @@ function detectCommodity(name: string): string {
   return 'gold';
 }
 
-export async function calcCommoditySpot(
+// ─── LLM Response Parser ─────────────────────────────────────────────────────
+
+/**
+ * Safely extract a numeric field from an LLM response, with fallback.
+ */
+function extractNumber(llmResult: any, field: string, fallback: number): number {
+  const val = llmResult[field];
+  if (typeof val === 'number' && val > 0) return Math.round(val);
+  return fallback;
+}
+
+function extractConfidence(llmResult: any, fallback: number): number {
+  const val = llmResult.confidence;
+  if (typeof val === 'number') return Math.max(0.3, Math.min(0.95, val));
+  return fallback;
+}
+
+// ─── Real Estate Valuation (LLM-Powered) ────────────────────────────────────
+
+async function gatherRealEstateData(location: string, sqft?: number): Promise<{
+  dataContext: string;
+  dataSource: string;
+  fallbackValue: number;
+}> {
+  const city = normalizeLocation(location);
+  let dataContext = '';
+  let dataSource = 'Mock Data';
+  let fallbackValue: number;
+
+  try {
+    const [data, macro, rate] = await Promise.allSettled([
+      getRealEstateData(location),
+      getMacroContext(),
+      getMortgageRate(),
+    ]);
+
+    const estateData = data.status === 'fulfilled' ? data.value : null;
+    const macroData = macro.status === 'fulfilled' ? macro.value : null;
+    const mortgageRate = rate.status === 'fulfilled' && rate.value > 0 ? rate.value : 0.068;
+
+    if (estateData && estateData.comparables.length > 0) {
+      dataSource = 'RentCast API + FRED';
+      const comps = estateData.comparables;
+      const avgPrice = comps.reduce((sum: number, c: any) => sum + (c.price || 0), 0) / comps.length;
+      const avgPricePerSqft = comps.reduce((sum: number, c: any) => sum + (c.pricePerSqft || 0), 0) / comps.length;
+
+      const compLines = comps.slice(0, 8).map((c: any, i: number) =>
+        `  ${i + 1}. ${c.address || 'N/A'} — $${(c.price || 0).toLocaleString()} (${c.sqft || 0} sqft, $${c.pricePerSqft || 0}/sqft, ${c.daysOnMarket || 0} days on market)`
+      ).join('\n');
+
+      dataContext = [
+        `PROPERTY DATA (${location}):`,
+        `- Estimated value from API: ${estateData.priceData.estimatedValue ? '$' + estateData.priceData.estimatedValue.toLocaleString() : 'N/A'}`,
+        `- Square footage: ${estateData.priceData.sqft || sqft || 'N/A'}`,
+        `- Bedrooms: ${estateData.priceData.bedrooms || 'N/A'}`,
+        `- Bathrooms: ${estateData.priceData.bathrooms || 'N/A'}`,
+        `- Year built: ${estateData.priceData.yearBuilt || 'N/A'}`,
+        `- Property type: ${estateData.priceData.propertyType || 'Unknown'}`,
+        '',
+        `COMPARABLE SALES (${comps.length} properties):`,
+        compLines,
+        `- Average price: $${Math.round(avgPrice).toLocaleString()}`,
+        `- Average price/sqft: $${Math.round(avgPricePerSqft)}`,
+        '',
+        'MACRO CONTEXT:',
+        `- Mortgage rate: ${(mortgageRate * 100).toFixed(2)}%`,
+        macroData ? `- CPI: ${macroData.cpi || 'N/A'}, Fed Funds: ${macroData.fedFundsRate || 'N/A'}%` : '',
+      ].join('\n');
+
+      fallbackValue = Math.round(avgPrice);
+    } else {
+      throw new Error('No comparable data');
+    }
+  } catch {
+    const mock = MOCK_REAL_ESTATE_COMPS[city] || MOCK_REAL_ESTATE_COMPS['miami'];
+    fallbackValue = sqft ? Math.round(mock.avgPricePerSqft * sqft) : jitter(mock.avgPrice, 0.15);
+    dataContext = [
+      `PROPERTY DATA (${location}):`,
+      `- Square footage: ${sqft || 'N/A'}`,
+      `- Market: ${city}`,
+      '',
+      'COMPARABLE SALES (estimated market averages):',
+      `- Average price/sqft: $${mock.avgPricePerSqft}`,
+      `- Average price: $${mock.avgPrice.toLocaleString()}`,
+      '',
+      'NOTE: Live API data unavailable. Using market estimates.',
+    ].join('\n');
+  }
+
+  return { dataContext, dataSource, fallbackValue };
+}
+
+export async function calcRealEstateComps(
   agentName: string,
   assetId: string,
-  weightOz: number,
-  commodityName?: string
+  location: string,
+  sqft?: number
 ): Promise<ValuationResult> {
+  const { dataContext, dataSource, fallbackValue } = await gatherRealEstateData(location, sqft);
+
+  const userPrompt = [
+    `You are valuing a real estate asset using COMPARABLE SALES analysis.`,
+    '',
+    `ASSET: ${assetId}`,
+    `LOCATION: ${sanitizeForPrompt(location)}`,
+    sqft ? `SIZE: ${sqft} sqft` : '',
+    '',
+    dataContext,
+    '',
+    'Analyze this data as a comps specialist. What is the fair market value?',
+  ].filter(Boolean).join('\n');
+
+  try {
+    const llmResult = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
+    const estimatedValue = extractNumber(llmResult, 'estimated_value', fallbackValue);
+    const confidence = extractConfidence(llmResult, 0.65);
+
+    return {
+      agent: agentName,
+      method: 'comparable_sales',
+      asset_id: assetId,
+      estimated_value: estimatedValue,
+      confidence,
+      per_spot_value: estimatedValue,
+      reasoning: llmResult.reasoning || `Comparable sales analysis for ${location}. Data source: ${dataSource}.`,
+      timestamp: Date.now(),
+      dataSource,
+    };
+  } catch {
+    return {
+      agent: agentName,
+      method: 'comparable_sales',
+      asset_id: assetId,
+      estimated_value: fallbackValue,
+      confidence: 0.60,
+      per_spot_value: fallbackValue,
+      reasoning: `Comparable sales analysis for ${location}. Data source: ${dataSource}. (Deterministic fallback — LLM unavailable)`,
+      timestamp: Date.now(),
+      dataSource,
+    };
+  }
+}
+
+export async function calcRealEstateDCF(
+  agentName: string,
+  assetId: string,
+  location: string,
+  sqft?: number
+): Promise<ValuationResult> {
+  const { dataContext, dataSource, fallbackValue } = await gatherRealEstateData(location, sqft);
+
+  let mortgageRate = 0.068;
+  try {
+    const rate = await getMortgageRate();
+    if (rate > 0) mortgageRate = rate;
+  } catch { /* use default */ }
+
+  const monthlyRent = fallbackValue * 0.006;
+  const annualRent = monthlyRent * 12;
+  const capRate = 0.05 + (mortgageRate - 0.065) * 0.5;
+  const dcfFallback = Math.round(annualRent / Math.max(capRate, 0.03));
+
+  const userPrompt = [
+    `You are valuing a real estate asset using FUNDAMENTAL / DCF analysis.`,
+    '',
+    `ASSET: ${assetId}`,
+    `LOCATION: ${sanitizeForPrompt(location)}`,
+    sqft ? `SIZE: ${sqft} sqft` : '',
+    '',
+    dataContext,
+    '',
+    'DCF PARAMETERS:',
+    `- Current mortgage rate: ${(mortgageRate * 100).toFixed(2)}%`,
+    `- Estimated monthly rent: $${Math.round(monthlyRent).toLocaleString()}`,
+    `- Estimated annual rent: $${Math.round(annualRent).toLocaleString()}`,
+    `- Calculated cap rate: ${(capRate * 100).toFixed(1)}%`,
+    `- DCF formula value: $${dcfFallback.toLocaleString()}`,
+    '',
+    'Analyze this data as a fundamentals analyst. Consider income potential, risk factors, and macro environment. What is the intrinsic value?',
+  ].filter(Boolean).join('\n');
+
+  try {
+    const llmResult = await askValuationAgent(AGENT_B_SYSTEM, userPrompt);
+    const estimatedValue = extractNumber(llmResult, 'estimated_value', dcfFallback);
+    const confidence = extractConfidence(llmResult, 0.72);
+
+    return {
+      agent: agentName,
+      method: 'dcf',
+      asset_id: assetId,
+      estimated_value: estimatedValue,
+      confidence,
+      per_spot_value: estimatedValue,
+      reasoning: llmResult.reasoning || `DCF analysis for ${location}. Mortgage rate: ${(mortgageRate * 100).toFixed(2)}%. Cap rate: ${(capRate * 100).toFixed(1)}%.`,
+      timestamp: Date.now(),
+      dataSource,
+    };
+  } catch {
+    return {
+      agent: agentName,
+      method: 'dcf',
+      asset_id: assetId,
+      estimated_value: jitter(dcfFallback, 0.08),
+      confidence: 0.68,
+      per_spot_value: jitter(dcfFallback, 0.08),
+      reasoning: `DCF analysis for ${location}. Mortgage rate: ${(mortgageRate * 100).toFixed(2)}%. Cap rate: ${(capRate * 100).toFixed(1)}%. (Deterministic fallback — LLM unavailable)`,
+      timestamp: Date.now(),
+      dataSource,
+    };
+  }
+}
+
+// ─── Art Valuation (LLM-Powered) ─────────────────────────────────────────────
+
+async function gatherArtData(artistOrMedium: string): Promise<{
+  dataContext: string;
+  dataSource: string;
+  fallbackValue: number;
+}> {
+  const medium = artistOrMedium.toLowerCase();
+  const mock = MOCK_ART_ESTIMATES[medium] || MOCK_ART_ESTIMATES['oil painting'];
+  let dataContext = '';
+  let dataSource = 'Mock Data';
+  let fallbackValue = jitter(mock.mid, 0.2);
+
+  try {
+    const data = await getArtData(artistOrMedium);
+    if (data.comparables.length > 0) {
+      dataSource = 'Met Museum API';
+      const compsCount = data.comparables.length;
+      const prominenceMultiplier = Math.min(1.5, 1 + compsCount * 0.05);
+      fallbackValue = Math.round(jitter(mock.mid, 0.2) * prominenceMultiplier);
+
+      const compLines = data.comparables.slice(0, 8).map((c: any, i: number) =>
+        `  ${i + 1}. "${c.title || 'Untitled'}" — ${c.artist || 'Unknown artist'}, ${c.medium || 'N/A'}, ${c.date || 'N/A'}`
+      ).join('\n');
+
+      dataContext = [
+        `ARTWORK DATA (${sanitizeForPrompt(artistOrMedium)}):`,
+        `- Medium: ${artistOrMedium}`,
+        `- Museum collection matches: ${compsCount} comparable works found`,
+        `- Artist prominence multiplier: ${prominenceMultiplier.toFixed(2)}x`,
+        '',
+        'COMPARABLE WORKS (from Met Museum collection):',
+        compLines,
+        '',
+        `MARKET ESTIMATES (${medium}):`,
+        `- Low: $${mock.low.toLocaleString()}`,
+        `- Mid: $${mock.mid.toLocaleString()}`,
+        `- High: $${mock.high.toLocaleString()}`,
+      ].join('\n');
+    } else {
+      throw new Error('No comparable artworks');
+    }
+  } catch {
+    dataContext = [
+      `ARTWORK DATA (${sanitizeForPrompt(artistOrMedium)}):`,
+      `- Medium: ${artistOrMedium}`,
+      '',
+      `MARKET ESTIMATES (${medium}):`,
+      `- Low: $${mock.low.toLocaleString()}`,
+      `- Mid: $${mock.mid.toLocaleString()}`,
+      `- High: $${mock.high.toLocaleString()}`,
+      '',
+      'NOTE: Live museum data unavailable. Using market estimates.',
+    ].join('\n');
+  }
+
+  return { dataContext, dataSource, fallbackValue };
+}
+
+export async function calcArtAppraisal(
+  agentName: string,
+  assetId: string,
+  artistOrMedium: string
+): Promise<ValuationResult> {
+  const { dataContext, dataSource, fallbackValue } = await gatherArtData(artistOrMedium);
+
+  const userPrompt = [
+    `You are appraising a fine art piece using COMPARABLE SALES analysis.`,
+    '',
+    `ASSET: ${assetId}`,
+    `ARTWORK: ${sanitizeForPrompt(artistOrMedium)}`,
+    '',
+    dataContext,
+    '',
+    'Analyze this data as a comps specialist. Consider artist prominence, medium, and market demand. What is the fair market value?',
+  ].filter(Boolean).join('\n');
+
+  try {
+    const llmResult = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
+    const estimatedValue = extractNumber(llmResult, 'estimated_value', fallbackValue);
+    const confidence = extractConfidence(llmResult, 0.60);
+
+    return {
+      agent: agentName,
+      method: 'appraisal',
+      asset_id: assetId,
+      estimated_value: estimatedValue,
+      confidence,
+      per_spot_value: estimatedValue,
+      reasoning: llmResult.reasoning || `Art appraisal for "${artistOrMedium}". Data source: ${dataSource}.`,
+      timestamp: Date.now(),
+      dataSource,
+    };
+  } catch {
+    return {
+      agent: agentName,
+      method: 'appraisal',
+      asset_id: assetId,
+      estimated_value: fallbackValue,
+      confidence: 0.55,
+      per_spot_value: fallbackValue,
+      reasoning: `Art appraisal for "${artistOrMedium}". Data source: ${dataSource}. (Deterministic fallback — LLM unavailable)`,
+      timestamp: Date.now(),
+      dataSource,
+    };
+  }
+}
+
+export async function calcArtMarketComparison(
+  agentName: string,
+  assetId: string,
+  artistOrMedium: string
+): Promise<ValuationResult> {
+  const { dataContext, dataSource, fallbackValue } = await gatherArtData(artistOrMedium);
+  const medium = artistOrMedium.toLowerCase();
+  const mock = MOCK_ART_ESTIMATES[medium] || MOCK_ART_ESTIMATES['oil painting'];
+  const dcfFallback = jitter(mock.high * 0.7, 0.15);
+
+  const userPrompt = [
+    `You are valuing a fine art piece using FUNDAMENTAL / INTRINSIC analysis.`,
+    '',
+    `ASSET: ${assetId}`,
+    `ARTWORK: ${sanitizeForPrompt(artistOrMedium)}`,
+    '',
+    dataContext,
+    '',
+    'Consider: Is the market price justified by the artist\'s significance, the work\'s quality, and long-term collectibility?',
+    'Or is it inflated by speculation? What is the intrinsic value?',
+  ].filter(Boolean).join('\n');
+
+  try {
+    const llmResult = await askValuationAgent(AGENT_B_SYSTEM, userPrompt);
+    const estimatedValue = extractNumber(llmResult, 'estimated_value', dcfFallback);
+    const confidence = extractConfidence(llmResult, 0.58);
+
+    return {
+      agent: agentName,
+      method: 'market_price',
+      asset_id: assetId,
+      estimated_value: estimatedValue,
+      confidence,
+      per_spot_value: estimatedValue,
+      reasoning: llmResult.reasoning || `Market comparison for "${artistOrMedium}". Data source: ${dataSource}.`,
+      timestamp: Date.now(),
+      dataSource,
+    };
+  } catch {
+    return {
+      agent: agentName,
+      method: 'market_price',
+      asset_id: assetId,
+      estimated_value: dcfFallback,
+      confidence: 0.55,
+      per_spot_value: dcfFallback,
+      reasoning: `Market comparison for "${artistOrMedium}". Data source: ${dataSource}. (Deterministic fallback — LLM unavailable)`,
+      timestamp: Date.now(),
+      dataSource,
+    };
+  }
+}
+
+// ─── Commodity Valuation (LLM-Powered) ───────────────────────────────────────
+
+async function gatherCommodityData(weightOz: number, commodityName?: string): Promise<{
+  dataContext: string;
+  dataSource: string;
+  fallbackValue: number;
+  pricePerOz: number;
+}> {
   const commodity = detectCommodity(commodityName || 'gold');
   let pricePerOz = MOCK_COMMODITY_PRICES[commodity] || MOCK_COMMODITY_PRICES['gold'];
   let dataSource = 'Mock Data';
-  let confidence = 0.85;
 
   try {
     const data = await getCommodityData(commodity);
     if (data.priceData.pricePerOz) {
       pricePerOz = data.priceData.pricePerOz;
       dataSource = 'CoinGecko API';
-      confidence = 0.92;
     }
   } catch {
     // use mock price
   }
 
-  const estimatedValue = Math.round(pricePerOz * weightOz);
+  const fallbackValue = Math.round(pricePerOz * weightOz);
 
-  return {
-    agent: agentName,
-    method: 'market_price',
-    asset_id: assetId,
-    estimated_value: estimatedValue,
-    confidence,
-    per_spot_value: Math.round(pricePerOz),
-    reasoning: `Spot price valuation for ${weightOz}oz ${commodity}. Price per oz: ${pricePerOz.toLocaleString()} (${dataSource}). Total value: ${estimatedValue.toLocaleString()}.`,
-    timestamp: Date.now(),
-    dataSource,
-  };
+  const dataContext = [
+    `COMMODITY DATA (${commodity}):`,
+    `- Current spot price: $${pricePerOz.toLocaleString()} per oz`,
+    `- Weight: ${weightOz} oz`,
+    `- Total spot value: $${fallbackValue.toLocaleString()}`,
+    `- Data source: ${dataSource}`,
+    '',
+    `PHYSICAL PREMIUMS:`,
+    `- Assay certification: typically 1-2%`,
+    `- Secure storage: typically 0.5-1% annually`,
+    `- Physical delivery: typically 1-3%`,
+    `- Total premium range: 3-7% above spot`,
+  ].join('\n');
+
+  return { dataContext, dataSource, fallbackValue, pricePerOz };
+}
+
+export async function calcCommoditySpot(
+  agentName: string,
+  assetId: string,
+  weightOz: number,
+  commodityName?: string
+): Promise<ValuationResult> {
+  const { dataContext, dataSource, fallbackValue, pricePerOz } = await gatherCommodityData(weightOz, commodityName);
+  const commodity = detectCommodity(commodityName || 'gold');
+
+  const userPrompt = [
+    `You are valuing a commodity using SPOT PRICE analysis.`,
+    '',
+    `ASSET: ${assetId}`,
+    `COMMODITY: ${commodity}`,
+    '',
+    dataContext,
+    '',
+    'Analyze this data as a comps specialist. What is the fair market value based on current spot prices and market conditions?',
+  ].filter(Boolean).join('\n');
+
+  try {
+    const llmResult = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
+    const estimatedValue = extractNumber(llmResult, 'estimated_value', fallbackValue);
+    const confidence = extractConfidence(llmResult, 0.85);
+
+    return {
+      agent: agentName,
+      method: 'market_price',
+      asset_id: assetId,
+      estimated_value: estimatedValue,
+      confidence,
+      per_spot_value: Math.round(pricePerOz),
+      reasoning: llmResult.reasoning || `Spot price valuation for ${weightOz}oz ${commodity}. Price per oz: $${pricePerOz.toLocaleString()} (${dataSource}).`,
+      timestamp: Date.now(),
+      dataSource,
+    };
+  } catch {
+    return {
+      agent: agentName,
+      method: 'market_price',
+      asset_id: assetId,
+      estimated_value: fallbackValue,
+      confidence: 0.82,
+      per_spot_value: Math.round(pricePerOz),
+      reasoning: `Spot price valuation for ${weightOz}oz ${commodity}. Price per oz: $${pricePerOz.toLocaleString()} (${dataSource}). (Deterministic fallback — LLM unavailable)`,
+      timestamp: Date.now(),
+      dataSource,
+    };
+  }
 }
 
 export async function calcCommodityAppraisal(
@@ -272,33 +574,52 @@ export async function calcCommodityAppraisal(
   weightOz: number,
   commodityName?: string
 ): Promise<ValuationResult> {
+  const { dataContext, dataSource, fallbackValue, pricePerOz } = await gatherCommodityData(weightOz, commodityName);
   const commodity = detectCommodity(commodityName || 'gold');
-  let pricePerOz = MOCK_COMMODITY_PRICES[commodity] || MOCK_COMMODITY_PRICES['gold'];
+  const premium = 1.03 + Math.random() * 0.04;
+  const dcfFallback = Math.round(pricePerOz * weightOz * premium);
+
+  const userPrompt = [
+    `You are valuing a commodity using FUNDAMENTAL / PHYSICAL APPRAISAL analysis.`,
+    '',
+    `ASSET: ${assetId}`,
+    `COMMODITY: ${commodity}`,
+    '',
+    dataContext,
+    '',
+    'Consider: physical premiums, storage costs, assay certification, delivery logistics.',
+    'Is spot price fair, or should physical premiums be higher/lower? What is the intrinsic value?',
+  ].filter(Boolean).join('\n');
 
   try {
-    const data = await getCommodityData(commodity);
-    if (data.priceData.pricePerOz) {
-      pricePerOz = data.priceData.pricePerOz;
-    }
+    const llmResult = await askValuationAgent(AGENT_B_SYSTEM, userPrompt);
+    const estimatedValue = extractNumber(llmResult, 'estimated_value', dcfFallback);
+    const confidence = extractConfidence(llmResult, 0.78);
+
+    return {
+      agent: agentName,
+      method: 'appraisal',
+      asset_id: assetId,
+      estimated_value: estimatedValue,
+      confidence,
+      per_spot_value: Math.round(pricePerOz * premium),
+      reasoning: llmResult.reasoning || `Physical appraisal for ${weightOz}oz ${commodity}. Includes premium for assay, delivery, and storage.`,
+      timestamp: Date.now(),
+      dataSource: 'Physical Appraisal',
+    };
   } catch {
-    // use mock
+    return {
+      agent: agentName,
+      method: 'appraisal',
+      asset_id: assetId,
+      estimated_value: dcfFallback,
+      confidence: 0.75,
+      per_spot_value: Math.round(pricePerOz * premium),
+      reasoning: `Physical appraisal for ${weightOz}oz ${commodity}. Includes ${(premium * 100 - 100).toFixed(1)}% premium for assay, delivery, and storage. (Deterministic fallback — LLM unavailable)`,
+      timestamp: Date.now(),
+      dataSource: 'Physical Appraisal',
+    };
   }
-
-  // Appraisal adds a premium for physical delivery, assay, and storage
-  const premium = 1.03 + Math.random() * 0.04; // 3-7% premium
-  const appraisedValue = Math.round(pricePerOz * weightOz * premium);
-
-  return {
-    agent: agentName,
-    method: 'appraisal',
-    asset_id: assetId,
-    estimated_value: appraisedValue,
-    confidence: 0.78,
-    per_spot_value: Math.round(pricePerOz * premium),
-    reasoning: `Physical appraisal for ${weightOz}oz ${commodity}. Includes ${(premium * 100 - 100).toFixed(1)}% premium for assay certification, physical delivery, and secure storage costs.`,
-    timestamp: Date.now(),
-    dataSource: 'Physical Appraisal',
-  };
 }
 
 // ─── Unified Valuation Dispatcher ────────────────────────────────────────────

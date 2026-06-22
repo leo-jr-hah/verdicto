@@ -26,6 +26,8 @@ export const Footer: React.FC = () => {
               <h4 style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '16px' }}>Product</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <Link to="/assess" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Value Asset</Link>
+                <Link to="/borrow" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Borrow</Link>
+                <Link to="/insure" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Insure</Link>
                 <Link to="/predict" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Predict</Link>
                 <Link to="/reputation" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Agents</Link>
                 <Link to="/transactions" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>History</Link>

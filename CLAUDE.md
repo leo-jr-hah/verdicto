@@ -72,6 +72,8 @@ scripts/            Deploy and demo scripts
 - `/` — Landing page (standalone top-nav layout, premium animations)
 - `/dashboard` — Dashboard with live contract state + x402 payment stream
 - `/assess` — Asset valuation with multi-methodology dashboard (2.5 CSPR fee)
+- `/borrow` — Borrow against assessed assets (5 CSPR fee, AI-calculated LTV)
+- `/insure` — Insure assets against value loss (3 CSPR fee, AI risk assessment)
 - `/predict` — Prediction market resolution (1 CSPR fee)
 - `/reputation` — Agent reputation
 - `/transactions` — Transaction history

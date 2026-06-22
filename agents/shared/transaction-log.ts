@@ -15,7 +15,7 @@ const MAX_ENTRIES = 200;
 
 export interface TransactionEntry {
   id: string;
-  type: 'ZK-Lite Commitment' | 'Native Transfer' | 'HMAC Receipt Chain' | 'ExecuteVerdict' | 'UpdateReputation' | 'InitiateDispute' | 'x402 Payment';
+  type: 'ZK-Lite Commitment' | 'Native Transfer' | 'HMAC Receipt Chain' | 'ExecuteVerdict' | 'UpdateReputation' | 'SubmitAssessment' | 'x402 Payment';
   action: string;
   hash: string;
   contract: string;

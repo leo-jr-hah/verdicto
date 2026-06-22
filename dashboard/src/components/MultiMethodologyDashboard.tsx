@@ -90,7 +90,7 @@ const AGENTS: AgentProfile[] = [
     color: '#8B5CF6',
     bgColor: 'rgba(139, 92, 246, 0.08)',
     methodology: 'Precedent Research',
-    description: 'Searches historical disputes via Vectra vector database to find relevant precedents and legal frameworks for current valuation decisions.',
+    description: 'Searches historical assessments via Vectra vector database to find relevant precedents and valuation frameworks for current asset assessments.',
   },
 ];
 
@@ -580,7 +580,7 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
         agent: AGENTS[4],
         value: result.verdict.finalValue * (0.96 + Math.random() * 0.08),
         confidence: 0.85 + Math.random() * 0.10,
-        reasoning: 'Found 8 comparable disputes in the historical record. Average resolution aligned with the current assessment. Precedent strongly supports this valuation.',
+        reasoning: 'Found 8 comparable assessments in the historical record. Average valuation aligned with the current assessment. Precedent strongly supports this valuation.',
         source: 'Historical Precedents',
       },
     ] : []),

@@ -151,7 +151,7 @@ export const LiveContractPanel: React.FC = () => {
       } else {
         // Use mock data when API unavailable
         setState({
-          disputes: { total: 47, pending: 3, deliberating: 2, voting: 1, resolved: 41 },
+          assessments: { total: 47, pending: 3, deliberating: 2, voting: 1, resolved: 41 },
           agents: [
             { id: 'valuation-agent-a', name: 'Valuation Agent A', reputation: 847, totalAssessments: 156, accuracy: 92 },
             { id: 'valuation-agent-b', name: 'Valuation Agent B', reputation: 812, totalAssessments: 143, accuracy: 89 },
@@ -159,7 +159,7 @@ export const LiveContractPanel: React.FC = () => {
             { id: 'market-interpreter', name: 'Market Interpreter', reputation: 778, totalAssessments: 134, accuracy: 87 },
             { id: 'precedent-researcher', name: 'Precedent Researcher', reputation: 856, totalAssessments: 152, accuracy: 91 },
           ],
-          escrow: { totalStaked: 125_000_000_000, totalSettled: 98_500_000_000, activeDisputes: 6 },
+          payments: { totalCollected: 125_000_000_000, totalProcessed: 98_500_000_000, activeAssessments: 6 },
           receipts: { total: 234, verified: 228, pending: 6 },
           lastUpdated: Date.now(),
         });
@@ -260,10 +260,10 @@ export const LiveContractPanel: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         <StatCard
           icon={<Scale size={16} />}
-          label="Total Disputes"
-          value={state.disputes.total}
+          label="Total Assessments"
+          value={state.assessments.total}
           color="#6366f1"
-          subtext={`${state.disputes.pending} pending • ${state.disputes.resolved} resolved`}
+          subtext={`${state.assessments.pending} pending • ${state.assessments.resolved} resolved`}
           index={0}
         />
         <StatCard
@@ -276,18 +276,18 @@ export const LiveContractPanel: React.FC = () => {
         />
         <StatCard
           icon={<TrendingUp size={16} />}
-          label="Total Secured"
-          value={formatCSPR(state.escrow.totalStaked)}
+          label="Total Collected"
+          value={formatCSPR(state.payments.totalCollected)}
           color="#f59e0b"
-          subtext={`${formatCSPR(state.escrow.totalSettled)} processed`}
+          subtext={`${formatCSPR(state.payments.totalProcessed)} processed`}
           index={2}
         />
         <StatCard
           icon={<Activity size={16} />}
           label="In Progress"
-          value={state.disputes.deliberating + state.disputes.voting}
+          value={state.assessments.deliberating + state.assessments.voting}
           color="#ef4444"
-          subtext={`${state.disputes.deliberating} in review • ${state.disputes.voting} finalizing`}
+          subtext={`${state.assessments.deliberating} in review • ${state.assessments.voting} finalizing`}
           index={3}
         />
       </div>

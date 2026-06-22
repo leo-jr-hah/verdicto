@@ -1,5 +1,5 @@
 /**
- * Unified Data Sources for CASPER RWA Court
+ * Unified Data Sources for Verdict
  * 
  * Wraps all external APIs into a clean interface:
  *   - Real Estate: RentCast API (comps, property data)

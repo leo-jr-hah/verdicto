@@ -94,11 +94,11 @@ export const TestnetProof: React.FC = () => {
                   <span style={{ color: 'var(--text-primary)' }}>{blockHeight.toLocaleString()}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <span>DISPUTES FILED</span>
+                  <span>ASSESSMENTS RUN</span>
                   <span style={{ color: 'var(--text-primary)' }}>1,402</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
-                  <span>CSPR ESCROWED</span>
+                  <span>CSPR COLLECTED</span>
                   <span style={{ color: 'var(--text-primary)' }}>345.8 CSPR</span>
                 </div>
 

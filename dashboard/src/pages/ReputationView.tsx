@@ -112,7 +112,7 @@ const AGENTS: AgentData[] = [
   {
     id: 'precedent-researcher',
     name: 'Precedent Researcher',
-    description: 'Searches historical disputes via vector database for relevant precedents and comparable cases.',
+    description: 'Searches historical assessments via vector database for relevant precedents and comparable cases.',
     methodology: 'RAG with vector similarity search across historical assessments',
     strengths: ['Case law research', 'Historical comparisons', 'Vector search', 'Pattern recognition'],
     icon: <BookOpen size={20} />,

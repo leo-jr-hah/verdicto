@@ -27,12 +27,12 @@ export interface JurorConfig {
 
 function buildJurorSystemPrompt(config: JurorConfig, assetType: AssetType): string {
   const assetContext: Record<AssetType, string> = {
-    'real-estate': 'This is a real estate dispute. Consider property condition, location desirability, comparable sales, rental income potential, and macroeconomic factors like interest rates.',
-    'art': 'This is a fine art dispute. Consider artist provenance, exhibition history, medium, condition, comparable auction results, and current market demand for the artist\'s work.',
-    'commodity': 'This is a commodity dispute. Consider spot prices, purity/weight verification, storage costs, market volatility, and physical delivery premiums.',
+    'real-estate': 'This is a real estate assessment. Consider property condition, location desirability, comparable sales, rental income potential, and macroeconomic factors like interest rates.',
+    'art': 'This is a fine art assessment. Consider artist provenance, exhibition history, medium, condition, comparable auction results, and current market demand for the artist\'s work.',
+    'commodity': 'This is a commodity assessment. Consider spot prices, purity/weight verification, storage costs, market volatility, and physical delivery premiums.',
   };
 
-  return `You are ${config.name}, a specialized juror in the Casper RWA Court.
+  return `You are ${config.name}, a specialized juror in the Verdict autonomous assessment system.
 Your specialization: ${config.specializationContext}
 Asset context: ${assetContext[assetType] || assetContext['real-estate']}
 
@@ -45,7 +45,7 @@ export function createJurorServer(config: JurorConfig) {
   app.use(express.json({ limit: '16kb' }));
 
   // ── CORS — restrict to known origins ─────────────────────────────────────
-  const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',');
+  const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5174,http://localhost:3000').split(',');
   app.use((req, res, next) => {
     const origin = req.headers.origin || '';
     if (ALLOWED_ORIGINS.includes(origin)) {
@@ -102,9 +102,9 @@ export function createJurorServer(config: JurorConfig) {
 
   mcpServer.tool(
     'deliberate',
-    'Assess evidence and provide a verdict recommendation for a dispute',
+    'Assess evidence and provide a verdict recommendation for an asset assessment',
     {
-      dispute_id: z.string(),
+      assessment_id: z.string(),
       asset_id: z.string(),
       asset_type: z.enum(['real-estate', 'art', 'commodity']).optional(),
       location: z.string(),
@@ -113,13 +113,13 @@ export function createJurorServer(config: JurorConfig) {
       valuation_b: z.number(),
       peer_reasoning: z.array(z.string()).optional(),
     },
-    async ({ dispute_id, asset_id, asset_type, location, spot_count, valuation_a, valuation_b, peer_reasoning }) => {
+    async ({ assessment_id, asset_id, asset_type, location, spot_count, valuation_a, valuation_b, peer_reasoning }) => {
       const resolvedAssetType: AssetType = asset_type || 'real-estate';
       const isRound2 = peer_reasoning && peer_reasoning.length > 0;
 
       const systemPrompt = buildJurorSystemPrompt(config, resolvedAssetType);
 
-      let userPrompt = `Dispute: ${sanitizeForPrompt(dispute_id)} | Asset: ${sanitizeForPrompt(asset_id)} | Type: ${resolvedAssetType} | Location: ${sanitizeForPrompt(location)} | Units: ${spot_count}
+      let userPrompt = `Assessment: ${sanitizeForPrompt(assessment_id)} | Asset: ${sanitizeForPrompt(asset_id)} | Type: ${resolvedAssetType} | Location: ${sanitizeForPrompt(location)} | Units: ${spot_count}
 Valuation A (Comparable/Appraisal): ${valuation_a.toLocaleString()}
 Valuation B (DCF/Market): ${valuation_b.toLocaleString()}
 Divergence: ${Math.abs(((valuation_a - valuation_b) / Math.min(valuation_a, valuation_b)) * 100).toFixed(1)}%
@@ -140,7 +140,7 @@ Analyze the evidence from your perspective.`;
         userPrompt += `\n\nThis is ROUND 2 of deliberation. Here is what your peers said in Round 1:\n${sanitizedReasoning}\nGiven your peers' reasoning, do you maintain your position or shift your vote? Explain why.`;
       }
 
-      console.log(`[${config.name}] 🤔 Reasoning about dispute ${dispute_id} (${resolvedAssetType}, Round ${isRound2 ? 2 : 1})...`);
+      console.log(`[${config.name}] 🤔 Reasoning about assessment ${assessment_id} (${resolvedAssetType}, Round ${isRound2 ? 2 : 1})...`);
       const llmResponse = await askJuror(systemPrompt, userPrompt);
       console.log(`[${config.name}] ✅ Reached verdict: ${llmResponse.vote}`);
 

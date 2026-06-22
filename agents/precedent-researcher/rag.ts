@@ -11,8 +11,8 @@ export async function queryPrecedents(location: string, asset_id: string): Promi
   // In a real RAG system, we would embed the query and search the index.
   // Here we mock a Vectra RAG retrieval for the Precedent Researcher.
   return `Relevant Precedents Found via Vectra:
-1. Dispute DISP-998 (Miami Commercial): The court favored a split when comparable sales were older than 6 months.
-2. Dispute DISP-1042 (Florida Real Estate): Emphasized DCF valuation when local development drastically altered traffic patterns.
-3. Verdict 884: Instructed jurors to favor DCF if the split is larger than 30%.
+1. Assessment ASSESS-998 (Miami Commercial): The system favored a split when comparable sales were older than 6 months.
+2. Assessment ASSESS-1042 (Florida Real Estate): Emphasized DCF valuation when local development drastically altered traffic patterns.
+3. Assessment ASSESS-884: Instructed jurors to favor DCF if the split is larger than 30%.
 `;
 }

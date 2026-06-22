@@ -8,6 +8,8 @@ import { ReputationView } from './pages/ReputationView';
 import { TransactionsView } from './pages/TransactionsView';
 import { ArchitectureView } from './pages/ArchitectureView';
 import { PredictionView } from './pages/PredictionView';
+import { BorrowView } from './pages/BorrowView';
+import { InsureView } from './pages/InsureView';
 import { RoadmapView } from './pages/RoadmapView';
 
 function App() {
@@ -20,6 +22,8 @@ function App() {
         <Route path="dashboard" element={<DashboardView />} />
         <Route path="assess" element={<AssessView />} />
         <Route path="predict" element={<PredictionView />} />
+        <Route path="borrow" element={<BorrowView />} />
+        <Route path="insure" element={<InsureView />} />
         <Route path="reputation" element={<ReputationView />} />
         <Route path="transactions" element={<TransactionsView />} />
         <Route path="architecture" element={<ArchitectureView />} />

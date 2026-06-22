@@ -2,7 +2,7 @@ import { createHmac, randomUUID, createHash, timingSafeEqual } from 'crypto';
 
 export interface DeliberationReceipt {
   receiptId: string; // UUID
-  disputeId: string; // Link to dispute
+  assessmentId: string; // Link to assessment
   jurorId: string; // Agent identity
   round: number; // Deliberation round
   inputHash: string; // SHA-256 of input evidence
@@ -21,14 +21,14 @@ export interface DeliberationReceipt {
  */
 function deriveHmacKey(privateKeyMaterial: string): string {
   return createHash('sha256')
-    .update('casper-rwa-court:deliberation-receipt-hmac')
+    .update('verdict:deliberation-receipt-hmac')
     .update(privateKeyMaterial)
     .digest('hex');
 }
 
 export function createDeliberationReceipt(
   jurorSecret: string,
-  disputeId: string,
+  assessmentId: string,
   jurorId: string,
   round: number,
   input: string,
@@ -46,14 +46,14 @@ export function createDeliberationReceipt(
   const reasoningHash = createHmac('sha256', hmacKey).update(reasoning).digest('hex');
   
   // Construct receipt data string for signing
-  const receiptData = `${receiptId}|${disputeId}|${jurorId}|${round}|${inputHash}|${outputHash}|${reasoningHash}|${timestamp}|${previousReceiptId}`;
+  const receiptData = `${receiptId}|${assessmentId}|${jurorId}|${round}|${inputHash}|${outputHash}|${reasoningHash}|${timestamp}|${previousReceiptId}`;
   
   // Cryptographically sign the receipt
   const signature = createHmac('sha256', hmacKey).update(receiptData).digest('hex');
   
   return {
     receiptId,
-    disputeId,
+    assessmentId,
     jurorId,
     round,
     inputHash,
@@ -79,7 +79,7 @@ export function verifyReceiptChain(receipts: DeliberationReceipt[], jurorSecret:
     }
 
     // 2. Verify HMAC signature
-    const receiptData = `${r.receiptId}|${r.disputeId}|${r.jurorId}|${r.round}|${r.inputHash}|${r.outputHash}|${r.reasoningHash}|${r.timestamp}|${r.previousReceiptId}`;
+    const receiptData = `${r.receiptId}|${r.assessmentId}|${r.jurorId}|${r.round}|${r.inputHash}|${r.outputHash}|${r.reasoningHash}|${r.timestamp}|${r.previousReceiptId}`;
     const expectedSignature = createHmac('sha256', hmacKey).update(receiptData).digest('hex');
 
     if (!timingSafeEqual(Buffer.from(r.signature, 'hex'), Buffer.from(expectedSignature, 'hex'))) {

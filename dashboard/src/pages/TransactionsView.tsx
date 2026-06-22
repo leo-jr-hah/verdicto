@@ -31,7 +31,7 @@ function typeColor(type: string): string {
     case 'x402 Payment': return '#F59E0B';
     case 'ExecuteVerdict': return '#EF4444';
     case 'UpdateReputation': return '#06B6D4';
-    case 'InitiateDispute': return '#F97316';
+    case 'SubmitAssessment': return '#F97316';
     default: return 'var(--text-secondary)';
   }
 }
@@ -206,7 +206,7 @@ export const TransactionsView: React.FC = () => {
           <Shield size={48} color="var(--text-tertiary)" className="empty-state-icon" />
           <div className="empty-state-title">No transactions yet</div>
           <p className="empty-state-text">
-            Run a dispute resolution to see on-chain transactions appear here in real time.
+            Run an assessment to see on-chain transactions appear here in real time.
           </p>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
             Make sure the orchestrator backend is running on port 3011.

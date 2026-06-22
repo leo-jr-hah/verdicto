@@ -739,7 +739,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
 // ─── Main View ───────────────────────────────────────────────────────────────
 
 export const AssessView: React.FC = () => {
-  const { loading, error, result, demoAssets, assess, loadDemoAssets, reset, clearError } = useAssessment();
+  const { loading, error, result, demoAssets, submitWithPaymentProof, loadDemoAssets, reset, clearError } = useAssessment();
   const wallet = useWallet();
 
   const [assetType, setAssetType] = useState<AssetType>('real-estate');
@@ -906,7 +906,7 @@ export const AssessView: React.FC = () => {
       logIdRef.current = 0;
       // Show the deploy hash in logs — user can verify on-chain
       addLog('success', `Payment signed, deploy: ${deployHash.substring(0, 16)}...`, `View on explorer: https://testnet.cspr.live/deploy/${deployHash}`);
-      assess(request, paymentProof);
+      await submitWithPaymentProof(request, paymentProof);
     } catch (err: any) {
       if (err?.message?.includes('cancelled')) {
         setSignError('Payment was cancelled. Please approve the transfer in your wallet.');

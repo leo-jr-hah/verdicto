@@ -1,5 +1,191 @@
 [
   {
+    "id": "tx-1782151963250-2q18wa",
+    "type": "x402 Payment",
+    "action": "Insurance policy created for Downtown Austin Office Tower",
+    "hash": "ins-POL-1782151963250-1no1",
+    "contract": "Insurance",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-22T18:12:43.250Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "policyId": "POL-1782151963250-1no1",
+      "assetName": "Downtown Austin Office Tower",
+      "coverageAmount": 483268,
+      "premiumCSPR": 3.6,
+      "riskScore": 80
+    }
+  },
+  {
+    "id": "tx-1782151960994-w52n42",
+    "type": "SubmitAssessment",
+    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 644,357",
+    "hash": "RE-1782151957262-hri8",
+    "contract": "Orchestrator",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-22T18:12:40.994Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assetType": "real-estate",
+      "askingPrice": 14200000,
+      "assessedValue": 644357,
+      "divergence": 34.31163636363637
+    }
+  },
+  {
+    "id": "tx-1782151957262-p2xutk",
+    "type": "x402 Payment",
+    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
+    "hash": "0379a1efc3e82497dd2fc87a8d74acb0f1c1ef8880b8b40929e1f3f83e0276f1",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-22T18:12:37.262Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/0379a1efc3e82497dd2fc87a8d74acb0f1c1ef8880b8b40929e1f3f83e0276f1",
+    "onChain": true,
+    "metadata": {
+      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
+      "amount": "2.5",
+      "fee": 2.5
+    }
+  },
+  {
+    "id": "tx-1782150993922-ctm011",
+    "type": "SubmitAssessment",
+    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 647,974",
+    "hash": "RE-1782150989418-5gle",
+    "contract": "Orchestrator",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-22T17:56:33.922Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assetType": "real-estate",
+      "askingPrice": 14200000,
+      "assessedValue": 647974,
+      "divergence": 35.62672727272727
+    }
+  },
+  {
+    "id": "tx-1782150989418-t3dbej",
+    "type": "x402 Payment",
+    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
+    "hash": "0d906bb41157619462572481df660ca2760d204289fc07c8f4854563fcbbdad7",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-22T17:56:29.418Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/0d906bb41157619462572481df660ca2760d204289fc07c8f4854563fcbbdad7",
+    "onChain": true,
+    "metadata": {
+      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
+      "amount": "2.5",
+      "fee": 2.5
+    }
+  },
+  {
+    "id": "tx-1782147299505-hd2b5a",
+    "type": "Native Transfer",
+    "action": "Loan disbursement: 300881.7 CSPR to 02025d11b8b4...",
+    "hash": "6926b3caa9b11580b9a2e414647644eb4d9edde4ad1124d387dd07d5297e72a1",
+    "contract": "LendingPool",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-22T16:54:59.505Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/6926b3caa9b11580b9a2e414647644eb4d9edde4ad1124d387dd07d5297e72a1",
+    "onChain": true,
+    "metadata": {
+      "loanId": "LOAN-1782147299504-meny",
+      "borrowerPublicKey": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
+      "loanAmount": 300881.7,
+      "ltv": 45,
+      "assetId": "RE-1782147285599-uphc",
+      "assetType": "real-estate"
+    }
+  },
+  {
+    "id": "tx-1782147298423-od7qj6",
+    "type": "x402 Payment",
+    "action": "Lending fee: 5 CSPR from 02025d11b8b4...",
+    "hash": "ce4125cd735bff04a0d9a0b28b823fe5d0cc40f0460ecfecd7813b80a13b564b",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-22T16:54:58.423Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/ce4125cd735bff04a0d9a0b28b823fe5d0cc40f0460ecfecd7813b80a13b564b",
+    "onChain": true,
+    "metadata": {
+      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
+      "amount": "5",
+      "fee": 5,
+      "purpose": "loan_creation"
+    }
+  },
+  {
+    "id": "tx-1782147289140-vb8njd",
+    "type": "SubmitAssessment",
+    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 668,626",
+    "hash": "RE-1782147285599-uphc",
+    "contract": "Orchestrator",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-22T16:54:49.140Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assetType": "real-estate",
+      "askingPrice": 1420000,
+      "assessedValue": 668626,
+      "divergence": 43.136545454545455
+    }
+  },
+  {
+    "id": "tx-1782147285598-psxbif",
+    "type": "x402 Payment",
+    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
+    "hash": "5465a73c08f179a819266d001d2355ce8c21b7d18aea94696d5eb4a11dc18cba",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-22T16:54:45.598Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/5465a73c08f179a819266d001d2355ce8c21b7d18aea94696d5eb4a11dc18cba",
+    "onChain": true,
+    "metadata": {
+      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
+      "amount": "2.5",
+      "fee": 2.5
+    }
+  },
+  {
+    "id": "tx-1782146425376-u7fbge",
+    "type": "SubmitAssessment",
+    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 664,177",
+    "hash": "RE-1782146421110-x8on",
+    "contract": "Orchestrator",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-22T16:40:25.377Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assetType": "real-estate",
+      "askingPrice": 1420000,
+      "assessedValue": 664177,
+      "divergence": 41.51890909090909
+    }
+  },
+  {
+    "id": "tx-1782146421110-11rgav",
+    "type": "x402 Payment",
+    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
+    "hash": "dd8430e63a2f4d389a05bc9d7486776451598888d3d7bb565b397e202ea088cd",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-22T16:40:21.110Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/dd8430e63a2f4d389a05bc9d7486776451598888d3d7bb565b397e202ea088cd",
+    "onChain": true,
+    "metadata": {
+      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
+      "amount": "2.5",
+      "fee": 2.5
+    }
+  },
+  {
     "id": "tx-1781889384919-zv2fq1",
     "type": "InitiateDispute",
     "action": "Assessment: Manhattan Studio Apartment (real-estate) - 595,215",

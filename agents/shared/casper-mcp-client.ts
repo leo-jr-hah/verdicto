@@ -5,7 +5,7 @@ let casperMcpClient: Client | null = null;
 
 // Contract hashes from .env
 const REPUTATION_CONTRACT_HASH = process.env.REPUTATION_CONTRACT_HASH || '';
-const ESCROW_CONTRACT_HASH = process.env.ESCROW_CONTRACT_HASH || '';
+const ASSESSMENT_CONTRACT_HASH = process.env.ASSESSMENT_CONTRACT_HASH || '';
 const VOTING_CONTRACT_HASH = process.env.VOTING_CONTRACT_HASH || '';
 
 export async function getCasperMcpClient(): Promise<Client> {
@@ -24,7 +24,7 @@ export async function getCasperMcpClient(): Promise<Client> {
 
   const client = new Client(
     {
-      name: 'casper-rwa-court-orchestrator',
+      name: 'verdict-orchestrator',
       version: '1.0.0',
     },
     {
@@ -38,12 +38,12 @@ export async function getCasperMcpClient(): Promise<Client> {
 }
 
 // Helper to get contract hash for a specific contract
-export function getContractHash(contractName: 'reputation' | 'escrow' | 'voting'): string {
+export function getContractHash(contractName: 'reputation' | 'assessment' | 'voting'): string {
   switch (contractName) {
     case 'reputation':
       return REPUTATION_CONTRACT_HASH;
-    case 'escrow':
-      return ESCROW_CONTRACT_HASH;
+    case 'assessment':
+      return ASSESSMENT_CONTRACT_HASH;
     case 'voting':
       return VOTING_CONTRACT_HASH;
     default:

@@ -308,7 +308,7 @@ export const HeroSection: React.FC = () => {
           }}
         >
           AI-Powered Asset{' '}
-          <span style={{ color: 'var(--primary)' }}>Assessment</span>{' '}
+          <span style={{ color: 'var(--primary)' }}>Valuation & Lending</span>{' '}
           on Chain
         </motion.h1>
 
@@ -325,9 +325,9 @@ export const HeroSection: React.FC = () => {
             margin: '0 auto 2.5rem',
           }}
         >
-          Get a fair, transparent valuation of any real-world asset, powered by
-          independent AI agents that analyze, cross-check, and record their
-          assessment on the Casper blockchain.
+          Get a fair, transparent valuation of any real-world asset — then borrow
+          against it or insure it instantly. Powered by independent AI agents that analyze,
+          cross-check, and record every assessment on the Casper blockchain.
         </motion.p>
 
         {/* CTAs */}
@@ -344,6 +344,22 @@ export const HeroSection: React.FC = () => {
             style={{ padding: '0.875rem 1.75rem', fontSize: '0.95rem' }}
           >
             Value an Asset <ArrowRight size={16} />
+          </FlipButton>
+          <FlipButton
+            to="/borrow"
+            variant="secondary"
+            className="btn"
+            style={{ padding: '0.875rem 1.75rem', fontSize: '0.95rem' }}
+          >
+            Borrow Against Asset <ArrowRight size={16} />
+          </FlipButton>
+          <FlipButton
+            to="/insure"
+            variant="secondary"
+            className="btn"
+            style={{ padding: '0.875rem 1.75rem', fontSize: '0.95rem' }}
+          >
+            Insure Your Asset <ArrowRight size={16} />
           </FlipButton>
           <FlipButton
             variant="secondary"

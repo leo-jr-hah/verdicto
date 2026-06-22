@@ -25,8 +25,8 @@ const learnMoreData: Record<string, { title: string, layman: string, tech: strin
   },
   'X402 Authentication': {
     title: 'X402 Token Authentication',
-    layman: 'Think of an X402 token like a VIP wristband at a concert. It not only proves who you are, but it strictly defines exactly which areas you are allowed to enter. It ensures only the authorized parties can view or interact with this specific dispute case.',
-    tech: 'X402 (similar to L402 or Macaroons) is a bearer token standard that combines authentication with verifiable claims and payment proofs. It allows for highly granular, cryptographically verifiable access control to specific API endpoints and dispute states.'
+    layman: 'Think of an X402 token like a VIP wristband at a concert. It not only proves who you are, but it strictly defines exactly which areas you are allowed to enter. It ensures only the authorized parties can view or interact with this specific asset assessment.',
+    tech: 'X402 (similar to L402 or Macaroons) is a bearer token standard that combines authentication with verifiable claims and payment proofs. It allows for highly granular, cryptographically verifiable access control to specific API endpoints and assessment states.'
   },
   'HMAC Security': {
     title: 'HMAC Data Integrity',
@@ -314,7 +314,7 @@ const scenes = [
       { id: 'observer', src: charObserver, initial: { y: 200, opacity: 0 }, animate: { y: 0, opacity: 1 }, style: { bottom: '0', left: '35%', height: '75%' } }
     ],
     bubbles: [
-      { speaker: 'Observer', text: 'Oh no... a major financial dispute. This is going to take months in court and cost thousands in legal fees. How do we solve this fairly without a central authority?', style: { top: '20%', left: '10%', maxWidth: '350px' }, delay: 0.5 }
+      { speaker: 'Observer', text: 'Oh no... I need to know what this property is really worth. Appraisals take weeks and cost thousands. How do I get a fast, trustworthy valuation without a middleman?', style: { top: '20%', left: '10%', maxWidth: '350px' }, delay: 0.5 }
     ]
   },
   // Scene 3: Enter the Hero
@@ -325,7 +325,7 @@ const scenes = [
       { id: 'hero', src: charVerdictHero, initial: { y: -500, opacity: 0 }, animate: { y: 0, opacity: 1 }, transition: { type: 'spring', bounce: 0.5 }, style: { bottom: '0', right: '15%', height: '80%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'Fear not! I am Verdict. I can resolve this dispute instantly, fairly, and permanently using AI and the blockchain!', style: { top: '15%', left: '35%' }, delay: 0.8 }
+      { speaker: 'Verdict', text: 'Fear not! I am Verdict. I can assess any asset instantly, fairly, and permanently using AI agents and the blockchain!', style: { top: '15%', left: '35%' }, delay: 0.8 }
     ]
   },
   // Scene 4: ZK
@@ -347,7 +347,7 @@ const scenes = [
       { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '80%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'To ensure nobody unauthorized sneaks into this dispute, we issue an X402 Token. Think of it as a VIP digital ticket. It ensures only verified parties have access to this specific case.', style: { top: '20%', left: '40%', maxWidth: '400px' }, delay: 0.2, learnMore: 'X402 Authentication' }
+      { speaker: 'Verdict', text: 'To ensure only authorized parties access this assessment, we issue an X402 Token. Think of it as a VIP digital ticket. It ensures only verified parties have access to this specific assessment.', style: { top: '20%', left: '40%', maxWidth: '400px' }, delay: 0.2, learnMore: 'X402 Authentication' }
     ]
   },
   // Scene 6: HMAC

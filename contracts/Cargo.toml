@@ -1,7 +1,6 @@
 [workspace]
 members = [
     "reputation",
-    "escrow",
     "voting",
 ]
 resolver = "2"
@@ -9,7 +8,7 @@ resolver = "2"
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-authors = ["Casper RWA Court"]
+authors = ["Verdict"]
 
 [workspace.dependencies]
 odra = { version = "2.8.1", default-features = false }

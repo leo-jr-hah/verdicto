@@ -11,5 +11,5 @@ createJurorServer({
   name: 'Precedent Researcher',
   port: parseInt(process.env.PRECEDENT_RESEARCHER_PORT || '3005', 10),
   publicKey: process.env.AGENT_E_PUBLIC_KEY || '',
-  specializationContext: 'You are an expert in historical dispute outcomes and legal precedents for RWA valuations. You ensure consistency across verdicts. You weigh how similar valuation divergences were settled in the past. You favor splitting the difference when both methods are credible, but strongly penalize outlier valuations.',
+  specializationContext: 'You are an expert in historical assessment outcomes and valuation precedents for real-world assets. You ensure consistency across assessments. You weigh how similar valuation divergences were resolved in the past. You favor splitting the difference when both methods are credible, but strongly penalize outlier valuations.',
 });

@@ -32,19 +32,23 @@ export const CTASection: React.FC = () => {
             fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: 800, color: 'var(--text-primary)',
             marginBottom: '24px', fontFamily: 'var(--font-display)', letterSpacing: '-0.02em'
           }}>
-            Ready to get your first valuation?
+            Ready to unlock your asset's value?
           </h2>
           
           <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '40px' }}>
-            Connect your Casper wallet and submit an asset in under 2 minutes. Two valuation agents and three jurors will analyze, deliberate, and deliver a verdict.
+            Connect your Casper wallet, submit an asset, and get an AI-powered valuation in under 2 minutes.
+            Then borrow against it or protect it with insurance — no banks, no paperwork, just on-chain trust.
           </p>
 
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/assess" className="btn btn-primary" style={{ padding: '16px 32px', fontSize: '1rem' }}>
-              Start Assessment
+              Value an Asset
             </Link>
-            <Link to="/dashboard" className="btn" style={{ padding: '16px 32px', fontSize: '1rem', background: 'transparent' }}>
-              View the Dashboard
+            <Link to="/borrow" className="btn" style={{ padding: '16px 32px', fontSize: '1rem', background: 'transparent' }}>
+              Borrow Against Asset
+            </Link>
+            <Link to="/insure" className="btn" style={{ padding: '16px 32px', fontSize: '1rem', background: 'transparent' }}>
+              Insure Your Asset
             </Link>
           </div>
         </Reveal>

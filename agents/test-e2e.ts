@@ -1,4 +1,4 @@
-import { runDisputeResolution } from './orchestrator/index.js';
+import { runAssessmentPipeline } from './orchestrator/index.js';
 
 async function runE2E() {
   console.log("=========================================");
@@ -6,19 +6,19 @@ async function runE2E() {
   console.log("=========================================");
 
   try {
-    const disputeId = `E2E-TEST-${Math.floor(Math.random() * 1000)}`;
-    console.log(`[E2E] Triggering dispute resolution for ${disputeId}...`);
+    const assessmentId = `E2E-TEST-${Math.floor(Math.random() * 1000)}`;
+    console.log(`[E2E] Triggering assessment pipeline for ${assessmentId}...`);
     
     // We await the entire flow. This will:
     // 1. Summon Valuation Agent A (RentCast Integration)
     // 2. Summon Valuation Agent B (FRED Integration)
     // 3. Negotiate x402 V2 payments with multi-chain headers
-    // 4. Run multi-round Groq LLM deliberation
+    // 4. Run multi-round LLM deliberation
     // 5. Simulate Casper blockchain settlement via Odra
-    const result = await runDisputeResolution(disputeId, 'PARKING-MIAMI-TEST', 'Miami', 50);
+    const result = await runAssessmentPipeline(assessmentId, 'PARKING-MIAMI-TEST', 'Miami', 50);
     
     if (!result || !result.verdict) {
-      throw new Error("Dispute resolution completed but no final verdict was returned.");
+      throw new Error("Assessment pipeline completed but no final verdict was returned.");
     }
 
     console.log("\n=========================================");

@@ -1,4 +1,4 @@
-// Shared TypeScript types for all Casper RWA Court agents
+// Shared TypeScript types for all Verdict agents
 // DO NOT change after Day 3 — all agents depend on these
 
 // ─── Asset Types ─────────────────────────────────────────────────────────────
@@ -31,8 +31,8 @@ export interface ValuationResult {
   dataSource?: string;
 }
 
-export interface DisputeCase {
-  dispute_id: number;
+export interface AssessmentCase {
+  assessment_id: number;
   asset_id: string;
   asset_name: string;
   asset_type: AssetType;
@@ -43,8 +43,8 @@ export interface DisputeCase {
   valuation_b: ValuationResult;
   divergence_percent: number;
   status: 'pending' | 'deliberating' | 'voting' | 'resolved';
-  filing_fee_motes: string;
-  filed_at: number;
+  assessment_fee_motes: string;
+  created_at: number;
 }
 
 export interface JurorAssessment {
@@ -64,10 +64,10 @@ export interface JurorVote {
   tx_hash?: string; // Casper testnet transaction hash
 }
 
-export type VerdictChoice = 'full_refund' | 'split_fifty' | 'full_release';
+export type VerdictChoice = 'agent_a_preferred' | 'split_fifty' | 'agent_b_preferred';
 
 export interface VerdictResult {
-  dispute_id: number;
+  assessment_id: number;
   verdict: VerdictChoice;
   votes: JurorVote[];
   final_value: number;
@@ -77,7 +77,7 @@ export interface VerdictResult {
 
 export interface DeliberationEvent {
   type: 'assessment' | 'vote' | 'verdict' | 'payment';
-  dispute_id: number;
+  assessment_id: number;
   data: JurorAssessment | JurorVote | VerdictResult | PaymentEvent;
   timestamp: number;
 }
@@ -90,10 +90,10 @@ export interface PaymentEvent {
   tx_hash: string; // simulated for hackathon
 }
 
-// Demo seed data — 3 pre-seeded disputes for the dashboard
-export const DEMO_DISPUTES: Partial<DisputeCase>[] = [
+// Demo seed data — 3 pre-seeded assessments for the dashboard
+export const DEMO_ASSESSMENTS: Partial<AssessmentCase>[] = [
   {
-    dispute_id: 1,
+    assessment_id: 1,
     asset_id: 'RE-MIAMI-001',
     asset_name: 'Miami Beachfront Condo',
     asset_type: 'real-estate',
@@ -102,10 +102,10 @@ export const DEMO_DISPUTES: Partial<DisputeCase>[] = [
     asking_price: 1_250_000,
     divergence_percent: 25,
     status: 'pending',
-    filing_fee_motes: '100000000',
+    assessment_fee_motes: '100000000',
   },
   {
-    dispute_id: 2,
+    assessment_id: 2,
     asset_id: 'ART-NYC-007',
     asset_name: 'Contemporary Oil Painting',
     asset_type: 'art',
@@ -114,10 +114,10 @@ export const DEMO_DISPUTES: Partial<DisputeCase>[] = [
     asking_price: 85_000,
     divergence_percent: 31,
     status: 'resolved',
-    filing_fee_motes: '100000000',
+    assessment_fee_motes: '100000000',
   },
   {
-    dispute_id: 3,
+    assessment_id: 3,
     asset_id: 'GOLD-003',
     asset_name: '10oz Gold Bar (999.9)',
     asset_type: 'commodity',
@@ -126,72 +126,15 @@ export const DEMO_DISPUTES: Partial<DisputeCase>[] = [
     asking_price: 23_500,
     divergence_percent: 12,
     status: 'deliberating',
-    filing_fee_motes: '100000000',
+    assessment_fee_motes: '100000000',
   },
 ];
 
 // Agent reputation seed data
 export const AGENT_SEED_SCORES: Record<string, Record<string, number>> = {
   'valuation-agent-a': { 'real-estate': 750, art: 680, commodity: 720 },
-  'valuation-agent-b': { 'real-estate': 780, art: 710, commodity: 760 },
-  'evidence-analyst':  { 'real-estate': 810, art: 740, commodity: 690 },
+  'valuation-agent-b': { 'real-estate': 780, art: 710, commodity: 690 },
+  'evidence-analyst': { 'real-estate': 820, art: 790, commodity: 810 },
+  'market-data-interpreter': { 'real-estate': 770, art: 730, commodity: 800 },
+  'precedent-researcher': { 'real-estate': 740, art: 850, commodity: 700 },
 };
-
-// Precedent cases for Vectra vector store
-export const PRECEDENT_CASES = [
-  {
-    case_id: 'DIS-001',
-    asset_type: 'parking',
-    location: 'Miami',
-    val_a: 2400000,
-    val_b: 1800000,
-    divergence: 25,
-    verdict: 'split_fifty',
-    final_value: 2100000,
-    reasoning: 'Weighted average of both methods. Comparable sales showed recent market premium, DCF captured income fundamentals. Court split the difference.',
-  },
-  {
-    case_id: 'DIS-002',
-    asset_type: 'parking',
-    location: 'New York',
-    val_a: 8500000,
-    val_b: 5200000,
-    divergence: 38,
-    verdict: 'full_refund',
-    final_value: 5200000,
-    reasoning: 'Comparable sales method used inflated 2021 comps. DCF method with 6.5% cap rate more accurately reflected post-correction market.',
-  },
-  {
-    case_id: 'DIS-003',
-    asset_type: 'parking',
-    location: 'Chicago',
-    val_a: 3100000,
-    val_b: 3400000,
-    divergence: 9,
-    verdict: 'split_fifty',
-    final_value: 3250000,
-    reasoning: 'Both valuations within acceptable range. Minor divergence due to cap rate assumptions. Split deemed fair.',
-  },
-  {
-    case_id: 'DIS-004',
-    asset_type: 'parking',
-    location: 'Los Angeles',
-    val_a: 4200000,
-    val_b: 6800000,
-    divergence: 38,
-    verdict: 'full_release',
-    final_value: 6800000,
-    reasoning: 'Comparable sales missed recent LA premium. DCF correctly captured EV charging revenue potential adding 40% income uplift.',
-  },
-  {
-    case_id: 'DIS-005',
-    asset_type: 'parking',
-    location: 'Miami',
-    val_a: 1900000,
-    val_b: 1600000,
-    divergence: 17,
-    verdict: 'split_fifty',
-    final_value: 1750000,
-    reasoning: 'Standard split for Miami waterfront parking. Both methods sound but differing occupancy assumptions led to divergence.',
-  },
-];

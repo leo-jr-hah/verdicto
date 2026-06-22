@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Menu, X, Bot, LayoutDashboard, Users, Scale, History, Cpu, ChevronRight, Droplets, Target, Map } from 'lucide-react';
+import { Moon, Sun, Menu, X, Bot, LayoutDashboard, Users, Scale, History, Cpu, ChevronRight, Droplets, Target, Map, Landmark, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import verdictLogo from '../assets/logo.jpeg';
 import { ConnectionStatus } from '../components/ConnectionStatus';
@@ -18,6 +18,8 @@ const NAV_SECTIONS = [
     title: 'TOOLS',
     items: [
       { name: 'Value Asset', path: '/assess', icon: Scale },
+      { name: 'Borrow', path: '/borrow', icon: Landmark },
+      { name: 'Insure', path: '/insure', icon: Shield },
       { name: 'Predict', path: '/predict', icon: Target },
     ],
   },
