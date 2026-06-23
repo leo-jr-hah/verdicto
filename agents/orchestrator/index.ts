@@ -672,21 +672,53 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
   emitEvent('transaction', commitmentTx);
 
   if (votingHash) {
-    console.log(`  📝 VotingContract (${votingHash.slice(0, 16)}...): cast_vote(${assessmentId}, ${verdictIndex}, weight)`);
+    console.log(`  📝 VotingContract (${votingHash.slice(0, 16)}...): casting vote on-chain...`);
+    try {
+      const { castVoteOnChain } = await import('../shared/casper-contracts.js');
+      const verdictName = finalVerdict === 'AgentAPreferred' ? 'AgentAPreferred' : finalVerdict === 'AgentBPreferred' ? 'AgentBPreferred' : 'SplitFifty';
+      const voteResult = await castVoteOnChain(assessmentId, verdictName, `Weighted consensus: A=${scoreA} B=${scoreB} Split=${scoreSplit}`, Math.max(scoreA, scoreB, scoreSplit));
+      if (voteResult.success) {
+        console.log(`  📝 VotingContract ✅ vote recorded on-chain: ${voteResult.txHash.slice(0, 16)}...`);
+        const voteTx = createTransactionEntry('ContractCall', `VotingContract: cast_vote for ${assessmentId}`, voteResult.txHash, 'VotingContract', 'latest', { assessmentId, verdict: verdictName, weight: voteResult.weight }, true);
+        saveTransaction(voteTx);
+        emitEvent('transaction', voteTx);
+      } else {
+        console.log(`  📝 VotingContract ⚠️ vote failed (no deployer key or contract error)`);
+      }
+    } catch (err: any) {
+      console.warn(`  📝 VotingContract ⚠️ on-chain call failed: ${err.message}`);
+    }
   } else {
-    console.log(`  📝 VotingContract: [PENDING DEPLOY] cast_vote(${assessmentId}, verdict=${verdictIndex}, weight)`);
+    console.log(`  📝 VotingContract: [NO CONTRACT HASH] cast_vote skipped — set VOTING_CONTRACT_HASH in .env`);
   }
 
   if (assessmentHash) {
     console.log(`  💰 AssessmentContract (${assessmentHash.slice(0, 16)}...): record_assessment(${assessmentId})`);
   } else {
-    console.log(`  💰 AssessmentContract: [PENDING DEPLOY] record_assessment(${assessmentId})`);
+    console.log(`  💰 AssessmentContract: [NO CONTRACT HASH] record_assessment skipped — set ASSESSMENT_CONTRACT_HASH in .env`);
   }
 
   if (reputationHash) {
-    console.log(`  🏆 ReputationRegistry (${reputationHash.slice(0, 16)}...): queued for retroactive update`);
+    console.log(`  🏆 ReputationRegistry (${reputationHash.slice(0, 16)}...): recording verdict for retroactive settlement...`);
+    try {
+      const { updateReputationOnChain } = await import('../shared/casper-contracts.js');
+      // Record the verdict for retroactive settlement — agent closest to finalValue gains reputation
+      const delta = finalVerdict === 'AgentAPreferred' ? 10 : finalVerdict === 'AgentBPreferred' ? -10 : 0;
+      if (delta !== 0) {
+        const agentToUpdate = finalVerdict === 'AgentAPreferred' ? 'valuation-agent-a' : 'valuation-agent-b';
+        const repResult = await updateReputationOnChain(agentToUpdate, 'parking', delta);
+        if (repResult.success) {
+          console.log(`  🏆 ReputationRegistry ✅ score updated on-chain: ${repResult.txHash.slice(0, 16)}...`);
+          const repTx = createTransactionEntry('ContractCall', `ReputationRegistry: update ${agentToUpdate} +${delta}`, repResult.txHash, 'ReputationRegistry', 'latest', { agentId: agentToUpdate, delta }, true);
+          saveTransaction(repTx);
+          emitEvent('transaction', repTx);
+        }
+      }
+    } catch (err: any) {
+      console.warn(`  🏆 ReputationRegistry ⚠️ on-chain call failed: ${err.message}`);
+    }
   } else {
-    console.log(`  🏆 ReputationRegistry: [PENDING DEPLOY] retroactive update queued`);
+    console.log(`  🏆 ReputationRegistry: [NO CONTRACT HASH] retroactive update skipped — set REPUTATION_CONTRACT_HASH in .env`);
   }
 
   // Step 7: Native transfer settlement
@@ -1236,6 +1268,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
             confidence: valuationA.confidence,
             source: valuationA.dataSource || 'Agent',
             reasoning: valuationA.reasoning,
+            fallbackTriggered: valuationA.fallbackTriggered || false,
+            fallbackProvider: valuationA.fallbackProvider,
           },
           valuationB: {
             method: valuationB.method,
@@ -1243,6 +1277,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
             confidence: valuationB.confidence,
             source: valuationB.dataSource || 'Agent',
             reasoning: valuationB.reasoning,
+            fallbackTriggered: valuationB.fallbackTriggered || false,
+            fallbackProvider: valuationB.fallbackProvider,
           },
           verdict: verdict ? {
             decision: verdict.verdict,
@@ -1256,6 +1292,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           dataSources: dataSourcesUsed,
           methodology,
           timestamp: Date.now(),
+          /** Which agents fell back to deterministic responses (empty = all LLMs worked). */
+          fallbackAgents: [
+            ...(valuationA.fallbackTriggered ? [{ agent: 'Agent A', provider: valuationA.fallbackProvider }] : []),
+            ...(valuationB.fallbackTriggered ? [{ agent: 'Agent B', provider: valuationB.fallbackProvider }] : []),
+          ],
         },
       };
 

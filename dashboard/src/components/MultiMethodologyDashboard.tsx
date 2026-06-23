@@ -614,6 +614,42 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
         </span>
       </div>
 
+      {/* Fallback warning banner — visible when any agent fell back to deterministic responses */}
+      {result.fallbackAgents && result.fallbackAgents.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.75rem',
+            padding: '1rem 1.25rem',
+            marginBottom: '1.5rem',
+            borderRadius: '10px',
+            background: 'rgba(245, 158, 11, 0.08)',
+            border: '1px solid rgba(245, 158, 11, 0.25)',
+          }}
+        >
+          <AlertTriangle size={18} color="#f59e0b" style={{ marginTop: 2, flexShrink: 0 }} />
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#f59e0b', marginBottom: 4 }}>
+              LLM Fallback Triggered
+            </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              {result.valuationA.fallbackTriggered && result.valuationB.fallbackTriggered
+                ? 'Both valuation agents fell back to deterministic calculations because the LLM (MiMo + Groq) was unavailable.'
+                : `${result.fallbackAgents.map(f => f.agent).join(' and ')} fell back to deterministic calculations because the primary LLM was unavailable.`
+              }{' '}
+              Results are based on {result.fallbackAgents.some(f => f.provider === 'groq') ? 'Groq fallback (reduced reasoning quality)' : 'heuristic formulas (no LLM reasoning)'}.
+              {' '}
+              <span style={{ color: '#f59e0b', fontWeight: 600 }}>
+                These valuations should be treated with lower confidence.
+              </span>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Divergence range bar */}
       <div style={{ marginBottom: '1.5rem' }}>
         <DivergenceBar

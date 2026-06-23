@@ -141,11 +141,11 @@ Analyze the evidence from your perspective.`;
       }
 
       console.log(`[${config.name}] 🤔 Reasoning about assessment ${assessment_id} (${resolvedAssetType}, Round ${isRound2 ? 2 : 1})...`);
-      const llmResponse = await askJuror(systemPrompt, userPrompt);
-      console.log(`[${config.name}] ✅ Reached verdict: ${llmResponse.vote}`);
+      const { result: llmResponse, provider: llmProvider, fallbackTriggered } = await askJuror(systemPrompt, userPrompt);
+      console.log(`[${config.name}] ✅ Reached verdict: ${llmResponse.vote} (provider: ${llmProvider}${fallbackTriggered ? ', FALLBACK' : ''})`);
 
       return {
-        content: [{ type: 'text', text: JSON.stringify(llmResponse, null, 2) }],
+        content: [{ type: 'text', text: JSON.stringify({ ...llmResponse, _provider: llmProvider, _fallbackTriggered: fallbackTriggered }, null, 2) }],
       };
     }
   );

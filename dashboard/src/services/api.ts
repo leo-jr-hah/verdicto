@@ -70,6 +70,8 @@ export interface AssessmentResult {
     confidence: number;
     source: string;
     reasoning: string;
+    fallbackTriggered?: boolean;
+    fallbackProvider?: 'groq' | 'heuristic';
   };
   valuationB: {
     method: string;
@@ -77,6 +79,8 @@ export interface AssessmentResult {
     confidence: number;
     source: string;
     reasoning: string;
+    fallbackTriggered?: boolean;
+    fallbackProvider?: 'groq' | 'heuristic';
   };
   verdict: {
     decision: string;
@@ -90,6 +94,8 @@ export interface AssessmentResult {
   dataSources?: DataSource[];
   methodology?: Methodology;
   timestamp: number;
+  /** Agents that fell back to deterministic responses (empty = all LLMs worked). */
+  fallbackAgents?: Array<{ agent: string; provider: 'groq' | 'heuristic' }>;
 }
 
 export interface DemoAsset {

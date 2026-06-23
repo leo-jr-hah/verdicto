@@ -216,7 +216,7 @@ export async function calcRealEstateComps(
   ].filter(Boolean).join('\n');
 
   try {
-    const llmResult = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
+    const { result: llmResult, provider: llmProvider, fallbackTriggered } = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
     const estimatedValue = extractNumber(llmResult, 'estimated_value', fallbackValue);
     const confidence = extractConfidence(llmResult, 0.65);
 
@@ -230,6 +230,8 @@ export async function calcRealEstateComps(
       reasoning: llmResult.reasoning || `Comparable sales analysis for ${location}. Data source: ${dataSource}.`,
       timestamp: Date.now(),
       dataSource,
+      fallbackTriggered,
+      fallbackProvider: fallbackTriggered ? (llmProvider as 'groq' | 'heuristic') : undefined,
     };
   } catch {
     return {
@@ -242,6 +244,8 @@ export async function calcRealEstateComps(
       reasoning: `Comparable sales analysis for ${location}. Data source: ${dataSource}. (Deterministic fallback — LLM unavailable)`,
       timestamp: Date.now(),
       dataSource,
+      fallbackTriggered: true,
+      fallbackProvider: 'heuristic',
     };
   }
 }
@@ -285,7 +289,7 @@ export async function calcRealEstateDCF(
   ].filter(Boolean).join('\n');
 
   try {
-    const llmResult = await askValuationAgent(AGENT_B_SYSTEM, userPrompt);
+    const { result: llmResult, provider: llmProvider, fallbackTriggered } = await askValuationAgent(AGENT_B_SYSTEM, userPrompt);
     const estimatedValue = extractNumber(llmResult, 'estimated_value', dcfFallback);
     const confidence = extractConfidence(llmResult, 0.72);
 
@@ -299,6 +303,8 @@ export async function calcRealEstateDCF(
       reasoning: llmResult.reasoning || `DCF analysis for ${location}. Mortgage rate: ${(mortgageRate * 100).toFixed(2)}%. Cap rate: ${(capRate * 100).toFixed(1)}%.`,
       timestamp: Date.now(),
       dataSource,
+      fallbackTriggered,
+      fallbackProvider: fallbackTriggered ? (llmProvider as 'groq' | 'heuristic') : undefined,
     };
   } catch {
     return {
@@ -311,6 +317,8 @@ export async function calcRealEstateDCF(
       reasoning: `DCF analysis for ${location}. Mortgage rate: ${(mortgageRate * 100).toFixed(2)}%. Cap rate: ${(capRate * 100).toFixed(1)}%. (Deterministic fallback — LLM unavailable)`,
       timestamp: Date.now(),
       dataSource,
+      fallbackTriggered: true,
+      fallbackProvider: 'heuristic',
     };
   }
 }
@@ -393,7 +401,7 @@ export async function calcArtAppraisal(
   ].filter(Boolean).join('\n');
 
   try {
-    const llmResult = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
+    const { result: llmResult, provider: llmProvider, fallbackTriggered } = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
     const estimatedValue = extractNumber(llmResult, 'estimated_value', fallbackValue);
     const confidence = extractConfidence(llmResult, 0.60);
 
@@ -407,6 +415,8 @@ export async function calcArtAppraisal(
       reasoning: llmResult.reasoning || `Art appraisal for "${artistOrMedium}". Data source: ${dataSource}.`,
       timestamp: Date.now(),
       dataSource,
+      fallbackTriggered,
+      fallbackProvider: fallbackTriggered ? (llmProvider as 'groq' | 'heuristic') : undefined,
     };
   } catch {
     return {
@@ -419,6 +429,8 @@ export async function calcArtAppraisal(
       reasoning: `Art appraisal for "${artistOrMedium}". Data source: ${dataSource}. (Deterministic fallback — LLM unavailable)`,
       timestamp: Date.now(),
       dataSource,
+      fallbackTriggered: true,
+      fallbackProvider: 'heuristic',
     };
   }
 }
@@ -446,7 +458,7 @@ export async function calcArtMarketComparison(
   ].filter(Boolean).join('\n');
 
   try {
-    const llmResult = await askValuationAgent(AGENT_B_SYSTEM, userPrompt);
+    const { result: llmResult, provider: llmProvider, fallbackTriggered } = await askValuationAgent(AGENT_B_SYSTEM, userPrompt);
     const estimatedValue = extractNumber(llmResult, 'estimated_value', dcfFallback);
     const confidence = extractConfidence(llmResult, 0.58);
 
@@ -460,6 +472,8 @@ export async function calcArtMarketComparison(
       reasoning: llmResult.reasoning || `Market comparison for "${artistOrMedium}". Data source: ${dataSource}.`,
       timestamp: Date.now(),
       dataSource,
+      fallbackTriggered,
+      fallbackProvider: fallbackTriggered ? (llmProvider as 'groq' | 'heuristic') : undefined,
     };
   } catch {
     return {
@@ -472,6 +486,8 @@ export async function calcArtMarketComparison(
       reasoning: `Market comparison for "${artistOrMedium}". Data source: ${dataSource}. (Deterministic fallback — LLM unavailable)`,
       timestamp: Date.now(),
       dataSource,
+      fallbackTriggered: true,
+      fallbackProvider: 'heuristic',
     };
   }
 }
@@ -538,7 +554,7 @@ export async function calcCommoditySpot(
   ].filter(Boolean).join('\n');
 
   try {
-    const llmResult = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
+    const { result: llmResult, provider: llmProvider, fallbackTriggered } = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
     const estimatedValue = extractNumber(llmResult, 'estimated_value', fallbackValue);
     const confidence = extractConfidence(llmResult, 0.85);
 
@@ -549,9 +565,11 @@ export async function calcCommoditySpot(
       estimated_value: estimatedValue,
       confidence,
       per_spot_value: Math.round(pricePerOz),
-      reasoning: llmResult.reasoning || `Spot price valuation for ${weightOz}oz ${commodity}. Price per oz: $${pricePerOz.toLocaleString()} (${dataSource}).`,
+      reasoning: llmResult.reasoning || `Spot price valuation for ${weightOz}oz ${commodity}. Price per oz: ${pricePerOz.toLocaleString()} (${dataSource}).`,
       timestamp: Date.now(),
       dataSource,
+      fallbackTriggered,
+      fallbackProvider: fallbackTriggered ? (llmProvider as 'groq' | 'heuristic') : undefined,
     };
   } catch {
     return {
@@ -561,9 +579,11 @@ export async function calcCommoditySpot(
       estimated_value: fallbackValue,
       confidence: 0.82,
       per_spot_value: Math.round(pricePerOz),
-      reasoning: `Spot price valuation for ${weightOz}oz ${commodity}. Price per oz: $${pricePerOz.toLocaleString()} (${dataSource}). (Deterministic fallback — LLM unavailable)`,
+      reasoning: `Spot price valuation for ${weightOz}oz ${commodity}. Price per oz: ${pricePerOz.toLocaleString()} (${dataSource}). (Deterministic fallback — LLM unavailable)`,
       timestamp: Date.now(),
       dataSource,
+      fallbackTriggered: true,
+      fallbackProvider: 'heuristic',
     };
   }
 }
@@ -592,7 +612,7 @@ export async function calcCommodityAppraisal(
   ].filter(Boolean).join('\n');
 
   try {
-    const llmResult = await askValuationAgent(AGENT_B_SYSTEM, userPrompt);
+    const { result: llmResult, provider: llmProvider, fallbackTriggered } = await askValuationAgent(AGENT_B_SYSTEM, userPrompt);
     const estimatedValue = extractNumber(llmResult, 'estimated_value', dcfFallback);
     const confidence = extractConfidence(llmResult, 0.78);
 
@@ -606,6 +626,8 @@ export async function calcCommodityAppraisal(
       reasoning: llmResult.reasoning || `Physical appraisal for ${weightOz}oz ${commodity}. Includes premium for assay, delivery, and storage.`,
       timestamp: Date.now(),
       dataSource: 'Physical Appraisal',
+      fallbackTriggered,
+      fallbackProvider: fallbackTriggered ? (llmProvider as 'groq' | 'heuristic') : undefined,
     };
   } catch {
     return {
@@ -618,6 +640,8 @@ export async function calcCommodityAppraisal(
       reasoning: `Physical appraisal for ${weightOz}oz ${commodity}. Includes ${(premium * 100 - 100).toFixed(1)}% premium for assay, delivery, and storage. (Deterministic fallback — LLM unavailable)`,
       timestamp: Date.now(),
       dataSource: 'Physical Appraisal',
+      fallbackTriggered: true,
+      fallbackProvider: 'heuristic',
     };
   }
 }

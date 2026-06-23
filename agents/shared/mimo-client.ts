@@ -209,7 +209,16 @@ function buildFallbackResponse(userPrompt: string): any {
  * Each step has a 15s timeout. If MiMo fails, Groq is tried.
  * If Groq fails, a deterministic heuristic response is returned.
  */
-export async function askJuror(systemPrompt: string, userPrompt: string) {
+export interface JurorResponse {
+  /** The parsed JSON response from the LLM (or heuristic fallback). */
+  result: any;
+  /** Which provider actually produced the response. */
+  provider: 'mimo' | 'groq' | 'heuristic';
+  /** True if the primary LLM (MiMo) was unavailable. */
+  fallbackTriggered: boolean;
+}
+
+export async function askJuror(systemPrompt: string, userPrompt: string): Promise<JurorResponse> {
   // Step 1: Try MiMo
   try {
     console.log(`[LLM] 🤖 Trying MiMo (${MIMO_MODEL})...`);
@@ -217,7 +226,7 @@ export async function askJuror(systemPrompt: string, userPrompt: string) {
     console.log(`[LLM] ✅ MiMo responded (${result.tokensUsed} tokens)`);
 
     try {
-      return JSON.parse(result.content);
+      return { result: JSON.parse(result.content), provider: 'mimo', fallbackTriggered: false };
     } catch {
       console.warn(`[LLM] ⚠️  MiMo returned non-JSON, trying Groq...`);
     }
@@ -232,10 +241,10 @@ export async function askJuror(systemPrompt: string, userPrompt: string) {
     console.log(`[LLM] ✅ Groq responded (${result.tokensUsed} tokens)`);
 
     try {
-      return JSON.parse(result.content);
+      return { result: JSON.parse(result.content), provider: 'groq', fallbackTriggered: true };
     } catch {
       console.warn(`[LLM] ⚠️  Groq returned non-JSON, using fallback`);
-      return buildFallbackResponse(userPrompt);
+      return { result: buildFallbackResponse(userPrompt), provider: 'heuristic', fallbackTriggered: true };
     }
   } catch (groqErr: any) {
     console.warn(`[LLM] ⚠️  Groq failed: ${groqErr.message} — using fallback`);
@@ -243,13 +252,13 @@ export async function askJuror(systemPrompt: string, userPrompt: string) {
 
   // Step 3: Heuristic fallback
   console.log(`[LLM] 🔄 Using heuristic fallback`);
-  return buildFallbackResponse(userPrompt);
+  return { result: buildFallbackResponse(userPrompt), provider: 'heuristic', fallbackTriggered: true };
 }
 
 /**
  * Ask the LLM for a valuation analysis (used by agent-engine).
  * Same chain: MiMo → Groq → Fallback
  */
-export async function askValuationAgent(systemPrompt: string, userPrompt: string) {
+export async function askValuationAgent(systemPrompt: string, userPrompt: string): Promise<JurorResponse> {
   return askJuror(systemPrompt, userPrompt);
 }
