@@ -48,6 +48,7 @@ import { createExecutionCommitment, storeCommitmentOnCasper } from '../shared/ve
 import { saveTransaction, createTransactionEntry, loadTransactions } from '../shared/transaction-log.js';
 import { runDualValuation, type ValuationRequest } from '../shared/agent-engine.js';
 import { fetchAssetData, type AssetData } from '../shared/data-sources.js';
+import { casperX402Middleware } from '../shared/x402-middleware.js';
 import type { AssetType } from '../shared/types.js';
 
 // ─── Named constants ─────────────────────────────────────────────────────────
@@ -62,6 +63,9 @@ const JUROR_IDS = ['evidence', 'market', 'precedent'] as const;
 
 // ─── x402 Payment Constants ──────────────────────────────────────────────────
 const ASSESSMENT_FEE_CSPR = 2.5;
+const LOAN_FEE_CSPR = 5.0;
+const REPAY_FEE_CSPR = 2.5;
+const INSURANCE_FEE_CSPR = 3.0;
 const PLATFORM_WALLET = process.env.PLATFORM_WALLET || '02030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20212223';
 
 // ─── In-memory receipt chain store (per assessment) ──────────────────────────
@@ -1429,9 +1433,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
    * POST /api/loans/create
    * Create a loan against a previously assessed asset.
    * Flow: validate assessment → calculate LTV → disburse CSPR via wallet transfer → store loan.
-   * Requires x402 payment for the platform lending fee (1% of loan amount, min 0.5 CSPR).
+   * x402-gated: returns HTTP 402 with payment requirements if no valid payment proof is provided.
    */
-  app.post('/api/loans/create', async (req, res) => {
+  app.post('/api/loans/create',
+    casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(LOAN_FEE_CSPR) }),
+    async (req, res) => {
     try {
       const ip = req.ip || req.socket.remoteAddress || 'unknown';
       if (isRateLimited(ip)) {
@@ -1716,10 +1722,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   /**
    * POST /api/loans/:loanId/repay
    * Repay part or all of a loan. Requires real CSPR transfer from borrower to platform wallet.
+   * x402-gated: returns HTTP 402 with payment requirements if no valid payment proof is provided.
    */
-  app.post('/api/loans/:loanId/repay', async (req, res) => {
+  app.post('/api/loans/:loanId/repay',
+    casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(REPAY_FEE_CSPR) }),
+    async (req, res) => {
     try {
-      const loan = loanStore.get(req.params.loanId);
+      const loan = loanStore.get(req.params.loanId as string);
       if (!loan) {
         return res.status(404).json({ success: false, error: 'Loan not found' });
       }
@@ -2135,9 +2144,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
    * POST /api/insurance/create
    * Create an insurance policy for a previously assessed asset.
    * Flow: validate assessment → calculate risk/premium → store policy.
-   * Requires x402 payment for the platform insurance fee (3 CSPR).
+   * x402-gated: returns HTTP 402 with payment requirements if no valid payment proof is provided.
    */
-  app.post('/api/insurance/create', async (req, res) => {
+  app.post('/api/insurance/create',
+    casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(INSURANCE_FEE_CSPR) }),
+    async (req, res) => {
     try {
       const ip = req.ip || req.socket.remoteAddress || 'unknown';
       if (isRateLimited(ip)) {
@@ -2325,10 +2336,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
    * POST /api/insurance/:policyId/claim
    * File a claim against an insurance policy.
    * Triggers revaluation to determine actual loss, then approves/denies/pays.
+   * x402-gated: returns HTTP 402 with payment requirements if no valid payment proof is provided.
    */
-  app.post('/api/insurance/:policyId/claim', async (req, res) => {
+  app.post('/api/insurance/:policyId/claim',
+    casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(INSURANCE_FEE_CSPR) }),
+    async (req, res) => {
     try {
-      const policy = insuranceStore.get(req.params.policyId);
+      const policy = insuranceStore.get(req.params.policyId as string);
       if (!policy) {
         return res.status(404).json({ success: false, error: 'Insurance policy not found' });
       }
@@ -2444,8 +2458,163 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     }
   });
 
+  // ─── Admin: Force-trigger revaluation (demo/testing aid) ──────────────────
+  // POST /api/admin/force-revalue/:loanId — immediately revalues a loan
+  // regardless of staleness. For live demos to show autonomous behavior.
+  // Gated by ADMIN_SECRET header to prevent unauthorized access.
+  app.post('/api/admin/force-revalue/:loanId', async (req, res) => {
+    const adminSecret = process.env.ADMIN_SECRET;
+    if (!adminSecret || req.headers['x-admin-secret'] !== adminSecret) {
+      return res.status(403).json({ error: 'Forbidden — missing or invalid x-admin-secret header' });
+    }
+    const { loanId } = req.params;
+    const loan = loanStore.get(loanId);
+    if (!loan) {
+      return res.status(404).json({ error: 'Loan not found', loanId });
+    }
+
+    console.log(`\n[Force-Revalue] Manual trigger for loan ${loanId}...`);
+
+    try {
+      const [agentA, agentB] = await runDualValuation({
+        assetId: loan.assetId,
+        assetType: loan.assetType as AssetType,
+      });
+
+      const newValue = Math.round((agentA.estimated_value + agentB.estimated_value) / 2);
+      const confidence = (agentA.confidence + agentB.confidence) / 2;
+      const newHealthRatio = Math.round((newValue / (loan.loanAmountCSPR * 100)) * 100);
+      const newStatus: Loan['status'] = newHealthRatio < 50 ? 'warning' : 'healthy';
+
+      const now = Date.now();
+      loan.revaluationHistory.push({
+        timestamp: now,
+        previousValue: loan.assessedValue,
+        newValue,
+        healthRatio: newHealthRatio,
+        status: newStatus,
+        valuationA: { value: agentA.estimated_value, method: agentA.method, confidence: agentA.confidence, reasoning: agentA.reasoning },
+        valuationB: { value: agentB.estimated_value, method: agentB.method, confidence: agentB.confidence, reasoning: agentB.reasoning },
+      });
+      loan.assessedValue = newValue;
+      loan.lastRevaluedAt = now;
+      loan.healthRatio = newHealthRatio;
+      loan.status = newStatus;
+
+      console.log(`[Force-Revalue] ${loanId}: ${loan.assessedValue.toLocaleString()} → ${newValue.toLocaleString()} health=${newHealthRatio}`);
+
+      res.json({
+        success: true,
+        loanId,
+        revaluation: {
+          previousValue: loan.revaluationHistory[loan.revaluationHistory.length - 2]?.newValue ?? loan.assessedValue,
+          newValue,
+          healthRatio: newHealthRatio,
+          status: newStatus,
+          confidence,
+          valuationA: { value: agentA.estimated_value, method: agentA.method, confidence: agentA.confidence },
+          valuationB: { value: agentB.estimated_value, method: agentB.method, confidence: agentB.confidence },
+        },
+      });
+    } catch (err: any) {
+      console.error(`[Force-Revalue] Failed for ${loanId}:`, err.message);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // ─── Admin: List active loans (for demo UI) ──────────────────────────────
+  // Gated by ADMIN_SECRET header to prevent unauthorized access.
+  app.get('/api/admin/loans', (req, res) => {
+    const adminSecret = process.env.ADMIN_SECRET;
+    if (!adminSecret || req.headers['x-admin-secret'] !== adminSecret) {
+      return res.status(403).json({ error: 'Forbidden — missing or invalid x-admin-secret header' });
+    }
+    const loans = Array.from(loanStore.values()).map(l => ({
+      loanId: l.loanId,
+      assetName: l.assetName,
+      status: l.status,
+      assessedValue: l.assessedValue,
+      healthRatio: l.healthRatio,
+      revaluationCount: l.revaluationHistory?.length || 0,
+      lastRevaluedAt: l.lastRevaluedAt,
+      createdAt: l.createdAt,
+    }));
+    res.json({ loans });
+  });
+
   const PORT = process.env.ORCHESTRATOR_API_PORT || 3011;
   app.listen(PORT, () => {
     console.log(`🚀 Orchestrator API running on http://localhost:${PORT}`);
+
+    // ─── Auto-revaluation monitor ───────────────────────────────────────────
+    // Periodically checks active loans and triggers revaluation if stale.
+    // This makes the system "monitor its own loans" rather than requiring manual triggers.
+    //
+    // DEMO_MODE: When DEMO_MODE=true, checks every 30s with 0 staleness threshold.
+    // This lets you show autonomous revaluation firing live during a demo.
+    const isDemoMode = process.env.DEMO_MODE === 'true';
+    const REVAL_INTERVAL_MS = isDemoMode ? 30_000 : 5 * 60 * 1000;
+    const REVAL_STALE_MS = isDemoMode ? 0 : 30 * 60 * 1000;
+
+    if (isDemoMode) {
+      console.log(`[Auto-Revalue] ⚡ DEMO MODE — checking every 30s, revalues on every check`);
+    } else {
+      console.log(`[Auto-Revalue] Normal mode — checking every 5 min, staleness threshold 30 min`);
+    }
+
+    setInterval(async () => {
+      const activeLoans = Array.from(loanStore.values()).filter(
+        l => l.status === 'active' || l.status === 'healthy'
+      );
+      if (activeLoans.length === 0) return;
+
+      console.log(`\n[Auto-Revalue] Checking ${activeLoans.length} active loans...`);
+      const now = Date.now();
+
+      for (const loan of activeLoans) {
+        const lastReval = loan.revaluationHistory?.length
+          ? loan.revaluationHistory[loan.revaluationHistory.length - 1].timestamp
+          : loan.createdAt;
+        const staleMs = now - lastReval;
+
+        if (staleMs < REVAL_STALE_MS) continue;
+
+        console.log(`[Auto-Revalue] Loan ${loan.loanId} is stale (${Math.round(staleMs / 60000)} min since last revaluation). Triggering...`);
+
+        try {
+          // Re-run the dual-agent deliberation pipeline
+          const [agentA, agentB] = await runDualValuation({
+            assetId: loan.assetId,
+            assetType: loan.assetType as AssetType,
+          });
+
+          const newValue = Math.round((agentA.estimated_value + agentB.estimated_value) / 2);
+          const confidence = (agentA.confidence + agentB.confidence) / 2;
+
+          // Compute new health ratio
+          const newHealthRatio = Math.round((newValue / (loan.loanAmountCSPR * 100)) * 100);
+          const newStatus: Loan['status'] = newHealthRatio < 50 ? 'warning' : 'healthy';
+
+          // Store revaluation
+          loan.revaluationHistory.push({
+            timestamp: now,
+            previousValue: loan.assessedValue,
+            newValue,
+            healthRatio: newHealthRatio,
+            status: newStatus,
+            valuationA: { value: agentA.estimated_value, method: agentA.method, confidence: agentA.confidence, reasoning: agentA.reasoning },
+            valuationB: { value: agentB.estimated_value, method: agentB.method, confidence: agentB.confidence, reasoning: agentB.reasoning },
+          });
+          loan.assessedValue = newValue;
+          loan.lastRevaluedAt = now;
+          loan.healthRatio = newHealthRatio;
+          loan.status = newStatus;
+
+          console.log(`[Auto-Revalue] ${loan.loanId}: ${loan.assessedValue.toLocaleString()} → ${newValue.toLocaleString()} health=${newHealthRatio}`);
+        } catch (err: any) {
+          console.error(`[Auto-Revalue] Failed for ${loan.loanId}:`, err.message);
+        }
+      }
+    }, REVAL_INTERVAL_MS);
   });
 }

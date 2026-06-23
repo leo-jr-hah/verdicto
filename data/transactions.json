@@ -1,5 +1,38 @@
 [
   {
+    "id": "tx-1782159418471-s9w670",
+    "type": "SubmitAssessment",
+    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 632,029",
+    "hash": "RE-1782159412024-oe5u",
+    "contract": "Orchestrator",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-22T20:16:58.471Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assetType": "real-estate",
+      "askingPrice": 14200000,
+      "assessedValue": 632029,
+      "divergence": 29.828727272727274
+    }
+  },
+  {
+    "id": "tx-1782159412024-dfem0l",
+    "type": "x402 Payment",
+    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
+    "hash": "96aab414a604f8ba60f55e58393aa61f8942ac2f4f014607b74d484f1b9f1412",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-22T20:16:52.024Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/96aab414a604f8ba60f55e58393aa61f8942ac2f4f014607b74d484f1b9f1412",
+    "onChain": true,
+    "metadata": {
+      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
+      "amount": "2.5",
+      "fee": 2.5
+    }
+  },
+  {
     "id": "tx-1782151963250-2q18wa",
     "type": "x402 Payment",
     "action": "Insurance policy created for Downtown Austin Office Tower",
