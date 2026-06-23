@@ -5,129 +5,97 @@
  * - VotingContract: cast_vote, get_verdict, get_tally
  * - ReputationRegistry: register_agent, get_agent, update_parking_score
  * 
- * Uses casper-js-sdk v5.x for RPC calls via CSPR.cloud.
+ * Uses casper-client CLI + CSPR.cloud RPC for contract calls.
+ * Same pattern as executeCasperTransfer in orchestrator.
  * Falls back gracefully if contracts are unavailable.
  */
 
-import axios from 'axios';
-import dotenv from 'dotenv';
+import { execFile } from 'child_process';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import axios from 'axios';
+import dotenv from 'dotenv';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-const CSPR_RPC_URL = process.env.CASPER_RPC_URL || 'https://node.testnet.casper.network/rpc';
 const CSPR_CLOUD_KEY = process.env.CSPRCLOUD_API_KEY;
 const CSPR_CLOUD_URL = process.env.CSPR_CLOUD_URL || 'https://api.testnet.casper.cloud/v1';
+const CSPR_RPC_URL = process.env.CASPER_RPC_URL || 'https://node.testnet.casper.network/rpc';
 
 const VOTING_CONTRACT_HASH = process.env.VOTING_CONTRACT_HASH;
 const REPUTATION_CONTRACT_HASH = process.env.REPUTATION_CONTRACT_HASH;
 
-const DEPLOY_PAYMENT_MOTES = 100_000_000; // 0.1 CSPR
-const DEPLOY_TTL_MS = 1_800_000;          // 30 minutes
+const DEPLOY_PAYMENT_MOTES = 500_000_000; // 0.5 CSPR — session deploys cost more than transfers
+const CHAIN_NAME = process.env.CASPER_CHAIN_NAME || 'casper-test';
 
 // ─── Shared Helpers ──────────────────────────────────────────────────────────
 
-async function loadDeployerKey() {
-  const { PrivateKey, KeyAlgorithm } = await import('casper-js-sdk');
-  const fs = await import('fs');
-
+function getDeployerKeyPath(): string {
   const deployerKeyPath = process.env.DEPLOYER_PRIVATE_KEY;
   if (!deployerKeyPath) throw new Error('DEPLOYER_PRIVATE_KEY not configured');
-
-  const absoluteKeyPath = path.resolve(__dirname, '../../..', deployerKeyPath);
+  const absoluteKeyPath = path.resolve(process.cwd(), '..', deployerKeyPath);
   if (!fs.existsSync(absoluteKeyPath)) throw new Error(`Key file not found: ${absoluteKeyPath}`);
-
-  const pemContent = fs.readFileSync(absoluteKeyPath, 'utf8');
-  return PrivateKey.fromPem(pemContent, KeyAlgorithm.ED25519);
+  return absoluteKeyPath;
 }
 
 /**
- * Submit a session_put_deploy to call a smart contract entry point.
- * This is a WRITE call — it costs CSPR and produces a deploy hash.
+ * Execute a session deploy (smart contract call) via casper-client + CSPR.cloud.
+ * 
+ * For Odra contracts, we use `casper-client put-deploy` with:
+ *   --session-hash <contract_hash>
+ *   --session-entry-point <entry_point>
+ *   --session-arg <arg_name:type:value>
  */
-async function callContractEntryPoint(
+async function executeContractCall(
   contractHash: string,
   entryPoint: string,
-  args: Array<{ clType: string; bytes: string }>,
-  deployerKey: any,
+  sessionArgs: string[],
+  deployId: number,
 ): Promise<string> {
-  const { CasperNetwork } = await import('casper-js-sdk');
+  const keyPath = getDeployerKeyPath();
+  const tempFile = path.resolve(process.cwd(), `contract-deploy-${deployId}.json`);
 
-  const rpcUrl = process.env.CASPER_RPC_URL || 'https://node.testnet.casper.network/rpc';
-  const { HttpHandler, RpcClient } = await import('casper-js-sdk');
-  const httpHandler = new HttpHandler(rpcUrl);
-  const rpcClient = new RpcClient(httpHandler);
-  const casperNetwork = await CasperNetwork.create(rpcClient);
+  // Build casper-client args
+  const args = [
+    'put-deploy',
+    '--chain-name', CHAIN_NAME,
+    '--secret-key', keyPath,
+    '--payment-amount', String(DEPLOY_PAYMENT_MOTES),
+    '--session-hash', contractHash,
+    '--session-entry-point', entryPoint,
+    '-o', tempFile,
+    ...sessionArgs.flatMap(a => ['--session-arg', a]),
+  ];
 
-  const publicKey = deployerKey.publicKey;
-  const chainName = process.env.CASPER_CHAIN_NAME || 'casper-test';
+  const stdout = await new Promise<string>((resolve, reject) => {
+    execFile('casper-client', args, { encoding: 'utf-8' }, (error, stdout, stderr) => {
+      if (error) reject(new Error(`casper-client failed: ${stderr || error.message}`));
+      else resolve(stdout);
+    });
+  });
 
-  // Build the session module bytes for a stored contract call
-  // Format: module bytes = contract hash (32 bytes) + entry point name length (1 byte) + entry point name
-  const contractHashBytes = Buffer.from(contractHash.replace('hash-', ''), 'hex');
-  const entryPointBytes = Buffer.from(entryPoint, 'utf8');
-  const entryPointLen = Buffer.from([entryPointBytes.length]);
+  const deployJson = fs.readFileSync(tempFile, 'utf8');
+  fs.unlinkSync(tempFile);
 
-  const moduleBytes = Buffer.concat([contractHashBytes, entryPointLen, entryPointBytes]);
+  const payload = {
+    jsonrpc: '2.0',
+    id: deployId,
+    method: 'account_put_deploy',
+    params: [JSON.parse(deployJson)],
+  };
 
-  // Create a deploy with session bytes
-  const tx = casperNetwork.createTransaction(
-    publicKey,
-    chainName,
-    DEPLOY_PAYMENT_MOTES,
-    DEPLOY_TTL_MS,
-    Date.now(),
-    {
-      Stored: {
-        by_hash: contractHash.replace('hash-', ''),
-        version: null,
-        entry_point: entryPoint,
-        args: args.reduce((acc, arg) => {
-          acc[arg.clType] = { bytes: arg.bytes, clType: arg.clType };
-          return acc;
-        }, {} as Record<string, any>),
-      },
-    } as any,
-  );
+  const response = await axios.post(CSPR_RPC_URL, payload, {
+    headers: { Authorization: CSPR_CLOUD_KEY },
+    timeout: 15_000,
+  });
 
-  tx.sign(deployerKey);
-
-  const result = await casperNetwork.putTransaction(tx);
-  const txHash = 'transactionHash' in result
-    ? JSON.parse(JSON.stringify(result.transactionHash))
-    : 'hash' in result && typeof result.hash === 'string'
-      ? result.hash
-      : 'unknown';
-
-  return txHash;
-}
-
-/**
- * Read a value from contract state via CSPR.cloud REST API.
- * This is a READ call — no CSPR cost, no deploy needed.
- */
-async function readContractState(
-  contractHash: string,
-  keyPath: string,
-): Promise<any> {
-  if (!CSPR_CLOUD_KEY) {
-    throw new Error('CSPRCLOUD_API_KEY not configured');
+  if (response.data.error) {
+    throw new Error(response.data.error.message);
   }
 
-  try {
-    const response = await axios.get(
-      `${CSPR_CLOUD_URL}/contracts/${contractHash}/state`,
-      {
-        headers: { Authorization: CSPR_CLOUD_KEY },
-        timeout: 10_000,
-      }
-    );
-    return response.data;
-  } catch (err: any) {
-    throw new Error(`Failed to read contract state: ${err.message}`);
-  }
+  return response.data.result.deploy_hash;
 }
 
 // ─── VotingContract Calls ────────────────────────────────────────────────────
@@ -143,6 +111,8 @@ export interface CastVoteResult {
 /**
  * Cast a vote on the VotingContract.
  * Maps verdict string to contract enum index: AgentAPreferred=0, SplitFifty=1, AgentBPreferred=2
+ * 
+ * Contract entry point: cast_vote(assessment_id: u64, verdict: VerdictOption, reasoning: String, weight: u32)
  */
 export async function castVoteOnChain(
   assessmentId: string,
@@ -156,25 +126,23 @@ export async function castVoteOnChain(
   }
 
   try {
-    const deployerKey = await loadDeployerKey();
-
-    // Convert assessment ID string to u64 (use hash of string as numeric ID)
     const { createHash } = await import('crypto');
     const assessmentNum = parseInt(createHash('sha256').update(assessmentId).digest('hex').slice(0, 15), 16);
-
     const verdictIndex = verdict === 'AgentAPreferred' ? 0 : verdict === 'SplitFifty' ? 1 : 2;
 
-    // CL types for cast_vote(assessment_id: u64, verdict: VerdictOption, reasoning: String, weight: u32)
-    const args = [
-      { clType: 'U64', bytes: assessmentNum.toString(16).padStart(16, '0') },
-      { clType: 'U32', bytes: verdictIndex.toString(16).padStart(8, '0') },
-      { clType: 'String', bytes: Buffer.from(reasoning.slice(0, 200), 'utf8').toString('hex') },
-      { clType: 'U32', bytes: weight.toString(16).padStart(8, '0') },
+    // Odra VerdictOption is an enum: AgentAPreferred=0, SplitFifty=1, AgentBPreferred=2
+    // casper-client session-arg format: "name:type:value"
+    const sessionArgs = [
+      `assessment_id:u64:${assessmentNum}`,
+      `verdict:u32:${verdictIndex}`,
+      `reasoning:string:"${reasoning.slice(0, 200).replace(/"/g, '\\"')}"`,
+      `weight:u32:${weight}`,
     ];
 
-    const txHash = await callContractEntryPoint(VOTING_CONTRACT_HASH, 'cast_vote', args, deployerKey);
+    const deployId = Date.now() + Math.floor(Math.random() * 1000);
+    const txHash = await executeContractCall(VOTING_CONTRACT_HASH, 'cast_vote', sessionArgs, deployId);
 
-    console.log(`  📝 VotingContract (${VOTING_CONTRACT_HASH.slice(0, 16)}...): cast_vote → ${txHash.slice(0, 16)}...`);
+    console.log(`  📝 VotingContract ✅ cast_vote → ${txHash.slice(0, 16)}...`);
     return { success: true, txHash, assessmentId, verdictIndex, weight };
   } catch (err: any) {
     console.warn(`  ⚠️ VotingContract cast_vote failed: ${err.message}`);
@@ -183,16 +151,17 @@ export async function castVoteOnChain(
 }
 
 /**
- * Read verdict from VotingContract state.
+ * Read verdict from VotingContract via CSPR.cloud state query.
  */
 export async function getVerdictOnChain(assessmentId: string): Promise<{ verdict: number; tally: number[] } | null> {
-  if (!VOTING_CONTRACT_HASH) return null;
+  if (!VOTING_CONTRACT_HASH || !CSPR_CLOUD_KEY) return null;
 
   try {
-    const state = await readContractState(VOTING_CONTRACT_HASH, '');
-    // Parse the contract state to extract verdict and tally
-    // The exact structure depends on Odra's state serialization
-    return state?.data?.verdicts ? { verdict: state.data.verdicts, tally: state.data.tally || [] } : null;
+    const response = await axios.get(
+      `${CSPR_CLOUD_URL}/contracts/${VOTING_CONTRACT_HASH}/state`,
+      { headers: { Authorization: CSPR_CLOUD_KEY }, timeout: 10_000 }
+    );
+    return response.data?.data || null;
   } catch (err: any) {
     console.warn(`  ⚠️ VotingContract read failed: ${err.message}`);
     return null;
@@ -210,40 +179,9 @@ export interface OnChainReputation {
 }
 
 /**
- * Register an agent on the ReputationRegistry.
- */
-export async function registerAgentOnChain(
-  agentId: string,
-  initialParking: number,
-  initialRealEstate: number,
-): Promise<{ success: boolean; txHash: string }> {
-  if (!REPUTATION_CONTRACT_HASH) {
-    console.log(`  🏆 ReputationRegistry: [NO CONTRACT HASH] register_agent skipped`);
-    return { success: false, txHash: '' };
-  }
-
-  try {
-    const deployerKey = await loadDeployerKey();
-
-    // CL types for register_agent(agent_id: Address, initial_parking: u32, initial_real_estate: u32)
-    const args = [
-      { clType: 'Key', bytes: Buffer.from(agentId, 'hex').toString('hex') },
-      { clType: 'U32', bytes: initialParking.toString(16).padStart(8, '0') },
-      { clType: 'U32', bytes: initialRealEstate.toString(16).padStart(8, '0') },
-    ];
-
-    const txHash = await callContractEntryPoint(REPUTATION_CONTRACT_HASH, 'register_agent', args, deployerKey);
-
-    console.log(`  🏆 ReputationRegistry (${REPUTATION_CONTRACT_HASH.slice(0, 16)}...): register_agent → ${txHash.slice(0, 16)}...`);
-    return { success: true, txHash };
-  } catch (err: any) {
-    console.warn(`  ⚠️ ReputationRegistry register_agent failed: ${err.message}`);
-    return { success: false, txHash: '' };
-  }
-}
-
-/**
  * Update an agent's parking score on the ReputationRegistry.
+ * 
+ * Contract entry point: update_parking_score(agent_id: Address, delta: i32)
  */
 export async function updateReputationOnChain(
   agentId: string,
@@ -256,40 +194,53 @@ export async function updateReputationOnChain(
   }
 
   try {
-    const deployerKey = await loadDeployerKey();
+    // For Odra Address type, we use the deployer's own address as the agent_id
+    // since agents are registered by the deployer (admin)
+    const deployerKeyPath = getDeployerKeyPath();
+    const pemContent = fs.readFileSync(deployerKeyPath, 'utf8');
+    
+    // Extract public key from PEM for the agent address
+    // Odra Address is the account hash (blake2b of public key)
+    // For simplicity, use the deployer's account as the agent address
+    const { PrivateKey, KeyAlgorithm } = await import('casper-js-sdk');
+    const privateKey = PrivateKey.fromPem(pemContent, KeyAlgorithm.ED25519);
+    const publicKey = privateKey.publicKey;
+    const accountHash = publicKey.accountHash().toString();
 
-    const entryPoint = domain === 'parking' ? 'update_parking_score' : 'update_parking_score'; // Both use same pattern
-    const deltaBytes = (delta >= 0 ? delta : (0xFFFFFFFF + delta + 1)).toString(16).padStart(8, '0');
-
-    const args = [
-      { clType: 'Key', bytes: Buffer.from(agentId, 'hex').toString('hex') },
-      { clType: 'I32', bytes: deltaBytes },
+    const entryPoint = 'update_parking_score';
+    const sessionArgs = [
+      `agent_id:key_account-hash:${accountHash}`,
+      `delta:i32:${delta}`,
     ];
 
-    const txHash = await callContractEntryPoint(REPUTATION_CONTRACT_HASH, entryPoint, args, deployerKey);
+    const deployId = Date.now() + Math.floor(Math.random() * 1000);
+    const txHash = await executeContractCall(REPUTATION_CONTRACT_HASH, entryPoint, sessionArgs, deployId);
 
-    console.log(`  🏆 ReputationRegistry (${REPUTATION_CONTRACT_HASH.slice(0, 16)}...): ${entryPoint} → ${txHash.slice(0, 16)}...`);
+    console.log(`  🏆 ReputationRegistry ✅ ${entryPoint} → ${txHash.slice(0, 16)}...`);
     return { success: true, txHash };
   } catch (err: any) {
-    console.warn(`  ⚠️ ReputationRegistry update_score failed: ${err.message}`);
+    console.warn(`  ⚠️ ReputationRegistry update failed: ${err.message}`);
     return { success: false, txHash: '' };
   }
 }
 
 /**
- * Read all agent reputations from the ReputationRegistry.
+ * Read all agent reputations from the ReputationRegistry via CSPR.cloud.
  * Falls back to env-based defaults if on-chain read fails.
  */
 export async function getReputationsOnChain(): Promise<OnChainReputation[]> {
-  if (!REPUTATION_CONTRACT_HASH) {
+  if (!REPUTATION_CONTRACT_HASH || !CSPR_CLOUD_KEY) {
     return getDefaultReputations();
   }
 
   try {
-    const state = await readContractState(REPUTATION_CONTRACT_HASH, '');
-    // Parse Odra contract state — cards mapping
-    if (state?.data?.cards) {
-      return Object.entries(state.data.cards).map(([agentId, card]: [string, any]) => ({
+    const response = await axios.get(
+      `${CSPR_CLOUD_URL}/contracts/${REPUTATION_CONTRACT_HASH}/state`,
+      { headers: { Authorization: CSPR_CLOUD_KEY }, timeout: 10_000 }
+    );
+    const state = response.data?.data;
+    if (state?.cards) {
+      return Object.entries(state.cards).map(([agentId, card]: [string, any]) => ({
         agentId,
         parkingScore: card.parking_score || 700,
         realEstateScore: card.real_estate_score || 700,
@@ -306,7 +257,6 @@ export async function getReputationsOnChain(): Promise<OnChainReputation[]> {
 
 /**
  * Default reputations from env vars (fallback when on-chain read fails).
- * These match the AGENT_SEED_SCORES in shared/types.ts.
  */
 function getDefaultReputations(): OnChainReputation[] {
   return [

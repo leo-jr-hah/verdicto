@@ -829,3 +829,28 @@ export async function fileInsuranceClaim(
     return { success: false, error: err.message };
   }
 }
+
+// ─── Reputation API ──────────────────────────────────────────────────────────
+
+export interface OnChainReputation {
+  agentId: string;
+  parkingScore: number;
+  realEstateScore: number;
+  reliabilityScore: number;
+  assessmentCount: number;
+}
+
+/**
+ * Fetch agent reputation data from the backend (reads on-chain ReputationRegistry,
+ * falls back to env defaults if on-chain read fails).
+ */
+export async function fetchReputations(): Promise<OnChainReputation[]> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/reputation`);
+    const data = await handleResponse<{ success: boolean; reputations: OnChainReputation[] }>(res);
+    return data.reputations || [];
+  } catch (err) {
+    console.error('[API] Failed to fetch reputations:', err);
+    return [];
+  }
+}

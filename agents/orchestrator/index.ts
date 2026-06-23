@@ -1321,6 +1321,22 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 
   /**
+   * GET /api/reputation
+   * Returns agent reputation data — reads from on-chain ReputationRegistry,
+   * falls back to env-based defaults if on-chain read fails.
+   */
+  app.get('/api/reputation', async (_, res) => {
+    try {
+      const { getReputationsOnChain } = await import('../shared/casper-contracts.js');
+      const reputations = await getReputationsOnChain();
+      res.json({ success: true, reputations });
+    } catch (err: any) {
+      console.error('[Reputation] Error:', err.message);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  /**
    * GET /api/assess/demo
    * Returns pre-built demo assessment data for the UI.
    */
