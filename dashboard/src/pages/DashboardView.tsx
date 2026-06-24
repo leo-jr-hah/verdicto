@@ -25,7 +25,7 @@ const QUICK_ACTIONS = [
 
 export const DashboardView: React.FC = () => {
   const [transactions, setTransactions] = useState<TransactionEntry[]>([]);
-  const [oracleStats, setOracleStats] = useState<OracleStats>({ totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0 });
+  const [oracleStats, setOracleStats] = useState<OracleStats>({ totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0, activeDisputes: 0, overturnedVerdicts: 0 });
   const [loading, setLoading] = useState(true);
   const [wsConnected, setWsConnected] = useState(false);
 

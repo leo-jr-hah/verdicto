@@ -1,5 +1,38 @@
 [
   {
+    "id": "tx-1782329696203-ubgktp",
+    "type": "SubmitAssessment",
+    "action": "Assessment: Manhattan Studio Apartment (real-estate) - 604,311",
+    "hash": "RE-1782329692148-sjfl",
+    "contract": "Orchestrator",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-24T19:34:56.203Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assetType": "real-estate",
+      "askingPrice": 650000,
+      "assessedValue": 604311,
+      "divergence": 39.805753968253974
+    }
+  },
+  {
+    "id": "tx-1782329692147-00ic24",
+    "type": "x402 Payment",
+    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
+    "hash": "29cdc4a901d0b39306bb9cb5bb529bf3179513c3b86889ed93d1dba4eed2005f",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-24T19:34:52.147Z",
+    "explorerUrl": "https://testnet.cspr.live/transaction/29cdc4a901d0b39306bb9cb5bb529bf3179513c3b86889ed93d1dba4eed2005f",
+    "onChain": true,
+    "metadata": {
+      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
+      "amount": "2.5",
+      "fee": 2.5
+    }
+  },
+  {
     "id": "tx-1782247046531-bni4hl",
     "type": "SubmitAssessment",
     "action": "Assessment: Downtown Austin Office Tower (real-estate) - 662,745",

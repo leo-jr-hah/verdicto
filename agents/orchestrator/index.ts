@@ -1459,8 +1459,87 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   /**
    * GET /api/oracle/verdict/:assetId
    * Returns a specific verdict by asset ID.
+   * x402-gated: requires 0.1 CSPR micropayment for cross-contract queries.
+   * Dashboard reads (list/stats) are free; this is the agent-to-agent endpoint.
    */
   app.get('/api/oracle/verdict/:assetId', async (req, res) => {
+    // ── x402 Payment Gate (0.1 CSPR per query) ──────────────────────────────
+    const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
+    const paymentProof = req.headers['x-payment-proof'] as string | undefined;
+
+    if (requirePayment && !paymentProof) {
+      res.setHeader('payment-required', 'true');
+      return res.status(402).json({
+        success: false,
+        error: 'Payment Required',
+        x402Version: '2',
+        paymentRequirements: {
+          scheme: 'wallet-session',
+          supportedChains: ['casper:testnet'],
+          chainId: 'casper:testnet',
+          maxAmountRequired: String(ORACLE_FEE_CSPR),
+          resource: `/api/oracle/verdict/${req.params.assetId}`,
+          description: `Oracle query fee for ${req.params.assetId}`,
+          mimeType: 'application/json',
+          payTo: PLATFORM_WALLET,
+          sessionEnabled: true,
+        },
+      });
+    }
+
+    if (requirePayment && paymentProof) {
+      // Verify the payment proof
+      try {
+        const decoded = JSON.parse(Buffer.from(paymentProof, 'base64').toString('utf-8'));
+        const payer = decoded.payer || decoded.payload?.payer;
+        const txHash = decoded.txHash || decoded.deployHash;
+        const amount = decoded.amount || decoded.payload?.amount;
+
+        if (!payer || !txHash || !amount) {
+          return res.status(402).json({ success: false, error: 'Invalid payment proof: missing fields' });
+        }
+
+        const paidAmount = parseFloat(amount);
+        if (isNaN(paidAmount) || paidAmount < ORACLE_FEE_CSPR * 0.99) {
+          return res.status(402).json({
+            success: false,
+            error: `Insufficient payment: required ${ORACLE_FEE_CSPR} CSPR, got ${amount} CSPR`,
+          });
+        }
+
+        // Verify deploy on-chain
+        if (CSPR_CLOUD_KEY) {
+          try {
+            const verifyRes = await axios.get(`${CSPR_CLOUD_URL}/deploys/${txHash}`, {
+              headers: { Authorization: CSPR_CLOUD_KEY },
+              timeout: 5_000,
+            });
+            if (verifyRes.data?.execution_results?.length) {
+              console.log(`[x402] ✅ Oracle query payment verified: ${txHash.substring(0, 16)}...`);
+            }
+          } catch {
+            console.warn(`[x402] Could not verify oracle query deploy, proceeding with trust`);
+          }
+        }
+
+        // Log the oracle query payment
+        const oracleTx = createTransactionEntry(
+          'x402 Payment',
+          `Oracle query: ${req.params.assetId}`,
+          txHash,
+          'VerdictOracle',
+          'latest',
+          { assetId: req.params.assetId, amount: ORACLE_FEE_CSPR, payer },
+          true,
+        );
+        saveTransaction(oracleTx);
+        emitEvent('transaction', oracleTx);
+      } catch (err: any) {
+        console.error('[x402] Oracle query payment verification failed:', err.message);
+        return res.status(402).json({ success: false, error: 'Payment verification failed' });
+      }
+    }
+
     try {
       const { getOracleVerdictOnChain } = await import('../shared/casper-contracts.js');
       const verdict = await getOracleVerdictOnChain(req.params.assetId);
@@ -1485,6 +1564,170 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       res.json({ success: true, stats });
     } catch (err: any) {
       console.error('[Oracle] Error:', err.message);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // ─── Dispute & Re-trial System ──────────────────────────────────────────────
+  //
+  // Any third party can challenge a verdict by staking CSPR.
+  // The stake triggers an independent panel with adversarial methodology
+  // to re-run the case. If the challenger is right, they get their stake
+  // back plus the original jurors lose reputation. If wrong, stake goes to jurors.
+  //
+  // This is the "appeals court" that makes Verdict Oracle a real court,
+  // not just a price feed.
+
+  const DISPUTE_FEE_CSPR = 5.0; // stake required to file a dispute
+
+  /**
+   * POST /api/oracle/dispute
+   * File a dispute against an existing verdict.
+   * Body: { assetId, challengerKey, reason }
+   * Requires 5 CSPR stake via x402.
+   */
+  app.post('/api/oracle/dispute', async (req, res) => {
+    try {
+      const { assetId, challengerKey, reason } = req.body;
+      if (!assetId || !challengerKey || !reason) {
+        return res.status(400).json({ success: false, error: 'Missing required fields: assetId, challengerKey, reason' });
+      }
+
+      // x402 payment gate (same inline pattern as assessment endpoint)
+      const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
+      const paymentProof = req.headers['x-payment-proof'] as string | undefined;
+
+      if (requirePayment && !paymentProof) {
+        res.setHeader('payment-required', 'true');
+        return res.status(402).json({
+          success: false,
+          error: 'Payment Required',
+          x402Version: '2',
+          paymentRequirements: {
+            scheme: 'wallet-session',
+            supportedChains: ['casper:testnet'],
+            chainId: 'casper:testnet',
+            maxAmountRequired: String(DISPUTE_FEE_CSPR),
+            resource: '/api/oracle/dispute',
+            description: 'Dispute filing stake - triggers independent re-trial',
+            mimeType: 'application/json',
+            payTo: PLATFORM_WALLET,
+            sessionEnabled: true,
+          },
+        });
+      }
+
+      if (requirePayment && paymentProof) {
+        try {
+          const decoded = JSON.parse(Buffer.from(paymentProof, 'base64').toString('utf-8'));
+          if (decoded.amount !== String(DISPUTE_FEE_CSPR)) {
+            return res.status(402).json({ success: false, error: `Wrong amount: expected ${DISPUTE_FEE_CSPR} CSPR, got ${decoded.amount}` });
+          }
+          console.log(`  ⚖️  [x402] Dispute payment proof accepted: ${decoded.amount} CSPR`);
+        } catch {
+          return res.status(402).json({ success: false, error: 'Invalid payment proof' });
+        }
+      }
+
+      const { createDispute } = await import('../shared/casper-contracts.js');
+      const result = createDispute(assetId, challengerKey, DISPUTE_FEE_CSPR, reason);
+
+      if ('error' in result) {
+        return res.status(400).json({ success: false, error: result.error });
+      }
+
+      // Log the dispute filing as a transaction
+      const disputeTx = createTransactionEntry(
+        'Dispute Filed',
+        `Dispute ${result.id} against verdict for ${assetId}`,
+        `dispute-${result.id}`,
+        'DisputeEngine',
+        'latest',
+        { disputeId: result.id, assetId, challengerKey, stakeCSPR: DISPUTE_FEE_CSPR },
+        false,
+      );
+      saveTransaction(disputeTx);
+      emitEvent('transaction', disputeTx);
+      emitEvent('dispute_filed', { disputeId: result.id, assetId, challengerKey });
+
+      console.log(`  ⚖️  Dispute filed: ${result.id} against ${assetId} (${DISPUTE_FEE_CSPR} CSPR stake)`);
+      res.json({ success: true, dispute: result });
+    } catch (err: any) {
+      console.error('[Dispute] Error:', err.message);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  /**
+   * POST /api/oracle/disputes/:disputeId/retrial
+   * Trigger the re-trial for a pending dispute.
+   * This runs an independent panel with adversarial methodology.
+   */
+  app.post('/api/oracle/disputes/:disputeId/retrial', async (req, res) => {
+    try {
+      const { runRetrial } = await import('../shared/casper-contracts.js');
+      const result = await runRetrial(req.params.disputeId);
+
+      if ('error' in result) {
+        return res.status(400).json({ success: false, error: result.error });
+      }
+
+      // Log the retrial completion
+      const retrialTx = createTransactionEntry(
+        'Retrial Complete',
+        `Retrial ${result.retrial?.retrialId} for dispute ${result.id}: ${result.outcome}`,
+        result.retrial?.receiptHash || `retrial-${result.id}`,
+        'DisputeEngine',
+        'latest',
+        {
+          disputeId: result.id,
+          outcome: result.outcome,
+          valueDelta: result.retrial?.valueDelta,
+          confidenceDelta: result.retrial?.confidenceDelta,
+          panelSize: result.retrial?.panel.length,
+        },
+        false,
+      );
+      saveTransaction(retrialTx);
+      emitEvent('transaction', retrialTx);
+      emitEvent('retrial_complete', { disputeId: result.id, outcome: result.outcome });
+
+      res.json({ success: true, dispute: result });
+    } catch (err: any) {
+      console.error('[Retrial] Error:', err.message);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  /**
+   * GET /api/oracle/disputes
+   * List all disputes, newest first.
+   */
+  app.get('/api/oracle/disputes', async (_, res) => {
+    try {
+      const { getAllDisputes } = await import('../shared/casper-contracts.js');
+      const disputes = getAllDisputes();
+      res.json({ success: true, disputes });
+    } catch (err: any) {
+      console.error('[Disputes] Error:', err.message);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  /**
+   * GET /api/oracle/disputes/:disputeId
+   * Get a specific dispute with full retrial details.
+   */
+  app.get('/api/oracle/disputes/:disputeId', async (req, res) => {
+    try {
+      const { getDispute } = await import('../shared/casper-contracts.js');
+      const dispute = getDispute(req.params.disputeId);
+      if (!dispute) {
+        return res.status(404).json({ success: false, error: 'Dispute not found' });
+      }
+      res.json({ success: true, dispute });
+    } catch (err: any) {
+      console.error('[Dispute] Error:', err.message);
       res.status(500).json({ success: false, error: err.message });
     }
   });
@@ -3010,8 +3253,9 @@ Respond in JSON format:
     // Populates the in-memory oracle store so the dashboard shows live data
     // on first load. Real assessment verdicts overwrite these by asset_id.
     try {
-      const { seedDemoVerdicts } = await import('../shared/casper-contracts.js');
+      const { seedDemoVerdicts, seedDemoDisputes } = await import('../shared/casper-contracts.js');
       seedDemoVerdicts();
+      seedDemoDisputes();
     } catch (err: any) {
       console.warn(`  ⚠️ Oracle seed failed (non-critical): ${err.message}`);
     }

@@ -24,3 +24,6 @@ export const LOAN_FEE_CSPR = 5;
 
 /** Insurance policy fee in CSPR */
 export const INSURANCE_FEE_CSPR = 3;
+
+/** Dispute filing stake in CSPR (returned if challenger wins) */
+export const DISPUTE_FEE_CSPR = 5;

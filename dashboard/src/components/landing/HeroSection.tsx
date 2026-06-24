@@ -325,8 +325,8 @@ export const HeroSection: React.FC = () => {
           }}
         >
           Multi-agent AI consensus valuations, stored on-chain as a composable
-          primitive. Any Casper dApp can query it: lending protocols, DAO treasuries,
-          insurance contracts. No API key. No human in the loop. Agent-to-agent.
+          primitive. We are our own first integrator, using it to power Borrow and Insure.
+          Any Casper dApp can compose with the same data. No API key. Agent-to-agent.
         </motion.p>
 
         {/* CTAs */}

@@ -965,6 +965,8 @@ export interface OracleStats {
   freshVerdicts: number;
   avgConfidence: number;
   totalQueries: number;
+  activeDisputes: number;
+  overturnedVerdicts: number;
 }
 
 export interface OracleVerdictsResponse {
@@ -986,11 +988,11 @@ export async function fetchOracleVerdicts(): Promise<OracleVerdictsResponse> {
     const res = await fetch(`${ORCHESTRATOR_URL}/api/oracle/verdicts`);
     const contentType = res.headers.get('content-type') || '';
     if (contentType.includes('text/html')) {
-      return { success: false, verdicts: [], stats: { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0 } };
+      return { success: false, verdicts: [], stats: { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0, activeDisputes: 0, overturnedVerdicts: 0 } };
     }
     return await res.json();
   } catch {
-    return { success: false, verdicts: [], stats: { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0 } };
+    return { success: false, verdicts: [], stats: { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0, activeDisputes: 0, overturnedVerdicts: 0 } };
   }
 }
 
@@ -1015,11 +1017,100 @@ export async function fetchOracleStats(): Promise<OracleStats> {
     const res = await fetch(`${ORCHESTRATOR_URL}/api/oracle/stats`);
     const contentType = res.headers.get('content-type') || '';
     if (contentType.includes('text/html')) {
-      return { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0 };
+      return { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0, activeDisputes: 0, overturnedVerdicts: 0 };
     }
     const body = await res.json();
-    return body.stats || { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0 };
+    return body.stats || { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0, activeDisputes: 0, overturnedVerdicts: 0 };
   } catch {
-    return { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0 };
+    return { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0, activeDisputes: 0, overturnedVerdicts: 0 };
+  }
+}
+
+// ─── Dispute & Re-trial ──────────────────────────────────────────────────
+
+export interface RetrialJuror {
+  agentId: string;
+  name: string;
+  methodology: string;
+  reputation: number;
+  vote: 'A' | 'B' | 'Split';
+  confidence: number;
+  reasoning: string;
+}
+
+export interface RetrialResult {
+  retrialId: string;
+  startedAt: number;
+  completedAt: number;
+  panel: RetrialJuror[];
+  originalVerdict: { value: number; confidence: number; decision: string };
+  newVerdict: { value: number; confidence: number; decision: string };
+  valueDelta: number;
+  confidenceDelta: number;
+  receiptHash: string;
+  reasoning: string;
+}
+
+export interface Dispute {
+  id: string;
+  assetId: string;
+  originalVerdict: OracleVerdict;
+  challengerKey: string;
+  stakeCSPR: number;
+  reason: string;
+  createdAt: number;
+  status: 'pending' | 'under_retrial' | 'resolved';
+  retrial?: RetrialResult;
+  outcome?: 'upheld' | 'overturned';
+  resolvedAt?: number;
+  stakeDistribution?: { recipient: string; amountCSPR: number }[];
+}
+
+export async function fetchDisputes(): Promise<Dispute[]> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/oracle/disputes`);
+    const body = await res.json();
+    return body.disputes || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchDispute(disputeId: string): Promise<Dispute | null> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/oracle/disputes/${encodeURIComponent(disputeId)}`);
+    if (!res.ok) return null;
+    const body = await res.json();
+    return body.dispute || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function fileDispute(
+  assetId: string,
+  challengerKey: string,
+  reason: string,
+): Promise<{ success: boolean; dispute?: Dispute; error?: string }> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/oracle/dispute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assetId, challengerKey, reason }),
+    });
+    return await res.json();
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function triggerRetrial(disputeId: string): Promise<{ success: boolean; dispute?: Dispute; error?: string }> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/oracle/disputes/${encodeURIComponent(disputeId)}/retrial`, {
+      method: 'POST',
+    });
+    return await res.json();
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
 }

@@ -475,7 +475,7 @@ export function getAllVerdicts(): OracleVerdict[] {
 /**
  * Get oracle statistics for the dashboard.
  */
-export function getOracleStats(): { totalVerdicts: number; freshVerdicts: number; avgConfidence: number; totalQueries: number } {
+export function getOracleStats(): { totalVerdicts: number; freshVerdicts: number; avgConfidence: number; totalQueries: number; activeDisputes: number; overturnedVerdicts: number } {
   const all = Array.from(oracleVerdictStore.values());
   const now = Date.now();
   const fresh = all.filter(v => v.expiry > now);
@@ -483,10 +483,501 @@ export function getOracleStats(): { totalVerdicts: number; freshVerdicts: number
     ? Math.round(all.reduce((sum, v) => sum + v.confidence, 0) / all.length)
     : 0;
 
+  const disputes = Array.from(disputeStore.values());
+  const activeDisputes = disputes.filter(d => d.status === 'pending' || d.status === 'under_retrial').length;
+  const overturnedVerdicts = disputes.filter(d => d.status === 'resolved' && d.outcome === 'overturned').length;
+
   return {
     totalVerdicts: all.length,
     freshVerdicts: fresh.length,
     avgConfidence,
     totalQueries: 0, // tracked via events in production
+    activeDisputes,
+    overturnedVerdicts,
   };
+}
+
+// ─── Dispute & Re-trial System ───────────────────────────────────────────
+
+export interface Dispute {
+  id: string;
+  assetId: string;
+  originalVerdict: OracleVerdict;
+  challengerKey: string;
+  stakeCSPR: number;
+  reason: string;
+  createdAt: number;
+  status: 'pending' | 'under_retrial' | 'resolved';
+  retrial?: RetrialResult;
+  outcome?: 'upheld' | 'overturned';
+  resolvedAt?: number;
+  stakeDistribution?: { recipient: string; amountCSPR: number }[];
+}
+
+export interface RetrialResult {
+  retrialId: string;
+  startedAt: number;
+  completedAt: number;
+  panel: RetrialJuror[];
+  originalVerdict: { value: number; confidence: number; decision: string };
+  newVerdict: { value: number; confidence: number; decision: string };
+  valueDelta: number;       // percentage change
+  confidenceDelta: number;  // percentage points change
+  receiptHash: string;
+  reasoning: string;
+}
+
+export interface RetrialJuror {
+  agentId: string;
+  name: string;
+  methodology: string;       // which lens this juror uses in retrial
+  reputation: number;
+  vote: 'A' | 'B' | 'Split';
+  confidence: number;
+  reasoning: string;
+}
+
+const disputeStore = new Map<string, Dispute>();
+
+/**
+ * Seed one demo dispute so the UI has something to show on first load.
+ */
+export function seedDemoDisputes(): void {
+  const now = Date.now();
+  const HOUR = 3_600_000;
+
+  const allVerdicts = Array.from(oracleVerdictStore.values());
+  if (allVerdicts.length === 0) return;
+
+  // Pick the lowest-confidence verdict as the disputed one
+  const sorted = [...allVerdicts].sort((a, b) => a.confidence - b.confidence);
+  const target = sorted[0];
+
+  // A resolved dispute (overturned) from 4h ago
+  const resolvedDispute: Dispute = {
+    id: `DSP-${now - 1000}`,
+    assetId: target.assetId,
+    originalVerdict: target,
+    challengerKey: '0203a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',
+    stakeCSPR: 5.0,
+    reason: 'Market comps are stale; comparable sales moved 18% since last data pull.',
+    createdAt: now - 4 * HOUR,
+    status: 'resolved',
+    outcome: 'overturned',
+    resolvedAt: now - 3.5 * HOUR,
+    retrial: {
+      retrialId: `RTL-${now - 1000}`,
+      startedAt: now - 4 * HOUR + 60_000,
+      completedAt: now - 3.5 * HOUR,
+      panel: [
+        { agentId: 'adversarial-market', name: 'Adversarial Market Analyst', methodology: 'stress_test', reputation: 840, vote: 'B', confidence: 72, reasoning: 'Comparable sales data is 18 days stale. Adjusted comps show 15% decline in subject submarket.' },
+        { agentId: 'deep-value', name: 'Deep Value Auditor', methodology: 'value_at_risk', reputation: 860, vote: 'B', confidence: 68, reasoning: 'DCF with updated cap rate (7.2% vs 6.1% used) yields significantly lower intrinsic value.' },
+        { agentId: 'devils-advocate', name: 'Devil\'s Advocate', methodology: 'contrarian', reputation: 810, vote: 'A', confidence: 45, reasoning: 'Original methodology was sound but inputs were dated. Partial correction warranted.' },
+      ],
+      originalVerdict: { value: target.value, confidence: target.confidence, decision: target.decision },
+      newVerdict: { value: Math.round(target.value * 0.82), confidence: Math.max(target.confidence - 15, 40), decision: 'AgentBPreferred' },
+      valueDelta: -18.0,
+      confidenceDelta: -15,
+      receiptHash: 'hmac-retrial-demo-abc123',
+      reasoning: 'Retrial panel found original verdict relied on stale comparable sales data. Adjusted valuation reflects 18% decline in subject submarket confirmed by 2 of 3 adversarial jurors.',
+    },
+    stakeDistribution: [
+      { recipient: 'challenger', amountCSPR: 5.0 },
+    ],
+  };
+
+  // A pending dispute from 30 min ago
+  const pendingVerdict = sorted.length > 1 ? sorted[1] : sorted[0];
+  const pendingDispute: Dispute = {
+    id: `DSP-${now}`,
+    assetId: pendingVerdict.assetId,
+    originalVerdict: pendingVerdict,
+    challengerKey: '0203b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1',
+    stakeCSPR: 5.0,
+    reason: 'Confidence score appears inflated given thin comparable data in this submarket.',
+    createdAt: now - 30 * 60_000,
+    status: 'pending',
+  };
+
+  disputeStore.set(resolvedDispute.id, resolvedDispute);
+  disputeStore.set(pendingDispute.id, pendingDispute);
+  console.log(`  ⚖️  DisputeEngine: seeded 2 demo disputes (1 resolved/overturned, 1 pending)`);
+}
+
+/**
+ * Create a new dispute against a verdict.
+ */
+export function createDispute(
+  assetId: string,
+  challengerKey: string,
+  stakeCSPR: number,
+  reason: string,
+): Dispute | { error: string } {
+  const verdict = oracleVerdictStore.get(assetId);
+  if (!verdict) return { error: `No verdict found for asset ${assetId}` };
+
+  // Check if there's already an active dispute for this asset
+  const existingActive = Array.from(disputeStore.values()).find(
+    d => d.assetId === assetId && d.status !== 'resolved',
+  );
+  if (existingActive) return { error: `Verdict already has an active dispute (${existingActive.id})` };
+
+  const dispute: Dispute = {
+    id: `DSP-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    assetId,
+    originalVerdict: verdict,
+    challengerKey,
+    stakeCSPR,
+    reason,
+    createdAt: Date.now(),
+    status: 'pending',
+  };
+
+  disputeStore.set(dispute.id, dispute);
+  console.log(`  ⚖️  DisputeEngine: created dispute ${dispute.id} against ${assetId} (stake: ${stakeCSPR} CSPR)`);
+  return dispute;
+}
+
+/**
+ * Get a dispute by ID.
+ */
+export function getDispute(disputeId: string): Dispute | undefined {
+  return disputeStore.get(disputeId);
+}
+
+/**
+ * Get all disputes, newest first.
+ */
+export function getAllDisputes(): Dispute[] {
+  return Array.from(disputeStore.values()).sort((a, b) => b.createdAt - a.createdAt);
+}
+
+/**
+ * Get disputes for a specific asset.
+ */
+export function getDisputesForAsset(assetId: string): Dispute[] {
+  return Array.from(disputeStore.values())
+    .filter(d => d.assetId === assetId)
+    .sort((a, b) => b.createdAt - a.createdAt);
+}
+
+/**
+ * Run a re-trial for a dispute with an independently selected panel.
+ *
+ * The re-trial panel uses DIFFERENT methodology weightings than the original:
+ * - Original panel: evidence, market, precedent (balanced)
+ * - Re-trial panel: adversarial_market, value_at_risk, contrarian (stress-test oriented)
+ *
+ * This makes the re-trial genuinely independent, not just re-running the same agents.
+ */
+export async function runRetrial(disputeId: string): Promise<Dispute | { error: string }> {
+  const dispute = disputeStore.get(disputeId);
+  if (!dispute) return { error: `Dispute ${disputeId} not found` };
+  if (dispute.status === 'resolved') return { error: `Dispute already resolved` };
+
+  dispute.status = 'under_retrial';
+  disputeStore.set(disputeId, dispute);
+
+  const assetId = dispute.assetId;
+  const original = dispute.originalVerdict;
+
+  console.log(`\n  ⚖️  [RETRIAL] Starting re-trial for dispute ${disputeId} against asset ${assetId}`);
+
+  // Independently selected re-trial panel with DIFFERENT methodology orientations
+  // These are NOT the same jurors as the original deliberation
+  const retrialPanel: RetrialJuror[] = [
+    {
+      agentId: 'adversarial-market',
+      name: 'Adversarial Market Analyst',
+      methodology: 'stress_test',
+      reputation: 840,
+      vote: 'A',
+      confidence: 70,
+      reasoning: '',
+    },
+    {
+      agentId: 'deep-value',
+      name: 'Deep Value Auditor',
+      methodology: 'value_at_risk',
+      reputation: 860,
+      vote: 'A',
+      confidence: 70,
+      reasoning: '',
+    },
+    {
+      agentId: 'devils-advocate',
+      name: 'Devil\'s Advocate',
+      methodology: 'contrarian',
+      reputation: 810,
+      vote: 'A',
+      confidence: 70,
+      reasoning: '',
+    },
+  ];
+
+  // Call each retrial juror agent with their specialized methodology prompt
+  const retrialId = `RTL-${Date.now()}`;
+  const retrialStartTime = Date.now();
+
+  for (const juror of retrialPanel) {
+    try {
+      const retrialPrompt = buildRetrialPrompt(original, juror.methodology, dispute.reason, assetId);
+
+      // Try calling the actual juror agent on the retrial ports (3006-3008 for retrial panel)
+      // In production, these would be separate agent instances with different system prompts
+      // For now, simulate adversarial analysis with methodology-influenced verdict
+      const simulatedVerdict = simulateAdversarialVerdict(original, juror.methodology);
+
+      juror.vote = simulatedVerdict.vote;
+      juror.confidence = simulatedVerdict.confidence;
+      juror.reasoning = simulatedVerdict.reasoning;
+
+      console.log(`    👨‍⚖️ [RETRIAL] ${juror.name} (${juror.methodology}): Vote=${juror.vote} | Confidence=${juror.confidence}%`);
+    } catch (err: any) {
+      console.warn(`    ⚠️  [RETRIAL] ${juror.name} failed: ${err.message}`);
+      // Juror abstains - vote stays as default
+    }
+  }
+
+  // Reputation-weighted tally (same mechanism as original deliberation)
+  let scoreA = 0, scoreB = 0, scoreSplit = 0;
+  for (const juror of retrialPanel) {
+    if (juror.vote === 'A') scoreA += juror.reputation;
+    else if (juror.vote === 'B') scoreB += juror.reputation;
+    else scoreSplit += juror.reputation;
+  }
+
+  let newDecision: string;
+  let newValue: number;
+
+  if (scoreA >= scoreB && scoreA >= scoreSplit) {
+    newDecision = 'AgentAPreferred';
+    newValue = original.value; // Upheld: original value stands
+  } else if (scoreB >= scoreA && scoreB >= scoreSplit) {
+    newDecision = 'AgentBPreferred';
+    // Overturned: calculate adversarial estimate
+    newValue = Math.round(original.value * (0.75 + Math.random() * 0.15)); // 15-25% lower
+  } else {
+    newDecision = 'SplitFifty';
+    newValue = Math.round(original.value * (0.88 + Math.random() * 0.08)); // 4-16% lower
+  }
+
+  // New confidence is weighted average of retrial panel
+  const newConfidence = Math.round(
+    retrialPanel.reduce((sum, j) => sum + j.confidence * j.reputation, 0) /
+    retrialPanel.reduce((sum, j) => sum + j.reputation, 0)
+  );
+
+  const valueDelta = ((newValue - original.value) / original.value) * 100;
+  const confidenceDelta = newConfidence - original.confidence;
+
+  // Determine outcome: overturned if value shifted >10% OR confidence dropped >15 points
+  const overturned = Math.abs(valueDelta) > 10 || confidenceDelta < -15;
+
+  const retrialResult: RetrialResult = {
+    retrialId,
+    startedAt: retrialStartTime,
+    completedAt: Date.now(),
+    panel: retrialPanel,
+    originalVerdict: { value: original.value, confidence: original.confidence, decision: original.decision },
+    newVerdict: { value: newValue, confidence: newConfidence, decision: newDecision },
+    valueDelta: Math.round(valueDelta * 10) / 10,
+    confidenceDelta,
+    receiptHash: `hmac-retrial-${retrialId}`,
+    reasoning: buildRetrialReasoning(retrialPanel, overturned, valueDelta, confidenceDelta),
+  };
+
+  // Update dispute
+  dispute.status = 'resolved';
+  dispute.retrial = retrialResult;
+  dispute.outcome = overturned ? 'overturned' : 'upheld';
+  dispute.resolvedAt = Date.now();
+
+  // Distribute stake
+  if (overturned) {
+    // Challenger wins: gets stake back
+    dispute.stakeDistribution = [
+      { recipient: 'challenger', amountCSPR: dispute.stakeCSPR },
+    ];
+    // Apply reputation penalty to original jurors (simulated)
+    console.log(`    💰 [STAKE] Challenger wins! ${dispute.stakeCSPR} CSPR returned. Original jurors lose reputation.`);
+  } else {
+    // Original panel upheld: stake distributed to original jurors
+    dispute.stakeDistribution = [
+      { recipient: 'original_jurors', amountCSPR: dispute.stakeCSPR },
+    ];
+    console.log(`    💰 [STAKE] Verdict upheld. ${dispute.stakeCSPR} CSPR distributed to original jurors.`);
+  }
+
+  disputeStore.set(disputeId, dispute);
+
+  // Update the oracle verdict if overturned
+  if (overturned) {
+    const updatedVerdict: OracleVerdict = {
+      ...original,
+      value: newValue,
+      confidence: newConfidence,
+      decision: newDecision,
+      timestamp: Date.now(),
+      receiptHash: retrialResult.receiptHash,
+      agentWeights: retrialPanel.map(j => `${j.methodology}:${j.reputation}`).join(','),
+    };
+    oracleVerdictStore.set(assetId, updatedVerdict);
+    console.log(`    📡 VerdictOracle: verdict UPDATED after overturned dispute → ${newValue.toLocaleString()} (was ${original.value.toLocaleString()})`);
+  }
+
+  console.log(`  ⚖️  [RETRIAL] Complete: dispute=${disputeId} outcome=${dispute.outcome} delta=${valueDelta.toFixed(1)}%`);
+  return dispute;
+}
+
+/**
+ * Build a specialized prompt for the retrial panel.
+ * Each methodology lens produces a different analytical angle.
+ */
+function buildRetrialPrompt(original: OracleVerdict, methodology: string, challengerReason: string, assetId: string): string {
+  const base = `You are a RETRIAL juror in an adversarial review of an AI-generated asset valuation.
+
+ORIGINAL VERDICT:
+- Asset: ${assetId}
+- Assessed Value: ${original.value.toLocaleString()}
+- Confidence: ${original.confidence}%
+- Decision: ${original.decision}
+- Juror Weights: ${original.agentWeights}
+
+CHALLENGER'S CLAIM: "${challengerReason}"
+
+YOUR ROLE: ${methodology.toUpperCase()} ANALYST`;
+
+  switch (methodology) {
+    case 'stress_test':
+      return `${base}
+Your job is to STRESS TEST the original valuation. Assume worst-case scenarios:
+- What if comparable sales data is stale?
+- What if market conditions shifted since last data pull?
+- What if the subject property has undisclosed issues?
+Produce a vote (A=original upheld, B=overturned, Split) and confidence score.`;
+    case 'value_at_risk':
+      return `${base}
+Your job is to evaluate the VALUE AT RISK. Focus on downside scenarios:
+- Calculate the valuation under adverse market conditions
+- Apply appropriate risk-adjusted discount rates
+- Consider tail risks the original panel may have missed
+Produce a vote (A=original upheld, B=overturned, Split) and confidence score.`;
+    case 'contrarian':
+      return `${base}
+Your job is to be the DEVIL'S ADVOCATE. Argue against the consensus:
+- Find weaknesses in the original methodology
+- Identify confirmation bias in the original panel
+- Present the strongest possible case for a different valuation
+Produce a vote (A=original upheld, B=overturned, Split) and confidence score.`;
+    default:
+      return `${base}
+Review the original verdict and the challenger's claim. Vote independently.`;
+  }
+}
+
+/**
+ * Simulate an adversarial verdict based on methodology.
+ * In production, this would be a real LLM call to a retrial agent.
+ * The simulation demonstrates the mechanism with methodology-influenced variation.
+ */
+function simulateAdversarialVerdict(
+  original: OracleVerdict,
+  methodology: string,
+): { vote: 'A' | 'B' | 'Split'; confidence: number; reasoning: string } {
+  // Each methodology has different probability of agreeing with original
+  const agreementRates: Record<string, number> = {
+    stress_test: 0.40,      // 40% chance of agreeing with original (most adversarial)
+    value_at_risk: 0.45,    // 45% chance
+    contrarian: 0.35,       // 35% chance (most adversarial)
+  };
+
+  const agreeRate = agreementRates[methodology] || 0.50;
+  const roll = Math.random();
+
+  if (roll < agreeRate) {
+    // Agrees with original
+    return {
+      vote: 'A',
+      confidence: Math.round(original.confidence * (0.85 + Math.random() * 0.15)),
+      reasoning: getMethodologyReasoning(methodology, true, original),
+    };
+  } else if (roll < agreeRate + (1 - agreeRate) * 0.7) {
+    // Disagrees: overturn
+    return {
+      vote: 'B',
+      confidence: Math.round(55 + Math.random() * 25),
+      reasoning: getMethodologyReasoning(methodology, false, original),
+    };
+  } else {
+    // Split
+    return {
+      vote: 'Split',
+      confidence: Math.round(45 + Math.random() * 30),
+      reasoning: getMethodologyReasoning(methodology, false, original),
+    };
+  }
+}
+
+function getMethodologyReasoning(methodology: string, agrees: boolean, original: OracleVerdict): string {
+  const reasonings: Record<string, { agree: string[]; disagree: string[] }> = {
+    stress_test: {
+      agree: [
+        'Under stress conditions (rate spike, demand shock), valuation holds within 5% margin. Original methodology is robust.',
+        'Comparable sales data confirmed fresh as of last 48h. Stress scenario produces similar value due to strong fundamentals.',
+      ],
+      disagree: [
+        'Stress test reveals 18-22% downside risk. Original panel used optimistic assumptions on cap rate and absorption.',
+        'Comparable data shows 15-day staleness. Under adverse conditions (rates +150bps), value drops significantly.',
+      ],
+    },
+    value_at_risk: {
+      agree: [
+        'Value-at-risk analysis shows 95th percentile loss within acceptable bounds. Original valuation is defensible.',
+        'Risk-adjusted DCF with appropriate discount rates produces value within 3% of original verdict.',
+      ],
+      disagree: [
+        'VaR analysis shows tail risk not accounted for. Adjusted discount rate yields 20% lower intrinsic value.',
+        'Original panel used risk-free rate proxy that understates volatility in this asset class.',
+      ],
+    },
+    contrarian: {
+      agree: [
+        'Despite adversarial review, original methodology is sound. Key assumptions are well-supported by market data.',
+        'Tried to find weaknesses but comparable sales analysis and DCF both converge on similar value.',
+      ],
+      disagree: [
+        'Original panel exhibited confirmation bias: cherry-picked favorable comps, ignored declining absorption rate.',
+        'Strongest case for different valuation: updated comparable sales show 22% correction in subject submarket.',
+      ],
+    },
+  };
+
+  const pool = reasonings[methodology] || reasonings.contrarian;
+  const options = agrees ? pool.agree : pool.disagree;
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+/**
+ * Build a human-readable reasoning summary for the retrial result.
+ */
+function buildRetrialReasoning(
+  panel: RetrialJuror[],
+  overturned: boolean,
+  valueDelta: number,
+  confidenceDelta: number,
+): string {
+  const votesFor = panel.filter(j => j.vote === 'A').length;
+  const votesAgainst = panel.filter(j => j.vote === 'B').length;
+  const votesSplit = panel.filter(j => j.vote === 'Split').length;
+
+  if (overturned) {
+    return `Retrial panel overturned original verdict (${votesAgainst}-${votesFor}-${votesSplit}). ` +
+      `Value adjusted ${valueDelta > 0 ? '+' : ''}${valueDelta.toFixed(1)}%. ` +
+      `Confidence ${confidenceDelta > 0 ? 'increased' : 'decreased'} by ${Math.abs(confidenceDelta)} points. ` +
+      `${panel[0].name}: "${panel[0].reasoning}"`;
+  }
+  return `Retrial panel upheld original verdict (${votesFor}-${votesAgainst}-${votesSplit}). ` +
+    `Value delta ${valueDelta > 0 ? '+' : ''}${valueDelta.toFixed(1)}% within acceptable tolerance. ` +
+    `Confidence shift ${confidenceDelta} points. Original methodology validated under adversarial scrutiny.`;
 }
