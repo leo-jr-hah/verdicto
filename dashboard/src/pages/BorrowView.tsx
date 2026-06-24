@@ -29,6 +29,7 @@ import {
   type AssessmentRequest,
 } from '../services/api';
 import { PLATFORM_WALLET, LOAN_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
+import { AgentExplainer } from '../components/AgentExplainer';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -85,9 +86,9 @@ const ASSET_TYPES: Array<{
 ];
 
 const LTV_TIERS: Record<AssetType, string> = {
-  'real-estate': '60–75%',
-  'art': '30–50%',
-  'commodity': '70–85%',
+  'real-estate': '60-75%',
+  'art': '30-50%',
+  'commodity': '70-85%',
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -304,7 +305,7 @@ const LoanCard: React.FC<{
         </div>
       </div>
 
-      {/* Verdict Point 1: Trust breakdown — shows why LTV is what it is */}
+      {/* Verdicto Point 1: Trust breakdown - shows why LTV is what it is */}
       {loan.trustBreakdown && (
         <div style={{
           padding: '0.75rem 1rem',
@@ -324,7 +325,7 @@ const LoanCard: React.FC<{
         </div>
       )}
 
-      {/* Verdict Point 2: Escrow tx hashes — visible on-chain proof */}
+      {/* Verdicto Point 2: Escrow tx hashes - visible on-chain proof */}
       {(loan.escrowLockTxHash || loan.escrowReleaseTxHash) && (
         <div style={{
           padding: '0.75rem 1rem',
@@ -353,7 +354,7 @@ const LoanCard: React.FC<{
         </div>
       )}
 
-      {/* Verdict Point 3: Revaluation history — shows juror deliberation */}
+      {/* Verdicto Point 3: Revaluation history - shows juror deliberation */}
       {loan.revaluationHistory && loan.revaluationHistory.length > 0 && (
         <div style={{
           padding: '0.75rem 1rem',
@@ -932,7 +933,7 @@ export const BorrowView: React.FC = () => {
                 type="number"
                 value={requestedLtv}
                 onChange={(e) => setRequestedLtv(e.target.value)}
-                placeholder={`e.g. ${LTV_TIERS[assetType].split('–')[0]}`}
+                placeholder={`e.g. ${LTV_TIERS[assetType].split('-')[0]}`}
                 min={10}
                 max={90}
                 style={inputStyle}
@@ -1062,7 +1063,14 @@ export const BorrowView: React.FC = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
+              {/* Agent explanation for assessment */}
+              {assessmentResult && (
+                <div style={{ marginTop: '1.5rem' }}>
+                  <AgentExplainer assessment={assessmentResult} />
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                 <button onClick={handleStartNew} style={{ ...btnSecondary, flex: 1 }}>
                   <RotateCcw size={16} /> Start Over
                 </button>
@@ -1123,7 +1131,7 @@ export const BorrowView: React.FC = () => {
             </div>
           </div>
 
-          {/* Verdict Point 1: Trust breakdown — why this LTV */}
+          {/* Verdicto Point 1: Trust breakdown - why this LTV */}
           {currentLoan.trustBreakdown && (
             <div style={{
               padding: '0.75rem 1rem',
@@ -1143,7 +1151,7 @@ export const BorrowView: React.FC = () => {
             </div>
           )}
 
-          {/* Verdict Point 2: Escrow lock tx hash */}
+          {/* Verdicto Point 2: Escrow lock tx hash */}
           {currentLoan.escrowLockTxHash && (
             <div style={{
               padding: '0.75rem 1rem',
@@ -1179,6 +1187,20 @@ export const BorrowView: React.FC = () => {
               <> Tx: <code style={{ fontSize: '0.75rem' }}>{currentLoan.disbursementTxHash.slice(0, 16)}...</code></>
             )}
           </div>
+
+          {/* Agent explanation with loan context */}
+          {assessmentResult && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <AgentExplainer
+                assessment={assessmentResult}
+                loan={{
+                  ltvRatio: currentLoan.ltvRatio,
+                  loanAmountCSPR: currentLoan.loanAmountCSPR,
+                  trustBreakdown: currentLoan.trustBreakdown,
+                }}
+              />
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button onClick={handleStartNew} style={{ ...btnSecondary, flex: 1 }}>

@@ -70,7 +70,7 @@ export function useAssessment(): UseAssessmentReturn {
           result: response.assessment,
         }));
       } else if (response.status === 'payment_required') {
-        // x402: backend wants payment — store requirements, stop loading
+        // x402: backend wants payment - store requirements, stop loading
         setState(prev => ({
           ...prev,
           loading: false,
@@ -113,7 +113,7 @@ export function useAssessment(): UseAssessmentReturn {
           result: response.assessment,
         }));
       } else if (response.status === 'payment_required') {
-        // Still needs payment — proof was invalid
+        // Still needs payment - proof was invalid
         setState(prev => ({
           ...prev,
           loading: false,

@@ -15,11 +15,11 @@ const DEPLOY_HASH_RE = /^[0-9a-f]{64}$/i;
 /**
  * Verify a deploy hash exists on-chain by querying CSPR.cloud.
  * Returns true only if the deploy is confirmed with execution results.
- * Falls back to REJECT (false) if no API key is configured — fail-closed.
+ * Falls back to REJECT (false) if no API key is configured - fail-closed.
  */
 async function verifyDeployOnChain(deployHash: string): Promise<boolean> {
   if (!CSPR_CLOUD_KEY) {
-    console.error(`  [x402] ❌ No CSPRCLOUD_API_KEY — cannot verify deploy, REJECTING`);
+    console.error(`  [x402] ❌ No CSPRCLOUD_API_KEY - cannot verify deploy, REJECTING`);
     return false;
   }
   try {
@@ -104,7 +104,7 @@ export function casperX402Middleware(config: { recipientAddress: string; amountC
         return res.status(402).json({ error: 'Invalid deploy hash format' });
       }
 
-      // Validate payment amount — prevent zero-value or micro-payment exploits
+      // Validate payment amount - prevent zero-value or micro-payment exploits
       if (!validatePaymentAmount(parsed.amount, config.amountCSPR)) {
         return res.status(402).json({
           error: 'Insufficient payment amount',
@@ -113,7 +113,7 @@ export function casperX402Middleware(config: { recipientAddress: string; amountC
         });
       }
 
-      // Verify on-chain — reject if not confirmed (fail-closed)
+      // Verify on-chain - reject if not confirmed (fail-closed)
       const VERIFICATION_TIMEOUT_MS = 8_000;
       const verificationPromise = verifyDeployOnChain(deployHash);
       const timeoutPromise = new Promise<boolean>((resolve) => {
@@ -122,7 +122,7 @@ export function casperX402Middleware(config: { recipientAddress: string; amountC
 
       const valid = await Promise.race([verificationPromise, timeoutPromise]);
       if (!valid) {
-        // Reject unconfirmed deploys — no more silent pass-through
+        // Reject unconfirmed deploys - no more silent pass-through
         return res.status(402).json({
           error: 'Payment not confirmed on-chain',
           deployHash,

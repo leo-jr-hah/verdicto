@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigation } from '../components/landing/Navigation';
 import { HeroSection } from '../components/landing/HeroSection';
 import { StatsBar } from '../components/landing/StatsBar';
+import { OracleSection } from '../components/landing/OracleSection';
 import { HowItWorks } from '../components/landing/HowItWorks';
 import { AgentGrid } from '../components/landing/AgentGrid';
 import { X402PaymentFlow } from '../components/landing/X402PaymentFlow';
@@ -17,6 +18,7 @@ export const LandingPage: React.FC = () => {
       <main>
         <HeroSection />
         <StatsBar />
+        <OracleSection />
         <HowItWorks />
         <AgentGrid />
         <X402PaymentFlow />

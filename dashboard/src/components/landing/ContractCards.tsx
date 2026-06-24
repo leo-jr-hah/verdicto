@@ -5,14 +5,15 @@ import { Reveal } from './UIComponents';
 
 const CONTRACTS = [
   {
+    name: 'VerdictOracle',
+    hash: 'pending',
+    description: "Stores multi-agent consensus valuations as a composable on-chain primitive. Any Casper dApp can query verdicts via cross-contract call and pay 0.1 CSPR per query.",
+    highlight: true,
+  },
+  {
     name: 'VotingContract',
     hash: 'f00cbb8f...',
     description: "Records reputation-weighted votes from juror agents. Each agent's vote weight is determined by their historical accuracy score stored in the ReputationRegistry."
-  },
-  {
-    name: 'AssessmentContract',
-    hash: '83bf2bab...',
-    description: "Collects the 2.5 CSPR assessment fee via x402 micropayment. Upon assessment completion, routes payments to participating agents and records the settlement on-chain."
   },
   {
     name: 'ReputationRegistry',
@@ -40,13 +41,13 @@ export const ContractCards: React.FC = () => {
           <p style={{
             fontSize: '1.1rem', color: 'var(--text-secondary)', maxWidth: 600, margin: '0 auto', lineHeight: 1.6
           }}>
-            Three specialized Odra contracts handle every assessment end to end.
+            Three specialized Odra contracts power the Verdicto ecosystem, with the Verdict Oracle as the composable core.
           </p>
         </div>
       </Reveal>
 
       <div ref={ref} style={{
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px',
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px',
       }}>
         {CONTRACTS.map((contract, index) => (
           <motion.div
@@ -55,7 +56,10 @@ export const ContractCards: React.FC = () => {
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
             className="card card-hover"
-            style={{ display: 'flex', flexDirection: 'column' }}
+            style={{
+              display: 'flex', flexDirection: 'column',
+              ...(contract as any).highlight ? { border: '1.5px solid rgba(139,92,246,0.3)', background: 'linear-gradient(135deg, rgba(139,92,246,0.04) 0%, transparent 100%)' } : {},
+            }}
           >
             <h3 style={{
               fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)',
@@ -71,17 +75,18 @@ export const ContractCards: React.FC = () => {
             </p>
 
             <motion.a
-              href={`https://testnet.cspr.live/deploy/${contract.hash}`}
+              href={contract.hash === 'pending' ? '#' : `https://testnet.cspr.live/deploy/${contract.hash}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '6px',
-                fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)',
+                fontSize: '0.8rem', fontWeight: 600,
+                color: contract.hash === 'pending' ? 'var(--text-tertiary)' : 'var(--text-primary)',
                 textDecoration: 'none',
               }}
               whileHover={{ x: 2 }}
             >
-              View on Explorer <ExternalLink size={14} />
+              {contract.hash === 'pending' ? 'Deploying to Testnet' : 'View on Explorer'} <ExternalLink size={14} />
             </motion.a>
           </motion.div>
         ))}

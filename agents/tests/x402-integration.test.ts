@@ -1,5 +1,5 @@
 /**
- * x402 Integration Tests — Full payment flow simulation
+ * x402 Integration Tests - Full payment flow simulation
  *
  * Tests the complete x402 protocol:
  *   1. Client requests resource without payment → 402 + paymentRequirements
@@ -98,7 +98,7 @@ function createTestApp(config?: { recipientAddress?: string; amountCSPR?: string
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
-describe('x402 — Payment Required Response', () => {
+describe('x402 - Payment Required Response', () => {
   it('returns 402 with paymentRequirements when no proof provided', async () => {
     const app = createTestApp();
 
@@ -149,7 +149,7 @@ describe('x402 — Payment Required Response', () => {
   });
 });
 
-describe('x402 — Payment Proof Validation', () => {
+describe('x402 - Payment Proof Validation', () => {
   it('accepts valid payment proof and passes through', async () => {
     const app = createTestApp();
     const proof = createValidProof();
@@ -249,11 +249,11 @@ describe('x402 — Payment Proof Validation', () => {
   });
 });
 
-describe('x402 — Full Flow Simulation (402 → Sign → Retry)', () => {
+describe('x402 - Full Flow Simulation (402 → Sign → Retry)', () => {
   it('simulates complete client-side 402 flow', async () => {
     const app = createTestApp({ amountCSPR: '2.5' });
 
-    // Step 1: Initial request — expect 402
+    // Step 1: Initial request - expect 402
     const step1 = await request(app)
       .post('/assess')
       .send({ assetId: 'GOLD-001' })
@@ -269,7 +269,7 @@ describe('x402 — Full Flow Simulation (402 → Sign → Retry)', () => {
       payTo: requirements.payTo,
     });
 
-    // Step 3: Retry with payment proof — expect 200
+    // Step 3: Retry with payment proof - expect 200
     const step3 = await request(app)
       .post('/assess')
       .set('x-payment-proof', proof)
@@ -284,7 +284,7 @@ describe('x402 — Full Flow Simulation (402 → Sign → Retry)', () => {
   it('multiple assessments each require separate payment', async () => {
     const app = createTestApp({ amountCSPR: '2.5' });
 
-    // First assessment — pay and succeed
+    // First assessment - pay and succeed
     const proof1 = createValidProof({ txHash: generateDeployHash() });
     await request(app)
       .post('/assess')
@@ -292,7 +292,7 @@ describe('x402 — Full Flow Simulation (402 → Sign → Retry)', () => {
       .send({ assetId: 'RE-001' })
       .expect(200);
 
-    // Second assessment — no proof, expect 402 again
+    // Second assessment - no proof, expect 402 again
     await request(app)
       .post('/assess')
       .send({ assetId: 'RE-002' })
@@ -326,7 +326,7 @@ describe('x402 — Full Flow Simulation (402 → Sign → Retry)', () => {
   });
 });
 
-describe('x402 — Security Edge Cases', () => {
+describe('x402 - Security Edge Cases', () => {
   it('rejects proof with zero amount', async () => {
     const app = createTestApp();
     const proof = createValidProof({ amount: '0' });

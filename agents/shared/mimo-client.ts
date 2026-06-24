@@ -1,15 +1,15 @@
 /**
- * MiMo AI Client — Primary LLM for Verdict
+ * MiMo AI Client: Primary LLM for Verdict
  * 
  * Uses Xiaomi MiMo V2 API (OpenAI-compatible endpoint).
  * Falls back to Groq if MiMo fails.
  * Falls back to heuristic if both fail.
  * 
- * Model hierarchy (low → high consumption):
- *   1. mimo-v2-pro      — best reasoning, most tokens
- *   2. mimo-v2           — balanced
- *   3. mimo-v2.5         — newer, good reasoning
- *   4. mimo-v2.5-pro     — newest, best quality
+ * Model hierarchy (low to high consumption):
+ *   1. mimo-v2-pro      - best reasoning, most tokens
+ *   2. mimo-v2           - balanced
+ *   3. mimo-v2.5         - newer, good reasoning
+ *   4. mimo-v2.5-pro     - newest, best quality
  * 
  * We use mimo-v2 as the low-consumption default.
  */
@@ -231,7 +231,7 @@ export async function askJuror(systemPrompt: string, userPrompt: string): Promis
       console.warn(`[LLM] ⚠️  MiMo returned non-JSON, trying Groq...`);
     }
   } catch (mimoErr: any) {
-    console.warn(`[LLM] ⚠️  MiMo failed: ${mimoErr.message} — trying Groq...`);
+    console.warn(`[LLM] ⚠️  MiMo failed: ${mimoErr.message} - trying Groq...`);
   }
 
   // Step 2: Try Groq
@@ -247,7 +247,7 @@ export async function askJuror(systemPrompt: string, userPrompt: string): Promis
       return { result: buildFallbackResponse(userPrompt), provider: 'heuristic', fallbackTriggered: true };
     }
   } catch (groqErr: any) {
-    console.warn(`[LLM] ⚠️  Groq failed: ${groqErr.message} — using fallback`);
+    console.warn(`[LLM] ⚠️  Groq failed: ${groqErr.message} - using fallback`);
   }
 
   // Step 3: Heuristic fallback

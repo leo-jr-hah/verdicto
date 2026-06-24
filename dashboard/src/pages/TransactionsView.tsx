@@ -55,7 +55,7 @@ const STATS = [
   { key: 'zkLite' as const, label: 'ZK-Lite', color: '#8B5CF6', icon: Shield },
   { key: 'hmac' as const, label: 'HMAC', color: '#3B82F6', icon: Hash },
   { key: 'payments' as const, label: 'Payments', color: '#F59E0B', icon: TrendingUp },
-  { key: 'verdicts' as const, label: 'Verdicts', color: '#10B981', icon: Clock },
+  { key: 'verdicts' as const, label: 'Verdicto', color: '#10B981', icon: Clock },
 ];
 
 export const TransactionsView: React.FC = () => {

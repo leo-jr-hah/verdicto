@@ -151,16 +151,16 @@ export const LiveContractPanel: React.FC = () => {
       } else {
         // Use mock data when API unavailable
         setState({
-          assessments: { total: 47, pending: 3, deliberating: 2, voting: 1, resolved: 41 },
+          assessments: { total: 0, pending: 0, deliberating: 0, voting: 0, resolved: 0 },
           agents: [
-            { id: 'valuation-agent-a', name: 'Valuation Agent A', reputation: 847, totalAssessments: 156, accuracy: 92 },
-            { id: 'valuation-agent-b', name: 'Valuation Agent B', reputation: 812, totalAssessments: 143, accuracy: 89 },
-            { id: 'evidence-analyst', name: 'Evidence Analyst', reputation: 891, totalAssessments: 167, accuracy: 94 },
-            { id: 'market-interpreter', name: 'Market Interpreter', reputation: 778, totalAssessments: 134, accuracy: 87 },
-            { id: 'precedent-researcher', name: 'Precedent Researcher', reputation: 856, totalAssessments: 152, accuracy: 91 },
+            { id: 'valuation-agent-a', name: 'Valuation Agent A', reputation: 0, totalAssessments: 0, accuracy: 0 },
+            { id: 'valuation-agent-b', name: 'Valuation Agent B', reputation: 0, totalAssessments: 0, accuracy: 0 },
+            { id: 'evidence-analyst', name: 'Evidence Analyst', reputation: 0, totalAssessments: 0, accuracy: 0 },
+            { id: 'market-interpreter', name: 'Market Interpreter', reputation: 0, totalAssessments: 0, accuracy: 0 },
+            { id: 'precedent-researcher', name: 'Precedent Researcher', reputation: 0, totalAssessments: 0, accuracy: 0 },
           ],
-          payments: { totalCollected: 125_000_000_000, totalProcessed: 98_500_000_000, activeAssessments: 6 },
-          receipts: { total: 234, verified: 228, pending: 6 },
+          payments: { totalCollected: 0, totalProcessed: 0, activeAssessments: 0 },
+          receipts: { total: 0, verified: 0, pending: 0 },
           lastUpdated: Date.now(),
         });
         setConnected(false);
@@ -226,12 +226,12 @@ export const LiveContractPanel: React.FC = () => {
           <div style={{
             display: 'flex', alignItems: 'center', gap: '0.3rem',
             padding: '0.2rem 0.6rem', borderRadius: '4px',
-            background: connected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-            color: connected ? '#10b981' : '#f59e0b',
+            background: connected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)',
+            color: connected ? '#10b981' : '#6b7280',
             fontSize: '0.7rem', fontWeight: 600,
           }}>
             {connected ? <Wifi size={12} /> : <WifiOff size={12} />}
-            {connected ? 'Live' : 'Demo'}
+            {connected ? 'Live' : 'Offline'}
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

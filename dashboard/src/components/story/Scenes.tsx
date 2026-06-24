@@ -347,7 +347,7 @@ export const Scene4Consensus: React.FC = () => {
 };
 
 /* -------------------------------------------------------------------------- */
-/* SCENE 5: Verdict Generated                                                 */
+/* SCENE 5: Verdicto Generated                                                 */
 /* -------------------------------------------------------------------------- */
 export const Scene5Verdict: React.FC = () => {
   return (
@@ -374,7 +374,7 @@ export const Scene5Verdict: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Main Verdict Card */}
+      {/* Main Verdicto Card */}
       <motion.div 
         initial={{ y: 50, opacity: 0, scale: 0.9 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -391,7 +391,7 @@ export const Scene5Verdict: React.FC = () => {
         }}
       >
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', padding: '0.4rem 1rem', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 600, marginBottom: '1.5rem' }}>
-          <CheckCircle2 size={16} /> Final Verdict
+          <CheckCircle2 size={16} /> Final Verdicto
         </div>
         
         <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Fair Market Value</div>
@@ -462,7 +462,7 @@ export const Scene6OnChain: React.FC = () => {
           </div>
           <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.1)' }} />
           <div style={{ fontSize: '0.85rem', color: '#e5e7eb', lineHeight: 1.6 }}>
-            <strong>Verdict:</strong> $2.05M<br/>
+            <strong>Verdicto:</strong> $2.05M<br/>
             <strong>Confidence:</strong> 91.4%
           </div>
         </motion.div>

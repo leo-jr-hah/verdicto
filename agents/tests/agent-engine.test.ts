@@ -122,7 +122,7 @@ vi.mock('../shared/fred-client.js', () => ({
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
-describe('Agent Engine — Real Estate Valuation', () => {
+describe('Agent Engine - Real Estate Valuation', () => {
   it('calcRealEstateComps returns a valid ValuationResult', async () => {
     const result = await calcRealEstateComps('test-agent', 'RE-001', 'Miami, FL', 1200);
     expect(result).toBeDefined();
@@ -161,7 +161,7 @@ describe('Agent Engine — Real Estate Valuation', () => {
   });
 });
 
-describe('Agent Engine — Art Valuation', () => {
+describe('Agent Engine - Art Valuation', () => {
   it('calcArtAppraisal returns a valid ValuationResult', async () => {
     const result = await calcArtAppraisal('test-agent', 'ART-001', 'oil painting');
     expect(result).toBeDefined();
@@ -189,7 +189,7 @@ describe('Agent Engine — Art Valuation', () => {
   });
 });
 
-describe('Agent Engine — Commodity Valuation', () => {
+describe('Agent Engine - Commodity Valuation', () => {
   it('calcCommoditySpot returns a valid ValuationResult', async () => {
     const result = await calcCommoditySpot('test-agent', 'GOLD-001', 10, 'gold');
     expect(result).toBeDefined();
@@ -218,7 +218,7 @@ describe('Agent Engine — Commodity Valuation', () => {
   });
 });
 
-describe('Agent Engine — Edge Cases', () => {
+describe('Agent Engine - Edge Cases', () => {
   it('handles missing location gracefully (defaults to Miami)', async () => {
     const request: ValuationRequest = {
       assetType: 'real-estate',
@@ -271,7 +271,7 @@ describe('Agent Engine — Edge Cases', () => {
   });
 });
 
-describe('Agent Engine — Valuation Consistency', () => {
+describe('Agent Engine - Valuation Consistency', () => {
   it('commodity spot valuation is deterministic for same input', async () => {
     const r1 = await calcCommoditySpot('agent', 'GOLD-CONS-1', 10, 'gold');
     const r2 = await calcCommoditySpot('agent', 'GOLD-CONS-2', 10, 'gold');

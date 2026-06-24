@@ -1,5 +1,5 @@
 /**
- * Juror Engine — MCP server for juror agents
+ * Juror Engine - MCP server for juror agents
  *
  * Each juror specializes in one dimension:
  *   - Evidence Analyst: document quality, proof strength
@@ -44,7 +44,7 @@ export function createJurorServer(config: JurorConfig) {
   const app = express();
   app.use(express.json({ limit: '16kb' }));
 
-  // ── CORS — restrict to known origins ─────────────────────────────────────
+  // ── CORS: restrict to known origins ─────────────────────────────────────
   const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5174,http://localhost:3000').split(',');
   app.use((req, res, next) => {
     const origin = req.headers.origin || '';

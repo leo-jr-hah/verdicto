@@ -1,10 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  Clock,
   CheckCircle2,
   ArrowRight,
-  Zap,
   Shield,
   Globe,
   TrendingUp,
@@ -12,6 +10,15 @@ import {
   BarChart3,
   Lock,
   Layers,
+  Wallet,
+  Scale,
+  Landmark,
+  Activity,
+  Cpu,
+  FileCheck,
+  Link2,
+  Timer,
+  GitBranch,
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -22,152 +29,217 @@ interface RoadmapItem {
   description: string;
   category: 'verifiable' | 'economic' | 'network' | 'enhancement';
   status: 'live' | 'building' | 'planned' | 'future';
-  effort: string;
   icon: React.ReactNode;
 }
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
 const ROADMAP_ITEMS: RoadmapItem[] = [
-  // LIVE
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LIVE: Products and core features
+  // ═══════════════════════════════════════════════════════════════════════════
+
   {
-    id: 'a2',
-    title: 'Multi-Methodology Dashboard',
-    description: 'Side-by-side view of all 5 AI agents\' reasoning with divergence visualization, risk flags, and consensus analysis.',
-    category: 'verifiable',
+    id: 'p1',
+    title: 'Assess: AI Asset Valuation',
+    description: 'Dual-agent valuation with 3 AI jurors, autonomous methodology selection, and HMAC receipt chains. Results in under 60 seconds.',
+    category: 'economic',
     status: 'live',
-    effort: '5 hours',
-    icon: <BarChart3 size={18} />,
+    icon: <Scale size={18} />,
   },
   {
-    id: 'd4',
-    title: 'Multi-Asset Selector',
-    description: 'Dropdown to choose asset type: Real Estate, Fine Art, Commodities. Each triggers asset-specific valuation logic.',
-    category: 'enhancement',
+    id: 'p2',
+    title: 'Borrow: Lend Against Assessed Assets',
+    description: 'AI-calculated LTV ratios with real CSPR disbursement to your wallet. Autonomous collateral monitoring with margin call alerts.',
+    category: 'economic',
     status: 'live',
-    effort: '4 hours',
-    icon: <Layers size={18} />,
+    icon: <Landmark size={18} />,
   },
   {
-    id: 'd7',
-    title: 'Async CSPR Transfer',
-    description: 'Replaced synchronous execFileSync with async execFile to prevent event loop blocking during blockchain operations.',
-    category: 'enhancement',
+    id: 'p3',
+    title: 'Insure: AI-Powered Asset Insurance',
+    description: 'Risk scoring across market volatility, liquidity, and confidence. File claims with live AI revaluation and automated payouts.',
+    category: 'economic',
     status: 'live',
-    effort: '1 hour',
-    icon: <Zap size={18} />,
-  },
-  {
-    id: 'd8',
-    title: 'Environment Variable Validation',
-    description: 'Startup validation of all required env vars using Zod-style checks. Fails fast with clear error messages.',
-    category: 'enhancement',
-    status: 'live',
-    effort: '1 hour',
     icon: <Shield size={18} />,
   },
   {
-    id: 'd1',
-    title: 'Live Contract State Panel',
-    description: 'Real-time dashboard showing deployed contract data: assessment count, agent reputation scores, recent votes, payment totals.',
-    category: 'enhancement',
-    status: 'live',
-    effort: '3 hours',
-    icon: <Globe size={18} />,
-  },
-  {
-    id: 'd2',
-    title: 'x402 Payment Stream',
-    description: 'Live visualization of CSPR flowing between agents via x402: payment requests, settlements, and confirmations with tx hashes.',
-    category: 'enhancement',
-    status: 'live',
-    effort: '4 hours',
-    icon: <Zap size={18} />,
-  },
-
-  // PLANNED
-  {
-    id: 'b2',
-    title: 'Prediction Market Resolution',
-    description: 'Ask real-world outcome questions. 5 AI agents analyze market data and give probability estimates with full reasoning.',
+    id: 'p4',
+    title: 'Predict: Prediction Market Resolution',
+    description: 'Ask real-world outcome questions. 5 AI agents analyze data and produce probability estimates with full reasoning.',
     category: 'economic',
-    status: 'planned',
-    effort: '5 hours',
+    status: 'live',
     icon: <TrendingUp size={18} />,
   },
   {
+    id: 'v1',
+    title: 'Multi-Agent Deliberation',
+    description: '5 independent AI agents with autonomous methodology selection. Each queries real market data, selects its approach at runtime, and documents reasoning.',
+    category: 'verifiable',
+    status: 'live',
+    icon: <Cpu size={18} />,
+  },
+  {
+    id: 'v2',
+    title: 'Juror Peer Review Protocol',
+    description: 'When valuations diverge, 3 jurors deliberate across 2 rounds. In Round 2, each juror reviews peer reasoning and may revise their vote.',
+    category: 'verifiable',
+    status: 'live',
+    icon: <Users size={18} />,
+  },
+  {
+    id: 'v3',
+    title: 'HMAC Receipt Chain',
+    description: 'Every execution step produces a cryptographic receipt. Receipts chain together so no step can be altered without breaking the chain.',
+    category: 'verifiable',
+    status: 'live',
+    icon: <Link2 size={18} />,
+  },
+  {
+    id: 'v4',
+    title: 'Retroactive Trust Scoring',
+    description: 'Agent reputation is not consensus-based. Predictions are recorded, then compared to actual market outcomes. Accurate agents gain trust; inaccurate ones lose it.',
+    category: 'verifiable',
+    status: 'live',
+    icon: <BarChart3 size={18} />,
+  },
+  {
+    id: 'v5',
+    title: 'Verifiable Execution Commitments',
+    description: 'Pre-execution commitment hashes stored on-chain. Post-execution receipts prove the committed computation was executed faithfully.',
+    category: 'verifiable',
+    status: 'live',
+    icon: <FileCheck size={18} />,
+  },
+  {
+    id: 'e1',
+    title: 'x402 Micropayments',
+    description: 'Real CSPR transfers signed by your Casper Wallet. Not simulated. Every payment is verifiable on the Casper testnet explorer.',
+    category: 'economic',
+    status: 'live',
+    icon: <Wallet size={18} />,
+  },
+  {
+    id: 'e2',
+    title: 'Casper Wallet Connection',
+    description: 'One-click wallet integration via CasperWalletProvider. Connect, sign transactions, and manage your account from the dashboard.',
+    category: 'enhancement',
+    status: 'live',
+    icon: <Wallet size={18} />,
+  },
+  {
+    id: 'e3',
+    title: 'Multi-Asset Support',
+    description: 'Real Estate, Fine Art, and Commodities. Each asset type triggers specialized valuation logic with different data sources and methodologies.',
+    category: 'enhancement',
+    status: 'live',
+    icon: <Layers size={18} />,
+  },
+  {
+    id: 'e4',
+    title: 'Real-Time Progress Updates',
+    description: 'WebSocket-powered live updates during assessments. See each agent start, complete, and deliberate as it happens.',
+    category: 'enhancement',
+    status: 'live',
+    icon: <Activity size={18} />,
+  },
+  {
+    id: 'e5',
+    title: 'Autonomous Keepers',
+    description: 'Background services monitor collateral health and insurance policies continuously. Margin calls and liquidation triggers fire without human intervention.',
+    category: 'enhancement',
+    status: 'live',
+    icon: <Timer size={18} />,
+  },
+  {
+    id: 'e6',
+    title: 'Agent Reputation Dashboard',
+    description: 'Trust scores with historical accuracy charts, tier badges, and methodology details for every agent in the system.',
+    category: 'enhancement',
+    status: 'live',
+    icon: <Globe size={18} />,
+  },
+  {
+    id: 'e7',
+    title: 'LLM Fallback Transparency',
+    description: 'When the primary LLM is unavailable, agents fall back to deterministic estimates. The UI flags exactly which agents fell back and at what quality level.',
+    category: 'enhancement',
+    status: 'live',
+    icon: <Shield size={18} />,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PLANNED: Next phase
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  {
     id: 'a1',
-    title: 'On-Chain Verdict Certificate (NFT)',
-    description: 'Mint a non-transferable NFT on Casper Testnet containing the verdict hash, agent signatures, and HMAC receipt root.',
+    title: 'On-Chain Verdicto Certificate',
+    description: 'Mint a non-transferable NFT on Casper containing the verdict hash, agent signatures, and receipt root. Permanent, verifiable proof of assessment.',
     category: 'verifiable',
     status: 'planned',
-    effort: '4 hours',
     icon: <Shield size={18} />,
   },
   {
-    id: 'a3',
-    title: 'Regulatory Compliance Export (PDF)',
-    description: 'One-click generation of SEC, EU MiCA, and UAE VARA formatted compliance documents with cryptographic signatures.',
+    id: 'a2',
+    title: 'Compliance Export',
+    description: 'One-click generation of regulatory compliance documents (SEC, EU MiCA, UAE VARA) with cryptographic signatures and methodology documentation.',
     category: 'verifiable',
     status: 'planned',
-    effort: '4 hours',
     icon: <Lock size={18} />,
   },
   {
     id: 'b1',
-    title: 'DeFi Collateral Oracle Feed',
-    description: 'Standardized API endpoint that outputs Verdict valuations in a format consumable by DeFi lending protocols (Aave, Compound, Morpho).',
+    title: 'DeFi Collateral Oracle',
+    description: 'Standardized API that outputs Verdicto valuations in a format consumable by DeFi lending protocols.',
     category: 'economic',
     status: 'planned',
-    effort: '4 hours',
     icon: <Globe size={18} />,
   },
   {
-    id: 'b3',
+    id: 'b2',
     title: 'Agent Staking Marketplace',
-    description: 'Open platform where third-party AI analysts register as Verdict agents, stake CSPR as collateral, and earn fees for accurate valuations.',
+    description: 'Open platform where third-party AI analysts register as Verdicto agents, stake CSPR as collateral, and earn fees for accurate valuations.',
     category: 'economic',
     status: 'planned',
-    effort: '6 hours',
     icon: <Users size={18} />,
   },
   {
-    id: 'b4',
-    title: 'Insurance Claim Verification',
-    description: 'Insurance companies submit property damage claims; Verdict agents verify the claimed value against market data and flag fraud.',
-    category: 'economic',
-    status: 'planned',
-    effort: '5 hours',
-    icon: <Shield size={18} />,
-  },
-
-  // FUTURE
-  {
     id: 'c1',
-    title: 'Historical Accuracy Leaderboard',
-    description: 'Public leaderboard showing each agent\'s historical accuracy: how close their valuations were to actual market outcomes.',
-    category: 'network',
-    status: 'future',
-    effort: '3 hours',
-    icon: <TrendingUp size={18} />,
-  },
-  {
-    id: 'c2',
-    title: 'Cross-Asset Correlation Analysis',
+    title: 'Cross-Asset Portfolio Analysis',
     description: 'Portfolio risk reports across multiple asset types: concentration risk, macro sensitivity, and diversification recommendations.',
     category: 'network',
-    status: 'future',
-    effort: '6 hours',
+    status: 'planned',
     icon: <BarChart3 size={18} />,
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FUTURE: Long-term vision
+  // ═══════════════════════════════════════════════════════════════════════════
+
   {
-    id: 'c3',
-    title: 'Retroactive Accuracy Betting',
-    description: 'Users bet CSPR on whether an agent\'s valuation will prove accurate when the asset eventually sells. A prediction market on prediction accuracy.',
+    id: 'f1',
+    title: 'Accuracy Prediction Market',
+    description: 'Users bet on whether an agent\'s valuation will prove accurate when the asset eventually sells. A market on prediction quality itself.',
     category: 'network',
     status: 'future',
-    effort: '8 hours',
     icon: <TrendingUp size={18} />,
+  },
+  {
+    id: 'f2',
+    title: 'Multi-Tenant Agent Deployment',
+    description: 'Isolated agent clusters per client with dedicated AI agents, separate reputation namespaces, and isolated payment flows.',
+    category: 'network',
+    status: 'future',
+    icon: <GitBranch size={18} />,
+  },
+  {
+    id: 'f3',
+    title: 'Mainnet Deployment',
+    description: 'Migration from Casper Testnet to Mainnet with security audit, gas optimization, and production-grade infrastructure.',
+    category: 'network',
+    status: 'future',
+    icon: <Globe size={18} />,
   },
 ];
 
@@ -256,7 +328,7 @@ const RoadmapCard: React.FC<{ item: RoadmapItem; index: number }> = ({ item, ind
         {item.description}
       </p>
 
-      {/* Bottom row: category + effort */}
+      {/* Bottom row: category */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{
           fontSize: '0.7rem',
@@ -264,16 +336,6 @@ const RoadmapCard: React.FC<{ item: RoadmapItem; index: number }> = ({ item, ind
           fontWeight: 600,
         }}>
           {category.label}
-        </span>
-        <span style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.3rem',
-          fontSize: '0.7rem',
-          color: 'var(--text-tertiary)',
-        }}>
-          <Clock size={12} />
-          {item.effort}
         </span>
       </div>
     </motion.div>
@@ -288,8 +350,8 @@ export const RoadmapView: React.FC = () => {
   const future = ROADMAP_ITEMS.filter(i => i.status === 'future');
 
   const sections = [
-    { title: 'Live Now', items: live, icon: <CheckCircle2 size={18} color="#10b981" />, color: '#10b981' },
-    { title: 'Planned', items: planned, icon: <Clock size={18} color="#f59e0b" />, color: '#f59e0b' },
+    { title: 'Live & Deployed', items: live, icon: <CheckCircle2 size={18} color="#10b981" />, color: '#10b981' },
+    { title: 'Planned', items: planned, icon: <ArrowRight size={18} color="#f59e0b" />, color: '#f59e0b' },
     { title: 'Future Vision', items: future, icon: <ArrowRight size={18} color="var(--text-tertiary)" />, color: 'var(--text-tertiary)' },
   ];
 
@@ -299,14 +361,14 @@ export const RoadmapView: React.FC = () => {
       <div className="page-header">
         <h1 className="page-title">Roadmap</h1>
         <p className="page-subtitle">
-          What Verdict is building, from live features to future vision. Every feature creates verifiable value that traditional AI cannot produce.
+          What Verdicto has built and what's next. Every feature creates verifiable value that traditional AI cannot produce.
         </p>
       </div>
 
-      {/* Stats bar */}
+      {/* Summary stats */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(3, 1fr)',
         gap: '1rem',
         marginBottom: '2rem',
       }}>
@@ -384,7 +446,7 @@ export const RoadmapView: React.FC = () => {
         }}
       >
         <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-          The Verdict Vision
+          The Verdicto Vision
         </h3>
         <p style={{
           fontSize: '0.9rem',
@@ -393,10 +455,8 @@ export const RoadmapView: React.FC = () => {
           maxWidth: '600px',
           margin: '0 auto',
         }}>
-          Traditional AI gives you an <strong>opinion</strong>. Verdict gives you a <strong>verifiable, actionable, on-chain asset</strong>,
-          cryptographically signed, permanently recorded, legally defensible, and economically valuable.
-          Built on the Verdict Manifest with real x402 payments, deployed Odra contracts, and a $27.5B RWA market
-          that desperately needs trustworthy price discovery.
+          Traditional AI gives you an <strong>opinion</strong>. Verdicto gives you a <strong>verifiable, actionable, on-chain asset</strong>,
+          cryptographically signed, permanently recorded, and economically valuable.
         </p>
       </motion.div>
     </div>

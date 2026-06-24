@@ -125,9 +125,9 @@ Agents gate their services behind the **x402 Protocol** with real on-chain signi
 *   **Framework:** Vitest
 *   **Coverage:** 27/27 tests passing
 *   **Test Files:**
-    *   `trust-framework.test.ts` (17 tests) — trust scoring, tier assignment
-    *   `verifiable-execution.test.ts` (10 tests) — HMAC receipt chain
-    *   `agent-engine.test.ts` (16 tests) — agent orchestration, valuation logic
+    *   `trust-framework.test.ts` (17 tests) - trust scoring, tier assignment
+    *   `verifiable-execution.test.ts` (10 tests) - HMAC receipt chain
+    *   `agent-engine.test.ts` (16 tests) - agent orchestration, valuation logic
 
 ---
 

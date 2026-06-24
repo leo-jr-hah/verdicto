@@ -560,7 +560,7 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
       reasoning: result.valuationB.reasoning,
       source: result.valuationB.source,
     },
-    // Juror agents — use verdict data if available, otherwise simulate from consensus
+    // Juror agents - use verdict data if available, otherwise simulate from consensus
     ...(result.verdict ? [
       {
         agent: AGENTS[2],
@@ -614,7 +614,7 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
         </span>
       </div>
 
-      {/* Fallback warning banner — visible when any agent fell back to deterministic responses */}
+      {/* Fallback warning banner - visible when any agent fell back to deterministic responses */}
       {result.fallbackAgents && result.fallbackAgents.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}

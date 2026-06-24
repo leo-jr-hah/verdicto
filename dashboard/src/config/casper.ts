@@ -1,5 +1,5 @@
 /**
- * Casper network configuration — single source of truth for payment addresses & fees.
+ * Casper network configuration - single source of truth for payment addresses & fees.
  *
  * PLATFORM_WALLET is the Casper testnet public key that receives all
  * assessment & prediction fees.  It must match DEPLOYER_PUBLIC_KEY in the

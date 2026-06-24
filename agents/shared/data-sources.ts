@@ -84,7 +84,7 @@ export async function getRealEstateData(address: string): Promise<AssetData> {
   };
 }
 
-// ─── Fine Art (Met Museum API — free, no key needed) ─────────────────────────
+// ─── Fine Art (Met Museum API, free, no key needed) ─────────────────────────
 
 const MET_API_BASE = 'https://collectionapi.metmuseum.org/public/collection/v1';
 
@@ -127,7 +127,7 @@ export async function getArtData(query: string): Promise<AssetData> {
     name: artworks[0]?.title || query,
     query,
     priceData: {
-      // Met Museum doesn't provide prices — we use this for comparable analysis
+      // Met Museum doesn't provide prices, we use this for comparable analysis
       estimatedValue: null,
       note: 'Art valuation requires auction data. Met Museum provides provenance/comparables',
     },
@@ -158,7 +158,7 @@ const COINGECKO_BASE = 'https://api.coingecko.com/api/v3';
 
 // Map commodity names to CoinGecko IDs for gold-backed tokens
 const COMMODITY_IDS: Record<string, string> = {
-  gold: 'pax-gold',       // PAX Gold — tracks physical gold spot price
+  gold: 'pax-gold',       // PAX Gold, tracks physical gold spot price
   silver: 'coin-wind',    // fallback, may not exist
   platinum: 'platinum',   // may not exist on CoinGecko
 };

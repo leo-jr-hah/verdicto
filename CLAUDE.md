@@ -1,11 +1,11 @@
-# Casper RWA Court — AI Onboarding Document
+# Casper RWA Court - AI Onboarding Document
 
 ## Project Overview
 Multi-agent dispute resolution system for RWA (Real-World Asset) valuations on Casper Network.
 3 Odra smart contracts + AI analyst agents + x402 micropayments + React dark-mode dashboard.
 
 ## Hackathon
-Casper Agentic Buildathon 2026 — https://dorahacks.io/hackathon/casper-agentic-buildathon
+Casper Agentic Buildathon 2026 - https://dorahacks.io/hackathon/casper-agentic-buildathon
 Deadline: July 1, 2026
 
 ## Technology Stack
@@ -42,8 +42,8 @@ import { motion } from 'framer-motion';
 
 ## Architecture
 ```
-Layer 1 (On-Chain): 3 Odra contracts — Reputation, Escrow, Voting
-Layer 2 (Off-Chain): AI analyst agents — ValuationA, ValuationB, EvidenceAnalyst
+Layer 1 (On-Chain): 3 Odra contracts - Reputation, Escrow, Voting
+Layer 2 (Off-Chain): AI analyst agents - ValuationA, ValuationB, EvidenceAnalyst
 Layer 3 (Payment): x402 micropayments (real signing, CSPR native transfers)
 Layer 4 (Frontend): React 19 dark-mode dashboard with live WebSocket deliberation
 ```
@@ -69,21 +69,21 @@ scripts/            Deploy and demo scripts
 ```
 
 ## Routes
-- `/` — Landing page (standalone top-nav layout, premium animations)
-- `/dashboard` — Dashboard with live contract state + x402 payment stream
-- `/assess` — Asset valuation with multi-methodology dashboard (2.5 CSPR fee)
-- `/borrow` — Borrow against assessed assets (5 CSPR fee, AI-calculated LTV)
-- `/insure` — Insure assets against value loss (3 CSPR fee, AI risk assessment)
-- `/predict` — Prediction market resolution (1 CSPR fee)
-- `/reputation` — Agent reputation
-- `/transactions` — Transaction history
-- `/architecture` — How it works
-- `/roadmap` — Product roadmap
+- `/` - Landing page (standalone top-nav layout, premium animations)
+- `/dashboard` - Dashboard with live contract state + x402 payment stream
+- `/assess` - Asset valuation with multi-methodology dashboard (2.5 CSPR fee)
+- `/borrow` - Borrow against assessed assets (5 CSPR fee, AI-calculated LTV)
+- `/insure` - Insure assets against value loss (3 CSPR fee, AI risk assessment)
+- `/predict` - Prediction market resolution (1 CSPR fee)
+- `/reputation` - Agent reputation
+- `/transactions` - Transaction history
+- `/architecture` - How it works
+- `/roadmap` - Product roadmap
 
 ## Wallet Integration
 - Uses official Casper Wallet SDK (injected by Chrome extension)
-- `window.CasperWalletProvider` — factory function (NOT `window.casper`)
-- `window.CasperWalletEventTypes` — event names: Connected, Disconnected, ActiveKeyChanged
+- `window.CasperWalletProvider` - factory function (NOT `window.casper`)
+- `window.CasperWalletEventTypes` - event names: Connected, Disconnected, ActiveKeyChanged
 - Events are DOM CustomEvents on `window` (provider.on() does NOT exist)
 - Payment flow: signPayment() creates native transfer deploy → wallet signs → returns base64 proof
 - Platform wallet: `02039cd256da1f2e13fc24a6f2ad1c15166f45070befa52bc2da46bbe194e7381010`
@@ -96,7 +96,7 @@ scripts/            Deploy and demo scripts
 - Use kebab-case for filenames, camelCase for variables, PascalCase for types
 - Use U256 for all CSPR amounts in contracts (no floating point)
 - Default Tailwind is dark mode (bg-gray-950, text-gray-100)
-- No em dashes (—) in source files — use hyphens or colons instead
+- No em dashes (-) in source files - use hyphens or colons instead
 
 ## Do NOT Do
 - Do NOT use ethers.js or viem (use casper-js-sdk v5)

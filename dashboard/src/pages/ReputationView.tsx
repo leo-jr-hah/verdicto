@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { fetchReputations, type OnChainReputation } from '../services/api';
 
 /**
- * ReputationView — AI Agents page
+ * ReputationView - AI Agents page
  * 
  * - Fetches live reputation data from backend (on-chain ReputationRegistry)
  * - Falls back to env-based defaults if on-chain read fails
@@ -18,7 +18,7 @@ import { fetchReputations, type OnChainReputation } from '../services/api';
  * - Real-time aggregate metrics computed from agent array
  */
 
-// ─── Agent Metadata (static — display info only) ────────────────────────────
+// ─── Agent Metadata (static - display info only) ────────────────────────────
 
 interface AgentMeta {
   id: string;
@@ -155,7 +155,7 @@ const MiniSparkline: React.FC<{
   );
 };
 
-// ─── Compact Agent Card (no expand — just click target) ────────────────────
+// ─── Compact Agent Card (no expand - just click target) ────────────────────
 
 const AgentCard: React.FC<{
   agent: AgentData;
@@ -170,7 +170,7 @@ const AgentCard: React.FC<{
     ? agent.history[agent.history.length - 1].score - agent.history[0].score
     : 0;
   const scoreColor = scoreDelta > 0 ? 'var(--success)' : scoreDelta < 0 ? 'var(--error)' : 'var(--text-tertiary)';
-  const scoreIcon = scoreDelta > 0 ? '▲' : scoreDelta < 0 ? '▼' : '—';
+  const scoreIcon = scoreDelta > 0 ? '▲' : scoreDelta < 0 ? '▼' : '-';
 
   return (
     <div
@@ -503,7 +503,7 @@ export const ReputationView: React.FC = () => {
         ))}
       </div>
 
-      {/* Detail Panel — renders BELOW the grid, not inside any card */}
+      {/* Detail Panel - renders BELOW the grid, not inside any card */}
       <AnimatePresence mode="wait">
         {selectedAgent && (
           <AgentDetailPanel key={selectedAgent.id} agent={selectedAgent} />

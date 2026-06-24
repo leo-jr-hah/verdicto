@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist:wght@400;500;600;700&display=swap');
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   VERDICT — Design System
+   VERDICTO: Design System
    A unified, enterprise-grade design language for every screen.
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -134,7 +134,7 @@ button {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   APP LAYOUT — Sidebar + Content
+   APP LAYOUT: Sidebar + Content
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .app-layout {
@@ -1494,7 +1494,7 @@ button {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   HOW IT WORKS — Product Storytelling Page
+   HOW IT WORKS: Product Storytelling Page
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 .hiw-page {
@@ -1874,7 +1874,7 @@ button {
   margin-top: 0.2rem;
 }
 
-/* Verdict visual */
+/* Verdicto visual */
 .hiw-verdict-visual {
   display: flex;
   flex-direction: column;
@@ -2087,5 +2087,25 @@ button {
     width: 300px;
     height: 300px;
     opacity: 0;
+  }
+}
+
+/* ── Architecture Page (minimal, only used by ArchitectureView diagram wrapper) ── */
+
+.arch-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--sp-6) var(--sp-5) var(--sp-16);
+}
+
+.arch-section {
+  margin-top: var(--sp-8);
+}
+
+/* ── Oracle Section responsive ────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .oracle-bottom-grid {
+    grid-template-columns: 1fr !important;
   }
 }

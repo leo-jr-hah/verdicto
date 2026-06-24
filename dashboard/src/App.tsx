@@ -10,7 +10,9 @@ import { ArchitectureView } from './pages/ArchitectureView';
 import { PredictionView } from './pages/PredictionView';
 import { BorrowView } from './pages/BorrowView';
 import { InsureView } from './pages/InsureView';
+import { HowItWorksView } from './pages/HowItWorksView';
 import { RoadmapView } from './pages/RoadmapView';
+import { OracleView } from './pages/OracleView';
 
 function App() {
   return (
@@ -26,8 +28,10 @@ function App() {
         <Route path="insure" element={<InsureView />} />
         <Route path="reputation" element={<ReputationView />} />
         <Route path="transactions" element={<TransactionsView />} />
+        <Route path="how-it-works" element={<HowItWorksView />} />
         <Route path="architecture" element={<ArchitectureView />} />
         <Route path="roadmap" element={<RoadmapView />} />
+        <Route path="oracle" element={<OracleView />} />
       </Route>
     </Routes>
   );

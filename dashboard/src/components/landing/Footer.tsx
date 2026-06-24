@@ -11,11 +11,11 @@ export const Footer: React.FC = () => {
           {/* Brand */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '240px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <img src={verdictLogo} alt="Verdict" style={{ width: '28px', height: '28px', borderRadius: '6px', objectFit: 'cover' }} />
-              <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>Verdict</span>
+              <img src={verdictLogo} alt="Verdicto" style={{ width: '28px', height: '28px', borderRadius: '6px', objectFit: 'cover' }} />
+              <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>Verdicto</span>
             </div>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              AI-powered asset valuation on Casper blockchain.
+              AI-powered RWA oracle on Casper blockchain.
             </p>
           </div>
 
@@ -26,6 +26,7 @@ export const Footer: React.FC = () => {
               <h4 style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '16px' }}>Product</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <Link to="/assess" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Value Asset</Link>
+                <Link to="/oracle" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Oracle</Link>
                 <Link to="/borrow" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Borrow</Link>
                 <Link to="/insure" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Insure</Link>
                 <Link to="/predict" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Predict</Link>

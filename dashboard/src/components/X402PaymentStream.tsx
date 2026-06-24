@@ -38,68 +38,7 @@ function formatTime(timestamp: number): string {
 
 // ─── Demo Payments ───────────────────────────────────────────────────────────
 
-const DEMO_PAYMENTS: PaymentEvent[] = [
-  {
-    id: 'pay-1',
-    from: 'User Wallet',
-    to: 'Platform Wallet',
-    amount: 2_500_000_000,
-    tool: 'Assessment Fee',
-    txHash: '01a2b3c4d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef',
-    timestamp: Date.now() - 120000,
-    status: 'confirmed',
-  },
-  {
-    id: 'pay-2',
-    from: 'Platform',
-    to: 'Valuation Agent A',
-    amount: 500_000_000,
-    tool: 'Agent Reward',
-    txHash: '02b3c4d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef01',
-    timestamp: Date.now() - 90000,
-    status: 'confirmed',
-  },
-  {
-    id: 'pay-3',
-    from: 'Platform',
-    to: 'Valuation Agent B',
-    amount: 500_000_000,
-    tool: 'Agent Reward',
-    txHash: '03c4d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef0123',
-    timestamp: Date.now() - 60000,
-    status: 'confirmed',
-  },
-  {
-    id: 'pay-4',
-    from: 'Platform',
-    to: 'Evidence Analyst',
-    amount: 400_000_000,
-    tool: 'Analyst Reward',
-    txHash: '04d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef012345',
-    timestamp: Date.now() - 30000,
-    status: 'confirmed',
-  },
-  {
-    id: 'pay-5',
-    from: 'Platform',
-    to: 'Market Interpreter',
-    amount: 400_000_000,
-    tool: 'Analyst Reward',
-    txHash: '05e6f7890123456789abcdef0123456789abcdef0123456789abcdef01234567',
-    timestamp: Date.now() - 15000,
-    status: 'confirmed',
-  },
-  {
-    id: 'pay-6',
-    from: 'Platform',
-    to: 'Precedent Researcher',
-    amount: 400_000_000,
-    tool: 'Analyst Reward',
-    txHash: '06f7890123456789abcdef0123456789abcdef0123456789abcdef0123456789',
-    timestamp: Date.now() - 5000,
-    status: 'pending',
-  },
-];
+const DEMO_PAYMENTS: PaymentEvent[] = [];
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
@@ -209,12 +148,12 @@ export const X402PaymentStream: React.FC = () => {
           <div style={{
             display: 'flex', alignItems: 'center', gap: '0.3rem',
             padding: '0.2rem 0.6rem', borderRadius: '4px',
-            background: connected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-            color: connected ? '#10b981' : '#f59e0b',
+            background: connected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)',
+            color: connected ? '#10b981' : '#6b7280',
             fontSize: '0.7rem', fontWeight: 600,
           }}>
             {connected ? <Wifi size={12} /> : <WifiOff size={12} />}
-            {connected ? 'Live' : 'Demo'}
+            {connected ? 'Live' : 'Offline'}
           </div>
         </div>
       </div>
@@ -277,11 +216,17 @@ export const X402PaymentStream: React.FC = () => {
         </div>
 
         <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+          {payments.length === 0 ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>
+              No payments yet. Payments will appear here as assessments and services are used.
+            </div>
+          ) : (
           <AnimatePresence>
             {payments.map((payment, i) => (
               <PaymentRow key={payment.id} payment={payment} index={i} />
             ))}
           </AnimatePresence>
+          )}
         </div>
       </motion.div>
 

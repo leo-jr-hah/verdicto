@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Activity, Scale, TrendingUp, Shield, Zap, ArrowRight, BarChart3, CheckCircle2, Wifi, WifiOff, Landmark } from 'lucide-react';
+import { Users, Activity, Scale, TrendingUp, Shield, Zap, ArrowRight, BarChart3, CheckCircle2, Wifi, WifiOff, Landmark, Radio } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { fetchTransactions, createWebSocket, type TransactionEntry, type WSMessage } from '../services/api';
+import { fetchTransactions, fetchOracleStats, createWebSocket, type TransactionEntry, type WSMessage, type OracleStats } from '../services/api';
 import { LiveContractPanel } from '../components/LiveContractPanel';
 import { X402PaymentStream } from '../components/X402PaymentStream';
 
@@ -18,12 +18,14 @@ const QUICK_ACTIONS = [
   { label: 'Value an Asset', sub: 'Dual-agent valuation', to: '/assess', icon: Scale, primary: true },
   { label: 'Borrow Against Asset', sub: 'AI-secured lending', to: '/borrow', icon: Landmark },
   { label: 'Insure an Asset', sub: 'AI risk assessment', to: '/insure', icon: Shield },
+  { label: 'Verdict Oracle', sub: 'On-chain price feed', to: '/oracle', icon: Radio },
   { label: 'Meet the Agents', sub: 'Track performance', to: '/reputation', icon: Users },
   { label: 'View History', sub: 'All assessments & transactions', to: '/transactions', icon: Activity },
 ];
 
 export const DashboardView: React.FC = () => {
   const [transactions, setTransactions] = useState<TransactionEntry[]>([]);
+  const [oracleStats, setOracleStats] = useState<OracleStats>({ totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0 });
   const [loading, setLoading] = useState(true);
   const [wsConnected, setWsConnected] = useState(false);
 
@@ -32,6 +34,8 @@ export const DashboardView: React.FC = () => {
       setLoading(true);
       const txs = await fetchTransactions();
       setTransactions(txs.slice(0, 10));
+      const os = await fetchOracleStats();
+      setOracleStats(os);
       setLoading(false);
     };
     load();
@@ -87,17 +91,13 @@ export const DashboardView: React.FC = () => {
         <div className="page-header-row">
           <div>
             <h1 className="page-title">Dashboard</h1>
-            <p className="page-subtitle">Real-time overview of your Verdict platform activity.</p>
+            <p className="page-subtitle">Real-time overview of your Verdicto platform activity.</p>
           </div>
           <div className="page-header-actions">
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: wsConnected ? 'var(--success)' : 'var(--text-tertiary)' }}>
               {wsConnected ? <Wifi size={14} /> : <WifiOff size={14} />}
               {wsConnected ? 'Live' : 'Offline'}
             </div>
-            <Link to="/assess" className="btn btn-primary">
-              <Scale size={15} />
-              Value an Asset
-            </Link>
           </div>
         </div>
       </div>
@@ -108,6 +108,7 @@ export const DashboardView: React.FC = () => {
           {[
             { label: 'Total Cases', value: totalCases, icon: BarChart3, color: 'var(--text-primary)', bg: 'var(--bg-surface-alt)' },
             { label: 'Verified', value: onChainCount, icon: CheckCircle2, color: 'var(--success)', bg: 'rgba(16, 185, 129, 0.08)' },
+            { label: 'Oracle Verdicts', value: oracleStats.totalVerdicts, icon: Radio, color: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.08)' },
             { label: 'Active Agents', value: 5, icon: Zap, color: 'var(--purple)', bg: 'rgba(139, 92, 246, 0.08)' },
             { label: 'Live Feeds', value: 3, icon: TrendingUp, color: 'var(--warning)', bg: 'rgba(245, 158, 11, 0.08)' },
           ].map((stat, i) => (

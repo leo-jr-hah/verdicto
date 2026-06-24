@@ -1,5 +1,5 @@
 /**
- * Shared Transaction Log — records all on-chain transactions for the dashboard.
+ * Shared Transaction Log - records all on-chain transactions for the dashboard.
  * Persists to a JSON file so data survives across orchestrator restarts.
  *
  * Writes are serialized through a promise queue to prevent race conditions
@@ -46,7 +46,7 @@ export function loadTransactions(): TransactionEntry[] {
   }
 }
 
-// Write queue — serializes concurrent save calls so reads and writes don't clobber each other
+// Write queue - serializes concurrent save calls so reads and writes don't clobber each other
 let writeQueue: Promise<void> = Promise.resolve();
 
 export function saveTransaction(entry: TransactionEntry): void {

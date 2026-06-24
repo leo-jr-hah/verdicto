@@ -2,6 +2,7 @@
 members = [
     "reputation",
     "voting",
+    "verdict-oracle",
 ]
 resolver = "2"
 

@@ -27,6 +27,7 @@ import {
   type AssessmentRequest,
 } from '../services/api';
 import { PLATFORM_WALLET, INSURANCE_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
+import { AgentExplainer } from '../components/AgentExplainer';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -83,9 +84,9 @@ const ASSET_TYPES: Array<{
 ];
 
 const RISK_TIERS: Record<AssetType, string> = {
-  'real-estate': '2–3% premium',
-  'art': '3.5–5% premium',
-  'commodity': '1.5–2.5% premium',
+  'real-estate': '2-3% premium',
+  'art': '3.5-5% premium',
+  'commodity': '1.5-2.5% premium',
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -207,7 +208,7 @@ const PolicyCard: React.FC<{
         <div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.2rem' }}>Risk</div>
           <div style={{ fontSize: '0.9rem', fontWeight: 600, color: riskColor(policy.riskScore) }}>
-            {policy.riskScore}/100 — {riskLabel(policy.riskScore)}
+            {policy.riskScore}/100, {riskLabel(policy.riskScore)}
           </div>
         </div>
         <div>
@@ -345,7 +346,7 @@ export const InsureView: React.FC = () => {
       weightOz: weightOz ? parseFloat(weightOz) : undefined,
     };
 
-    // Direct assessment call (simplified — mirrors BorrowView)
+    // Direct assessment call (simplified - mirrors BorrowView)
     setShowAssessPaymentModal(true);
     setAssessPaymentReq(request);
   }, [assetType, assetName, assetDescription, assetValue, location, artistOrMedium, weightOz]);
@@ -803,6 +804,13 @@ export const InsureView: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Agent explanation for assessment */}
+              {assessmentResult && (
+                <div style={{ marginTop: '1.5rem' }}>
+                  <AgentExplainer assessment={assessmentResult} />
+                </div>
+              )}
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '2rem' }}>
@@ -843,7 +851,7 @@ export const InsureView: React.FC = () => {
             <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Risk Score</div>
               <div style={{ fontSize: '1.3rem', fontWeight: 700, color: riskColor(currentPolicy.riskScore) }}>
-                {currentPolicy.riskScore}/100 — {currentPolicy.tier}
+                {currentPolicy.riskScore}/100, {currentPolicy.tier}
               </div>
             </div>
             <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
@@ -880,6 +888,23 @@ export const InsureView: React.FC = () => {
             Policy active for 365 days. Deductible: {currentPolicy.deductiblePercent}%.
             File a claim anytime if your asset loses value.
           </div>
+
+          {/* Agent explanation with insurance context */}
+          {assessmentResult && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <AgentExplainer
+                assessment={assessmentResult}
+                insurance={{
+                  riskScore: currentPolicy.riskScore,
+                  riskFactors: currentPolicy.riskFactors,
+                  tier: currentPolicy.tier,
+                  coverageAmount: currentPolicy.coverageAmount,
+                  premiumCSPR: currentPolicy.premiumCSPR,
+                  deductiblePercent: currentPolicy.deductiblePercent,
+                }}
+              />
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button onClick={handleStartNew} style={{ ...btnSecondary, flex: 1 }}>

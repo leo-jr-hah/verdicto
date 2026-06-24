@@ -17,7 +17,7 @@ const ParticleField: React.FC = () => {
   const initParticles = useCallback((w: number, h: number) => {
     // ~250 particles, but skip the center "safe zone" where text lives
     const count = Math.min(Math.floor((w * h) / 4000), 280);
-    // Safe zone: center 50% width × 55% height — where headline, subtitle, buttons sit
+    // Safe zone: center 50% width × 55% height - where headline, subtitle, buttons sit
     const safeLeft = w * 0.25;
     const safeRight = w * 0.75;
     const safeTop = h * 0.22;
@@ -84,7 +84,7 @@ const ParticleField: React.FC = () => {
       for (let i = 0; i < ps.length; i++) {
         const p = ps[i];
 
-        // Mouse attraction — wider radius, stronger pull
+        // Mouse attraction - wider radius, stronger pull
         const dx = mx - p.x;
         const dy = my - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -118,7 +118,7 @@ const ParticleField: React.FC = () => {
           else { p.y = safeBottom + 2; p.vy = Math.abs(p.vy) * 0.5; }
         }
 
-        // Draw particle — boosted opacity
+        // Draw particle - boosted opacity
         ctx.beginPath();
         if (p.type === 'verdict') {
           ctx.save();
@@ -136,7 +136,7 @@ const ParticleField: React.FC = () => {
         }
         ctx.fill();
 
-        // Draw connections to nearby particles — skip if line crosses safe zone
+        // Draw connections to nearby particles - skip if line crosses safe zone
         for (let j = i + 1; j < ps.length; j++) {
           const q = ps[j];
           const ddx = p.x - q.x;
@@ -160,7 +160,7 @@ const ParticleField: React.FC = () => {
         }
       }
 
-      // Draw lines from mouse to nearby particles — much more visible
+      // Draw lines from mouse to nearby particles - much more visible
       if (mx > 0 && my > 0) {
         for (const p of ps) {
           const d = Math.sqrt((mx - p.x) ** 2 + (my - p.y) ** 2);
@@ -201,7 +201,7 @@ const ParticleField: React.FC = () => {
   );
 };
 
-/* ── Flip Button — color inverts on hover (red↔white) ────────────── */
+/* ── Flip Button - color inverts on hover (red↔white) ────────────── */
 const FlipButton: React.FC<{
   children: React.ReactNode;
   className?: string;
@@ -266,7 +266,7 @@ export const HeroSection: React.FC = () => {
       {/* Particle canvas behind everything */}
       <ParticleField />
 
-      {/* Content above particles — pointer-events: none so canvas gets mouse, buttons get pointer-events: auto */}
+      {/* Content above particles - pointer-events: none so canvas gets mouse, buttons get pointer-events: auto */}
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: 'none' }}>
         {/* Eyebrow badge */}
         <motion.div
@@ -307,12 +307,11 @@ export const HeroSection: React.FC = () => {
             fontFamily: 'var(--font-display)',
           }}
         >
-          AI-Powered Asset{' '}
-          <span style={{ color: 'var(--primary)' }}>Valuation & Lending</span>{' '}
-          on Chain
+          The On-Chain Oracle{' '}
+          <span style={{ color: 'var(--primary)' }}>for Real-World Assets</span>
         </motion.h1>
 
-        {/* Subheadline — qualitative */}
+        {/* Subheadline - qualitative */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -325,9 +324,9 @@ export const HeroSection: React.FC = () => {
             margin: '0 auto 2.5rem',
           }}
         >
-          Get a fair, transparent valuation of any real-world asset — then borrow
-          against it or insure it instantly. Powered by independent AI agents that analyze,
-          cross-check, and record every assessment on the Casper blockchain.
+          Multi-agent AI consensus valuations, stored on-chain as a composable
+          primitive. Any Casper dApp can query it: lending protocols, DAO treasuries,
+          insurance contracts. No API key. No human in the loop. Agent-to-agent.
         </motion.p>
 
         {/* CTAs */}
@@ -338,28 +337,20 @@ export const HeroSection: React.FC = () => {
           style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '4rem', pointerEvents: 'auto' }}
         >
           <FlipButton
-            to="/assess"
+            to="/oracle"
             variant="primary"
             className="btn btn-primary"
             style={{ padding: '0.875rem 1.75rem', fontSize: '0.95rem' }}
           >
+            Explore the Oracle <ArrowRight size={16} />
+          </FlipButton>
+          <FlipButton
+            to="/assess"
+            variant="secondary"
+            className="btn"
+            style={{ padding: '0.875rem 1.75rem', fontSize: '0.95rem' }}
+          >
             Value an Asset <ArrowRight size={16} />
-          </FlipButton>
-          <FlipButton
-            to="/borrow"
-            variant="secondary"
-            className="btn"
-            style={{ padding: '0.875rem 1.75rem', fontSize: '0.95rem' }}
-          >
-            Borrow Against Asset <ArrowRight size={16} />
-          </FlipButton>
-          <FlipButton
-            to="/insure"
-            variant="secondary"
-            className="btn"
-            style={{ padding: '0.875rem 1.75rem', fontSize: '0.95rem' }}
-          >
-            Insure Your Asset <ArrowRight size={16} />
           </FlipButton>
           <FlipButton
             variant="secondary"

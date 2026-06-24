@@ -15,7 +15,7 @@ export interface DeliberationReceipt {
 
 /**
  * Derives a dedicated HMAC key from a private key material.
- * We never use the raw private key as a symmetric secret —
+ * We never use the raw private key as a symmetric secret;
  * instead we hash it with a fixed domain separator so the
  * HMAC key is irreversible and distinct from the signing key.
  */

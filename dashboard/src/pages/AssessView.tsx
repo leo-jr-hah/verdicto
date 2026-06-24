@@ -656,12 +656,12 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
         </div>
       </div>
 
-      {/* Multi-Methodology Dashboard — 5 agents debating */}
+      {/* Multi-Methodology Dashboard - 5 agents debating */}
       <div style={{ marginBottom: '1.5rem' }}>
         <MultiMethodologyDashboard result={result} />
       </div>
 
-      {/* Verdict */}
+      {/* Verdicto */}
       {result.verdict && (
         <div style={{
           background: 'var(--bg-surface)',
@@ -672,7 +672,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
             <Shield size={18} color="var(--primary)" />
-            <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Court Verdict</span>
+            <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Court Verdicto</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
@@ -894,7 +894,7 @@ export const AssessView: React.FC = () => {
     setSignError(null);
 
     try {
-      // Sign the payment via wallet — this opens the wallet popup
+      // Sign the payment via wallet - this opens the wallet popup
       const { paymentProof, deployHash } = await wallet.signPayment(
         PLATFORM_WALLET,
         ASSESSMENT_FEE_CSPR,
@@ -904,7 +904,7 @@ export const AssessView: React.FC = () => {
       setShowPaymentModal(false);
       setLogs([]);
       logIdRef.current = 0;
-      // Show the deploy hash in logs — user can verify on-chain
+      // Show the deploy hash in logs - user can verify on-chain
       addLog('success', `Payment signed, deploy: ${deployHash.substring(0, 16)}...`, `View on explorer: https://testnet.cspr.live/deploy/${deployHash}`);
       await submitWithPaymentProof(request, paymentProof);
     } catch (err: any) {

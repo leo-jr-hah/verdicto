@@ -1,8 +1,8 @@
 import { createHash } from 'crypto';
 
-const MINIMUM_TRANSFER_MOTES = '10000000000'; // 10 CSPR — minimum for testnet self-transfer
-const DEPLOY_PAYMENT_MOTES = 100_000_000;      // 0.1 CSPR — standard deploy cost
-const DEPLOY_TTL_MS = 1_800_000;               // 30 minutes — deploy time-to-live
+const MINIMUM_TRANSFER_MOTES = '10000000000'; // 10 CSPR - minimum for testnet self-transfer
+const DEPLOY_PAYMENT_MOTES = 100_000_000;      // 0.1 CSPR - standard deploy cost
+const DEPLOY_TTL_MS = 1_800_000;               // 30 minutes - deploy time-to-live
 
 export interface ExecutionCommitment {
   commitment: string; // SHA-256 of (input + agentState + timestamp)

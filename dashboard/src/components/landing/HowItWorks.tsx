@@ -1,55 +1,63 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
-import { Upload, BarChart3, Users, ShieldCheck, CheckCircle2, Landmark, Shield } from 'lucide-react';
+import { Upload, BarChart3, Users, ShieldCheck, Landmark, Shield, TrendingUp } from 'lucide-react';
 
 const STEPS = [
   {
     num: '01',
-    title: 'Submit Your Asset',
+    title: 'Connect Your Wallet',
     color: '#FF3B3B',
     icon: Upload,
-    description: 'Tell Verdict what you want valued. Choose from Real Estate, Fine Art, or Commodities. Provide the asset details and your asking price. A 2.5 CSPR assessment fee is collected via x402 micropayment.',
-    detail: 'Real Estate, Art, Commodities',
+    description: 'Connect your Casper Wallet in one click. Your wallet handles all payments and receives all disbursements. No accounts, no passwords, no email.',
+    detail: 'Casper Wallet via CSPRClick SDK',
   },
   {
     num: '02',
-    title: 'Independent Dual Valuation',
+    title: 'Choose Your Product',
     color: '#3B82F6',
     icon: BarChart3,
-    description: 'Two AI agents each produce a full valuation using different methodologies. The Comps Specialist analyzes comparable sales. The DCF Specialist projects future cash flows. Their results are compared for divergence.',
-    detail: 'Comps Specialist + DCF Specialist',
+    description: 'Pick what you need: Assess an asset for its market value, Borrow against it, Insure it against loss, or Predict a real-world outcome. Each product uses the same multi-agent AI engine.',
+    detail: 'Assess, Borrow, Insure, or Predict',
   },
   {
     num: '03',
-    title: 'Juror Deliberation',
+    title: 'AI Agents Analyze',
     color: '#8B5CF6',
     icon: Users,
-    description: 'If the two valuations diverge beyond a threshold, three jurors (Evidence Analyst, Market Data Interpreter, Precedent Researcher) deliberate across two rounds. In Round 2, each juror reviews peer reasoning and may revise their vote.',
-    detail: '3 Jurors, 2 Rounds, Peer Review',
+    description: 'Five independent AI agents work in parallel. Each queries real market data, selects its own methodology, and produces a result with full reasoning. If agents disagree, three jurors deliberate across two rounds with peer review.',
+    detail: '5 Agents, 2 Rounds, Peer Review',
   },
   {
     num: '04',
-    title: 'Verdict and On-Chain Record',
+    title: 'Stored in the Verdict Oracle',
     color: '#10B981',
     icon: ShieldCheck,
-    description: 'Votes are weighted by each juror\'s on-chain trust score. The final verdict, along with every juror\'s reasoning and confidence, is committed to the Casper blockchain. An HMAC receipt chain ensures no reasoning was altered after the fact.',
-    detail: 'Immutable On-Chain Certificate',
+    description: 'The consensus valuation is committed to the Verdict Oracle, an on-chain smart contract. Any Casper dApp can query it via cross-contract call. An HMAC receipt chain ensures nothing was altered after the fact.',
+    detail: 'Composable On-Chain Primitive',
   },
   {
     num: '05',
-    title: 'Borrow Against Your Asset',
+    title: 'Borrow or Insure',
     color: '#F59E0B',
     icon: Landmark,
-    description: 'Once your asset is valued and recorded on-chain, you can borrow against it instantly. The AI-calculated LTV ratio (60–85% depending on asset type and confidence) determines your loan amount. CSPR is disbursed directly to your wallet via a real on-chain transfer.',
-    detail: 'AI-Calculated LTV · Real CSPR Disbursement',
+    description: 'With an on-chain assessment, you can borrow against your asset at AI-calculated LTV ratios, or protect it with AI-powered insurance. CSPR flows directly to and from your wallet.',
+    detail: 'Real CSPR Disbursement and Claims',
   },
   {
     num: '06',
-    title: 'Insure Your Asset',
-    color: '#8B5CF6',
+    title: 'Autonomous Monitoring',
+    color: '#EF4444',
     icon: Shield,
-    description: 'Protect your asset against value loss with AI-powered insurance. The risk engine evaluates market volatility, asset liquidity, and assessment confidence to calculate your premium and coverage. File claims anytime — the AI revalues your asset and pays out if the loss exceeds your deductible.',
-    detail: 'AI Risk Assessment · On-Chain Claims',
+    description: 'Background keepers watch your collateral health and insurance policies around the clock. Margin calls, liquidation alerts, and claim processing happen automatically with no human in the loop.',
+    detail: '24/7 Collateral and Policy Monitoring',
+  },
+  {
+    num: '07',
+    title: 'Predict Outcomes',
+    color: '#6366F1',
+    icon: TrendingUp,
+    description: 'Ask any yes-or-no question about the real world. Five agents analyze available data, estimate probabilities, and produce a weighted consensus. Track resolution as events unfold.',
+    detail: '5-Agent Probability Consensus',
   },
 ];
 
@@ -198,7 +206,7 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
               animate={inView ? { scale: [1, 1.2, 1] } : {}}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <CheckCircle2 size={14} />
+              <ShieldCheck size={14} />
             </motion.div>
             Verified on-chain
           </div>
@@ -235,10 +243,10 @@ export const HowItWorks: React.FC = () => {
             color: 'var(--text-primary)',
             marginBottom: '1rem',
           }}>
-            From asset to verifiable verdict
+            From wallet to verdict
           </h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>
-            Submit any real-world asset and get a cryptographically signed, on-chain valuation backed by multiple AI agents.
+            Connect your wallet, pick a product, and let five AI agents produce a cryptographically signed, on-chain result.
           </p>
         </div>
 

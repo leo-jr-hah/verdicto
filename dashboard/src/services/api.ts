@@ -2,8 +2,10 @@
  * API service for fetching real data from the orchestrator backend.
  */
 
-const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || 'http://localhost:3011';
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3010';
+// In dev, empty string uses Vite proxy (/api/* → localhost:3011)
+// In production, set VITE_ORCHESTRATOR_URL to the deployed backend URL
+const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || '';
+const WS_URL = import.meta.env.VITE_WS_URL || '';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -125,12 +127,12 @@ export interface Loan {
   createdAt: number;
   lastRevaluedAt: number;
   disbursementTxHash: string;
-  // Verdict Point 1: Trust-score-aware LTV breakdown
+  // Verdicto Point 1: Trust-score-aware LTV breakdown
   trustBreakdown: { confidence: number; valueRatio: number; ltvRange: string };
-  // Verdict Point 2: Escrow lock/release tx hashes
+  // Verdicto Point 2: Escrow lock/release tx hashes
   escrowLockTxHash?: string;
   escrowReleaseTxHash?: string;
-  // Verdict Point 3: Revaluation history with juror deliberation
+  // Verdicto Point 3: Revaluation history with juror deliberation
   revaluationHistory: Array<{
     timestamp: number;
     previousValue: number;
@@ -169,9 +171,9 @@ export interface LoanCreateResponse {
   disbursementTxHash: string;
   broadcastSuccess: boolean;
   createdAt: number;
-  // Verdict Point 1: Trust breakdown
+  // Verdicto Point 1: Trust breakdown
   trustBreakdown: { confidence: number; valueRatio: number; ltvRange: string };
-  // Verdict Point 2: Escrow
+  // Verdicto Point 2: Escrow
   escrowLockTxHash?: string;
 }
 
@@ -186,7 +188,7 @@ export interface RevaluationResult {
   liquidated: boolean;
   valuationA: { value: number; method: string; confidence: number; reasoning: string };
   valuationB: { value: number; method: string; confidence: number; reasoning: string };
-  // Verdict Point 3: Deliberation proof
+  // Verdicto Point 3: Deliberation proof
   divergence: number;
   receiptHash: string;
   commitmentTxHash: string;
@@ -278,7 +280,7 @@ export interface X402PaymentRequirements {
   };
 }
 
-/** Result of submitAssessment — either success, payment required, or error */
+/** Result of submitAssessment - either success, payment required, or error */
 export type AssessmentResponse =
   | { status: 'success'; assessment: AssessmentResult }
   | { status: 'payment_required'; paymentRequirements: X402PaymentRequirements }
@@ -311,7 +313,7 @@ export async function submitAssessment(
       body: JSON.stringify(request),
     });
 
-    // Handle 402 Payment Required — return requirements for UI to handle
+    // Handle 402 Payment Required - return requirements for UI to handle
     if (res.status === 402) {
       const body = await res.json();
       if (body.paymentRequirements) {
@@ -320,7 +322,7 @@ export async function submitAssessment(
           paymentRequirements: body as X402PaymentRequirements,
         };
       }
-      // 402 without requirements — treat as error
+      // 402 without requirements - treat as error
       return { status: 'error', error: body.error || 'Payment required' };
     }
 
@@ -460,7 +462,7 @@ export async function fetchDemoAssets(): Promise<DemoAsset[]> {
     // If backend returned data, use it; otherwise fall back to frontend demos
     return assets.length > 0 ? assets : FALLBACK_DEMOS;
   } catch (err) {
-    console.warn('[API] Backend unreachable — using built-in demo assets');
+    console.warn('[API] Backend unreachable, using built-in demo assets');
     return FALLBACK_DEMOS;
   }
 }
@@ -549,7 +551,8 @@ export interface WSMessage {
 }
 
 export function createWebSocket(onMessage: (msg: WSMessage) => void): WebSocket {
-  const ws = new WebSocket(WS_URL);
+  const wsUrl = WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
+  const ws = new WebSocket(wsUrl);
 
   ws.onopen = () => {
     console.log('[WS] Connected to orchestrator');
@@ -689,6 +692,7 @@ export interface InsurancePolicy {
   status: 'active' | 'expired' | 'claimed' | 'paid';
   riskScore: number;
   riskFactors: string[];
+  tier: string;
   expiresAt: number;
   createdAt: number;
   claimHistory: Array<{
@@ -852,5 +856,170 @@ export async function fetchReputations(): Promise<OnChainReputation[]> {
   } catch (err) {
     console.error('[API] Failed to fetch reputations:', err);
     return [];
+  }
+}
+
+// ─── Prediction API ──────────────────────────────────────────────────────────
+
+export interface PredictionAgent {
+  name: string;
+  role: string;
+  color: string;
+  probability: number;
+  confidence: number;
+  reasoning: string;
+  fallbackTriggered?: boolean;
+}
+
+export interface PredictionResult {
+  predictionId: string;
+  question: string;
+  timeframe: string;
+  assetType: string;
+  probability: number;
+  confidence: number;
+  agents: PredictionAgent[];
+  riskFactors: string[];
+  timestamp: number;
+}
+
+export interface PredictionRequest {
+  question: string;
+  timeframe: string;
+  assetType?: string;
+}
+
+export type PredictionResponse =
+  | { status: 'success'; prediction: PredictionResult }
+  | { status: 'payment_required'; paymentRequirements: X402PaymentRequirements }
+  | { status: 'error'; error: string };
+
+/**
+ * Submit a prediction request to the orchestrator.
+ * x402 flow: first call may return 402, user signs payment, retry with proof.
+ */
+export async function submitPrediction(
+  request: PredictionRequest,
+  paymentProof?: string,
+): Promise<PredictionResponse> {
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (paymentProof) {
+      headers['x-payment-proof'] = paymentProof;
+    }
+
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/predict`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(request),
+    });
+
+    // Detect HTML response (Vite catch-all when backend is down)
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('text/html')) {
+      return {
+        status: 'error',
+        error: 'Backend service unavailable - please try again shortly.',
+      };
+    }
+
+    if (res.status === 402) {
+      const body = await res.json();
+      if (body.paymentRequirements) {
+        return {
+          status: 'payment_required',
+          paymentRequirements: body as X402PaymentRequirements,
+        };
+      }
+      return { status: 'error', error: body.error || 'Payment required' };
+    }
+
+    const body = await res.json();
+    if (body.success && body.prediction) {
+      return { status: 'success', prediction: body.prediction };
+    }
+    return { status: 'error', error: body.error || 'Prediction failed' };
+  } catch (err: any) {
+    return { status: 'error', error: err.message || 'Network error' };
+  }
+}
+
+// ─── Verdict Oracle ──────────────────────────────────────────────────────────
+
+export interface OracleVerdict {
+  assetId: string;
+  value: number;
+  confidence: number;
+  jurorCount: number;
+  receiptHash: string;
+  timestamp: number;
+  expiry: number;
+  agentWeights: string;
+  decision: string;
+}
+
+export interface OracleStats {
+  totalVerdicts: number;
+  freshVerdicts: number;
+  avgConfidence: number;
+  totalQueries: number;
+}
+
+export interface OracleVerdictsResponse {
+  success: boolean;
+  verdicts: OracleVerdict[];
+  stats: OracleStats;
+}
+
+export interface OracleVerdictResponse {
+  success: boolean;
+  verdict: OracleVerdict;
+}
+
+/**
+ * Fetch all stored verdicts from the Verdict Oracle.
+ */
+export async function fetchOracleVerdicts(): Promise<OracleVerdictsResponse> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/oracle/verdicts`);
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('text/html')) {
+      return { success: false, verdicts: [], stats: { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0 } };
+    }
+    return await res.json();
+  } catch {
+    return { success: false, verdicts: [], stats: { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0 } };
+  }
+}
+
+/**
+ * Fetch a specific verdict by asset ID.
+ */
+export async function fetchOracleVerdict(assetId: string): Promise<OracleVerdictResponse | null> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/oracle/verdict/${encodeURIComponent(assetId)}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch oracle statistics.
+ */
+export async function fetchOracleStats(): Promise<OracleStats> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/oracle/stats`);
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('text/html')) {
+      return { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0 };
+    }
+    const body = await res.json();
+    return body.stats || { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0 };
+  } catch {
+    return { totalVerdicts: 0, freshVerdicts: 0, avgConfidence: 0, totalQueries: 0 };
   }
 }

@@ -1,5 +1,5 @@
 // Shared TypeScript types for all Verdict agents
-// DO NOT change after Day 3 — all agents depend on these
+// DO NOT change after Day 3 - all agents depend on these
 
 // ─── Asset Types ─────────────────────────────────────────────────────────────
 
@@ -94,7 +94,7 @@ export interface PaymentEvent {
   tx_hash: string; // simulated for hackathon
 }
 
-// Demo seed data — 3 pre-seeded assessments for the dashboard
+// Demo seed data - 3 pre-seeded assessments for the dashboard
 export const DEMO_ASSESSMENTS: Partial<AssessmentCase>[] = [
   {
     assessment_id: 1,

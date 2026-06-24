@@ -48,16 +48,50 @@ export const Navigation: React.FC = () => {
       >
         {/* Logo */}
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <img src={verdictLogo} alt="Verdict" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
-          <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>Verdict</span>
+          <img src={verdictLogo} alt="Verdicto" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
+          <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>Verdicto</span>
         </Link>
 
-        {/* Open App */}
-        <motion.div whileHover={{ y: -1, boxShadow: '0 8px 32px rgba(255,59,59,0.35)' }} transition={{ duration: 0.12 }}>
-          <Link to="/dashboard" className="btn btn-primary" style={{ padding: '10px 20px', borderRadius: '8px', fontSize: '0.9rem' }}>
-            Open App →
-          </Link>
-        </motion.div>
+        {/* Nav Links */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <a
+            href="#oracle"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('oracle')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            style={{
+              fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)',
+              textDecoration: 'none', transition: 'color 0.2s',
+            }}
+            onMouseEnter={(e) => { (e.target as HTMLElement).style.color = 'var(--text-primary)'; }}
+            onMouseLeave={(e) => { (e.target as HTMLElement).style.color = 'var(--text-secondary)'; }}
+          >
+            Oracle
+          </a>
+          <a
+            href="#contracts"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('contracts')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            style={{
+              fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)',
+              textDecoration: 'none', transition: 'color 0.2s',
+            }}
+            onMouseEnter={(e) => { (e.target as HTMLElement).style.color = 'var(--text-primary)'; }}
+            onMouseLeave={(e) => { (e.target as HTMLElement).style.color = 'var(--text-secondary)'; }}
+          >
+            Contracts
+          </a>
+
+          {/* Open App */}
+          <motion.div whileHover={{ y: -1, boxShadow: '0 8px 32px rgba(255,59,59,0.35)' }} transition={{ duration: 0.12 }}>
+            <Link to="/dashboard" className="btn btn-primary" style={{ padding: '10px 20px', borderRadius: '8px', fontSize: '0.9rem' }}>
+              Open App →
+            </Link>
+          </motion.div>
+        </div>
       </div>
     </motion.nav>
   );

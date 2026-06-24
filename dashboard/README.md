@@ -28,27 +28,27 @@ React 19 frontend for the Casper RWA Court multi-agent dispute resolution system
 ## Key Components
 
 ### Landing Page (`LandingPage.tsx`)
-- `ParticleField` — Canvas particles with mouse repulsion + connections
-- `GradientOrb` — Pulsing radial gradient blobs
-- `ScrambleText` — use-scramble hook on hero headline
-- `AnimatedNumber` — Counts up when scrolled into view
-- `Reveal` — Scroll-triggered fade animations
-- `LiveAssessmentVisual` — 5-step animated asset valuation sequence
-- `StickyScrollSection` — Horizontal scroll with pinned container
-- `CursorGlow` — Subtle radial gradient follows mouse
+- `ParticleField` - Canvas particles with mouse repulsion + connections
+- `GradientOrb` - Pulsing radial gradient blobs
+- `ScrambleText` - use-scramble hook on hero headline
+- `AnimatedNumber` - Counts up when scrolled into view
+- `Reveal` - Scroll-triggered fade animations
+- `LiveAssessmentVisual` - 5-step animated asset valuation sequence
+- `StickyScrollSection` - Horizontal scroll with pinned container
+- `CursorGlow` - Subtle radial gradient follows mouse
 - Scroll progress bar at top
 
 ### App Pages
-- **DashboardView** — Stats grid, agent reputation table, x402 payment stream
-- **AssessView** — Multi-methodology dashboard, 5 agent cards, divergence range, risk flags
-- **PredictionView** — Probability cards, weighted consensus, risk factors
-- **ReputationView** — Accordion tabs, score history sparklines, tier badges
-- **RoadmapView** — 16 features across 4 categories
+- **DashboardView** - Stats grid, agent reputation table, x402 payment stream
+- **AssessView** - Multi-methodology dashboard, 5 agent cards, divergence range, risk flags
+- **PredictionView** - Probability cards, weighted consensus, risk factors
+- **ReputationView** - Accordion tabs, score history sparklines, tier badges
+- **RoadmapView** - 16 features across 4 categories
 
 ### Wallet Integration
-- `CSPRClickContext` — Wallet provider using window.CasperWalletProvider
-- `WalletConnectButton` — Connect/disconnect, copy address, faucet link
-- `PaymentModal` — Shows fee before signing, handles CSPR transfer
+- `CSPRClickContext` - Wallet provider using window.CasperWalletProvider
+- `WalletConnectButton` - Connect/disconnect, copy address, faucet link
+- `PaymentModal` - Shows fee before signing, handles CSPR transfer
 
 ## Design System
 
@@ -133,9 +133,9 @@ dashboard/
 
 ## Key Files
 
-- `src/contexts/CSPRClickContext.tsx` — Wallet provider (CasperWalletProvider API)
-- `src/components/WalletConnectButton.tsx` — UI button with dropdown
-- `src/layouts/LandingLayout.tsx` — Standalone top-nav layout
-- `src/layouts/Layout.tsx` — Sidebar layout with wallet integration
-- `src/pages/LandingPage.tsx` — Premium landing page (~1215 lines)
-- `src/config/casper.ts` — Single source of truth for wallet address, fees, RPC URL
+- `src/contexts/CSPRClickContext.tsx` - Wallet provider (CasperWalletProvider API)
+- `src/components/WalletConnectButton.tsx` - UI button with dropdown
+- `src/layouts/LandingLayout.tsx` - Standalone top-nav layout
+- `src/layouts/Layout.tsx` - Sidebar layout with wallet integration
+- `src/pages/LandingPage.tsx` - Premium landing page (~1215 lines)
+- `src/config/casper.ts` - Single source of truth for wallet address, fees, RPC URL

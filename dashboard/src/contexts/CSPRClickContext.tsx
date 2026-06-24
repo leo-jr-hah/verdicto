@@ -225,7 +225,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
       const provider = window.CasperWalletProvider!();
       providerRef.current = provider;
 
-      // Request connection — this opens the wallet popup
+      // Request connection - this opens the wallet popup
       const accepted = await provider.requestConnection();
 
       clearTimeout(safetyTimeout);
@@ -235,7 +235,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
         const pk = await provider.getActivePublicKey();
         updateFromPublicKey(pk);
       }
-      // If not accepted, user cancelled — silently ignore
+      // If not accepted, user cancelled - silently ignore
     } catch (err: any) {
       clearTimeout(safetyTimeout);
       // User cancelled or wallet error
@@ -311,7 +311,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
     // Get the deploy JSON for signing
     const deployJson = Deploy.toJSON(deploy);
 
-    // Ask the wallet to sign it — this opens the wallet popup
+    // Ask the wallet to sign it - this opens the wallet popup
     const result = await provider.sign(JSON.stringify(deployJson), publicKey);
 
     if (result.cancelled || !result.signature) {
@@ -357,7 +357,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
         broadcastSuccess = true;
       }
     } catch (fetchErr) {
-      // CORS or network error — expected in browser context
+      // CORS or network error - expected in browser context
       console.warn('Deploy broadcast failed (CORS/network). Deploy is signed and valid as proof.', fetchErr);
     }
 

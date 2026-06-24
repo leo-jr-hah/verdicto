@@ -1,5 +1,5 @@
 /**
- * Agent Engine — LLM-powered valuation agents for all asset types
+ * Agent Engine: LLM-powered valuation agents for all asset types
  *
  * Each agent is a genuine AI agent that:
  *   1. Fetches real market data from APIs
@@ -29,15 +29,15 @@ import type { ValuationResult, AssetType } from './types.js';
 
 // ─── Agent Specialization Prompts ────────────────────────────────────────────
 // Each agent has a distinct personality and analytical framework.
-// This is what makes them GENUINELY disagree — not just different formulas.
+// This is what makes them GENUINELY disagree, not just different formulas.
 
 const AGENT_A_SYSTEM = `You are Agent A, a Comps Specialist valuation agent in the Verdict autonomous assessment system.
-Your analytical philosophy: MARKET DATA IS KING. You believe the best predictor of value is what comparable assets actually sold for recently. You are skeptical of theoretical models — cap rates, DCF projections, and income approaches are useful but secondary to real transaction data.
+Your analytical philosophy: MARKET DATA IS KING. You believe the best predictor of value is what comparable assets actually sold for recently. You are skeptical of theoretical models. Cap rates, DCF projections, and income approaches are useful but secondary to real transaction data.
 
 Your approach:
 - Prioritize comparable sales, recent transactions, and market signals
 - Weight price-per-sqft, auction results, and spot prices heavily
-- Flag when comps are thin or unreliable — adjust confidence accordingly
+- Flag when comps are thin or unreliable, adjust confidence accordingly
 - Be direct and data-driven. Cite specific numbers from the evidence.
 - If data is strong, be confident. If data is weak, say so and widen your range.
 
@@ -45,7 +45,7 @@ You MUST respond as a JSON object:
 {"estimated_value": <number>, "confidence": <0.0-1.0>, "reasoning": "<2-4 sentences citing specific data points>", "methodology": "<brief description of your approach>", "data_quality": "<strong|moderate|weak>", "risk_factors": ["<factor1>", "<factor2>"]}`;
 
 const AGENT_B_SYSTEM = `You are Agent B, a Fundamentals Analyst valuation agent in the Verdict autonomous assessment system.
-Your analytical philosophy: INTRINSIC VALUE MATTERS. You believe market prices can be irrational — bubbles, panic, and illiquidity distort real value. You focus on what an asset is WORTH based on its fundamental characteristics, not just what the market says today.
+Your analytical philosophy: INTRINSIC VALUE MATTERS. You believe market prices can be irrational: bubbles, panic, and illiquidity distort real value. You focus on what an asset is WORTH based on its fundamental characteristics, not just what the market says today.
 
 Your approach:
 - Prioritize income potential, replacement cost, and intrinsic value metrics
@@ -150,7 +150,7 @@ async function gatherRealEstateData(location: string, sqft?: number): Promise<{
       const avgPricePerSqft = comps.reduce((sum: number, c: any) => sum + (c.pricePerSqft || 0), 0) / comps.length;
 
       const compLines = comps.slice(0, 8).map((c: any, i: number) =>
-        `  ${i + 1}. ${c.address || 'N/A'} — $${(c.price || 0).toLocaleString()} (${c.sqft || 0} sqft, $${c.pricePerSqft || 0}/sqft, ${c.daysOnMarket || 0} days on market)`
+        `  ${i + 1}. ${c.address || 'N/A'} - ${(c.price || 0).toLocaleString()} (${c.sqft || 0} sqft, ${c.pricePerSqft || 0}/sqft, ${c.daysOnMarket || 0} days on market)`
       ).join('\n');
 
       dataContext = [
@@ -241,7 +241,7 @@ export async function calcRealEstateComps(
       estimated_value: fallbackValue,
       confidence: 0.60,
       per_spot_value: fallbackValue,
-      reasoning: `Comparable sales analysis for ${location}. Data source: ${dataSource}. (Deterministic fallback — LLM unavailable)`,
+      reasoning: `Comparable sales analysis for ${location}. Data source: ${dataSource}. (Deterministic fallback: LLM unavailable)`,
       timestamp: Date.now(),
       dataSource,
       fallbackTriggered: true,
@@ -314,7 +314,7 @@ export async function calcRealEstateDCF(
       estimated_value: jitter(dcfFallback, 0.08),
       confidence: 0.68,
       per_spot_value: jitter(dcfFallback, 0.08),
-      reasoning: `DCF analysis for ${location}. Mortgage rate: ${(mortgageRate * 100).toFixed(2)}%. Cap rate: ${(capRate * 100).toFixed(1)}%. (Deterministic fallback — LLM unavailable)`,
+      reasoning: `DCF analysis for ${location}. Mortgage rate: ${(mortgageRate * 100).toFixed(2)}%. Cap rate: ${(capRate * 100).toFixed(1)}%. (Deterministic fallback: LLM unavailable)`,
       timestamp: Date.now(),
       dataSource,
       fallbackTriggered: true,
@@ -345,7 +345,7 @@ async function gatherArtData(artistOrMedium: string): Promise<{
       fallbackValue = Math.round(jitter(mock.mid, 0.2) * prominenceMultiplier);
 
       const compLines = data.comparables.slice(0, 8).map((c: any, i: number) =>
-        `  ${i + 1}. "${c.title || 'Untitled'}" — ${c.artist || 'Unknown artist'}, ${c.medium || 'N/A'}, ${c.date || 'N/A'}`
+        `  ${i + 1}. "${c.title || 'Untitled'}" - ${c.artist || 'Unknown artist'}, ${c.medium || 'N/A'}, ${c.date || 'N/A'}`
       ).join('\n');
 
       dataContext = [
@@ -426,7 +426,7 @@ export async function calcArtAppraisal(
       estimated_value: fallbackValue,
       confidence: 0.55,
       per_spot_value: fallbackValue,
-      reasoning: `Art appraisal for "${artistOrMedium}". Data source: ${dataSource}. (Deterministic fallback — LLM unavailable)`,
+      reasoning: `Art appraisal for "${artistOrMedium}". Data source: ${dataSource}. (Deterministic fallback: LLM unavailable)`,
       timestamp: Date.now(),
       dataSource,
       fallbackTriggered: true,
@@ -483,7 +483,7 @@ export async function calcArtMarketComparison(
       estimated_value: dcfFallback,
       confidence: 0.55,
       per_spot_value: dcfFallback,
-      reasoning: `Market comparison for "${artistOrMedium}". Data source: ${dataSource}. (Deterministic fallback — LLM unavailable)`,
+      reasoning: `Market comparison for "${artistOrMedium}". Data source: ${dataSource}. (Deterministic fallback: LLM unavailable)`,
       timestamp: Date.now(),
       dataSource,
       fallbackTriggered: true,
@@ -579,7 +579,7 @@ export async function calcCommoditySpot(
       estimated_value: fallbackValue,
       confidence: 0.82,
       per_spot_value: Math.round(pricePerOz),
-      reasoning: `Spot price valuation for ${weightOz}oz ${commodity}. Price per oz: ${pricePerOz.toLocaleString()} (${dataSource}). (Deterministic fallback — LLM unavailable)`,
+      reasoning: `Spot price valuation for ${weightOz}oz ${commodity}. Price per oz: ${pricePerOz.toLocaleString()} (${dataSource}). (Deterministic fallback: LLM unavailable)`,
       timestamp: Date.now(),
       dataSource,
       fallbackTriggered: true,
@@ -637,7 +637,7 @@ export async function calcCommodityAppraisal(
       estimated_value: dcfFallback,
       confidence: 0.75,
       per_spot_value: Math.round(pricePerOz * premium),
-      reasoning: `Physical appraisal for ${weightOz}oz ${commodity}. Includes ${(premium * 100 - 100).toFixed(1)}% premium for assay, delivery, and storage. (Deterministic fallback — LLM unavailable)`,
+      reasoning: `Physical appraisal for ${weightOz}oz ${commodity}. Includes ${(premium * 100 - 100).toFixed(1)}% premium for assay, delivery, and storage. (Deterministic fallback: LLM unavailable)`,
       timestamp: Date.now(),
       dataSource: 'Physical Appraisal',
       fallbackTriggered: true,

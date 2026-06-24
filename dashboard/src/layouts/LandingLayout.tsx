@@ -1,12 +1,12 @@
 import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Scale } from 'lucide-react';
+import verdictoLogo from '../assets/logo.jpeg';
 
 export const LandingLayout: React.FC = () => {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
-      {/* ── Top Navigation — Logo + Open App only ── */}
+      {/* ── Top Navigation - Logo + Open App only ── */}
       <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -30,19 +30,12 @@ export const LandingLayout: React.FC = () => {
       >
         {/* Logo */}
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none' }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 8,
-            background: 'linear-gradient(135deg, #FF3B3B 0%, #FF6B6B 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 2px 12px rgba(255,59,59,0.3)',
-          }}>
-            <Scale size={16} color="#fff" />
-          </div>
+          <img src={verdictoLogo} alt="Verdicto" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
           <span style={{
             fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)',
             letterSpacing: '-0.03em', fontFamily: 'var(--font-display)',
           }}>
-            Verdict
+            Verdicto
           </span>
         </Link>
 
@@ -83,15 +76,9 @@ export const LandingLayout: React.FC = () => {
         textAlign: 'center',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-          <div style={{
-            width: 24, height: 24, borderRadius: 6,
-            background: 'linear-gradient(135deg, #FF3B3B 0%, #FF6B6B 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Scale size={12} color="#fff" />
-          </div>
+          <img src={verdictoLogo} alt="Verdicto" style={{ width: '24px', height: '24px', borderRadius: '6px', objectFit: 'cover' }} />
           <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-            Verdict
+            Verdicto
           </span>
         </div>
         <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', margin: 0 }}>

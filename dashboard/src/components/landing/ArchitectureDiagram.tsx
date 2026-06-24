@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 /**
- * ArchitectureDiagram — "How Verdict Works"
+ * ArchitectureDiagram - "How the Oracle Gets Fed"
  * 
  * A clean, properly-connected vertical flow diagram showing the real pipeline:
  * 
@@ -22,7 +22,7 @@ import {
  *              Evidence Analyst  Market Interpreter  Precedent Researcher
  *                     └─────────────────┼─────────────────┘
  *                                       ↓
- *                    Trust Framework → HMAC Receipt Chain → Verdict
+ *                    Trust Framework → HMAC Receipt Chain → Verdict Oracle
  *                                                          ↓
  *                                                    Casper Blockchain
  */
@@ -41,28 +41,28 @@ interface FlowNode {
 
 const NODES: FlowNode[] = [
   // Row 0: Entry
-  { id: 'user', label: 'You', sublabel: 'Submit your asset', icon: <User size={18} />, accentColor: '#3B82F6', row: 0, col: 0 },
-  { id: 'orchestrator', label: 'Orchestrator', sublabel: 'Routes assessment', icon: <Brain size={18} />, accentColor: '#8B5CF6', row: 0, col: 1 },
-  
+  { id: 'user', label: 'You', sublabel: 'Connect wallet, choose product', icon: <User size={18} />, accentColor: '#3B82F6', row: 0, col: 0 },
+  { id: 'orchestrator', label: 'Orchestrator', sublabel: 'Routes to product pipeline', icon: <Brain size={18} />, accentColor: '#8B5CF6', row: 0, col: 1 },
+
   // Row 1: Data & Payment
-  { id: 'datasources', label: 'Data Sources', sublabel: 'RentCast · Met · CoinGecko · FRED', icon: <Database size={18} />, accentColor: '#06B6D4', row: 1, col: 0 },
-  { id: 'x402', label: 'x402 Payment', sublabel: '2.5 CSPR per assessment', icon: <Zap size={18} />, accentColor: '#F59E0B', row: 1, col: 1 },
-  
-  // Row 2: Valuation Agents
-  { id: 'comps', label: 'Comps Specialist', sublabel: 'Comparable sales analysis', icon: <Search size={18} />, accentColor: '#10B981', row: 2, col: 0 },
-  { id: 'dcf', label: 'DCF Specialist', sublabel: 'Discounted cash flow', icon: <TrendingUp size={18} />, accentColor: '#10B981', row: 2, col: 1 },
-  { id: 'llm', label: 'MiMo LLM', sublabel: 'AI reasoning engine', icon: <Brain size={18} />, accentColor: '#10B981', row: 2, col: 2 },
-  
+  { id: 'datasources', label: 'Data Sources', sublabel: 'RentCast, FRED, CSPR.cloud', icon: <Database size={18} />, accentColor: '#06B6D4', row: 1, col: 0 },
+  { id: 'x402', label: 'x402 Payment', sublabel: '1-5 CSPR per product', icon: <Zap size={18} />, accentColor: '#F59E0B', row: 1, col: 1 },
+
+  // Row 2: AI Agents
+  { id: 'comps', label: 'Agent A', sublabel: 'Comparable sales analysis', icon: <Search size={18} />, accentColor: '#10B981', row: 2, col: 0 },
+  { id: 'dcf', label: 'Agent B', sublabel: 'Discounted cash flow', icon: <TrendingUp size={18} />, accentColor: '#10B981', row: 2, col: 1 },
+  { id: 'llm', label: 'LLM Engine', sublabel: 'Qualitative reasoning', icon: <Brain size={18} />, accentColor: '#10B981', row: 2, col: 2 },
+
   // Row 3: Jurors
-  { id: 'evidence', label: 'Evidence Analyst', sublabel: 'Cross-references data', icon: <Shield size={18} />, accentColor: '#EC4899', row: 3, col: 0 },
-  { id: 'market', label: 'Market Interpreter', sublabel: 'Macro trends & timing', icon: <TrendingUp size={18} />, accentColor: '#EC4899', row: 3, col: 1 },
+  { id: 'evidence', label: 'Evidence Analyst', sublabel: 'Data quality review', icon: <Shield size={18} />, accentColor: '#EC4899', row: 3, col: 0 },
+  { id: 'market', label: 'Market Interpreter', sublabel: 'Macro trends and timing', icon: <TrendingUp size={18} />, accentColor: '#EC4899', row: 3, col: 1 },
   { id: 'precedent', label: 'Precedent Researcher', sublabel: 'Historical comparisons', icon: <BookOpen size={18} />, accentColor: '#EC4899', row: 3, col: 2 },
-  
+
   // Row 4: Settlement
-  { id: 'trust', label: 'Trust Framework', sublabel: '5-dimension scoring', icon: <Scale size={18} />, accentColor: '#F59E0B', row: 4, col: 0 },
+  { id: 'trust', label: 'Trust Framework', sublabel: 'Reputation scoring', icon: <Scale size={18} />, accentColor: '#F59E0B', row: 4, col: 0 },
   { id: 'hmac', label: 'HMAC Receipt Chain', sublabel: 'Tamper-proof audit trail', icon: <FileCheck size={18} />, accentColor: '#F59E0B', row: 4, col: 1 },
-  { id: 'verdict', label: 'Verdict', sublabel: 'Final valuation', icon: <Gavel size={18} />, accentColor: '#EF4444', row: 4, col: 2 },
-  
+  { id: 'verdict', label: 'Verdict Oracle', sublabel: 'On-chain composable primitive', icon: <Gavel size={18} />, accentColor: '#8B5CF6', row: 4, col: 2 },
+
   // Row 5: On-chain
   { id: 'blockchain', label: 'Casper Blockchain', sublabel: 'Immutable on-chain record', icon: <Link2 size={18} />, accentColor: '#3B82F6', row: 5, col: 1 },
 ];
@@ -196,7 +196,7 @@ export const ArchitectureDiagram: React.FC = () => {
             color: 'var(--text-primary)',
             marginBottom: 12,
           }}>
-            How Verdict Works
+            How the Oracle Gets Fed
           </h2>
           <p style={{
             fontSize: '1rem',
@@ -205,7 +205,7 @@ export const ArchitectureDiagram: React.FC = () => {
             margin: '0 auto',
             lineHeight: 1.6,
           }}>
-            Every assessment follows this pipeline — from asset submission to immutable on-chain verdict.
+            Every product follows this pipeline, from wallet connection to immutable on-chain record.
           </p>
         </motion.div>
 
@@ -350,7 +350,7 @@ export const ArchitectureDiagram: React.FC = () => {
             })}
 
             {/* Row labels */}
-            {['ENTRY', 'DATA & PAY', 'VALUATION', 'DELIBERATION', 'SETTLEMENT', 'CHAIN'].map((label, i) => (
+            {['ENTRY', 'DATA & PAY', 'AI AGENTS', 'DELIBERATION', 'SETTLEMENT', 'CHAIN'].map((label, i) => (
               <text
                 key={label}
                 x={24}
@@ -383,7 +383,7 @@ export const ArchitectureDiagram: React.FC = () => {
           }}
         >
           {[
-            { color: '#10B981', label: 'Valuation Agents' },
+            { color: '#10B981', label: 'AI Agents' },
             { color: '#EC4899', label: 'Jurors' },
             { color: '#F59E0B', label: 'Trust & Payment' },
             { color: '#3B82F6', label: 'Blockchain' },

@@ -52,7 +52,7 @@ export async function fetchWithX402(url: string, payload: any, agentLabel: strin
       const network = requirements.network || err.response.headers['x-payment-network'] || 'casper:casper-test';
       const scheme = requirements.scheme || 'exact';
       
-      // Validate fee before proceeding — prevent overcharging
+      // Validate fee before proceeding - prevent overcharging
       const validatedFee = validateFee(feeCSPR);
       
       console.log(`  [x402]    Fee: ${validatedFee} CSPR on ${network}`);

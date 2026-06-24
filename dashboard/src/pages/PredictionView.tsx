@@ -16,27 +16,17 @@ import {
 } from 'lucide-react';
 import { useWallet } from '../contexts/CSPRClickContext';
 import { PLATFORM_WALLET, PREDICTION_FEE_CSPR } from '../config/casper';
+import {
+  submitPrediction,
+  type PredictionResult as APIPredictionResult,
+  type PredictionAgent as APIPredictionAgent,
+  type X402PaymentRequirements,
+} from '../services/api';
 
-// ─── Types ─────────────────────────────────────────────────────────────────
+// ─── Types (re-exported from API) ───────────────────────────────────────────
 
-interface PredictionAgent {
-  name: string;
-  role: string;
-  probability: number;
-  confidence: number;
-  reasoning: string;
-  color: string;
-}
-
-interface PredictionResult {
-  question: string;
-  probability: number;
-  confidence: number;
-  timeframe: string;
-  agents: PredictionAgent[];
-  riskFactors: string[];
-  timestamp: number;
-}
+type PredictionAgent = APIPredictionAgent;
+type PredictionResult = APIPredictionResult;
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -96,68 +86,6 @@ const AGENT_PROFILES = [
   { name: 'Market Interpreter', role: 'Macro & Sentiment', color: '#06B6D4' },
   { name: 'Precedent Researcher', role: 'Historical Precedent', color: '#8B5CF6' },
 ];
-
-// ─── Simulation ────────────────────────────────────────────────────────────
-
-function simulatePrediction(question: string, timeframe: string): PredictionResult {
-  const baseProbability = 0.3 + Math.random() * 0.4;
-  const agents = AGENT_PROFILES.map((profile) => {
-    const drift = (Math.random() - 0.5) * 0.3;
-    const prob = Math.max(0.05, Math.min(0.95, baseProbability + drift));
-    const conf = 0.6 + Math.random() * 0.35;
-    return {
-      ...profile,
-      probability: prob,
-      confidence: conf,
-      reasoning: generateReasoning(profile.name, prob),
-    };
-  });
-
-  const weightedProb = agents.reduce((sum, a) => sum + a.probability * a.confidence, 0)
-    / agents.reduce((sum, a) => sum + a.confidence, 0);
-
-  return {
-    question,
-    probability: weightedProb,
-    confidence: 0.65 + Math.random() * 0.25,
-    timeframe,
-    agents,
-    riskFactors: [
-      'Market volatility may affect outcome',
-      'Interest rate changes could shift probabilities',
-      'Historical precedent shows 60% accuracy for similar predictions',
-    ],
-    timestamp: Date.now(),
-  };
-}
-
-function generateReasoning(agentName: string, prob: number): string {
-  const templates: Record<string, string[]> = {
-    'Valuation Agent A': [
-      `Based on 12 comparable transactions from RentCast, the probability is assessed at ${(prob * 100).toFixed(0)}%. Recent sales data shows strong momentum.`,
-      `Analyzed 8 similar outcomes in the past 24 months. Market conditions suggest ${(prob * 100).toFixed(0)}% likelihood. Demand indicators are mixed.`,
-    ],
-    'Valuation Agent B': [
-      `Cash flow projections and DCF analysis using FRED data indicate ${(prob * 100).toFixed(0)}% probability. Discount rate adjusted for current risk environment.`,
-      `Revenue trajectory and yield analysis suggest ${(prob * 100).toFixed(0)}% chance. Operating margins support the assessment.`,
-    ],
-    'Evidence Analyst': [
-      `Data quality is high, 4/5 sources verified via MiMo LLM. Confidence in the ${(prob * 100).toFixed(0)}% estimate is strong. No significant outliers detected.`,
-      `Evidence chain is solid. 3 independent data sources corroborate the ${(prob * 100).toFixed(0)}% assessment. Minor gaps in historical data noted.`,
-    ],
-    'Market Interpreter': [
-      `Macro trends and sentiment analysis via MiMo LLM indicate ${(prob * 100).toFixed(0)}% probability. Interest rate environment is a key variable.`,
-      `Market cycle positioning suggests ${(prob * 100).toFixed(0)}% likelihood. Seasonal patterns and demand indicators align.`,
-    ],
-    'Precedent Researcher': [
-      `Found 6 historical precedents via Vectra vector search. Outcome distribution suggests ${(prob * 100).toFixed(0)}% probability. Precedent accuracy: 72%.`,
-      `Historical case analysis of 9 comparable scenarios supports ${(prob * 100).toFixed(0)}% probability. Resolution patterns are consistent.`,
-    ],
-  };
-
-  const options = templates[agentName] || [`Analysis suggests ${(prob * 100).toFixed(0)}% probability based on available data.`];
-  return options[Math.floor(Math.random() * options.length)];
-}
 
 // ─── Probability Ring ──────────────────────────────────────────────────────
 
@@ -332,25 +260,43 @@ export const PredictionView: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PredictionResult | null>(null);
   const [showDemos, setShowDemos] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Payment
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [signingPayment, setSigningPayment] = useState(false);
   const [signError, setSignError] = useState<string | null>(null);
   const [lastDeployHash, setLastDeployHash] = useState<string | null>(null);
+  const [pendingRequirements, setPendingRequirements] = useState<X402PaymentRequirements | null>(null);
 
-  const runPrediction = async () => {
+  const runPrediction = async (paymentProof?: string) => {
     setLoading(true);
     setResult(null);
-    await new Promise((r) => setTimeout(r, 4000 + Math.random() * 2000));
-    setResult(simulatePrediction(question, timeframe));
+    setError(null);
+
+    const response = await submitPrediction(
+      { question, timeframe, assetType: undefined },
+      paymentProof,
+    );
+
+    if (response.status === 'success') {
+      setResult(response.prediction);
+    } else if (response.status === 'payment_required') {
+      setPendingRequirements(response.paymentRequirements);
+      setShowPaymentModal(true);
+      setLoading(false);
+      return;
+    } else {
+      setError(response.error);
+    }
     setLoading(false);
   };
 
   const handlePredict = () => {
     if (!question.trim()) return;
     setSignError(null);
-    setShowPaymentModal(true);
+    setPendingRequirements(null);
+    runPrediction();
   };
 
   const handlePaymentConfirm = async () => {
@@ -369,10 +315,24 @@ export const PredictionView: React.FC = () => {
     setSignError(null);
 
     try {
-      const { deployHash } = await wallet.signPayment(PLATFORM_WALLET, PREDICTION_FEE_CSPR);
+      const amount = pendingRequirements
+        ? parseFloat(pendingRequirements.paymentRequirements.maxAmountRequired)
+        : PREDICTION_FEE_CSPR;
+      const payTo = pendingRequirements
+        ? pendingRequirements.paymentRequirements.payTo
+        : PLATFORM_WALLET;
+
+      const { deployHash } = await wallet.signPayment(payTo, amount);
       setShowPaymentModal(false);
       setLastDeployHash(deployHash);
-      await runPrediction();
+
+      const proof = btoa(JSON.stringify({
+        payer: wallet.publicKey,
+        deployHash,
+        amount,
+      }));
+
+      await runPrediction(proof);
     } catch (err: any) {
       if (err?.message?.includes('cancelled')) {
         setSignError('Payment was cancelled. Please approve the transfer in your wallet.');
@@ -414,7 +374,7 @@ export const PredictionView: React.FC = () => {
     }}>
       <AnimatePresence mode="wait">
         {/* ─── INPUT STATE ─────────────────────────────────────── */}
-        {!result && !loading ? (
+        {!result && !loading && !error ? (
           <motion.div
             key="input"
             initial={{ opacity: 0 }}
@@ -717,6 +677,42 @@ export const PredictionView: React.FC = () => {
                 </motion.div>
               ))}
             </div>
+          </motion.div>
+        ) : error ? (
+          /* ─── ERROR STATE ─────────────────────────────────────── */
+          <motion.div
+            key="error"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              padding: '6rem 2rem', textAlign: 'center',
+              maxWidth: 500, margin: '0 auto',
+            }}
+          >
+            <AlertTriangle size={48} color="#ef4444" style={{ marginBottom: 20 }} />
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>
+              Prediction Failed
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: 24 }}>
+              {error.includes('Unexpected token') || error.includes('JSON')
+                ? 'Could not connect to the Verdicto backend. The prediction service may be temporarily offline - please try again in a moment.'
+                : error}
+            </p>
+            <button
+              onClick={handleReset}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '10px 24px', borderRadius: 8, border: '1px solid var(--border-color)',
+                background: 'var(--bg-surface)', cursor: 'pointer',
+                fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)',
+              }}
+            >
+              <RefreshCw size={14} />
+              Try Again
+            </button>
           </motion.div>
         ) : result ? (
           /* ─── RESULT STATE ────────────────────────────────────── */

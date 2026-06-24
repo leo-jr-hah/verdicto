@@ -325,7 +325,7 @@ const scenes = [
       { id: 'hero', src: charVerdictHero, initial: { y: -500, opacity: 0 }, animate: { y: 0, opacity: 1 }, transition: { type: 'spring', bounce: 0.5 }, style: { bottom: '0', right: '15%', height: '80%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'Fear not! I am Verdict. I can assess any asset instantly, fairly, and permanently using AI agents and the blockchain!', style: { top: '15%', left: '35%' }, delay: 0.8 }
+      { speaker: 'Verdicto', text: 'Fear not! I am Verdicto. I can assess any asset instantly, fairly, and permanently using AI agents and the blockchain!', style: { top: '15%', left: '35%' }, delay: 0.8 }
     ]
   },
   // Scene 4: ZK
@@ -337,7 +337,7 @@ const scenes = [
       { id: 'investor', src: charInvestor, initial: { opacity: 0 }, animate: { opacity: 1 }, style: { bottom: '0', right: '10%', height: '65%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'First, upload your data. Don\'t worry about privacy - we use Zero-Knowledge (ZK) technology. This lets you prove your financial numbers are real without actually showing me your private bank statements!', style: { top: '5%', left: '50%', transform: 'translateX(-50%)', maxWidth: '400px' }, delay: 0.5, learnMore: 'ZK Proofs' }
+      { speaker: 'Verdicto', text: 'First, upload your data. Don\'t worry about privacy - we use Zero-Knowledge (ZK) technology. This lets you prove your financial numbers are real without actually showing me your private bank statements!', style: { top: '5%', left: '50%', transform: 'translateX(-50%)', maxWidth: '400px' }, delay: 0.5, learnMore: 'ZK Proofs' }
     ]
   },
   // Scene 5: X402
@@ -347,7 +347,7 @@ const scenes = [
       { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '80%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'To ensure only authorized parties access this assessment, we issue an X402 Token. Think of it as a VIP digital ticket. It ensures only verified parties have access to this specific assessment.', style: { top: '20%', left: '40%', maxWidth: '400px' }, delay: 0.2, learnMore: 'X402 Authentication' }
+      { speaker: 'Verdicto', text: 'To ensure only authorized parties access this assessment, we issue an X402 Token. Think of it as a VIP digital ticket. It ensures only verified parties have access to this specific assessment.', style: { top: '20%', left: '40%', maxWidth: '400px' }, delay: 0.2, learnMore: 'X402 Authentication' }
     ]
   },
   // Scene 6: HMAC
@@ -357,7 +357,7 @@ const scenes = [
       { id: 'hero', src: charVerdictHero, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', left: '5%', height: '80%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'When you send the data, we stamp it with an HMAC. Think of it as an unbreakable digital wax seal. If a hacker tries to tamper with the data while it\'s traveling, the seal breaks and we reject it!', style: { top: '20%', left: '40%', maxWidth: '400px' }, delay: 0.2, learnMore: 'HMAC Security' }
+      { speaker: 'Verdicto', text: 'When you send the data, we stamp it with an HMAC. Think of it as an unbreakable digital wax seal. If a hacker tries to tamper with the data while it\'s traveling, the seal breaks and we reject it!', style: { top: '20%', left: '40%', maxWidth: '400px' }, delay: 0.2, learnMore: 'HMAC Security' }
     ]
   },
   // Scene 7: Summoning Agents
@@ -372,7 +372,7 @@ const scenes = [
       { id: 'bot5', src: propAgentBot, initial: { scale: 0 }, animate: { scale: 1, x: [0, 30, -30, 0], y: [0, 30, -10, 0] }, style: { bottom: '60%', right: '35%', height: '12%' }, transition: { delay: 1.3, x: { repeat: Infinity, duration: 4.2 }, y: { repeat: Infinity, duration: 4.8 } } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'Now that the data is perfectly secure, I don\'t use a human judge. Instead, I summon a decentralized swarm of independent AI Agents to review the facts.', style: { top: '10%', left: '35%', maxWidth: '400px' }, delay: 0.2 }
+      { speaker: 'Verdicto', text: 'Now that the data is perfectly secure, I don\'t use a human judge. Instead, I summon a decentralized swarm of independent AI Agents to review the facts.', style: { top: '10%', left: '35%', maxWidth: '400px' }, delay: 0.2 }
     ]
   },
   // Scene 8: Investigation
@@ -384,7 +384,7 @@ const scenes = [
     ],
     bubbles: [
       { speaker: 'Observer', text: 'Wait, what if one of the AI agents makes a mistake or is biased?', style: { top: '15%', left: '30%' }, delay: 0.5 },
-      { speaker: 'Verdict', text: 'Great question! That\'s why they don\'t work alone.', style: { top: '35%', right: '35%' }, delay: 1.5 }
+      { speaker: 'Verdicto', text: 'Great question! That\'s why they don\'t work alone.', style: { top: '35%', right: '35%' }, delay: 1.5 }
     ]
   },
   // Scene 9: Consensus
@@ -397,7 +397,7 @@ const scenes = [
       { id: 'bot3', src: propAgentBot, initial: { opacity: 1 }, animate: { y: [0, -10, 10, 0] }, style: { bottom: '35%', right: '15%', height: '12%' }, transition: { repeat: Infinity, duration: 4, delay: 1 } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'The AI agents cross-check each other\'s work. Agents with a history of being highly accurate have their votes weighted heavier. We call this Trust-Weighted Consensus. It guarantees mathematical fairness.', style: { top: '15%', left: '30%', maxWidth: '400px' }, delay: 0.2 }
+      { speaker: 'Verdicto', text: 'The AI agents cross-check each other\'s work. Agents with a history of being highly accurate have their votes weighted heavier. We call this Trust-Weighted Consensus. It guarantees mathematical fairness.', style: { top: '15%', left: '30%', maxWidth: '400px' }, delay: 0.2 }
     ]
   },
   // Scene 10: Resolution
@@ -409,9 +409,9 @@ const scenes = [
       { id: 'investor', src: charInvestor, initial: { opacity: 1 }, animate: { opacity: 1 }, style: { bottom: '0', right: '0%', height: '60%' } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'Through consensus, the agents have mathematically determined the exact fair market value is $2.1 Million, not $2.5 Million or $1.8 Million.', style: { top: '5%', left: '22%', maxWidth: '340px' }, delay: 0.2 },
+      { speaker: 'Verdicto', text: 'Through consensus, the agents have mathematically determined the exact fair market value is $2.1 Million, not $2.5 Million or $1.8 Million.', style: { top: '5%', left: '22%', maxWidth: '340px' }, delay: 0.2 },
       { speaker: 'Asset Owner', text: 'That makes total sense based on the verified data. I accept!', style: { top: '30%', left: '15%', maxWidth: '240px' }, delay: 2 },
-      { speaker: 'Investor', text: 'Thank you for this awesome work, Verdict! This saved us months of legal battles.', style: { top: '5%', right: '5%', maxWidth: '250px' }, delay: 3 }
+      { speaker: 'Investor', text: 'Thank you for this awesome work, Verdicto! This saved us months of legal battles.', style: { top: '5%', right: '5%', maxWidth: '250px' }, delay: 3 }
     ]
   },
   // Scene 11: Casper Blockchain
@@ -423,7 +423,7 @@ const scenes = [
       { id: 'casper', src: propCasperBlock, initial: { scale: 0, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { type: 'spring', bounce: 0.5 }, style: { bottom: '30%', right: '20%', height: '18%', zIndex: 1 } }
     ],
     bubbles: [
-      { speaker: 'Verdict', text: 'Finally, I take this verdict and permanently lock it onto the Casper Blockchain. Once it\'s on Casper, it can never be tampered with, deleted, or altered by anyone. Total transparency!', style: { top: '15%', left: '35%', maxWidth: '400px' }, delay: 0.5, learnMore: 'Casper Finality' }
+      { speaker: 'Verdicto', text: 'Finally, I take this verdict and permanently lock it onto the Casper Blockchain. Once it\'s on Casper, it can never be tampered with, deleted, or altered by anyone. Total transparency!', style: { top: '15%', left: '35%', maxWidth: '400px' }, delay: 0.5, learnMore: 'Casper Finality' }
     ]
   },
   // Scene 12: Conclusion
@@ -435,7 +435,7 @@ const scenes = [
     ],
     bubbles: [
       { speaker: 'Observer', text: 'So you securely gathered data, hid the private parts, proved it wasn\'t tampered with, resolved it using an AI swarm, and locked it on the blockchain?', style: { top: '5%', left: '5%', maxWidth: '350px' }, delay: 0.5 },
-      { speaker: 'Verdict', text: 'Exactly. Welcome to the future of Real World Asset management.', style: { top: '5%', right: '5%', maxWidth: '350px' }, delay: 2.5 }
+      { speaker: 'Verdicto', text: 'Exactly. Welcome to the future of Real World Asset management.', style: { top: '5%', right: '5%', maxWidth: '350px' }, delay: 2.5 }
     ]
   }
 ];

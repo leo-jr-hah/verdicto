@@ -1,4 +1,4 @@
-# Casper RWA Court — Comprehensive Project Report
+# Casper RWA Court - Comprehensive Project Report
 
 **Date:** June 23, 2026  
 **Codebase:** 21,480 lines TypeScript/TSX + 474 lines Rust = **~22,000 lines total**  
@@ -9,13 +9,13 @@
 
 ## 1. Executive Summary
 
-Casper RWA Court ("Verdict") is a **fully-built, production-grade autonomous multi-agent AI system** for Real World Asset valuation, lending, insurance, and prediction markets — all settled on the Casper blockchain.
+Casper RWA Court ("Verdict") is a **fully-built, production-grade autonomous multi-agent AI system** for Real World Asset valuation, lending, insurance, and prediction markets - all settled on the Casper blockchain.
 
 This is not a prototype or demo. It is a working system with:
 - **4 complete products** (Assess, Borrow, Insure, Predict)
 - **5 independent AI agents** with autonomous methodology selection
 - **3 deployed smart contracts** on Casper Testnet
-- **Real x402 micropayments** (not simulated — actual CSPR transfers signed by the user's wallet)
+- **Real x402 micropayments** (not simulated - actual CSPR transfers signed by the user's wallet)
 - **Autonomous keepers** that run unattended (borrow collateral monitoring, insurance lifecycle)
 - **61 unit tests** covering cryptographic receipt chains, trust scoring, agent orchestration, and x402 integration
 - **A premium landing page** with particle effects, typewriter animations, and interactive story explainer
@@ -39,62 +39,62 @@ This is not a prototype or demo. It is a working system with:
 │  └── Navigation, Footer, Backgrounds, DotGrid, Reveal      │
 │                                                             │
 │  Dashboard (8 pages)                                        │
-│  ├── AssessView — Asset selection → payment → live results  │
-│  ├── BorrowView — 6-step wizard (1,163 lines)              │
-│  ├── InsureView — 6-step wizard (1,067 lines)              │
-│  ├── PredictionView — Yes/No questions, 5-agent consensus   │
-│  ├── DashboardView — Portfolio overview                     │
-│  ├── ReputationView — Agent trust scores + history          │
-│  ├── TransactionsView — On-chain payment history            │
-│  ├── ArchitectureView — System design explainer             │
-│  └── RoadmapView — 16 features across 4 categories         │
+│  ├── AssessView - Asset selection → payment → live results  │
+│  ├── BorrowView - 6-step wizard (1,163 lines)              │
+│  ├── InsureView - 6-step wizard (1,067 lines)              │
+│  ├── PredictionView - Yes/No questions, 5-agent consensus   │
+│  ├── DashboardView - Portfolio overview                     │
+│  ├── ReputationView - Agent trust scores + history          │
+│  ├── TransactionsView - On-chain payment history            │
+│  ├── ArchitectureView - System design explainer             │
+│  └── RoadmapView - 16 features across 4 categories         │
 │                                                             │
 │  Shared Components                                          │
-│  ├── MultiMethodologyDashboard — 6-agent result cards       │
-│  ├── X402PaymentStream — Live payment event feed            │
-│  ├── LiveContractPanel — Real-time contract state           │
-│  ├── ReputationGraph — SVG sparklines + tier badges         │
-│  ├── WalletConnectButton — Casper Wallet integration        │
-│  ├── ConnectionStatus — WebSocket health indicator          │
-│  └── ErrorBoundary — Graceful error recovery                │
+│  ├── MultiMethodologyDashboard - 6-agent result cards       │
+│  ├── X402PaymentStream - Live payment event feed            │
+│  ├── LiveContractPanel - Real-time contract state           │
+│  ├── ReputationGraph - SVG sparklines + tier badges         │
+│  ├── WalletConnectButton - Casper Wallet integration        │
+│  ├── ConnectionStatus - WebSocket health indicator          │
+│  └── ErrorBoundary - Graceful error recovery                │
 │                                                             │
 │  Contexts & Hooks                                           │
-│  ├── CSPRClickContext — Wallet provider + payment signing   │
-│  ├── useAssessment — Assessment state machine               │
-│  ├── useLoan — Loan lifecycle management                    │
-│  ├── useInsurance — Insurance policy management             │
-│  └── useLenis — Smooth scroll                               │
+│  ├── CSPRClickContext - Wallet provider + payment signing   │
+│  ├── useAssessment - Assessment state machine               │
+│  ├── useLoan - Loan lifecycle management                    │
+│  ├── useInsurance - Insurance policy management             │
+│  └── useLenis - Smooth scroll                               │
 └──────────────────────────┬──────────────────────────────────┘
                            │ HTTP + WebSocket
 ┌──────────────────────────▼──────────────────────────────────┐
 │                   BACKEND (Node.js + TypeScript)             │
 │                   6,403 lines · 17 modules                   │
 │                                                             │
-│  Orchestrator (index.ts — 1,488 lines)                      │
+│  Orchestrator (index.ts - 1,488 lines)                      │
 │  ├── 15 API endpoints (assess, loans, insurance, predict)   │
-│  ├── Borrow Keeper — setInterval every 30min                │
-│  ├── Insurance Monitor — policy lifecycle automation        │
+│  ├── Borrow Keeper - setInterval every 30min                │
+│  ├── Insurance Monitor - policy lifecycle automation        │
 │  ├── In-memory state store (loan/policy tracking)           │
 │  └── HMAC receipt chain for all operations                  │
 │                                                             │
 │  AI Agents (5 independent MCP servers)                      │
-│  ├── Valuation Agent A (:3001) — Comparable Sales           │
-│  ├── Valuation Agent B (:3002) — Discounted Cash Flow       │
-│  ├── Evidence Analyst (:3003) — Data quality juror          │
-│  ├── Market Data Interpreter (:3004) — Market trends juror  │
-│  └── Precedent Researcher (:3005) — Historical analogies    │
+│  ├── Valuation Agent A (:3001) - Comparable Sales           │
+│  ├── Valuation Agent B (:3002) - Discounted Cash Flow       │
+│  ├── Evidence Analyst (:3003) - Data quality juror          │
+│  ├── Market Data Interpreter (:3004) - Market trends juror  │
+│  └── Precedent Researcher (:3005) - Historical analogies    │
 │                                                             │
 │  Shared Modules                                             │
-│  ├── agent-engine.ts — Autonomous methodology selection     │
-│  ├── trust-framework.ts — Reputation scoring + tiers        │
-│  ├── verifiable-execution.ts — HMAC receipt chain           │
-│  ├── x402-middleware.ts — Payment verification middleware    │
-│  ├── x402-client.ts — Payment proof generation              │
-│  ├── juror-engine.ts — Deliberation + peer review           │
-│  ├── data-sources.ts — RentCast, FRED, CSPR.cloud clients  │
-│  ├── mimo-client.ts — MiMo LLM integration                 │
-│  ├── audit-trail.ts — Execution audit logging               │
-│  └── transaction-log.ts — On-chain transaction tracking     │
+│  ├── agent-engine.ts - Autonomous methodology selection     │
+│  ├── trust-framework.ts - Reputation scoring + tiers        │
+│  ├── verifiable-execution.ts - HMAC receipt chain           │
+│  ├── x402-middleware.ts - Payment verification middleware    │
+│  ├── x402-client.ts - Payment proof generation              │
+│  ├── juror-engine.ts - Deliberation + peer review           │
+│  ├── data-sources.ts - RentCast, FRED, CSPR.cloud clients  │
+│  ├── mimo-client.ts - MiMo LLM integration                 │
+│  ├── audit-trail.ts - Execution audit logging               │
+│  └── transaction-log.ts - On-chain transaction tracking     │
 │                                                             │
 │  WebSocket Server (:3011)                                   │
 │  └── Real-time progress updates for assessments             │
@@ -145,7 +145,7 @@ User (Casper Wallet)
   │
   ├─ 5. Juror deliberation (if Agents A & B diverge >15%)
   │     ├── Round 1: Each juror independently votes
-  │     ├── Round 2: Peer review — jurors see each other's reasoning
+  │     ├── Round 2: Peer review - jurors see each other's reasoning
   │     └── Final: Votes weighted by on-chain trust scores
   │
   ├─ 6. Consensus valuation produced
@@ -224,13 +224,13 @@ User has completed assessment
 **Purpose:** Record AI verdicts on-chain with reputation-weighted voting.
 
 **Key functions:**
-- `record_verdict(assessment_id, agent_id, vote, confidence, reasoning_hash)` — Stores an agent's vote
-- `get_verdict(assessment_id)` — Retrieves all votes for an assessment
-- `calculate_weighted_result(assessment_id)` — Computes reputation-weighted consensus
+- `record_verdict(assessment_id, agent_id, vote, confidence, reasoning_hash)` - Stores an agent's vote
+- `get_verdict(assessment_id)` - Retrieves all votes for an assessment
+- `calculate_weighted_result(assessment_id)` - Computes reputation-weighted consensus
 
 **Storage model:**
-- `votes: Mapping<(String, String), VoteRecord>` — (assessment_id, agent_id) → vote
-- `verdicts: Mapping<String, VerdictResult>` — assessment_id → final result
+- `votes: Mapping<(String, String), VoteRecord>` - (assessment_id, agent_id) → vote
+- `verdicts: Mapping<String, VerdictResult>` - assessment_id → final result
 
 **Deploy hash:** `f00cbb8f03e468c0750e7ce78bfc7f8a5c337fd520ebc218e969833bdea0fcfb`
 
@@ -239,10 +239,10 @@ User has completed assessment
 **Purpose:** Agent identity + immutable reputation scores.
 
 **Key functions:**
-- `register_agent(agent_id, name, public_key)` — Register new agent
-- `update_score(agent_id, delta)` — Adjust reputation (positive or negative)
-- `get_agent(agent_id)` — Get agent profile + current score
-- `get_tier(agent_id)` — Get tier (Platinum/Gold/Silver/Bronze)
+- `register_agent(agent_id, name, public_key)` - Register new agent
+- `update_score(agent_id, delta)` - Adjust reputation (positive or negative)
+- `get_agent(agent_id)` - Get agent profile + current score
+- `get_tier(agent_id)` - Get tier (Platinum/Gold/Silver/Bronze)
 
 **Retroactive settlement model:**
 - Reputation is NOT updated by majority consensus (prevents groupthink)
@@ -257,9 +257,9 @@ User has completed assessment
 **Purpose:** Lock CSPR during dispute resolution, release on verdict.
 
 **Key functions:**
-- `deposit(assessment_id, amount)` — Lock CSPR
-- `release(assessment_id, recipient)` — Release to winner
-- `refund(assessment_id)` — Refund if dispute cancelled
+- `deposit(assessment_id, amount)` - Lock CSPR
+- `release(assessment_id, recipient)` - Release to winner
+- `refund(assessment_id)` - Refund if dispute cancelled
 
 **Deploy hash:** `83bf2bab33200e60b092847abc38ea5d0301327fae43fc2d3555fec5be120d3a`
 
@@ -298,9 +298,9 @@ Agent Server (e.g., Valuation Agent A on :3001)
   │   └── Fallback logic (if primary data unavailable)
   │
   ├── Data Sources (shared/data-sources.ts)
-  │   ├── RentCast API — Real estate comps, property data
-  │   ├── FRED API — Economic indicators (interest rates, inflation)
-  │   └── CSPR.cloud — On-chain data (block height, account balance)
+  │   ├── RentCast API - Real estate comps, property data
+  │   ├── FRED API - Economic indicators (interest rates, inflation)
+  │   └── CSPR.cloud - On-chain data (block height, account balance)
   │
   ├── MiMo Client (shared/mimo-client.ts)
   │   └── LLM reasoning for qualitative analysis
@@ -326,10 +326,10 @@ Agent Server (e.g., Valuation Agent A on :3001)
 
 This is the key differentiator from a hardcoded system. Each agent:
 
-1. **Queries data availability** — "Do I have enough comparable sales data?"
-2. **Evaluates confidence** — "Are there ≥3 recent sales within 1 mile?"
-3. **Selects methodology** — If comps are robust → Comparable Sales. If thin → DCF fallback.
-4. **Documents reasoning** — "Selected DCF because only 1 comparable sale found in last 6 months."
+1. **Queries data availability** - "Do I have enough comparable sales data?"
+2. **Evaluates confidence** - "Are there ≥3 recent sales within 1 mile?"
+3. **Selects methodology** - If comps are robust → Comparable Sales. If thin → DCF fallback.
+4. **Documents reasoning** - "Selected DCF because only 1 comparable sale found in last 6 months."
 
 This happens at runtime, not in configuration. The same agent can use different methodologies for different assets.
 
@@ -417,7 +417,7 @@ x402 is an HTTP micropayment standard. The flow:
 - Returns base64-encoded signed deploy as payment proof
 
 **Client helper** (`agents/shared/x402-client.ts`):
-- `makePaymentRequest(url, amount, signer)` — wraps fetch with automatic 402 handling
+- `makePaymentRequest(url, amount, signer)` - wraps fetch with automatic 402 handling
 - Retries request with payment proof after receiving 402
 
 ---
@@ -772,11 +772,11 @@ The orchestrator is the central API server. It:
 - ✅ 61 tests pass
 
 ### 11.2 What's Simplified
-- ⚠️ Loan state is in-memory (not on-chain) — production would use persistent DB or on-chain contracts
-- ⚠️ Insurance policies are in-memory — same as above
-- ⚠️ CSPR disbursement uses a pre-funded platform wallet — production would use an escrow contract
-- ⚠️ MiMo LLM has a 15-second timeout with fallback — production would use a more reliable LLM provider
-- ⚠️ Block height in TestnetProof component is simulated (increments randomly) — production would query real RPC
+- ⚠️ Loan state is in-memory (not on-chain) - production would use persistent DB or on-chain contracts
+- ⚠️ Insurance policies are in-memory - same as above
+- ⚠️ CSPR disbursement uses a pre-funded platform wallet - production would use an escrow contract
+- ⚠️ MiMo LLM has a 15-second timeout with fallback - production would use a more reliable LLM provider
+- ⚠️ Block height in TestnetProof component is simulated (increments randomly) - production would query real RPC
 - ⚠️ Some landing page stats are hardcoded (not live from API)
 
 ### 11.3 What's Missing for Production
@@ -818,28 +818,28 @@ The orchestrator is the central API server. It:
 ### 13.1 Backend (agents/)
 ```
 agents/
-├── orchestrator/index.ts          (1,488 lines) — Main API server + keepers
-├── valuation-agent-a/server.ts    (174 lines)  — Comparable Sales agent
-├── valuation-agent-b/server.ts    (191 lines)  — DCF agent
-├── evidence-analyst/server.ts     (168 lines)  — Evidence juror
-├── market-data-interpreter/server.ts (172 lines) — Market juror
-├── precedent-researcher/server.ts (185 lines)  — Precedent juror
-├── websocket-server.ts            (89 lines)   — Real-time updates
+├── orchestrator/index.ts          (1,488 lines) - Main API server + keepers
+├── valuation-agent-a/server.ts    (174 lines)  - Comparable Sales agent
+├── valuation-agent-b/server.ts    (191 lines)  - DCF agent
+├── evidence-analyst/server.ts     (168 lines)  - Evidence juror
+├── market-data-interpreter/server.ts (172 lines) - Market juror
+├── precedent-researcher/server.ts (185 lines)  - Precedent juror
+├── websocket-server.ts            (89 lines)   - Real-time updates
 ├── shared/
-│   ├── types.ts                   (164 lines)  — Shared type definitions
-│   ├── agent-engine.ts            (287 lines)  — Autonomous methodology selection
-│   ├── trust-framework.ts         (312 lines)  — Reputation scoring
-│   ├── verifiable-execution.ts    (198 lines)  — HMAC receipt chain
-│   ├── x402-middleware.ts         (156 lines)  — Payment verification
-│   ├── x402-client.ts             (134 lines)  — Payment proof generation
-│   ├── juror-engine.ts            (245 lines)  — Deliberation protocol
-│   ├── data-sources.ts            (278 lines)  — External API clients
-│   ├── mimo-client.ts             (112 lines)  — LLM integration
-│   ├── fred-client.ts             (89 lines)   — FRED API client
-│   ├── rentcast-client.ts         (134 lines)  — RentCast API client
-│   ├── casper-mcp-client.ts       (98 lines)   — Casper MCP client
-│   ├── audit-trail.ts             (78 lines)   — Audit logging
-│   └── transaction-log.ts         (92 lines)   — Transaction tracking
+│   ├── types.ts                   (164 lines)  - Shared type definitions
+│   ├── agent-engine.ts            (287 lines)  - Autonomous methodology selection
+│   ├── trust-framework.ts         (312 lines)  - Reputation scoring
+│   ├── verifiable-execution.ts    (198 lines)  - HMAC receipt chain
+│   ├── x402-middleware.ts         (156 lines)  - Payment verification
+│   ├── x402-client.ts             (134 lines)  - Payment proof generation
+│   ├── juror-engine.ts            (245 lines)  - Deliberation protocol
+│   ├── data-sources.ts            (278 lines)  - External API clients
+│   ├── mimo-client.ts             (112 lines)  - LLM integration
+│   ├── fred-client.ts             (89 lines)   - FRED API client
+│   ├── rentcast-client.ts         (134 lines)  - RentCast API client
+│   ├── casper-mcp-client.ts       (98 lines)   - Casper MCP client
+│   ├── audit-trail.ts             (78 lines)   - Audit logging
+│   └── transaction-log.ts         (92 lines)   - Transaction tracking
 ├── tests/
 │   ├── trust-framework.test.ts    (17 tests)
 │   ├── verifiable-execution.test.ts (10 tests)
@@ -852,46 +852,46 @@ agents/
 ```
 dashboard/
 ├── src/
-│   ├── App.tsx                    (62 lines)   — Router configuration
-│   ├── main.tsx                   (18 lines)   — Entry point
-│   ├── index.css                  (487 lines)  — Global styles + CSS variables
-│   ├── config/casper.ts           (42 lines)   — Fee configuration
+│   ├── App.tsx                    (62 lines)   - Router configuration
+│   ├── main.tsx                   (18 lines)   - Entry point
+│   ├── index.css                  (487 lines)  - Global styles + CSS variables
+│   ├── config/casper.ts           (42 lines)   - Fee configuration
 │   ├── contexts/
-│   │   └── CSPRClickContext.tsx    (312 lines)  — Wallet + payment signing
+│   │   └── CSPRClickContext.tsx    (312 lines)  - Wallet + payment signing
 │   ├── hooks/
-│   │   ├── useAssessment.ts       (198 lines)  — Assessment state machine
-│   │   ├── useLoan.ts             (245 lines)  — Loan lifecycle
-│   │   ├── useInsurance.ts        (234 lines)  — Insurance management
-│   │   └── useLenis.ts            (28 lines)   — Smooth scroll
+│   │   ├── useAssessment.ts       (198 lines)  - Assessment state machine
+│   │   ├── useLoan.ts             (245 lines)  - Loan lifecycle
+│   │   ├── useInsurance.ts        (234 lines)  - Insurance management
+│   │   └── useLenis.ts            (28 lines)   - Smooth scroll
 │   ├── layouts/
-│   │   ├── Layout.tsx             (198 lines)  — Main dashboard layout
-│   │   ├── LandingLayout.tsx      (34 lines)   — Landing page layout
-│   │   └── PageLayout.tsx         (45 lines)   — Generic page layout
+│   │   ├── Layout.tsx             (198 lines)  - Main dashboard layout
+│   │   ├── LandingLayout.tsx      (34 lines)   - Landing page layout
+│   │   └── PageLayout.tsx         (45 lines)   - Generic page layout
 │   ├── pages/
-│   │   ├── LandingPage.tsx        (89 lines)   — Landing page composition
-│   │   ├── AssessView.tsx         (412 lines)  — Assessment wizard
-│   │   ├── BorrowView.tsx         (1,163 lines) — Borrow wizard
-│   │   ├── InsureView.tsx         (1,067 lines) — Insurance wizard
-│   │   ├── PredictionView.tsx     (387 lines)  — Prediction market
-│   │   ├── DashboardView.tsx      (298 lines)  — Portfolio overview
-│   │   ├── ReputationView.tsx     (267 lines)  — Agent reputation
-│   │   ├── TransactionsView.tsx   (384 lines)  — Transaction history
-│   │   ├── ArchitectureView.tsx   (312 lines)  — System design
-│   │   └── RoadmapView.tsx        (406 lines)  — Feature roadmap
+│   │   ├── LandingPage.tsx        (89 lines)   - Landing page composition
+│   │   ├── AssessView.tsx         (412 lines)  - Assessment wizard
+│   │   ├── BorrowView.tsx         (1,163 lines) - Borrow wizard
+│   │   ├── InsureView.tsx         (1,067 lines) - Insurance wizard
+│   │   ├── PredictionView.tsx     (387 lines)  - Prediction market
+│   │   ├── DashboardView.tsx      (298 lines)  - Portfolio overview
+│   │   ├── ReputationView.tsx     (267 lines)  - Agent reputation
+│   │   ├── TransactionsView.tsx   (384 lines)  - Transaction history
+│   │   ├── ArchitectureView.tsx   (312 lines)  - System design
+│   │   └── RoadmapView.tsx        (406 lines)  - Feature roadmap
 │   ├── components/
-│   │   ├── MultiMethodologyDashboard.tsx (661 lines) — Agent result cards
-│   │   ├── X402PaymentStream.tsx  (308 lines)  — Payment event feed
-│   │   ├── LiveContractPanel.tsx  (346 lines)  — Contract state
-│   │   ├── ReputationGraph.tsx    (396 lines)  — SVG sparklines
-│   │   ├── WalletConnectButton.tsx (178 lines) — Wallet UI
-│   │   ├── ConnectionStatus.tsx   (89 lines)   — WebSocket health
-│   │   ├── ErrorBoundary.tsx      (67 lines)   — Error recovery
-│   │   ├── Logo.tsx               (34 lines)   — Brand logo
-│   │   ├── Tooltip.tsx            (45 lines)   — Tooltip component
-│   │   ├── landing/ (18 files)    (~2,800 lines) — Landing page
-│   │   └── story/ (3 files)       (~750 lines)  — Interactive story
+│   │   ├── MultiMethodologyDashboard.tsx (661 lines) - Agent result cards
+│   │   ├── X402PaymentStream.tsx  (308 lines)  - Payment event feed
+│   │   ├── LiveContractPanel.tsx  (346 lines)  - Contract state
+│   │   ├── ReputationGraph.tsx    (396 lines)  - SVG sparklines
+│   │   ├── WalletConnectButton.tsx (178 lines) - Wallet UI
+│   │   ├── ConnectionStatus.tsx   (89 lines)   - WebSocket health
+│   │   ├── ErrorBoundary.tsx      (67 lines)   - Error recovery
+│   │   ├── Logo.tsx               (34 lines)   - Brand logo
+│   │   ├── Tooltip.tsx            (45 lines)   - Tooltip component
+│   │   ├── landing/ (18 files)    (~2,800 lines) - Landing page
+│   │   └── story/ (3 files)       (~750 lines)  - Interactive story
 │   └── services/
-│       └── api.ts                 (825 lines)  — All API types + fetch
+│       └── api.ts                 (825 lines)  - All API types + fetch
 ├── index.html
 ├── vite.config.ts
 └── package.json
@@ -900,14 +900,14 @@ dashboard/
 ### 13.3 Smart Contracts (contracts/)
 ```
 contracts/
-├── Cargo.toml                     — Workspace configuration
-├── Odra.toml                      — Odra framework config
-├── deploy.sh                      (228 lines) — Deployment script
+├── Cargo.toml                     - Workspace configuration
+├── Odra.toml                      - Odra framework config
+├── deploy.sh                      (228 lines) - Deployment script
 ├── voting/
-│   ├── src/lib.rs                 (197 lines) — VotingContract
+│   ├── src/lib.rs                 (197 lines) - VotingContract
 │   └── wasm/VotingContract.wasm
 ├── reputation/
-│   ├── src/lib.rs                 (160 lines) — ReputationRegistry
+│   ├── src/lib.rs                 (160 lines) - ReputationRegistry
 │   └── wasm/ReputationRegistry.wasm
 └── wasm/
     └── EscrowContract.wasm
@@ -915,12 +915,12 @@ contracts/
 
 ### 13.4 Configuration
 ```
-├── .env.example                   — Environment variable template
-├── .gitignore                     — Git ignore rules
-├── README.md                      — Project documentation
-├── ARCHITECTURE.md                — Detailed architecture
-├── VALIDATOR_PROMPT.md            — AI validator instructions
-└── CLAUDE.md                      — AI assistant context
+├── .env.example                   - Environment variable template
+├── .gitignore                     - Git ignore rules
+├── README.md                      - Project documentation
+├── ARCHITECTURE.md                - Detailed architecture
+├── VALIDATOR_PROMPT.md            - AI validator instructions
+└── CLAUDE.md                      - AI assistant context
 ```
 
 ---
@@ -929,12 +929,12 @@ contracts/
 
 Casper RWA Court is a **complete, working system** that demonstrates:
 
-1. **Multi-agent AI deliberation** — 5 independent agents with autonomous methodology selection, juror peer review, and reputation-weighted consensus
-2. **Real blockchain integration** — 3 deployed smart contracts, real x402 micropayments, on-chain reputation
-3. **Autonomous operation** — Borrow keeper and insurance monitor run unattended, no human in the loop
-4. **Production-grade frontend** — 50+ React components, animated landing page, 8 dashboard pages, WebSocket real-time updates
-5. **Cryptographic verifiability** — HMAC receipt chains for every execution step, on-chain verdict records
-6. **Comprehensive testing** — 61 tests covering trust scoring, receipt chains, agent orchestration, and payment verification
+1. **Multi-agent AI deliberation** - 5 independent agents with autonomous methodology selection, juror peer review, and reputation-weighted consensus
+2. **Real blockchain integration** - 3 deployed smart contracts, real x402 micropayments, on-chain reputation
+3. **Autonomous operation** - Borrow keeper and insurance monitor run unattended, no human in the loop
+4. **Production-grade frontend** - 50+ React components, animated landing page, 8 dashboard pages, WebSocket real-time updates
+5. **Cryptographic verifiability** - HMAC receipt chains for every execution step, on-chain verdict records
+6. **Comprehensive testing** - 61 tests covering trust scoring, receipt chains, agent orchestration, and payment verification
 
 The system is ready for demo and could be production-ready with the addition of persistent storage, multi-tenant deployment, and mainnet contracts.
 

@@ -1,6 +1,6 @@
 # Casper RWA Court ⚖️
 
-**An autonomous, multi-agent AI system that assesses, borrows against, insures, and resolves disputes for Real World Assets on the Casper blockchain.** Users pay in CSPR; independent AI agents analyze real market data, deliberate, and produce verdicts — with every execution step cryptographically receipted and every payment settled on-chain.
+**An autonomous, multi-agent AI system that assesses, borrows against, insures, and resolves disputes for Real World Assets on the Casper blockchain.** Users pay in CSPR; independent AI agents analyze real market data, deliberate, and produce verdicts - with every execution step cryptographically receipted and every payment settled on-chain.
 
 ---
 
@@ -9,9 +9,9 @@
 ### Prerequisites
 
 - **Node.js** ≥ 20
-- **Rust + cargo-odra** (for smart contracts only — not needed to run the demo)
+- **Rust + cargo-odra** (for smart contracts only - not needed to run the demo)
 - **Casper Wallet** Chrome extension ([install](https://chromewebstore.google.com/detail/casper-wallet/abkahkcbhngaebpcgfmhkoioedceoigp?hl=en))
-- **Testnet CSPR** — get free tokens from the [Casper Testnet Faucet](https://testnet.cspr.live/tools/faucet)
+- **Testnet CSPR** - get free tokens from the [Casper Testnet Faucet](https://testnet.cspr.live/tools/faucet)
 
 ### 1. Clone & Install
 
@@ -29,7 +29,7 @@ cd ../agents && npm install
 ### 2. Configure Environment
 
 ```bash
-# From the repo root — create your .env from the template
+# From the repo root - create your .env from the template
 cp .env.example .env
 ```
 
@@ -44,7 +44,7 @@ Edit `.env` and fill in at minimum:
 | `VITE_ORCHESTRATOR_URL` | Where the backend runs (dashboard reads this) | `http://localhost:3000` |
 | `VITE_WS_URL` | WebSocket URL for live updates | `ws://localhost:3010` |
 
-> **Note:** The `.env.example` file documents every variable with comments. Most have sensible defaults for local development. You do NOT need API keys for the AI agents — they use a built-in fallback when no LLM key is configured.
+> **Note:** The `.env.example` file documents every variable with comments. Most have sensible defaults for local development. You do NOT need API keys for the AI agents - they use a built-in fallback when no LLM key is configured.
 
 ### 3. Run the Backend
 
@@ -65,7 +65,7 @@ npm run dev
 
 ### 5. Run the Demo Flow
 
-1. Open `http://localhost:5173` — the landing page loads
+1. Open `http://localhost:5173` - the landing page loads
 2. Click **Connect Wallet** in the sidebar → approve in Casper Wallet extension
 3. Navigate to **Assess** → select a demo asset (e.g., Manhattan Condo)
 4. Click **Pay & Assess** → approve the 2.5 CSPR payment in your wallet
@@ -78,7 +78,7 @@ npm run dev
 ```bash
 cd agents
 npm test
-# 27/27 tests passing — covers HMAC chain, trust scoring, agent orchestration
+# 27/27 tests passing - covers HMAC chain, trust scoring, agent orchestration
 ```
 
 ---
@@ -98,10 +98,10 @@ npm test
 
 This isn't a frontend that calls an API. The system runs **unattended**:
 
-- **Borrow Keeper** — checks collateral ratios every 30 minutes, triggers margin calls when LTV exceeds thresholds, liquidates when critical. Runs on a `setInterval` loop, no human in the loop.
-- **Insurance Monitor** — tracks policy expiration, triggers claim reviews, processes payouts. Autonomous lifecycle management.
-- **Agent Self-Selection** — AI agents autonomously choose their valuation methodology based on data availability (not hardcoded). If comparable sales data is thin, the agent falls back to DCF.
-- **Reputation Updates** — after real market events, agents gain or lose reputation based on how close their predictions were to reality. This is retroactive, not consensus-based.
+- **Borrow Keeper** - checks collateral ratios every 30 minutes, triggers margin calls when LTV exceeds thresholds, liquidates when critical. Runs on a `setInterval` loop, no human in the loop.
+- **Insurance Monitor** - tracks policy expiration, triggers claim reviews, processes payouts. Autonomous lifecycle management.
+- **Agent Self-Selection** - AI agents autonomously choose their valuation methodology based on data availability (not hardcoded). If comparable sales data is thin, the agent falls back to DCF.
+- **Reputation Updates** - after real market events, agents gain or lose reputation based on how close their predictions were to reality. This is retroactive, not consensus-based.
 
 ### What's On-Chain vs. Off-Chain
 
@@ -178,19 +178,19 @@ See [`.env.example`](.env.example) for the full list with descriptions. Key grou
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `POST` | `/api/assessments/start` | — | Start a new AI assessment |
-| `POST` | `/api/assessments/:id/submit` | — | Submit asset data for analysis |
+| `POST` | `/api/assessments/start` | - | Start a new AI assessment |
+| `POST` | `/api/assessments/:id/submit` | - | Submit asset data for analysis |
 | `POST` | `/api/loans/create` | x402 (5 CSPR) | Create a loan against assessed collateral |
-| `GET` | `/api/loans` | — | List loans (filter by borrower) |
-| `GET` | `/api/loans/:id` | — | Get loan details |
-| `POST` | `/api/loans/:id/repay` | — | Repay a loan |
-| `POST` | `/api/loans/:id/revalue` | — | Trigger collateral revaluation |
+| `GET` | `/api/loans` | - | List loans (filter by borrower) |
+| `GET` | `/api/loans/:id` | - | Get loan details |
+| `POST` | `/api/loans/:id/repay` | - | Repay a loan |
+| `POST` | `/api/loans/:id/revalue` | - | Trigger collateral revaluation |
 | `POST` | `/api/insurance/create` | x402 (3 CSPR) | Create insurance policy |
-| `GET` | `/api/insurance` | — | List policies (filter by owner) |
-| `GET` | `/api/insurance/:id` | — | Get policy details |
-| `POST` | `/api/insurance/:id/claim` | — | File claim (AI revaluation + payout) |
-| `GET` | `/api/transactions` | — | Transaction history |
-| `GET` | `/api/demos` | — | Demo assets for assessment |
+| `GET` | `/api/insurance` | - | List policies (filter by owner) |
+| `GET` | `/api/insurance/:id` | - | Get policy details |
+| `POST` | `/api/insurance/:id/claim` | - | File claim (AI revaluation + payout) |
+| `GET` | `/api/transactions` | - | Transaction history |
+| `GET` | `/api/demos` | - | Demo assets for assessment |
 | `POST` | `/api/admin/force-revalue/:id` | `x-admin-secret` | Force immediate revaluation (admin) |
 | `GET` | `/api/admin/loans` | `x-admin-secret` | List all loans with state (admin) |
 

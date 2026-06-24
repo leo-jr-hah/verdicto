@@ -49,7 +49,7 @@ export async function verifyJurorExecution(
   // 2. Agent executes with challenge nonce
   const response = await runJurorWithChallenge(agentId, task, challenge);
   
-  // 3. Verify determinism — same challenge -> similar output
+  // 3. Verify determinism - same challenge -> similar output
   const response2 = await runJurorWithChallenge(agentId, task, challenge);
   const consistency = calculateSimilarity(response, response2);
   
