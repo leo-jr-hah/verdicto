@@ -4,7 +4,7 @@
 
 // In dev, empty string uses Vite proxy (/api/* → localhost:3011)
 // In production, set VITE_ORCHESTRATOR_URL to the deployed backend URL
-const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || '';
+export const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || '';
 const WS_URL = import.meta.env.VITE_WS_URL || '';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -91,6 +91,7 @@ export interface AssessmentResult {
   marketData: {
     source: string;
     comparables: number;
+    assetType?: string;
   } | null;
   analysisSteps?: AnalysisStep[];
   dataSources?: DataSource[];
@@ -1064,6 +1065,8 @@ export interface Dispute {
   outcome?: 'upheld' | 'overturned';
   resolvedAt?: number;
   stakeDistribution?: { recipient: string; amountCSPR: number }[];
+  paymentTxHash?: string;   // on-chain deploy hash of the 5 CSPR stake payment
+  paymentPayer?: string;    // public key that paid the stake
 }
 
 export async function fetchDisputes(): Promise<Dispute[]> {

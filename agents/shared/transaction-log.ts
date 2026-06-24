@@ -73,7 +73,7 @@ export function createTransactionEntry(
   onChain: boolean = false
 ): TransactionEntry {
   const explorerUrl = onChain
-    ? `https://testnet.cspr.live/transaction/${hash}`
+    ? `https://testnet.cspr.live/deploy/${hash}`
     : '';
   return {
     id: `tx-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Gavel, RefreshCw, Swords, Scale, AlertTriangle, Shield, ChevronDown, ChevronUp, Activity, ArrowLeft } from 'lucide-react';
+import { Gavel, RefreshCw, Swords, Scale, AlertTriangle, Shield, ChevronDown, ChevronUp, Activity, ArrowLeft, Loader2, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { fetchOracleVerdicts, fetchDisputes, fileDispute, triggerRetrial, type OracleVerdict, type Dispute } from '../services/api';
@@ -28,8 +28,7 @@ export const DisputesView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [expandedDispute, setExpandedDispute] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'under_retrial' | 'resolved'>('all');
-  const [retrialLoading, setRetrialLoading] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'active' | 'pending' | 'under_retrial' | 'resolved'>('active');
 
   // ── Dispute filing state ──────────────────────────────────────────────
   // Step 1: reason form modal
@@ -56,7 +55,7 @@ export const DisputesView: React.FC = () => {
       setDisputes(disputesData || []);
       setLastUpdate(new Date());
     } catch {
-      // silent — data may be unavailable
+      // silent, data may be unavailable
     } finally {
       setLoading(false);
     }
@@ -85,6 +84,9 @@ export const DisputesView: React.FC = () => {
     setShowPaymentModal(true); // open payment modal
   }, [showReasonModal, disputeReason, wallet.connected, wallet.publicKey]);
 
+  // Track the last successful dispute tx for display
+  const [lastTxHashByAsset, setLastTxHashByAsset] = useState<Record<string, string>>({});
+
   // ── Step 2: User confirms payment in PaymentModal ─────────────────────
   const handlePaymentConfirm = useCallback(async () => {
     const request = pendingRequestRef.current;
@@ -108,13 +110,13 @@ export const DisputesView: React.FC = () => {
     setSignError(null);
 
     try {
-      // Sign the payment via wallet — this opens the wallet popup
-      const { paymentProof } = await wallet.signPayment(
+      // Sign the payment via wallet (opens the wallet popup)
+      const { paymentProof, deployHash } = await wallet.signPayment(
         PLATFORM_WALLET,
         DISPUTE_FEE_CSPR,
       );
 
-      // Payment signed — close modal and submit the dispute
+      // Payment signed. Close modal and submit the dispute
       setShowPaymentModal(false);
       pendingRequestRef.current = null;
 
@@ -123,6 +125,13 @@ export const DisputesView: React.FC = () => {
 
       if (result.status === 'success') {
         setDisputeReason('');
+        setLastTxHashByAsset(prev => ({ ...prev, [request.assetId]: deployHash || '' }));
+        // Auto-trigger re-trial immediately after dispute is filed
+        try {
+          await triggerRetrial(result.dispute.id);
+        } catch {
+          // Retrial may fail silently, dispute is still filed
+        }
         await loadData();
       } else if (result.status === 'payment_required') {
         setSignError('Payment was not accepted by the server. Please try again.');
@@ -160,17 +169,14 @@ export const DisputesView: React.FC = () => {
     setReasonError(null);
   }, []);
 
-  const handleTriggerRetrial = async (disputeId: string) => {
-    setRetrialLoading(disputeId);
-    try {
-      await triggerRetrial(disputeId);
-      await loadData();
-    } finally {
-      setRetrialLoading(null);
-    }
-  };
+  const filteredDisputes = filter === 'active'
+    ? disputes.filter(d => d.status !== 'resolved')
+    : disputes.filter(d => d.status === filter);
 
-  const filteredDisputes = filter === 'all' ? disputes : disputes.filter(d => d.status === filter);
+  // Build a set of assetIds that already have active (non-resolved) disputes
+  const activeDisputedAssets = new Set(
+    disputes.filter(d => d.status !== 'resolved').map(d => d.assetId)
+  );
 
   const stats = {
     total: disputes.length,
@@ -337,7 +343,7 @@ export const DisputesView: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div>
+          <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
             {verdicts.map((v) => (
               <div
                 key={v.assetId}
@@ -354,23 +360,35 @@ export const DisputesView: React.FC = () => {
                     ${v.value.toLocaleString()} · {Math.round(v.confidence * 100)}% confidence · {formatTime(v.timestamp)}
                   </div>
                 </div>
-                <button
-                  onClick={() => {
-                    if (!wallet.connected) {
-                      wallet.connect();
-                    }
-                    setShowReasonModal(v.assetId);
-                  }}
-                  style={{
+                {activeDisputedAssets.has(v.assetId) ? (
+                  <div style={{
                     display: 'flex', alignItems: 'center', gap: '6px',
                     padding: '8px 16px', borderRadius: '8px',
-                    border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)',
-                    color: '#EF4444', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
-                  }}
-                >
-                  <Swords size={14} />
-                  Challenge
-                </button>
+                    border: '1px solid rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.08)',
+                    color: '#F59E0B', fontSize: '0.82rem', fontWeight: 600,
+                  }}>
+                    <AlertTriangle size={14} />
+                    Dispute Active
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      if (!wallet.connected) {
+                        wallet.connect();
+                      }
+                      setShowReasonModal(v.assetId);
+                    }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      padding: '8px 16px', borderRadius: '8px',
+                      border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)',
+                      color: '#EF4444', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
+                    }}
+                  >
+                    <Swords size={14} />
+                    Challenge
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -398,7 +416,7 @@ export const DisputesView: React.FC = () => {
             </span>
           </div>
           <div style={{ display: 'flex', gap: '6px' }}>
-            {(['all', 'pending', 'under_retrial', 'resolved'] as const).map((f) => (
+            {(['active', 'pending', 'under_retrial', 'resolved'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
@@ -410,7 +428,7 @@ export const DisputesView: React.FC = () => {
                     : { background: 'transparent', borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }),
                 }}
               >
-                {f === 'all' ? 'All' : f === 'under_retrial' ? 'Re-trial' : f.charAt(0).toUpperCase() + f.slice(1)}
+                {f === 'active' ? `Active (${disputes.filter(d => d.status !== 'resolved').length})` : f === 'under_retrial' ? 'Re-trial' : f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
             ))}
           </div>
@@ -421,7 +439,7 @@ export const DisputesView: React.FC = () => {
             <Gavel size={40} style={{ color: 'var(--text-tertiary)', marginBottom: '12px', opacity: 0.5 }} />
             <p style={{ margin: '0 0 4px', fontWeight: 500 }}>No disputes found</p>
             <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
-              {filter === 'all' ? 'Challenge a verdict above to get started.' : `No ${filter.replace('_', ' ')} disputes.`}
+              {filter === 'active' ? 'No active disputes. Challenge a verdict above to get started.' : `No ${filter.replace('_', ' ')} disputes.`}
             </p>
           </div>
         ) : (
@@ -464,6 +482,16 @@ export const DisputesView: React.FC = () => {
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '2px' }}>
                       Stake: {d.stakeCSPR} CSPR · {formatTime(d.createdAt)}
                     </div>
+                    {d.outcome && (
+                      <div style={{
+                        fontSize: '0.75rem', marginTop: '4px', lineHeight: 1.4,
+                        color: d.outcome === 'overturned' ? 'rgba(239,68,68,0.7)' : 'rgba(16,185,129,0.7)',
+                      }}>
+                        {d.outcome === 'overturned'
+                          ? 'Re-trial found the original verdict incorrect. Decision has been reversed.'
+                          : 'Re-trial confirmed the original verdict. Challenge was unsuccessful.'}
+                      </div>
+                    )}
                   </div>
                   {expandedDispute === d.id ? <ChevronUp size={16} style={{ color: 'var(--text-tertiary)' }} /> : <ChevronDown size={16} style={{ color: 'var(--text-tertiary)' }} />}
                 </div>
@@ -494,30 +522,160 @@ export const DisputesView: React.FC = () => {
                           </div>
                         </div>
                         {d.retrial && (
-                          <div style={{ marginTop: '12px' }}>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                              Re-trial Result
+                          <div style={{ marginTop: '16px' }}>
+                            {/* ── Re-trial Header ──────────────────────────── */}
+                            <div style={{
+                              padding: '14px 16px', borderRadius: '10px',
+                              background: d.outcome === 'overturned'
+                                ? 'rgba(239,68,68,0.06)' : 'rgba(16,185,129,0.06)',
+                              border: `1px solid ${d.outcome === 'overturned' ? 'rgba(239,68,68,0.15)' : 'rgba(16,185,129,0.15)'}`,
+                              marginBottom: '12px',
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                  Re-trial Outcome
+                                </div>
+                                <span style={{
+                                  fontSize: '0.7rem', padding: '3px 10px', borderRadius: '10px', fontWeight: 700,
+                                  ...(d.outcome === 'overturned'
+                                    ? { background: 'rgba(239,68,68,0.15)', color: '#EF4444' }
+                                    : { background: 'rgba(16,185,129,0.15)', color: '#10B981' }),
+                                }}>
+                                  {d.outcome === 'overturned' ? '⚡ Overturned' : '✅ Upheld'}
+                                </span>
+                              </div>
+
+                              {/* Value comparison */}
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
+                                <div style={{ textAlign: 'center' }}>
+                                  <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', marginBottom: '2px' }}>Original</div>
+                                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                    ${d.retrial.originalVerdict.value.toLocaleString()}
+                                  </div>
+                                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
+                                    {d.retrial.originalVerdict.confidence}% conf
+                                  </div>
+                                </div>
+                                <div style={{ fontSize: '1.2rem', color: 'var(--text-tertiary)' }}>→</div>
+                                <div style={{ textAlign: 'center' }}>
+                                  <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', marginBottom: '2px' }}>New Verdict</div>
+                                  <div style={{
+                                    fontSize: '1.1rem', fontWeight: 700,
+                                    color: d.outcome === 'overturned' ? '#EF4444' : '#10B981',
+                                  }}>
+                                    ${d.retrial.newVerdict.value.toLocaleString()}
+                                  </div>
+                                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
+                                    {d.retrial.newVerdict.confidence}% conf
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Deltas */}
+                              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                                <span style={{
+                                  fontSize: '0.75rem', padding: '2px 8px', borderRadius: '6px',
+                                  background: d.retrial.valueDelta < 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
+                                  color: d.retrial.valueDelta < 0 ? '#EF4444' : '#10B981', fontWeight: 600,
+                                }}>
+                                  Value: {d.retrial.valueDelta > 0 ? '+' : ''}{d.retrial.valueDelta.toFixed(1)}%
+                                </span>
+                                <span style={{
+                                  fontSize: '0.75rem', padding: '2px 8px', borderRadius: '6px',
+                                  background: d.retrial.confidenceDelta < 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
+                                  color: d.retrial.confidenceDelta < 0 ? '#EF4444' : '#10B981', fontWeight: 600,
+                                }}>
+                                  Confidence: {d.retrial.confidenceDelta > 0 ? '+' : ''}{d.retrial.confidenceDelta}
+                                </span>
+                              </div>
                             </div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                              {typeof d.retrial === 'string' ? d.retrial : JSON.stringify(d.retrial)}
+
+                            {/* ── Panel Votes ──────────────────────────────── */}
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                              Panel Votes
                             </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+                              {d.retrial.panel.map((juror, i) => (
+                                <div key={i} style={{
+                                  padding: '10px 12px', borderRadius: '8px',
+                                  background: 'var(--bg-primary)', border: '1px solid var(--border-color)',
+                                  display: 'flex', alignItems: 'flex-start', gap: '10px',
+                                }}>
+                                  <div style={{
+                                    width: '28px', height: '28px', borderRadius: '6px', flexShrink: 0,
+                                    background: juror.vote === 'A' ? 'rgba(16,185,129,0.12)' : juror.vote === 'B' ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontSize: '0.7rem', fontWeight: 700,
+                                    color: juror.vote === 'A' ? '#10B981' : juror.vote === 'B' ? '#EF4444' : '#F59E0B',
+                                  }}>
+                                    {juror.vote}
+                                  </div>
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                        {juror.name}
+                                      </span>
+                                      <span style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)' }}>
+                                        {juror.confidence}% · Rep {juror.reputation}
+                                      </span>
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                                      {juror.reasoning}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* ── Reasoning Summary ────────────────────────── */}
+                            {d.retrial.reasoning && (
+                              <div style={{
+                                padding: '12px 14px', borderRadius: '8px',
+                                background: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.12)',
+                              }}>
+                                <div style={{ fontSize: '0.7rem', color: '#8B5CF6', marginBottom: '4px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                  Panel Summary
+                                </div>
+                                <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                                  {d.retrial.reasoning}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* ── On-chain Payment Tx Link ──────────────────── */}
+                            {(d.paymentTxHash || lastTxHashByAsset[d.assetId]) && (() => {
+                              const txHash = d.paymentTxHash || lastTxHashByAsset[d.assetId];
+                              return txHash ? (
+                              <a
+                                href={`https://testnet.cspr.live/deploy/${txHash}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                  marginTop: '12px', padding: '8px 14px', borderRadius: '8px',
+                                  background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)',
+                                  color: '#8B5CF6', fontSize: '0.78rem', fontWeight: 500,
+                                  textDecoration: 'none',
+                                }}
+                              >
+                                <ExternalLink size={13} />
+                                View 5 CSPR payment on Explorer ↗
+                              </a>
+                              ) : null;
+                            })()}
                           </div>
                         )}
                         {d.status === 'pending' && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleTriggerRetrial(d.id); }}
-                            disabled={retrialLoading === d.id}
-                            style={{
-                              marginTop: '12px', padding: '8px 16px', borderRadius: '8px',
-                              border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(139,92,246,0.08)',
-                              color: '#8B5CF6', cursor: retrialLoading === d.id ? 'wait' : 'pointer',
-                              fontSize: '0.82rem', fontWeight: 600,
-                              display: 'flex', alignItems: 'center', gap: '6px',
-                            }}
-                          >
-                            <Swords size={14} style={{ animation: retrialLoading === d.id ? 'spin 1s linear infinite' : 'none' }} />
-                            {retrialLoading === d.id ? 'Starting Re-trial...' : 'Trigger Re-trial'}
-                          </button>
+                          <div style={{
+                            marginTop: '12px', padding: '10px 14px', borderRadius: '8px',
+                            background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)',
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                          }}>
+                            <Loader2 size={14} style={{ color: '#F59E0B', animation: 'spin 1s linear infinite' }} />
+                            <span style={{ fontSize: '0.82rem', color: '#F59E0B', fontWeight: 500 }}>
+                              Re-trial pending. Will start automatically
+                            </span>
+                          </div>
                         )}
                       </div>
                     </motion.div>
@@ -529,7 +687,7 @@ export const DisputesView: React.FC = () => {
         )}
       </motion.div>
 
-      {/* ── Step 1: Reason Form Modal ─────────────────────────────── */}
+      {/* ── Step 1: Reason Form Modal (matches PaymentModal design) ─── */}
       <AnimatePresence>
         {showReasonModal && (
           <motion.div
@@ -551,110 +709,120 @@ export const DisputesView: React.FC = () => {
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
               style={{
-                width: '90%', maxWidth: '520px', borderRadius: '16px',
-                background: 'var(--bg-surface)', border: '1px solid var(--border-color)',
-                boxShadow: '0 24px 64px rgba(0,0,0,0.4)', overflow: 'hidden',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '16px',
+                padding: '2rem',
+                maxWidth: '480px',
+                width: '90%',
+                boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
               }}
             >
               {/* Header */}
-              <div style={{
-                padding: '20px 24px', borderBottom: '1px solid var(--border-color)',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Swords size={20} style={{ color: '#EF4444' }} />
-                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                    Challenge Verdict
-                  </h3>
+              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: '50%',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '2px solid rgba(239, 68, 68, 0.3)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto 1rem',
+                }}>
+                  <Swords size={24} color="#EF4444" />
                 </div>
-                <button
-                  onClick={handleReasonCancel}
-                  style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: '1.2rem', padding: '4px' }}
-                >
-                  &times;
-                </button>
+                <h3 style={{
+                  fontSize: '1.2rem', fontWeight: 700,
+                  color: 'var(--text-primary)', marginBottom: '0.5rem',
+                }}>
+                  Challenge Verdict
+                </h3>
+                <p style={{
+                  fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0,
+                }}>
+                  Stake {DISPUTE_FEE_CSPR} CSPR and explain why this verdict is wrong.
+                </p>
               </div>
 
-              {/* Body */}
-              <div style={{ padding: '20px 24px' }}>
-                {/* Wallet status */}
-                <div style={{
-                  padding: '10px 14px', borderRadius: '8px', marginBottom: '16px',
-                  background: wallet.connected ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                  border: `1px solid ${wallet.connected ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'}`,
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                }}>
-                  <span style={{ fontSize: '0.8rem', color: wallet.connected ? '#10B981' : '#EF4444', fontWeight: 500 }}>
-                    {wallet.connected
-                      ? `Wallet connected: ${wallet.publicKey?.slice(0, 8)}...${wallet.publicKey?.slice(-6)}`
-                      : 'Wallet not connected — please connect first'}
-                  </span>
-                </div>
-
-                <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Target Asset
-                  </div>
-                  <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                    {showReasonModal}
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Why is this verdict wrong?
-                  </div>
-                  <textarea
-                    value={disputeReason}
-                    onChange={(e) => setDisputeReason(e.target.value)}
-                    placeholder="e.g. Comparable sales data is 18 days stale. Market moved 15% since last data pull..."
-                    rows={4}
-                    style={{
-                      width: '100%', padding: '10px 12px', borderRadius: '8px',
-                      border: '1px solid var(--border-color)', background: 'var(--bg-primary)',
-                      color: 'var(--text-primary)', fontSize: '0.9rem', lineHeight: 1.5,
-                      resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box',
-                    }}
-                  />
-                </div>
-
-                <div style={{
-                  padding: '12px', borderRadius: '8px',
-                  background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
-                  marginBottom: '16px',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <AlertTriangle size={14} style={{ color: '#F59E0B' }} />
-                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#F59E0B' }}>Stake Required: {DISPUTE_FEE_CSPR} CSPR</span>
-                  </div>
-                  <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                    If the re-trial overturns the verdict, you get your stake back. If upheld, the stake goes to the original jurors.
-                  </p>
-                </div>
-
-                {/* Error display */}
-                {reasonError && (
-                  <div style={{
-                    padding: '10px 14px', borderRadius: '8px', marginBottom: '16px',
-                    background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
-                    fontSize: '0.82rem', color: '#EF4444',
-                  }}>
-                    {reasonError}
-                  </div>
-                )}
+              {/* Wallet status */}
+              <div style={{
+                padding: '10px 14px', borderRadius: '8px', marginBottom: '16px',
+                background: wallet.connected ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
+                border: `1px solid ${wallet.connected ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                display: 'flex', alignItems: 'center', gap: '8px',
+              }}>
+                <span style={{ fontSize: '0.8rem', color: wallet.connected ? '#10B981' : '#EF4444', fontWeight: 500 }}>
+                  {wallet.connected
+                    ? `Wallet connected: ${wallet.publicKey?.slice(0, 8)}...${wallet.publicKey?.slice(-6)}`
+                    : 'Wallet not connected. Please connect first.'}
+                </span>
               </div>
 
-              {/* Footer */}
+              {/* Target asset */}
               <div style={{
-                padding: '16px 24px', borderTop: '1px solid var(--border-color)',
-                display: 'flex', justifyContent: 'flex-end', gap: '10px',
+                background: 'var(--bg-surface-alt)',
+                borderRadius: '10px', padding: '1rem 1.25rem', marginBottom: '16px',
               }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Target Asset
+                </div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                  {showReasonModal}
+                </div>
+              </div>
+
+              {/* Reason textarea */}
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Why is this verdict wrong?
+                </div>
+                <textarea
+                  value={disputeReason}
+                  onChange={(e) => setDisputeReason(e.target.value)}
+                  placeholder="e.g. Comparable sales data is 18 days stale. Market moved 15% since last data pull..."
+                  rows={4}
+                  style={{
+                    width: '100%', padding: '10px 12px', borderRadius: '8px',
+                    border: '1px solid var(--border-color)', background: 'var(--bg-primary)',
+                    color: 'var(--text-primary)', fontSize: '0.9rem', lineHeight: 1.5,
+                    resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              {/* Stake info */}
+              <div style={{
+                padding: '12px', borderRadius: '8px',
+                background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)',
+                marginBottom: '16px',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <AlertTriangle size={14} style={{ color: '#F59E0B' }} />
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#F59E0B' }}>Stake Required: {DISPUTE_FEE_CSPR} CSPR</span>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                  If the re-trial overturns the verdict, you get your stake back. If upheld, the stake goes to the original jurors.
+                </p>
+              </div>
+
+              {/* Error */}
+              {reasonError && (
+                <div style={{
+                  background: 'rgba(239, 68, 68, 0.08)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  borderRadius: '8px', padding: '0.75rem', marginBottom: '1rem',
+                  fontSize: '0.8rem', color: '#EF4444',
+                }}>
+                  {reasonError}
+                </div>
+              )}
+
+              {/* Buttons */}
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
                 <button
                   onClick={handleReasonCancel}
                   style={{
-                    padding: '10px 20px', borderRadius: '8px',
+                    flex: 1, padding: '0.75rem', borderRadius: '8px',
                     border: '1px solid var(--border-color)', background: 'transparent',
-                    color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.85rem',
+                    color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer',
                   }}
                 >
                   Cancel
@@ -663,14 +831,15 @@ export const DisputesView: React.FC = () => {
                   onClick={handleReasonSubmit}
                   disabled={!disputeReason.trim() || !wallet.connected}
                   style={{
-                    padding: '10px 20px', borderRadius: '8px', border: 'none',
-                    background: (!disputeReason.trim() || !wallet.connected) ? 'var(--bg-surface-alt)' : 'linear-gradient(135deg, #EF4444, #F97316)',
+                    flex: 2, padding: '0.75rem', borderRadius: '8px', border: 'none',
+                    background: (!disputeReason.trim() || !wallet.connected) ? 'var(--bg-surface-alt)' : '#EF4444',
                     color: '#fff', cursor: (!disputeReason.trim() || !wallet.connected) ? 'not-allowed' : 'pointer',
-                    fontSize: '0.85rem', fontWeight: 600,
-                    display: 'flex', alignItems: 'center', gap: '6px',
+                    fontSize: '0.9rem', fontWeight: 600,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    opacity: (!disputeReason.trim() || !wallet.connected) ? 0.5 : 1,
                   }}
                 >
-                  <Swords size={14} />
+                  <Swords size={16} />
                   Continue to Payment
                 </button>
               </div>

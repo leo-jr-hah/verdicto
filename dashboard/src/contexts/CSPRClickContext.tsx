@@ -22,6 +22,7 @@ import React, {
   type ReactNode,
 } from 'react';
 import { makeCsprTransferDeploy, Deploy, PublicKey } from 'casper-js-sdk';
+import { ORCHESTRATOR_URL } from '../services/api';
 
 /* ---------- Types (matching Casper Wallet SDK) ---------- */
 
@@ -318,51 +319,106 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
       throw new Error('Payment signing was cancelled');
     }
 
-    // Set the signature on the deploy (static method)
-    // The wallet returns a hex string; SDK accepts it at runtime despite TS typing
-    const signedDeploy = Deploy.setSignature(deploy, result.signature as unknown as Uint8Array, PublicKey.fromHex(publicKey));
+    // ── Debug: log the exact type/shape of the wallet signature ──
+    const rawSig: any = result.signature as any;
+    console.log('[signPayment] result.signature type:', typeof result.signature);
+    console.log('[signPayment] result.signature constructor:', rawSig?.constructor?.name);
+    console.log('[signPayment] result.signature:', rawSig);
+    console.log('[signPayment] result.signature length:', rawSig?.length);
+    if (rawSig instanceof Uint8Array) {
+      console.log('[signPayment] → Signature is Uint8Array, length:', rawSig.length);
+    } else if (typeof rawSig === 'string') {
+      console.log('[signPayment] → Signature is string, first 40 chars:', rawSig.substring(0, 40));
+    } else if (Array.isArray(rawSig)) {
+      console.log('[signPayment] → Signature is Array, length:', rawSig.length);
+    }
+
+    // Convert signature to Uint8Array regardless of input format
+    // (wallet SDK types say string, but runtime may return Uint8Array or Array)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sig: any = result.signature as any;
+    let sigBytes: Uint8Array;
+    if (sig instanceof Uint8Array) {
+      sigBytes = sig;
+    } else if (Array.isArray(sig)) {
+      sigBytes = new Uint8Array(sig);
+    } else if (typeof sig === 'string') {
+      // Hex string → Uint8Array
+      sigBytes = new Uint8Array(sig.length / 2);
+      for (let i = 0; i < sig.length; i += 2) {
+        sigBytes[i / 2] = parseInt(sig.substring(i, i + 2), 16);
+      }
+    } else {
+      throw new Error(`Unexpected signature type: ${typeof sig}`);
+    }
+
+    console.log('[signPayment] sigBytes length:', sigBytes.length, 'first bytes:', Array.from(sigBytes.slice(0, 10)));
+
+    // ── Prepend key-type tag if missing ──
+    // Casper RPC expects the signature to include the algorithm prefix byte:
+    //   01 = Ed25519, 02 = secp256k1
+    // The Casper Wallet extension returns raw 64-byte signatures without the tag.
+    // The public key prefix tells us which algorithm to use.
+    const keyTypeTag = publicKey.startsWith('01') ? 0x01 : 0x02;
+    let taggedSigBytes: Uint8Array;
+    if (sigBytes.length === 64) {
+      // Raw signature — prepend the key type tag
+      taggedSigBytes = new Uint8Array(65);
+      taggedSigBytes[0] = keyTypeTag;
+      taggedSigBytes.set(sigBytes, 1);
+      console.log('[signPayment] Prepended key-type tag:', keyTypeTag.toString(16), '→ 65 bytes');
+    } else if (sigBytes.length === 65 && (sigBytes[0] === 0x01 || sigBytes[0] === 0x02)) {
+      // Already has the tag
+      taggedSigBytes = sigBytes;
+      console.log('[signPayment] Signature already has key-type tag:', sigBytes[0].toString(16));
+    } else {
+      // Unknown format — pass through and hope for the best
+      taggedSigBytes = sigBytes;
+      console.warn('[signPayment] Unexpected signature length:', sigBytes.length, '— passing through');
+    }
+
+    const signedDeploy = Deploy.setSignature(deploy, taggedSigBytes, PublicKey.fromHex(publicKey));
 
     // Get the deploy JSON with signature
     const signedDeployJson = Deploy.toJSON(signedDeploy);
     const deployHash = (signedDeployJson as any).hash || (signedDeployJson as any).deploy?.hash || '';
 
-    // ── Attempt to broadcast the signed deploy to Casper testnet ──
-    // NOTE: Direct browser → RPC calls often fail due to CORS restrictions.
-    // In production, the backend would relay the signed deploy.
-    // For the hackathon, we try the broadcast but gracefully handle CORS failures.
+    // ── Broadcast the signed deploy via backend relay ──
+    // Direct browser → RPC calls fail due to CORS, so we relay through the backend.
     let confirmedHash = deployHash;
     let broadcastSuccess = false;
 
     try {
-      const CSPR_TESTNET_RPC = 'https://node.testnet.cspr.cloud/rpc';
-      const rpcPayload = {
-        jsonrpc: '2.0',
-        id: Date.now(),
-        method: 'account_put_deploy',
-        params: [signedDeployJson],
-      };
-
-      const rpcResponse = await fetch(CSPR_TESTNET_RPC, {
+      const relayRes = await fetch(`${ORCHESTRATOR_URL}/api/relay-deploy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(rpcPayload),
+        body: JSON.stringify({ deploy: signedDeployJson }),
       });
 
-      const rpcResult = await rpcResponse.json();
+      const relayResult = await relayRes.json();
 
-      if (rpcResult.error) {
-        console.warn('RPC broadcast error (deploy still signed):', rpcResult.error);
-      } else {
-        confirmedHash = rpcResult.result?.deploy_hash || deployHash;
+      if (relayResult.success && relayResult.deployHash) {
+        confirmedHash = relayResult.deployHash;
         broadcastSuccess = true;
+        console.log('✅ Deploy broadcast via relay:', confirmedHash.substring(0, 16) + '...');
+      } else {
+        // Broadcast failed — the deploy was signed but NOT submitted to chain.
+        // Throw so the user knows the payment didn't go through.
+        const errMsg = relayResult.error || 'Unknown relay error';
+        console.error('❌ Relay broadcast failed:', errMsg);
+        throw new Error(`Payment broadcast failed: ${errMsg}. The deploy was signed but NOT submitted to the chain. Please try again.`);
       }
-    } catch (fetchErr) {
-      // CORS or network error - expected in browser context
-      console.warn('Deploy broadcast failed (CORS/network). Deploy is signed and valid as proof.', fetchErr);
+    } catch (relayErr: any) {
+      // If it's already our explicit error, re-throw it
+      if (relayErr.message?.startsWith('Payment broadcast failed')) {
+        throw relayErr;
+      }
+      // Network/fetch error — relay endpoint might be down
+      console.error('❌ Deploy relay unreachable:', relayErr);
+      throw new Error(`Payment relay is unreachable (${relayErr.message || 'network error'}). The deploy was signed but NOT submitted to the chain. Please check your connection and try again.`);
     }
 
     // Build the payment proof (base64-encoded JSON)
-    // The signed deploy itself is cryptographic proof of payment intent
     const paymentProof = {
       scheme: 'casper',
       payload: {
@@ -403,7 +459,12 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
 /**
  * Access wallet state from any component.
  * Must be used inside <CSPRClickProvider>.
+ *
+ * NOTE: This hook lives in the same file as CSPRClickProvider intentionally.
+ * Vite fast-refresh sometimes flags mixed component+hook exports. This is a
+ * known limitation and does not affect production builds or runtime behavior.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useWallet(): WalletState {
   const ctx = useContext(WalletContext);
   if (!ctx) {

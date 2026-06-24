@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
 
-const CSPR_CLOUD_URL = process.env.CSPRCLOUD_BASE_URL || 'https://api.cspr.cloud/v1';
+const CSPR_CLOUD_URL = process.env.CSPRCLOUD_BASE_URL || 'https://api.testnet.cspr.cloud';
 const CSPR_CLOUD_KEY = process.env.CSPRCLOUD_API_KEY || '';
 
 // ─── Allowed internal IPs for localhost bypass ──────────────────────────────
@@ -24,11 +24,13 @@ async function verifyDeployOnChain(deployHash: string): Promise<boolean> {
   }
   try {
     const res = await axios.get(`${CSPR_CLOUD_URL}/deploys/${deployHash}`, {
-      headers: { Authorization: CSPR_CLOUD_KEY },
+      headers: { Authorization: CSPR_CLOUD_KEY, accept: 'application/json' },
       timeout: 5_000,
     });
-    // Deploy exists on-chain ONLY if execution_results are present (not just pending)
-    return res.data?.execution_results?.length > 0;
+    // CSPR.cloud API returns { data: { status: "processed", ... } }
+    // Deploy is confirmed if status is "processed" (not pending/unknown)
+    const status = res.data?.data?.status || res.data?.status;
+    return status === 'processed';
   } catch {
     return false;
   }

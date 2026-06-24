@@ -52,7 +52,7 @@ import { casperX402Middleware } from '../shared/x402-middleware.js';
 import type { AssetType } from '../shared/types.js';
 
 // ─── Named constants ─────────────────────────────────────────────────────────
-const CSPR_CLOUD_URL = process.env.CSPRCLOUD_BASE_URL || 'https://api.cspr.cloud/v1';
+const CSPR_CLOUD_URL = process.env.CSPRCLOUD_BASE_URL || 'https://api.testnet.cspr.cloud';
 const CSPR_CLOUD_KEY = process.env.CSPRCLOUD_API_KEY || '';
 const CSPR_RPC_URL = 'https://node.testnet.cspr.cloud/rpc';
 const SETTLEMENT_AMOUNT_MOTES = 2_500_000_000; // 2.5 CSPR
@@ -806,6 +806,57 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     return false;
   }
 
+  // ─── Deploy Relay: broadcast a user-signed deploy to the Casper testnet ────
+  // The browser cannot call the CSPR RPC directly (CORS), so the frontend sends
+  // the signed deploy JSON here and the backend relays it.
+  app.post('/api/relay-deploy', async (req, res) => {
+    try {
+      const { deploy } = req.body;
+      if (!deploy || typeof deploy !== 'object') {
+        return res.status(400).json({ success: false, error: 'deploy object is required' });
+      }
+
+      // ── Debug: inspect the deploy hash and approvals ──
+      console.log('[relay-deploy] deploy.hash:', deploy.hash);
+      console.log('[relay-deploy] deploy.header?.body_hash:', deploy.header?.body_hash);
+      const approvals = deploy.approvals || [];
+      for (const a of approvals) {
+        const sig = a.signature;
+        console.log('[relay-deploy] approval signer:', a.signer);
+        console.log('[relay-deploy] approval signature type:', typeof sig, 'length:', sig?.length);
+        console.log('[relay-deploy] approval signature first 80 chars:', typeof sig === 'string' ? sig.substring(0, 80) : sig);
+        // Check if it starts with 01 (ed25519) or 02 (secp256k1)
+        if (typeof sig === 'string') {
+          console.log('[relay-deploy] signature prefix (first 4 hex chars):', sig.substring(0, 4));
+        }
+      }
+
+      const payload = {
+        jsonrpc: '2.0',
+        id: Date.now(),
+        method: 'account_put_deploy',
+        params: [deploy],
+      };
+
+      const rpcResponse = await axios.post(CSPR_RPC_URL, payload, {
+        headers: { Authorization: CSPR_CLOUD_KEY },
+        timeout: 30_000,
+      });
+
+      if (rpcResponse.data.error) {
+        console.warn('[relay-deploy] RPC error:', rpcResponse.data.error);
+        return res.json({ success: false, error: rpcResponse.data.error.message || 'RPC error' });
+      }
+
+      const deployHash = rpcResponse.data.result?.deploy_hash;
+      console.log(`[relay-deploy] ✅ Broadcast: ${deployHash?.substring(0, 16)}...`);
+      return res.json({ success: true, deployHash });
+    } catch (err: any) {
+      console.error('[relay-deploy] Failed:', err.message);
+      return res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   app.post('/api/assessments/start', async (req, res) => {
     try {
       const ip = req.ip || req.socket.remoteAddress || 'unknown';
@@ -1042,11 +1093,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           if (CSPR_CLOUD_KEY) {
             try {
               const verifyRes = await axios.get(`${CSPR_CLOUD_URL}/deploys/${txHash}`, {
-                headers: { Authorization: CSPR_CLOUD_KEY },
+                headers: { Authorization: CSPR_CLOUD_KEY, accept: 'application/json' },
                 timeout: 5_000,
               });
-              if (!verifyRes.data?.execution_results?.length) {
-                console.warn(`[x402] Deploy ${txHash} not yet confirmed on-chain, proceeding with trust`);
+              const status = verifyRes.data?.data?.status || verifyRes.data?.status;
+              if (status !== 'processed') {
+                console.warn(`[x402] Deploy ${txHash} status: ${status}, proceeding with trust`);
               } else {
                 console.log(`[x402] ✅ Payment verified on-chain: ${txHash.substring(0, 16)}...`);
               }
@@ -1355,6 +1407,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           marketData: marketData ? {
             source: marketData.source,
             comparables: marketData.comparables?.length || 0,
+            assetType,
           } : null,
           analysisSteps,
           dataSources: dataSourcesUsed,
@@ -1511,10 +1564,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         if (CSPR_CLOUD_KEY) {
           try {
             const verifyRes = await axios.get(`${CSPR_CLOUD_URL}/deploys/${txHash}`, {
-              headers: { Authorization: CSPR_CLOUD_KEY },
+              headers: { Authorization: CSPR_CLOUD_KEY, accept: 'application/json' },
               timeout: 5_000,
             });
-            if (verifyRes.data?.execution_results?.length) {
+            const status = verifyRes.data?.data?.status || verifyRes.data?.status;
+            if (status === 'processed') {
               console.log(`[x402] ✅ Oracle query payment verified: ${txHash.substring(0, 16)}...`);
             }
           } catch {
@@ -1597,6 +1651,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
       const paymentProof = req.headers['x-payment-proof'] as string | undefined;
 
+      // Payment proof fields (extracted below, passed to createDispute)
+      let proofPayer: string | undefined;
+      let proofTxHash: string | undefined;
+
       if (requirePayment && !paymentProof) {
         res.setHeader('payment-required', 'true');
         return res.status(402).json({
@@ -1623,12 +1681,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           const decoded = JSON.parse(Buffer.from(paymentProof, 'base64').toString('utf-8'));
 
           // Support both flat { payer, txHash, amount } and nested { payload: { payer, amount }, deployHash }
-          const payer = decoded.payer || decoded.payload?.payer;
-          const txHash = decoded.txHash || decoded.deployHash;
+          proofPayer = decoded.payer || decoded.payload?.payer;
+          proofTxHash = decoded.txHash || decoded.deployHash;
           const amount = decoded.amount || decoded.payload?.amount;
 
-          if (!payer || !txHash || !amount) {
-            console.error('[x402] Dispute payment proof missing fields:', JSON.stringify({ hasPayer: !!payer, hasTxHash: !!txHash, hasAmount: !!amount }));
+          if (!proofPayer || !proofTxHash || !amount) {
+            console.error('[x402] Dispute payment proof missing fields:', JSON.stringify({ hasPayer: !!proofPayer, hasTxHash: !!proofTxHash, hasAmount: !!amount }));
             return res.status(402).json({ success: false, error: 'Invalid payment proof: missing fields' });
           }
 
@@ -1641,7 +1699,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
             });
           }
 
-          console.log(`  ⚖️  [x402] Dispute payment proof accepted: ${amount} CSPR from ${payer.slice(0, 12)}...`);
+          console.log(`  ⚖️  [x402] Dispute payment proof accepted: ${amount} CSPR from ${proofPayer.slice(0, 12)}...`);
         } catch (err: any) {
           console.error('[x402] Dispute payment proof decode error:', err.message);
           return res.status(402).json({ success: false, error: 'Invalid payment proof' });
@@ -1649,7 +1707,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       }
 
       const { createDispute } = await import('../shared/casper-contracts.js');
-      const result = createDispute(assetId, challengerKey, DISPUTE_FEE_CSPR, reason);
+      const result = createDispute(assetId, challengerKey, DISPUTE_FEE_CSPR, reason, proofTxHash, proofPayer);
 
       if ('error' in result) {
         return res.status(400).json({ success: false, error: result.error });
@@ -2255,11 +2313,12 @@ Respond in JSON format:
           if (CSPR_CLOUD_KEY) {
             try {
               const verifyRes = await axios.get(`${CSPR_CLOUD_URL}/deploys/${txHash}`, {
-                headers: { Authorization: CSPR_CLOUD_KEY },
+                headers: { Authorization: CSPR_CLOUD_KEY, accept: 'application/json' },
                 timeout: 5_000,
               });
-              if (!verifyRes.data?.execution_results?.length) {
-                console.warn(`[x402 Loan] Deploy ${txHash} not yet confirmed, proceeding with trust`);
+              const status = verifyRes.data?.data?.status || verifyRes.data?.status;
+              if (status !== 'processed') {
+                console.warn(`[x402 Loan] Deploy ${txHash} status: ${status}, proceeding with trust`);
               }
             } catch {
               console.warn(`[x402 Loan] Could not verify deploy ${txHash}, proceeding with trust`);
@@ -2509,11 +2568,12 @@ Respond in JSON format:
           if (CSPR_CLOUD_KEY) {
             try {
               const verifyRes = await axios.get(`${CSPR_CLOUD_URL}/deploys/${proofTxHash}`, {
-                headers: { Authorization: CSPR_CLOUD_KEY },
+                headers: { Authorization: CSPR_CLOUD_KEY, accept: 'application/json' },
                 timeout: 5_000,
               });
-              if (!verifyRes.data?.execution_results?.length) {
-                console.warn(`[x402 Repay] Deploy ${proofTxHash} not yet confirmed, proceeding with trust`);
+              const status = verifyRes.data?.data?.status || verifyRes.data?.status;
+              if (status !== 'processed') {
+                console.warn(`[x402 Repay] Deploy ${proofTxHash} status: ${status}, proceeding with trust`);
               }
             } catch {
               console.warn(`[x402 Repay] Could not verify deploy ${proofTxHash}, proceeding with trust`);
@@ -2541,10 +2601,11 @@ Respond in JSON format:
       if (txHash && CSPR_CLOUD_KEY) {
         try {
           const verifyRes = await axios.get(`${CSPR_CLOUD_URL}/deploys/${txHash}`, {
-            headers: { Authorization: CSPR_CLOUD_KEY },
+            headers: { Authorization: CSPR_CLOUD_KEY, accept: 'application/json' },
             timeout: 5_000,
           });
-          verified = !!verifyRes.data?.execution_results?.length;
+          const status = verifyRes.data?.data?.status || verifyRes.data?.status;
+          verified = status === 'processed';
         } catch {
           console.warn(`[Loan Repay] Could not verify deploy ${txHash}`);
         }
@@ -3272,9 +3333,9 @@ Respond in JSON format:
     // Populates the in-memory oracle store so the dashboard shows live data
     // on first load. Real assessment verdicts overwrite these by asset_id.
     try {
-      const { seedDemoVerdicts, seedDemoDisputes } = await import('../shared/casper-contracts.js');
+      const { seedDemoVerdicts } = await import('../shared/casper-contracts.js');
       seedDemoVerdicts();
-      seedDemoDisputes();
+      // Demo disputes are NOT seeded — users file real disputes from the UI
     } catch (err: any) {
       console.warn(`  ⚠️ Oracle seed failed (non-critical): ${err.message}`);
     }

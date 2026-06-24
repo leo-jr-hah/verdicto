@@ -512,6 +512,8 @@ export interface Dispute {
   outcome?: 'upheld' | 'overturned';
   resolvedAt?: number;
   stakeDistribution?: { recipient: string; amountCSPR: number }[];
+  paymentTxHash?: string;   // on-chain deploy hash of the 5 CSPR stake payment
+  paymentPayer?: string;    // public key that paid the stake
 }
 
 export interface RetrialResult {
@@ -612,6 +614,8 @@ export function createDispute(
   challengerKey: string,
   stakeCSPR: number,
   reason: string,
+  paymentTxHash?: string,
+  paymentPayer?: string,
 ): Dispute | { error: string } {
   const verdict = oracleVerdictStore.get(assetId);
   if (!verdict) return { error: `No verdict found for asset ${assetId}` };
@@ -631,6 +635,8 @@ export function createDispute(
     reason,
     createdAt: Date.now(),
     status: 'pending',
+    paymentTxHash,
+    paymentPayer,
   };
 
   disputeStore.set(dispute.id, dispute);

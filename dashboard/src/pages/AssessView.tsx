@@ -506,7 +506,11 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
           color: 'var(--text-secondary)',
         }}>
           <FileText size={14} />
-          Market data from {result.marketData.source} • {result.marketData.comparables} comparables found
+          Market data from {result.marketData.source} • {result.marketData.assetType === 'commodity'
+            ? 'Live spot price feed'
+            : result.marketData.comparables > 0
+              ? `${result.marketData.comparables} comparables found`
+              : 'No comparable data available'}
         </div>
       )}
 
