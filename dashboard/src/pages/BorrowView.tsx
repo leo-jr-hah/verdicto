@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Landmark,
   ArrowRight,
@@ -17,7 +17,6 @@ import {
   Building2,
   Palette,
   Gem,
-  Zap,
 } from 'lucide-react';
 import { useWallet } from '../contexts/CSPRClickContext';
 import { useLoan } from '../hooks/useLoan';
@@ -30,6 +29,7 @@ import {
 } from '../services/api';
 import { PLATFORM_WALLET, LOAN_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
 import { AgentExplainer } from '../components/AgentExplainer';
+import PaymentModal from '../components/PaymentModal';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -652,98 +652,22 @@ export const BorrowView: React.FC = () => {
   return (
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
       {/* Assessment Payment Modal */}
-      <AnimatePresence>
-        {showAssessPaymentModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(0,0,0,0.6)',
-              backdropFilter: 'blur(4px)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 9999,
-            }}
-            onClick={handleAssessPaymentCancel}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '16px',
-                padding: '2rem',
-                maxWidth: '420px',
-                width: '90%',
-                boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
-              }}
-            >
-              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                <div style={{
-                  width: 56, height: 56, borderRadius: '50%',
-                  background: 'rgba(139, 92, 246, 0.1)',
-                  border: '2px solid rgba(139, 92, 246, 0.3)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 1rem',
-                }}>
-                  <Zap size={24} color="#8B5CF6" />
-                </div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-                  Confirm Assessment Payment
-                </h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  A micropayment is required to run the AI valuation pipeline.
-                </p>
-              </div>
-
-              <div style={{ background: 'var(--bg-main)', borderRadius: '10px', padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Assessment Fee</span>
-                  <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>{ASSESSMENT_FEE_CSPR} CSPR</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                  <span>Network</span>
-                  <span>Casper Testnet</span>
-                </div>
-              </div>
-
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-                <div style={{ fontWeight: 600, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>You'll receive:</div>
-                <div>- Dual-agent independent valuation</div>
-                <div>- Agent deliberation (if agents diverge &gt;15%)</div>
-                <div>- Full analysis report with data sources</div>
-              </div>
-
-              {assessSignError && (
-                <div style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', padding: '0.75rem', marginBottom: '1rem', fontSize: '0.8rem', color: '#EF4444' }}>
-                  {assessSignError}
-                </div>
-              )}
-
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <button onClick={handleAssessPaymentCancel} disabled={assessSigning} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600, cursor: assessSigning ? 'not-allowed' : 'pointer', opacity: assessSigning ? 0.5 : 1 }}>
-                  Cancel
-                </button>
-                <button onClick={handleAssessPaymentConfirm} disabled={assessSigning} style={{ flex: 2, padding: '0.75rem', borderRadius: '8px', border: 'none', background: assessSigning ? '#6366f1aa' : '#6366f1', color: 'white', fontSize: '0.9rem', fontWeight: 600, cursor: assessSigning ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                  {assessSigning ? (
-                    <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Waiting for wallet...</>
-                  ) : (
-                    <><Zap size={16} /> Pay {ASSESSMENT_FEE_CSPR} CSPR & Run</>
-                  )}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <PaymentModal
+        open={showAssessPaymentModal}
+        title="Confirm Assessment Payment"
+        description="A micropayment is required to run the AI valuation pipeline."
+        feeLabel="Assessment Fee"
+        feeAmount={ASSESSMENT_FEE_CSPR}
+        features={[
+          'Dual-agent independent valuation',
+          'Agent deliberation (if agents diverge >15%)',
+          'Full analysis report with data sources',
+        ]}
+        signing={assessSigning}
+        signError={assessSignError}
+        onConfirm={handleAssessPaymentConfirm}
+        onCancel={handleAssessPaymentCancel}
+      />
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>

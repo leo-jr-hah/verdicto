@@ -1,5 +1,93 @@
 [
   {
+    "id": "tx-1782333107511-ju550q",
+    "type": "Retrial Complete",
+    "action": "Retrial RTL-1782333107511 for dispute DSP-1782332765292: overturned",
+    "hash": "hmac-retrial-RTL-1782333107511",
+    "contract": "DisputeEngine",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-24T20:31:47.511Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "disputeId": "DSP-1782332765292",
+      "outcome": "overturned",
+      "valueDelta": -10.7,
+      "confidenceDelta": -8,
+      "panelSize": 3
+    }
+  },
+  {
+    "id": "tx-1782333104017-5k41xq",
+    "type": "Retrial Complete",
+    "action": "Retrial RTL-1782333104017 for dispute DSP-1782332800352-u768nk: overturned",
+    "hash": "hmac-retrial-RTL-1782333104017",
+    "contract": "DisputeEngine",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-24T20:31:44.018Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "disputeId": "DSP-1782332800352-u768nk",
+      "outcome": "overturned",
+      "valueDelta": -15.9,
+      "confidenceDelta": -16,
+      "panelSize": 3
+    }
+  },
+  {
+    "id": "tx-1782333098700-mky5qy",
+    "type": "Retrial Complete",
+    "action": "Retrial RTL-1782333098682 for dispute DSP-1782333086816-j4y4bl: upheld",
+    "hash": "hmac-retrial-RTL-1782333098682",
+    "contract": "DisputeEngine",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-24T20:31:38.700Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "disputeId": "DSP-1782333086816-j4y4bl",
+      "outcome": "upheld",
+      "valueDelta": 0,
+      "confidenceDelta": -3,
+      "panelSize": 3
+    }
+  },
+  {
+    "id": "tx-1782333086817-le7mnr",
+    "type": "Dispute Filed",
+    "action": "Dispute DSP-1782333086816-j4y4bl against verdict for ASSESS-1719100000000",
+    "hash": "dispute-DSP-1782333086816-j4y4bl",
+    "contract": "DisputeEngine",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-24T20:31:26.817Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "disputeId": "DSP-1782333086816-j4y4bl",
+      "assetId": "ASSESS-1719100000000",
+      "challengerKey": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
+      "stakeCSPR": 5
+    }
+  },
+  {
+    "id": "tx-1782332800352-162no1",
+    "type": "Dispute Filed",
+    "action": "Dispute DSP-1782332800352-u768nk against verdict for ASSESS-1719220000000",
+    "hash": "dispute-DSP-1782332800352-u768nk",
+    "contract": "DisputeEngine",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-24T20:26:40.352Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "disputeId": "DSP-1782332800352-u768nk",
+      "assetId": "ASSESS-1719220000000",
+      "challengerKey": "test-key",
+      "stakeCSPR": 5
+    }
+  },
+  {
     "id": "tx-1782331930531-cm90z2",
     "type": "Retrial Complete",
     "action": "Retrial RTL-1782331930490 for dispute DSP-1782331815715: overturned",

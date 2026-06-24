@@ -1618,13 +1618,32 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       }
 
       if (requirePayment && paymentProof) {
+        // Verify the payment proof — same robust pattern as assessment endpoint
         try {
           const decoded = JSON.parse(Buffer.from(paymentProof, 'base64').toString('utf-8'));
-          if (decoded.amount !== String(DISPUTE_FEE_CSPR)) {
-            return res.status(402).json({ success: false, error: `Wrong amount: expected ${DISPUTE_FEE_CSPR} CSPR, got ${decoded.amount}` });
+
+          // Support both flat { payer, txHash, amount } and nested { payload: { payer, amount }, deployHash }
+          const payer = decoded.payer || decoded.payload?.payer;
+          const txHash = decoded.txHash || decoded.deployHash;
+          const amount = decoded.amount || decoded.payload?.amount;
+
+          if (!payer || !txHash || !amount) {
+            console.error('[x402] Dispute payment proof missing fields:', JSON.stringify({ hasPayer: !!payer, hasTxHash: !!txHash, hasAmount: !!amount }));
+            return res.status(402).json({ success: false, error: 'Invalid payment proof: missing fields' });
           }
-          console.log(`  ⚖️  [x402] Dispute payment proof accepted: ${decoded.amount} CSPR`);
-        } catch {
+
+          const requiredAmount = parseFloat(DISPUTE_FEE_CSPR.toString());
+          const paidAmount = parseFloat(amount);
+          if (isNaN(paidAmount) || paidAmount < requiredAmount * 0.99) {
+            return res.status(402).json({
+              success: false,
+              error: `Insufficient payment: expected ${DISPUTE_FEE_CSPR} CSPR, got ${amount} CSPR`,
+            });
+          }
+
+          console.log(`  ⚖️  [x402] Dispute payment proof accepted: ${amount} CSPR from ${payer.slice(0, 12)}...`);
+        } catch (err: any) {
+          console.error('[x402] Dispute payment proof decode error:', err.message);
           return res.status(402).json({ success: false, error: 'Invalid payment proof' });
         }
       }

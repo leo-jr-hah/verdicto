@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Gavel, RefreshCw, Swords, Scale, AlertTriangle, Shield, ChevronDown, ChevronUp, Activity, ArrowLeft, Wallet } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Gavel, RefreshCw, Swords, Scale, AlertTriangle, Shield, ChevronDown, ChevronUp, Activity, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { fetchOracleVerdicts, fetchDisputes, fileDispute, triggerRetrial, type OracleVerdict, type Dispute } from '../services/api';
 import { useWallet } from '../contexts/CSPRClickContext';
 import { PLATFORM_WALLET, DISPUTE_FEE_CSPR } from '../config/casper';
+import PaymentModal from '../components/PaymentModal';
 
 function formatTime(ts: number): string {
   const date = new Date(ts);
@@ -27,12 +28,22 @@ export const DisputesView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [expandedDispute, setExpandedDispute] = useState<string | null>(null);
-  const [disputeModal, setDisputeModal] = useState<string | null>(null);
-  const [disputeReason, setDisputeReason] = useState('');
-  const [disputeLoading, setDisputeLoading] = useState(false);
-  const [disputeError, setDisputeError] = useState<string | null>(null);
-  const [retrialLoading, setRetrialLoading] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'under_retrial' | 'resolved'>('all');
+  const [retrialLoading, setRetrialLoading] = useState<string | null>(null);
+
+  // ── Dispute filing state ──────────────────────────────────────────────
+  // Step 1: reason form modal
+  const [showReasonModal, setShowReasonModal] = useState<string | null>(null); // assetId or null
+  const [disputeReason, setDisputeReason] = useState('');
+  const [reasonError, setReasonError] = useState<string | null>(null);
+
+  // Step 2: payment modal
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [signingPayment, setSigningPayment] = useState(false);
+  const [signError, setSignError] = useState<string | null>(null);
+
+  // Pending request (stored between step 1 → step 2)
+  const pendingRequestRef = useRef<{ assetId: string; reason: string } | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -45,7 +56,7 @@ export const DisputesView: React.FC = () => {
       setDisputes(disputesData || []);
       setLastUpdate(new Date());
     } catch {
-      // silent
+      // silent — data may be unavailable
     } finally {
       setLoading(false);
     }
@@ -57,49 +68,97 @@ export const DisputesView: React.FC = () => {
     return () => clearInterval(interval);
   }, [loadData]);
 
-  const handleFileDispute = async () => {
-    if (!disputeModal || !disputeReason.trim()) return;
+  // ── Step 1: User fills reason, clicks "Continue to Payment" ───────────
+  const handleReasonSubmit = useCallback(() => {
+    if (!showReasonModal || !disputeReason.trim()) return;
+
     if (!wallet.connected || !wallet.publicKey) {
-      setDisputeError('Please connect your wallet first.');
+      setReasonError('Please connect your wallet first.');
       return;
     }
-    setDisputeLoading(true);
-    setDisputeError(null);
-    try {
-      // Step 1: Try without payment (backend may not require it in dev)
-      let result = await fileDispute(disputeModal, wallet.publicKey, disputeReason.trim());
 
-      // Step 2: If 402 payment required, sign via wallet and retry
-      if (result.status === 'payment_required') {
-        setDisputeError(null);
-        try {
-          const { paymentProof } = await wallet.signPayment(PLATFORM_WALLET, DISPUTE_FEE_CSPR);
-          result = await fileDispute(disputeModal, wallet.publicKey, disputeReason.trim(), paymentProof);
-        } catch (payErr: any) {
-          if (payErr?.message?.includes('cancelled') || payErr?.message?.includes('reject')) {
-            setDisputeError('Payment was cancelled. Please approve the transfer in your wallet.');
-          } else {
-            setDisputeError(payErr?.message || 'Failed to sign payment. Please try again.');
-          }
-          setDisputeLoading(false);
-          return;
-        }
+    // Store the request and open the payment modal
+    pendingRequestRef.current = { assetId: showReasonModal, reason: disputeReason.trim() };
+    setReasonError(null);
+    setShowReasonModal(null); // close reason modal
+    setSignError(null);
+    setShowPaymentModal(true); // open payment modal
+  }, [showReasonModal, disputeReason, wallet.connected, wallet.publicKey]);
+
+  // ── Step 2: User confirms payment in PaymentModal ─────────────────────
+  const handlePaymentConfirm = useCallback(async () => {
+    const request = pendingRequestRef.current;
+    if (!request) return;
+
+    // If wallet not connected, try to connect first
+    if (!wallet.connected) {
+      try {
+        await wallet.connect();
+      } catch {
+        setSignError('Please connect your wallet first.');
+        return;
       }
+      if (!wallet.connected) {
+        setSignError('Wallet connection is required to proceed.');
+        return;
+      }
+    }
+
+    setSigningPayment(true);
+    setSignError(null);
+
+    try {
+      // Sign the payment via wallet — this opens the wallet popup
+      const { paymentProof } = await wallet.signPayment(
+        PLATFORM_WALLET,
+        DISPUTE_FEE_CSPR,
+      );
+
+      // Payment signed — close modal and submit the dispute
+      setShowPaymentModal(false);
+      pendingRequestRef.current = null;
+
+      // Submit the dispute with the payment proof
+      const result = await fileDispute(request.assetId, wallet.publicKey!, request.reason, paymentProof);
 
       if (result.status === 'success') {
-        setDisputeModal(null);
         setDisputeReason('');
-        setDisputeError(null);
         await loadData();
+      } else if (result.status === 'payment_required') {
+        setSignError('Payment was not accepted by the server. Please try again.');
+        setShowPaymentModal(true);
       } else if (result.status === 'error') {
-        setDisputeError(result.error);
+        setSignError(result.error);
+        setShowPaymentModal(true);
       }
     } catch (err: any) {
-      setDisputeError(err?.message || 'Failed to file dispute.');
+      const msg = err?.message || 'Failed to sign payment.';
+      if (msg.includes('cancelled') || msg.includes('reject')) {
+        setSignError('Payment was cancelled. Please approve the transfer in your wallet.');
+      } else {
+        setSignError(msg);
+      }
+      // Re-open modal so user can retry
+      setShowPaymentModal(true);
     } finally {
-      setDisputeLoading(false);
+      setSigningPayment(false);
     }
-  };
+  }, [wallet, loadData]);
+
+  // ── Cancel payment ────────────────────────────────────────────────────
+  const handlePaymentCancel = useCallback(() => {
+    setShowPaymentModal(false);
+    setSigningPayment(false);
+    setSignError(null);
+    pendingRequestRef.current = null;
+  }, []);
+
+  // ── Cancel reason form ────────────────────────────────────────────────
+  const handleReasonCancel = useCallback(() => {
+    setShowReasonModal(null);
+    setDisputeReason('');
+    setReasonError(null);
+  }, []);
 
   const handleTriggerRetrial = async (disputeId: string) => {
     setRetrialLoading(disputeId);
@@ -135,7 +194,7 @@ export const DisputesView: React.FC = () => {
               </h1>
             </div>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.95rem' }}>
-              Challenge any verdict with a 5 CSPR stake. Adversarial AI panel re-evaluates independently.
+              Challenge any verdict with a {DISPUTE_FEE_CSPR} CSPR stake. Adversarial AI panel re-evaluates independently.
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -226,7 +285,7 @@ export const DisputesView: React.FC = () => {
               How Disputes Work
             </h3>
             <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              <strong>1. Challenge:</strong> Stake 5 CSPR and explain why the verdict is wrong.
+              <strong>1. Challenge:</strong> Stake {DISPUTE_FEE_CSPR} CSPR and explain why the verdict is wrong.
               <br />
               <strong>2. Adversarial Re-trial:</strong> Three fresh AI agents (Market Analyst, Value Auditor, Devil's Advocate) independently re-evaluate.
               <br />
@@ -296,7 +355,12 @@ export const DisputesView: React.FC = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => setDisputeModal(v.assetId)}
+                  onClick={() => {
+                    if (!wallet.connected) {
+                      wallet.connect();
+                    }
+                    setShowReasonModal(v.assetId);
+                  }}
                   style={{
                     display: 'flex', alignItems: 'center', gap: '6px',
                     padding: '8px 16px', borderRadius: '8px',
@@ -325,32 +389,25 @@ export const DisputesView: React.FC = () => {
       >
         <div style={{
           padding: '16px 20px', borderBottom: '1px solid var(--border-color)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Gavel size={16} style={{ color: '#EF4444' }} />
             <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
-              All Disputes
-            </span>
-            <span style={{
-              fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px',
-              background: 'rgba(239,68,68,0.1)', color: '#EF4444', fontWeight: 600,
-            }}>
-              {filteredDisputes.length}
+              Active Disputes
             </span>
           </div>
-
-          {/* Filter Tabs */}
-          <div style={{ display: 'flex', gap: '4px' }}>
+          <div style={{ display: 'flex', gap: '6px' }}>
             {(['all', 'pending', 'under_retrial', 'resolved'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 style={{
-                  padding: '4px 12px', borderRadius: '6px', border: 'none',
-                  background: filter === f ? 'rgba(139,92,246,0.15)' : 'transparent',
-                  color: filter === f ? '#8B5CF6' : 'var(--text-tertiary)',
-                  cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600,
+                  padding: '4px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 500,
+                  border: '1px solid', cursor: 'pointer',
+                  ...(filter === f
+                    ? { background: 'rgba(139,92,246,0.15)', borderColor: 'rgba(139,92,246,0.3)', color: '#8B5CF6' }
+                    : { background: 'transparent', borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }),
                 }}
               >
                 {f === 'all' ? 'All' : f === 'under_retrial' ? 'Re-trial' : f.charAt(0).toUpperCase() + f.slice(1)}
@@ -361,278 +418,158 @@ export const DisputesView: React.FC = () => {
 
         {filteredDisputes.length === 0 ? (
           <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-            <Scale size={40} style={{ color: 'var(--text-tertiary)', marginBottom: '12px', opacity: 0.5 }} />
-            <p style={{ margin: '0 0 4px', fontWeight: 500 }}>
-              {filter === 'all' ? 'No disputes filed yet' : `No ${filter === 'under_retrial' ? 're-trial' : filter} disputes`}
-            </p>
+            <Gavel size={40} style={{ color: 'var(--text-tertiary)', marginBottom: '12px', opacity: 0.5 }} />
+            <p style={{ margin: '0 0 4px', fontWeight: 500 }}>No disputes found</p>
             <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
-              {filter === 'all' ? 'Challenge any verdict above by staking 5 CSPR.' : 'Switch to "All" to see all disputes.'}
+              {filter === 'all' ? 'Challenge a verdict above to get started.' : `No ${filter.replace('_', ' ')} disputes.`}
             </p>
           </div>
         ) : (
           <div>
-            {filteredDisputes.map((d, i) => {
-              const isExpanded = expandedDispute === d.id;
-              const statusColors: Record<string, { color: string; bg: string }> = {
-                pending: { color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' },
-                under_retrial: { color: '#8B5CF6', bg: 'rgba(139,92,246,0.1)' },
-                resolved: { color: d.outcome === 'overturned' ? '#EF4444' : '#10B981', bg: d.outcome === 'overturned' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)' },
-              };
-              const sc = statusColors[d.status] || statusColors.pending;
-
-              return (
-                <React.Fragment key={d.id}>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.03 }}
-                    onClick={() => setExpandedDispute(isExpanded ? null : d.id)}
-                    style={{
-                      padding: '14px 20px', borderBottom: '1px solid var(--border-color)',
-                      cursor: 'pointer', background: isExpanded ? 'var(--bg-secondary)' : 'transparent',
-                      transition: 'background 0.15s ease',
-                    }}
-                    onMouseEnter={(e) => { if (!isExpanded) (e.currentTarget as HTMLElement).style.background = 'var(--bg-secondary)'; }}
-                    onMouseLeave={(e) => { if (!isExpanded) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
-                        <Swords size={16} style={{ color: '#EF4444', flexShrink: 0 }} />
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                            {d.assetId.length > 28 ? d.assetId.slice(0, 28) + '...' : d.assetId}
-                          </div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '2px' }}>
-                            {d.reason.length > 60 ? d.reason.slice(0, 60) + '...' : d.reason}
-                          </div>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+            {filteredDisputes.map((d) => (
+              <div key={d.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                <div
+                  style={{
+                    padding: '14px 20px', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+                  }}
+                  onClick={() => setExpandedDispute(expandedDispute === d.id ? null : d.id)}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <span style={{
+                        fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 600,
+                        ...(d.status === 'pending'
+                          ? { background: 'rgba(245,158,11,0.12)', color: '#F59E0B' }
+                          : d.status === 'under_retrial'
+                          ? { background: 'rgba(139,92,246,0.12)', color: '#8B5CF6' }
+                          : { background: 'rgba(16,185,129,0.12)', color: '#10B981' }),
+                      }}>
+                        {d.status === 'under_retrial' ? 'Re-trial' : d.status.charAt(0).toUpperCase() + d.status.slice(1)}
+                      </span>
+                      {d.outcome && (
                         <span style={{
-                          padding: '3px 10px', borderRadius: '12px',
-                          background: sc.bg, color: sc.color,
-                          fontSize: '0.75rem', fontWeight: 600,
+                          fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 600,
+                          ...(d.outcome === 'overturned'
+                            ? { background: 'rgba(239,68,68,0.12)', color: '#EF4444' }
+                            : { background: 'rgba(16,185,129,0.12)', color: '#10B981' }),
                         }}>
-                          {d.status === 'under_retrial' ? 'Re-trial' : d.status.charAt(0).toUpperCase() + d.status.slice(1)}
+                          {d.outcome === 'overturned' ? 'Overturned' : 'Upheld'}
                         </span>
-                        {d.outcome && (
-                          <span style={{
-                            padding: '3px 10px', borderRadius: '12px',
-                            background: d.outcome === 'overturned' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
-                            color: d.outcome === 'overturned' ? '#EF4444' : '#10B981',
-                            fontSize: '0.75rem', fontWeight: 600,
-                          }}>
-                            {d.outcome === 'overturned' ? 'Overturned' : 'Upheld'}
-                          </span>
-                        )}
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#F59E0B' }}>
-                          {d.stakeCSPR} CSPR
-                        </span>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
-                          {formatTime(d.createdAt)}
-                        </span>
-                        {isExpanded ? <ChevronUp size={14} style={{ color: 'var(--text-tertiary)' }} /> : <ChevronDown size={14} style={{ color: 'var(--text-tertiary)' }} />}
-                      </div>
+                      )}
                     </div>
-                  </motion.div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      {d.assetId.length > 32 ? d.assetId.slice(0, 32) + '...' : d.assetId}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '2px' }}>
+                      Stake: {d.stakeCSPR} CSPR · {formatTime(d.createdAt)}
+                    </div>
+                  </div>
+                  {expandedDispute === d.id ? <ChevronUp size={16} style={{ color: 'var(--text-tertiary)' }} /> : <ChevronDown size={16} style={{ color: 'var(--text-tertiary)' }} />}
+                </div>
 
-                  {/* Expanded Dispute Detail */}
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        style={{ overflow: 'hidden', background: 'var(--bg-secondary)' }}
-                      >
-                        <div style={{ padding: '16px 20px' }}>
-                          {/* Challenger's Reason */}
-                          <div style={{ marginBottom: '16px' }}>
+                <AnimatePresence>
+                  {expandedDispute === d.id && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <div style={{ padding: '0 20px 16px', borderTop: '1px solid var(--border-color)' }}>
+                        <div style={{ paddingTop: '12px' }}>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Challenger
+                          </div>
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-primary)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                            {d.challengerKey}
+                          </div>
+                        </div>
+                        <div style={{ marginTop: '12px' }}>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Reason
+                          </div>
+                          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                            {d.reason}
+                          </div>
+                        </div>
+                        {d.retrial && (
+                          <div style={{ marginTop: '12px' }}>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                              Challenger's Claim
+                              Re-trial Result
                             </div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
-                              {d.reason}
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                              {typeof d.retrial === 'string' ? d.retrial : JSON.stringify(d.retrial)}
                             </div>
                           </div>
-
-                          {/* Original vs New Verdict (if retrial completed) */}
-                          {d.retrial && (
-                            <div style={{ marginBottom: '16px' }}>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                Re-trial Result
-                              </div>
-                              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '16px', alignItems: 'center' }}>
-                                {/* Original */}
-                                <div style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}>
-                                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase' }}>Original</div>
-                                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>${d.retrial.originalVerdict.value.toLocaleString()}</div>
-                                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{d.retrial.originalVerdict.confidence}% confidence</div>
-                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '4px' }}>{d.retrial.originalVerdict.decision}</div>
-                                </div>
-
-                                {/* Arrow + Delta */}
-                                <div style={{ textAlign: 'center' }}>
-                                  <div style={{ fontSize: '1.2rem', color: d.outcome === 'overturned' ? '#EF4444' : '#10B981' }}>
-                                    {d.outcome === 'overturned' ? '!=' : '=='}
-                                  </div>
-                                  <div style={{
-                                    fontSize: '0.85rem', fontWeight: 700,
-                                    color: d.retrial.valueDelta > 0 ? '#10B981' : d.retrial.valueDelta < 0 ? '#EF4444' : 'var(--text-secondary)',
-                                  }}>
-                                    {d.retrial.valueDelta > 0 ? '+' : ''}{d.retrial.valueDelta}%
-                                  </div>
-                                </div>
-
-                                {/* New */}
-                                <div style={{ padding: '12px', borderRadius: '8px', border: `1px solid ${d.outcome === 'overturned' ? 'rgba(239,68,68,0.3)' : 'var(--border-color)'}`, background: 'var(--bg-primary)' }}>
-                                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase' }}>Re-trial</div>
-                                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: d.outcome === 'overturned' ? '#EF4444' : 'var(--text-primary)' }}>${d.retrial.newVerdict.value.toLocaleString()}</div>
-                                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{d.retrial.newVerdict.confidence}% confidence</div>
-                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '4px' }}>{d.retrial.newVerdict.decision}</div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Retrial Panel (if retrial completed) */}
-                          {d.retrial && (
-                            <div style={{ marginBottom: '16px' }}>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                Adversarial Panel ({d.retrial.panel.length} jurors)
-                              </div>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                {d.retrial.panel.map((juror) => (
-                                  <div key={juror.agentId} style={{
-                                    padding: '10px 12px', borderRadius: '8px',
-                                    border: '1px solid var(--border-color)', background: 'var(--bg-primary)',
-                                  }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{juror.name}</span>
-                                        <span style={{
-                                          fontSize: '0.7rem', padding: '2px 6px', borderRadius: '6px',
-                                          background: 'rgba(139,92,246,0.1)', color: '#8B5CF6', fontWeight: 500,
-                                        }}>
-                                          {juror.methodology}
-                                        </span>
-                                      </div>
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span style={{
-                                          padding: '2px 8px', borderRadius: '6px',
-                                          background: juror.vote === 'A' ? 'rgba(16,185,129,0.1)' : juror.vote === 'B' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
-                                          color: juror.vote === 'A' ? '#10B981' : juror.vote === 'B' ? '#EF4444' : '#F59E0B',
-                                          fontSize: '0.75rem', fontWeight: 600,
-                                        }}>
-                                          {juror.vote === 'A' ? 'Upheld' : juror.vote === 'B' ? 'Overturn' : 'Split'}
-                                        </span>
-                                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>{juror.confidence}%</span>
-                                      </div>
-                                    </div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                                      {juror.reasoning}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Retrial Reasoning Summary */}
-                          {d.retrial && (
-                            <div style={{ marginBottom: '16px', padding: '10px 12px', borderRadius: '8px', background: d.outcome === 'overturned' ? 'rgba(239,68,68,0.05)' : 'rgba(16,185,129,0.05)', border: `1px solid ${d.outcome === 'overturned' ? 'rgba(239,68,68,0.15)' : 'rgba(16,185,129,0.15)'}` }}>
-                              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                                {d.retrial.reasoning}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Stake Distribution */}
-                          {d.stakeDistribution && (
-                            <div style={{ marginBottom: '12px' }}>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Stake Distribution</div>
-                              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                {d.stakeDistribution.map((sd, si) => (
-                                  <span key={si} style={{
-                                    padding: '4px 10px', borderRadius: '6px',
-                                    background: sd.recipient === 'challenger' ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
-                                    color: sd.recipient === 'challenger' ? '#10B981' : '#F59E0B',
-                                    fontSize: '0.8rem', fontWeight: 600,
-                                  }}>
-                                    {sd.recipient === 'challenger' ? 'Challenger' : 'Original Jurors'}: {sd.amountCSPR} CSPR
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Retrial Button for Pending Disputes */}
-                          {d.status === 'pending' && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleTriggerRetrial(d.id); }}
-                              disabled={retrialLoading === d.id}
-                              style={{
-                                display: 'flex', alignItems: 'center', gap: '6px',
-                                padding: '10px 20px', borderRadius: '8px',
-                                border: 'none', background: retrialLoading === d.id ? 'var(--bg-secondary)' : 'linear-gradient(135deg, #8B5CF6, #06B6D4)',
-                                color: '#fff', cursor: retrialLoading === d.id ? 'wait' : 'pointer',
-                                fontSize: '0.85rem', fontWeight: 600,
-                              }}
-                            >
-                              <Gavel size={14} />
-                              {retrialLoading === d.id ? 'Running Re-trial...' : 'Run Re-trial'}
-                            </button>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </React.Fragment>
-              );
-            })}
+                        )}
+                        {d.status === 'pending' && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleTriggerRetrial(d.id); }}
+                            disabled={retrialLoading === d.id}
+                            style={{
+                              marginTop: '12px', padding: '8px 16px', borderRadius: '8px',
+                              border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(139,92,246,0.08)',
+                              color: '#8B5CF6', cursor: retrialLoading === d.id ? 'wait' : 'pointer',
+                              fontSize: '0.82rem', fontWeight: 600,
+                              display: 'flex', alignItems: 'center', gap: '6px',
+                            }}
+                          >
+                            <Swords size={14} style={{ animation: retrialLoading === d.id ? 'spin 1s linear infinite' : 'none' }} />
+                            {retrialLoading === d.id ? 'Starting Re-trial...' : 'Trigger Re-trial'}
+                          </button>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
           </div>
         )}
       </motion.div>
 
-      {/* ── Dispute Filing Modal ──────────────────────────────────── */}
+      {/* ── Step 1: Reason Form Modal ─────────────────────────────── */}
       <AnimatePresence>
-        {disputeModal && (
+        {showReasonModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             style={{
               position: 'fixed', inset: 0, zIndex: 1000,
-              background: 'rgba(0,0,0,0.75)',
+              background: 'rgba(0,0,0,0.6)',
+              backdropFilter: 'blur(4px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
-            onClick={() => { setDisputeModal(null); setDisputeReason(''); setDisputeError(null); }}
+            onClick={handleReasonCancel}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
               style={{
                 width: '90%', maxWidth: '520px', borderRadius: '16px',
-                background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.12)',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.6)', overflow: 'hidden',
+                background: 'var(--bg-surface)', border: '1px solid var(--border-color)',
+                boxShadow: '0 24px 64px rgba(0,0,0,0.4)', overflow: 'hidden',
               }}
             >
               {/* Header */}
               <div style={{
-                padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.08)',
+                padding: '20px 24px', borderBottom: '1px solid var(--border-color)',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <Swords size={20} style={{ color: '#EF4444' }} />
-                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                     Challenge Verdict
                   </h3>
                 </div>
                 <button
-                  onClick={() => { setDisputeModal(null); setDisputeReason(''); setDisputeError(null); }}
-                  style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '1.2rem', padding: '4px' }}
+                  onClick={handleReasonCancel}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: '1.2rem', padding: '4px' }}
                 >
                   &times;
                 </button>
@@ -647,7 +584,6 @@ export const DisputesView: React.FC = () => {
                   border: `1px solid ${wallet.connected ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'}`,
                   display: 'flex', alignItems: 'center', gap: '8px',
                 }}>
-                  <Wallet size={14} style={{ color: wallet.connected ? '#10B981' : '#EF4444' }} />
                   <span style={{ fontSize: '0.8rem', color: wallet.connected ? '#10B981' : '#EF4444', fontWeight: 500 }}>
                     {wallet.connected
                       ? `Wallet connected: ${wallet.publicKey?.slice(0, 8)}...${wallet.publicKey?.slice(-6)}`
@@ -656,16 +592,16 @@ export const DisputesView: React.FC = () => {
                 </div>
 
                 <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Target Asset
                   </div>
-                  <div style={{ fontSize: '0.9rem', color: '#ffffff', fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                    {disputeModal}
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                    {showReasonModal}
                   </div>
                 </div>
 
                 <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Why is this verdict wrong?
                   </div>
                   <textarea
@@ -675,8 +611,8 @@ export const DisputesView: React.FC = () => {
                     rows={4}
                     style={{
                       width: '100%', padding: '10px 12px', borderRadius: '8px',
-                      border: '1px solid rgba(255,255,255,0.12)', background: '#0f0f1e',
-                      color: '#ffffff', fontSize: '0.9rem', lineHeight: 1.5,
+                      border: '1px solid var(--border-color)', background: 'var(--bg-primary)',
+                      color: 'var(--text-primary)', fontSize: '0.9rem', lineHeight: 1.5,
                       resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box',
                     }}
                   />
@@ -691,57 +627,75 @@ export const DisputesView: React.FC = () => {
                     <AlertTriangle size={14} style={{ color: '#F59E0B' }} />
                     <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#F59E0B' }}>Stake Required: {DISPUTE_FEE_CSPR} CSPR</span>
                   </div>
-                  <p style={{ margin: 0, fontSize: '0.8rem', color: '#aaa', lineHeight: 1.4 }}>
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
                     If the re-trial overturns the verdict, you get your stake back. If upheld, the stake goes to the original jurors.
                   </p>
                 </div>
 
                 {/* Error display */}
-                {disputeError && (
+                {reasonError && (
                   <div style={{
                     padding: '10px 14px', borderRadius: '8px', marginBottom: '16px',
-                    background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)',
+                    background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
                     fontSize: '0.82rem', color: '#EF4444',
                   }}>
-                    {disputeError}
+                    {reasonError}
                   </div>
                 )}
               </div>
 
               {/* Footer */}
               <div style={{
-                padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.08)',
+                padding: '16px 24px', borderTop: '1px solid var(--border-color)',
                 display: 'flex', justifyContent: 'flex-end', gap: '10px',
               }}>
                 <button
-                  onClick={() => { setDisputeModal(null); setDisputeReason(''); setDisputeError(null); }}
+                  onClick={handleReasonCancel}
                   style={{
                     padding: '10px 20px', borderRadius: '8px',
-                    border: '1px solid rgba(255,255,255,0.12)', background: 'transparent',
-                    color: '#aaa', cursor: 'pointer', fontSize: '0.85rem',
+                    border: '1px solid var(--border-color)', background: 'transparent',
+                    color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.85rem',
                   }}
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleFileDispute}
-                  disabled={!disputeReason.trim() || disputeLoading || !wallet.connected}
+                  onClick={handleReasonSubmit}
+                  disabled={!disputeReason.trim() || !wallet.connected}
                   style={{
                     padding: '10px 20px', borderRadius: '8px', border: 'none',
-                    background: (!disputeReason.trim() || disputeLoading || !wallet.connected) ? '#333' : 'linear-gradient(135deg, #EF4444, #F97316)',
-                    color: '#fff', cursor: (!disputeReason.trim() || disputeLoading || !wallet.connected) ? 'not-allowed' : 'pointer',
+                    background: (!disputeReason.trim() || !wallet.connected) ? 'var(--bg-surface-alt)' : 'linear-gradient(135deg, #EF4444, #F97316)',
+                    color: '#fff', cursor: (!disputeReason.trim() || !wallet.connected) ? 'not-allowed' : 'pointer',
                     fontSize: '0.85rem', fontWeight: 600,
                     display: 'flex', alignItems: 'center', gap: '6px',
                   }}
                 >
                   <Swords size={14} />
-                  {disputeLoading ? 'Signing & Filing...' : `File Dispute (${DISPUTE_FEE_CSPR} CSPR)`}
+                  Continue to Payment
                 </button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Step 2: Payment Confirmation Modal (shared component) ── */}
+      <PaymentModal
+        open={showPaymentModal}
+        title="Confirm Dispute Filing"
+        description={`Stake ${DISPUTE_FEE_CSPR} CSPR to challenge this verdict. An independent AI panel will re-evaluate the case.`}
+        feeLabel="Dispute Stake"
+        feeAmount={DISPUTE_FEE_CSPR}
+        features={[
+          'Independent adversarial re-trial by 3 AI agents',
+          'Market Analyst, Value Auditor, and Devil\'s Advocate',
+          'Stake returned if you win the challenge',
+        ]}
+        signing={signingPayment}
+        signError={signError}
+        onConfirm={handlePaymentConfirm}
+        onCancel={handlePaymentCancel}
+      />
     </>
   );
 };

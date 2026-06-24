@@ -28,6 +28,7 @@ import {
 } from '../services/api';
 import { PLATFORM_WALLET, INSURANCE_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
 import { AgentExplainer } from '../components/AgentExplainer';
+import PaymentModal from '../components/PaymentModal';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -463,66 +464,22 @@ export const InsureView: React.FC = () => {
   return (
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
       {/* Assessment Payment Modal */}
-      <AnimatePresence>
-        {showAssessPaymentModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(0,0,0,0.6)',
-              backdropFilter: 'blur(4px)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 9999,
-            }}
-            onClick={handleAssessPaymentCancel}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              style={{ ...cardStyle, maxWidth: 420, width: '90%' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.75rem' }}>
-                Assessment Fee Required
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-                To run an AI-powered assessment of your asset, a fee of <strong>{ASSESSMENT_FEE_CSPR} CSPR</strong> is required.
-              </p>
-
-              {assessSignError && (
-                <div style={{ ...cardStyle, borderColor: '#ef4444', background: 'rgba(239,68,68,0.05)', marginBottom: '1rem', padding: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <AlertCircle size={16} color="#ef4444" />
-                  <span style={{ fontSize: '0.8rem', color: '#ef4444' }}>{assessSignError}</span>
-                </div>
-              )}
-
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <button onClick={handleAssessPaymentCancel} style={{ ...btnSecondary, flex: 1 }}>
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAssessPaymentConfirm}
-                  disabled={assessSigning}
-                  style={{ ...btnPrimary, flex: 1, opacity: assessSigning ? 0.6 : 1 }}
-                >
-                  {assessSigning ? (
-                    <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Signing...</>
-                  ) : (
-                    <>Pay {ASSESSMENT_FEE_CSPR} CSPR</>
-                  )}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <PaymentModal
+        open={showAssessPaymentModal}
+        title="Assessment Fee Required"
+        description={`To run an AI-powered assessment of your asset, a fee of ${ASSESSMENT_FEE_CSPR} CSPR is required.`}
+        feeLabel="Assessment Fee"
+        feeAmount={ASSESSMENT_FEE_CSPR}
+        features={[
+          'AI-powered risk assessment',
+          'On-chain insurance policy',
+          'Claim revaluation support',
+        ]}
+        signing={assessSigning}
+        signError={assessSignError}
+        onConfirm={handleAssessPaymentConfirm}
+        onCancel={handleAssessPaymentCancel}
+      />
 
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>

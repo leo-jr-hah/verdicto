@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useWallet } from '../contexts/CSPRClickContext';
 import { PLATFORM_WALLET, PREDICTION_FEE_CSPR } from '../config/casper';
+import PaymentModal from '../components/PaymentModal';
 import {
   submitPrediction,
   type PredictionResult as APIPredictionResult,
@@ -899,142 +900,22 @@ export const PredictionView: React.FC = () => {
       </AnimatePresence>
 
       {/* ─── Payment Modal ──────────────────────────────────────── */}
-      <AnimatePresence>
-        {showPaymentModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 1000,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-            }}
-            onClick={handlePaymentCancel}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                background: 'var(--bg-elevated)',
-                borderRadius: 16,
-                border: '1px solid var(--border-color)',
-                padding: 28,
-                maxWidth: 420, width: '90%',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-              }}
-            >
-              {/* Header */}
-              <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <div style={{
-                  width: 52, height: 52, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, var(--primary), var(--primary-dark, #cc2222))',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 12px',
-                }}>
-                  <Wallet size={24} color="#fff" />
-                </div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 6, color: 'var(--text-primary)' }}>
-                  Confirm Payment
-                </h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  Micropayment required to run the 5-agent prediction analysis.
-                </p>
-              </div>
-
-              {/* Fee Breakdown */}
-              <div style={{
-                background: 'var(--bg-surface)',
-                borderRadius: 10, border: '1px solid var(--border-color)',
-                padding: '14px 16px', marginBottom: 18,
-              }}>
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between',
-                  alignItems: 'center', marginBottom: 8,
-                }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Prediction Fee</span>
-                  <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary)' }}>
-                    {PREDICTION_FEE_CSPR} CSPR
-                  </span>
-                </div>
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between',
-                  fontSize: '0.75rem', color: 'var(--text-tertiary)',
-                }}>
-                  <span>Network</span>
-                  <span>Casper Testnet</span>
-                </div>
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between',
-                  fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4,
-                }}>
-                  <span>Recipient</span>
-                  <span>{PLATFORM_WALLET.substring(0, 8)}...{PLATFORM_WALLET.substring(PLATFORM_WALLET.length - 6)}</span>
-                </div>
-              </div>
-
-              {/* Error */}
-              {signError && (
-                <div style={{
-                  background: 'rgba(239,68,68,0.08)',
-                  border: '1px solid rgba(239,68,68,0.2)',
-                  borderRadius: 8, padding: '10px 12px', marginBottom: 14,
-                  fontSize: '0.82rem', color: '#ef4444',
-                }}>
-                  {signError}
-                </div>
-              )}
-
-              {/* Actions */}
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button
-                  onClick={handlePaymentCancel}
-                  disabled={signingPayment}
-                  style={{
-                    flex: 1, padding: '10px 16px', borderRadius: 8,
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-surface)',
-                    cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600,
-                    color: 'var(--text-secondary)',
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handlePaymentConfirm}
-                  disabled={signingPayment}
-                  style={{
-                    flex: 2, padding: '10px 16px', borderRadius: 8,
-                    border: 'none',
-                    background: signingPayment
-                      ? 'var(--border-color)'
-                      : 'linear-gradient(135deg, var(--primary), var(--primary-dark, #cc2222))',
-                    cursor: signingPayment ? 'not-allowed' : 'pointer',
-                    fontSize: '0.9rem', fontWeight: 700, color: '#fff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  }}
-                >
-                  {signingPayment ? (
-                    <>
-                      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
-                        <Loader2 size={16} />
-                      </motion.div>
-                      Signing...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 size={16} />
-                      Pay {PREDICTION_FEE_CSPR} CSPR & Run
-                    </>
-                  )}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <PaymentModal
+        open={showPaymentModal}
+        title="Confirm Payment"
+        description="Micropayment required to run the 5-agent prediction analysis."
+        feeLabel="Prediction Fee"
+        feeAmount={PREDICTION_FEE_CSPR}
+        features={[
+          '5-agent prediction analysis',
+          'Multi-methodology consensus',
+          'On-chain verdict with receipt',
+        ]}
+        signing={signingPayment}
+        signError={signError}
+        onConfirm={handlePaymentConfirm}
+        onCancel={handlePaymentCancel}
+      />
     </div>
   );
 };
