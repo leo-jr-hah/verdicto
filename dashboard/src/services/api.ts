@@ -1087,20 +1087,41 @@ export async function fetchDispute(disputeId: string): Promise<Dispute | null> {
   }
 }
 
+export type FileDisputeResponse =
+  | { status: 'success'; dispute: Dispute }
+  | { status: 'payment_required'; paymentRequirements: any }
+  | { status: 'error'; error: string };
+
 export async function fileDispute(
   assetId: string,
   challengerKey: string,
   reason: string,
-): Promise<{ success: boolean; dispute?: Dispute; error?: string }> {
+  paymentProof?: string,
+): Promise<FileDisputeResponse> {
   try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (paymentProof) {
+      headers['x-payment-proof'] = paymentProof;
+    }
+
     const res = await fetch(`${ORCHESTRATOR_URL}/api/oracle/dispute`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ assetId, challengerKey, reason }),
     });
-    return await res.json();
+
+    if (res.status === 402) {
+      const body = await res.json();
+      return { status: 'payment_required', paymentRequirements: body.paymentRequirements };
+    }
+
+    const data = await res.json();
+    if (data.success && data.dispute) {
+      return { status: 'success', dispute: data.dispute };
+    }
+    return { status: 'error', error: data.error || 'Unknown error' };
   } catch (err: any) {
-    return { success: false, error: err.message };
+    return { status: 'error', error: err.message };
   }
 }
 

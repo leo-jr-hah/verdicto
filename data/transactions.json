@@ -1,5 +1,23 @@
 [
   {
+    "id": "tx-1782331930531-cm90z2",
+    "type": "Retrial Complete",
+    "action": "Retrial RTL-1782331930490 for dispute DSP-1782331815715: overturned",
+    "hash": "hmac-retrial-RTL-1782331930490",
+    "contract": "DisputeEngine",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-24T20:12:10.531Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "disputeId": "DSP-1782331815715",
+      "outcome": "overturned",
+      "valueDelta": -11.7,
+      "confidenceDelta": -3,
+      "panelSize": 3
+    }
+  },
+  {
     "id": "tx-1782331435587-ty7f54",
     "type": "SubmitAssessment",
     "action": "Assessment: 100oz Silver Bar (commodity) - 3,340",
