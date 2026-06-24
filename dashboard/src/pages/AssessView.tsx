@@ -33,7 +33,8 @@ import {
 import type { AssetType, AssessmentResult, AssessmentRequest, DemoAsset } from '../services/api';
 import { MultiMethodologyDashboard } from '../components/MultiMethodologyDashboard';
 import { useWallet } from '../contexts/CSPRClickContext';
-import { PLATFORM_WALLET, ASSESSMENT_FEE_CSPR } from '../config/casper';
+import { ASSESSMENT_FEE_CSPR } from '../config/casper';
+import { usePaymentFlow } from '../hooks/usePaymentFlow';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -563,11 +564,17 @@ export const AssessView: React.FC = () => {
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [showDemos, setShowDemos] = useState(false);
 
-  // Payment modal state
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [signingPayment, setSigningPayment] = useState(false);
-  const [signError, setSignError] = useState<string | null>(null);
+  // Payment flow (shared hook — replaces manual showModal/signing/signError pattern)
   const pendingRequestRef = useRef<AssessmentRequest | null>(null);
+  const payment = usePaymentFlow(wallet.signPayment, ASSESSMENT_FEE_CSPR, async (paymentProof, deployHash) => {
+    const request = pendingRequestRef.current;
+    if (!request) return;
+    // Close modal and run assessment with payment proof
+    setLogs([]);
+    logIdRef.current = 0;
+    addLog('success', `Payment signed, deploy: ${deployHash.substring(0, 16)}...`, `View on explorer: https://testnet.cspr.live/deploy/${deployHash}`);
+    await submitWithPaymentProof(request, paymentProof);
+  });
 
   // Live log state
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -675,64 +682,9 @@ export const AssessView: React.FC = () => {
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
-    // Store the request and show payment modal
+    // Store the request and open payment modal
     pendingRequestRef.current = buildRequest();
-    setSignError(null);
-    setShowPaymentModal(true);
-  };
-
-  const handlePaymentConfirm = async () => {
-    const request = pendingRequestRef.current;
-    if (!request) return;
-
-    // If wallet not connected, connect first
-    if (!wallet.connected) {
-      try {
-        await wallet.connect();
-      } catch {
-        setSignError('Please connect your wallet first.');
-        return;
-      }
-      // If still not connected after attempt, user cancelled
-      if (!wallet.connected) {
-        setSignError('Wallet connection is required to proceed.');
-        return;
-      }
-    }
-
-    setSigningPayment(true);
-    setSignError(null);
-
-    try {
-      // Sign the payment via wallet - this opens the wallet popup
-      const { paymentProof, deployHash } = await wallet.signPayment(
-        PLATFORM_WALLET,
-        ASSESSMENT_FEE_CSPR,
-      );
-
-      // Close modal and run assessment with payment proof
-      setShowPaymentModal(false);
-      setLogs([]);
-      logIdRef.current = 0;
-      // Show the deploy hash in logs - user can verify on-chain
-      addLog('success', `Payment signed, deploy: ${deployHash.substring(0, 16)}...`, `View on explorer: https://testnet.cspr.live/deploy/${deployHash}`);
-      await submitWithPaymentProof(request, paymentProof);
-    } catch (err: any) {
-      if (err?.message?.includes('cancelled')) {
-        setSignError('Payment was cancelled. Please approve the transfer in your wallet.');
-      } else {
-        setSignError(err?.message || 'Failed to sign payment. Please try again.');
-      }
-    } finally {
-      setSigningPayment(false);
-    }
-  };
-
-  const handlePaymentCancel = () => {
-    setShowPaymentModal(false);
-    setSigningPayment(false);
-    setSignError(null);
-    pendingRequestRef.current = null;
+    payment.openModal();
   };
 
   const handleReset = () => {
@@ -754,7 +706,7 @@ export const AssessView: React.FC = () => {
     <div>
       {/* Payment Confirmation Modal */}
       <PaymentModal
-        open={showPaymentModal}
+        open={payment.showModal}
         title="Confirm Assessment Payment"
         description="A micropayment is required to run the AI valuation pipeline."
         feeLabel="Assessment Fee"
@@ -764,10 +716,10 @@ export const AssessView: React.FC = () => {
           'Agent deliberation (if agents diverge >15%)',
           'Full analysis report with data sources',
         ]}
-        signing={signingPayment}
-        signError={signError}
-        onConfirm={handlePaymentConfirm}
-        onCancel={handlePaymentCancel}
+        signing={payment.signing}
+        signError={payment.signError}
+        onConfirm={payment.confirm}
+        onCancel={payment.cancel}
       />
 
       {/* Page Header */}

@@ -37,6 +37,7 @@ validateEnv();
 
 import axios from 'axios';
 import { execFile } from 'child_process';
+import crypto from 'crypto';
 import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
@@ -68,6 +69,27 @@ const REPAY_FEE_CSPR = 2.5;
 const INSURANCE_FEE_CSPR = 3.0;
 const ORACLE_FEE_CSPR = 0.1;  // Micro-fee for oracle queries (agent-to-agent)
 const PLATFORM_WALLET = process.env.PLATFORM_WALLET || '02030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20212223';
+
+// ─── Security: Input sanitization helpers ────────────────────────────────────
+const MAX_STRING_LENGTH = 500;
+const MAX_DESCRIPTION_LENGTH = 2000;
+
+/** Truncate and sanitize string inputs to prevent abuse */
+function sanitizeString(value: unknown, maxLen = MAX_STRING_LENGTH): string {
+  if (typeof value !== 'string') return '';
+  return value.trim().slice(0, maxLen);
+}
+
+/** Sanitize error messages — never leak internal details to clients */
+function sanitizeError(err: any): string {
+  const msg = err?.message || 'Internal server error';
+  // Strip file paths, stack traces, and env var references
+  return msg
+    .replace(/\/[\w/.-]+\.(ts|js|json)/g, '[internal]')
+    .replace(/process\.env\.\w+/g, '[config]')
+    .replace(/Error:?\s*/i, '')
+    .slice(0, 200);
+}
 
 // ─── In-memory receipt chain store (per assessment) ──────────────────────────
 // Keyed by assessmentId → full DeliberationReceipt[] for that session.
@@ -811,24 +833,19 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // the signed deploy JSON here and the backend relays it.
   app.post('/api/relay-deploy', async (req, res) => {
     try {
+      const ip = req.ip || req.socket.remoteAddress || 'unknown';
+      if (isRateLimited(ip)) {
+        return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
+      }
+
       const { deploy } = req.body;
       if (!deploy || typeof deploy !== 'object') {
         return res.status(400).json({ success: false, error: 'deploy object is required' });
       }
 
-      // ── Debug: inspect the deploy hash and approvals ──
-      console.log('[relay-deploy] deploy.hash:', deploy.hash);
-      console.log('[relay-deploy] deploy.header?.body_hash:', deploy.header?.body_hash);
-      const approvals = deploy.approvals || [];
-      for (const a of approvals) {
-        const sig = a.signature;
-        console.log('[relay-deploy] approval signer:', a.signer);
-        console.log('[relay-deploy] approval signature type:', typeof sig, 'length:', sig?.length);
-        console.log('[relay-deploy] approval signature first 80 chars:', typeof sig === 'string' ? sig.substring(0, 80) : sig);
-        // Check if it starts with 01 (ed25519) or 02 (secp256k1)
-        if (typeof sig === 'string') {
-          console.log('[relay-deploy] signature prefix (first 4 hex chars):', sig.substring(0, 4));
-        }
+      // ── Validate deploy structure ──
+      if (!deploy.hash || typeof deploy.hash !== 'string') {
+        return res.status(400).json({ success: false, error: 'deploy.hash is required' });
       }
 
       const payload = {
@@ -844,8 +861,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       });
 
       if (rpcResponse.data.error) {
-        console.warn('[relay-deploy] RPC error:', rpcResponse.data.error);
-        return res.json({ success: false, error: rpcResponse.data.error.message || 'RPC error' });
+        console.warn('[relay-deploy] RPC error:', rpcResponse.data.error.message || rpcResponse.data.error);
+        return res.json({ success: false, error: 'RPC rejected the deploy. Check your transaction and try again.' });
       }
 
       const deployHash = rpcResponse.data.result?.deploy_hash;
@@ -853,7 +870,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       return res.json({ success: true, deployHash });
     } catch (err: any) {
       console.error('[relay-deploy] Failed:', err.message);
-      return res.status(500).json({ success: false, error: err.message });
+      return res.status(500).json({ success: false, error: 'Deploy relay failed. Please try again.' });
     }
   });
 
@@ -865,11 +882,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       }
 
       const { assetId, location, spotCount } = req.body || {};
-      if (!assetId || typeof assetId !== 'string') {
-        return res.status(400).json({ success: false, error: 'assetId is required' });
+      if (!assetId || typeof assetId !== 'string' || assetId.length > 100) {
+        return res.status(400).json({ success: false, error: 'assetId is required (max 100 chars)' });
       }
-      if (!location || typeof location !== 'string') {
-        return res.status(400).json({ success: false, error: 'location is required' });
+      if (!location || typeof location !== 'string' || location.length > 500) {
+        return res.status(400).json({ success: false, error: 'location is required (max 500 chars)' });
       }
       if (typeof spotCount !== 'number' || spotCount < 1 || spotCount > 10000) {
         return res.status(400).json({ success: false, error: 'spotCount must be a number between 1 and 10000' });
@@ -883,7 +900,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
       res.json({ success: true, assessmentId });
     } catch (err: any) {
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -896,7 +913,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const transactions = loadTransactions();
       res.json({ success: true, transactions });
     } catch (err: any) {
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -963,7 +980,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         },
       });
     } catch (err: any) {
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -1018,7 +1035,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         details,
       });
     } catch (err: any) {
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -1140,6 +1157,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
       if (!name || typeof name !== 'string' || name.trim().length === 0) {
         return res.status(400).json({ success: false, error: 'name is required' });
+      }
+      if (name.length > MAX_STRING_LENGTH) {
+        return res.status(400).json({ success: false, error: `name must be under ${MAX_STRING_LENGTH} characters` });
+      }
+      if (description && typeof description === 'string' && description.length > MAX_DESCRIPTION_LENGTH) {
+        return res.status(400).json({ success: false, error: `description must be under ${MAX_DESCRIPTION_LENGTH} characters` });
       }
 
       if (typeof askingPrice !== 'number' || askingPrice <= 0) {
@@ -1470,7 +1493,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       res.json(response);
     } catch (err: any) {
       console.error('[Assess] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -1486,7 +1509,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       res.json({ success: true, reputations });
     } catch (err: any) {
       console.error('[Reputation] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -1505,7 +1528,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       res.json({ success: true, verdicts, stats });
     } catch (err: any) {
       console.error('[Oracle] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -1603,7 +1626,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       res.json({ success: true, verdict });
     } catch (err: any) {
       console.error('[Oracle] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -1618,7 +1641,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       res.json({ success: true, stats });
     } catch (err: any) {
       console.error('[Oracle] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -1642,9 +1665,17 @@ if (import.meta.url === `file://${process.argv[1]}`) {
    */
   app.post('/api/oracle/dispute', async (req, res) => {
     try {
+      const ip = req.ip || req.socket.remoteAddress || 'unknown';
+      if (isRateLimited(ip)) {
+        return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
+      }
+
       const { assetId, challengerKey, reason } = req.body;
       if (!assetId || !challengerKey || !reason) {
         return res.status(400).json({ success: false, error: 'Missing required fields: assetId, challengerKey, reason' });
+      }
+      if (typeof reason !== 'string' || reason.length > MAX_DESCRIPTION_LENGTH) {
+        return res.status(400).json({ success: false, error: `reason is required (max ${MAX_DESCRIPTION_LENGTH} chars)` });
       }
 
       // x402 payment gate (same inline pattern as assessment endpoint)
@@ -1731,7 +1762,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       res.json({ success: true, dispute: result });
     } catch (err: any) {
       console.error('[Dispute] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -1772,7 +1803,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       res.json({ success: true, dispute: result });
     } catch (err: any) {
       console.error('[Retrial] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -1787,7 +1818,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       res.json({ success: true, disputes });
     } catch (err: any) {
       console.error('[Disputes] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -1805,7 +1836,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       res.json({ success: true, dispute });
     } catch (err: any) {
       console.error('[Dispute] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -2055,7 +2086,7 @@ Respond in JSON format:
       res.json(response);
     } catch (err: any) {
       console.error('[Predict] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -2447,7 +2478,7 @@ Respond in JSON format:
       });
     } catch (err: any) {
       console.error('[Loan Create] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -2484,7 +2515,7 @@ Respond in JSON format:
       }));
       res.json({ success: true, loans: summaries });
     } catch (err: any) {
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -2673,7 +2704,7 @@ Respond in JSON format:
         },
       });
     } catch (err: any) {
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -2841,7 +2872,7 @@ Respond in JSON format:
       });
     } catch (err: any) {
       console.error('[Loan Revalue] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -3066,7 +3097,7 @@ Respond in JSON format:
       });
     } catch (err: any) {
       console.error('[Insurance Create] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -3099,7 +3130,7 @@ Respond in JSON format:
       }));
       res.json({ success: true, policies: summaries });
     } catch (err: any) {
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -3140,6 +3171,9 @@ Respond in JSON format:
       const { reason, requestedAmount } = req.body;
       if (!reason || typeof reason !== 'string') {
         return res.status(400).json({ success: false, error: 'reason is required' });
+      }
+      if (reason.length > MAX_DESCRIPTION_LENGTH) {
+        return res.status(400).json({ success: false, error: `reason must be under ${MAX_DESCRIPTION_LENGTH} characters` });
       }
 
       console.log(`\n📋 Insurance claim filed: ${policy.policyId}`);
@@ -3237,7 +3271,7 @@ Respond in JSON format:
       });
     } catch (err: any) {
       console.error('[Insurance Claim] Error:', err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -3247,8 +3281,12 @@ Respond in JSON format:
   // Gated by ADMIN_SECRET header to prevent unauthorized access.
   app.post('/api/admin/force-revalue/:loanId', async (req, res) => {
     const adminSecret = process.env.ADMIN_SECRET;
-    if (!adminSecret || req.headers['x-admin-secret'] !== adminSecret) {
-      return res.status(403).json({ error: 'Forbidden - missing or invalid x-admin-secret header' });
+    if (!adminSecret || !req.headers['x-admin-secret'] ||
+        !crypto.timingSafeEqual(
+          Buffer.from(String(req.headers['x-admin-secret']), 'utf-8'),
+          Buffer.from(adminSecret, 'utf-8')
+        )) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
     const { loanId } = req.params;
     const loan = loanStore.get(loanId);
@@ -3301,7 +3339,7 @@ Respond in JSON format:
       });
     } catch (err: any) {
       console.error(`[Force-Revalue] Failed for ${loanId}:`, err.message);
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
 
@@ -3323,6 +3361,17 @@ Respond in JSON format:
       createdAt: l.createdAt,
     }));
     res.json({ loans });
+  });
+
+  // ─── Global 404 handler ────────────────────────────────────────────────────
+  app.use((_req, res) => {
+    res.status(404).json({ success: false, error: 'Endpoint not found' });
+  });
+
+  // ─── Global error handler (catches unhandled async errors) ─────────────────
+  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    console.error('[Unhandled Error]', err.stack || err.message || err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
   });
 
   const PORT = process.env.ORCHESTRATOR_API_PORT || 3011;

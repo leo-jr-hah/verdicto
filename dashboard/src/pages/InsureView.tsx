@@ -29,6 +29,7 @@ import {
 import { PLATFORM_WALLET, INSURANCE_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
 import { AgentExplainer } from '../components/AgentExplainer';
 import PaymentModal from '../components/PaymentModal';
+import { usePaymentFlow } from '../hooks/usePaymentFlow';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -316,11 +317,12 @@ export const InsureView: React.FC = () => {
   const [signing, setSigning] = useState(false);
   const [signError, setSignError] = useState<string | null>(null);
 
-  // Assessment payment modal
-  const [showAssessPaymentModal, setShowAssessPaymentModal] = useState(false);
-  const [assessPaymentReq, setAssessPaymentReq] = useState<any>(null);
-  const [assessSigning, setAssessSigning] = useState(false);
-  const [assessSignError, setAssessSignError] = useState<string | null>(null);
+  // Assessment payment flow (shared hook)
+  const assessPayment = usePaymentFlow(signPayment, ASSESSMENT_FEE_CSPR, async (paymentProof) => {
+    if (!assessPayment.pendingPayloadRef.current) return;
+    await submitAssessmentWithProof(assessPayment.pendingPayloadRef.current, paymentProof);
+    setStep(2);
+  });
 
   // Claim modal
   const [claimPolicyId, setClaimPolicyId] = useState<string | null>(null);
@@ -347,33 +349,8 @@ export const InsureView: React.FC = () => {
       weightOz: weightOz ? parseFloat(weightOz) : undefined,
     };
 
-    // Direct assessment call (simplified - mirrors BorrowView)
-    setShowAssessPaymentModal(true);
-    setAssessPaymentReq(request);
-  }, [assetType, assetName, assetDescription, assetValue, location, artistOrMedium, weightOz]);
-
-  // Handle assessment payment
-  const handleAssessPaymentConfirm = useCallback(async () => {
-    if (!assessPaymentReq || !signPayment) return;
-    setAssessSigning(true);
-    setAssessSignError(null);
-    try {
-      const { paymentProof } = await signPayment(PLATFORM_WALLET, ASSESSMENT_FEE_CSPR);
-      await submitAssessmentWithProof(assessPaymentReq, paymentProof);
-      setShowAssessPaymentModal(false);
-      setStep(2);
-    } catch (err: any) {
-      setAssessSignError(err.message || 'Payment failed');
-    } finally {
-      setAssessSigning(false);
-    }
-  }, [assessPaymentReq, signPayment, submitAssessmentWithProof]);
-
-  const handleAssessPaymentCancel = useCallback(() => {
-    setShowAssessPaymentModal(false);
-    setAssessPaymentReq(null);
-    setAssessSignError(null);
-  }, []);
+    assessPayment.openModal(request);
+  }, [assetType, assetName, assetDescription, assetValue, location, artistOrMedium, weightOz, assessPayment]);
 
   // When assessment completes, request insurance
   useEffect(() => {
@@ -465,7 +442,7 @@ export const InsureView: React.FC = () => {
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
       {/* Assessment Payment Modal */}
       <PaymentModal
-        open={showAssessPaymentModal}
+        open={assessPayment.showModal}
         title="Assessment Fee Required"
         description={`To run an AI-powered assessment of your asset, a fee of ${ASSESSMENT_FEE_CSPR} CSPR is required.`}
         feeLabel="Assessment Fee"
@@ -475,10 +452,10 @@ export const InsureView: React.FC = () => {
           'On-chain insurance policy',
           'Claim revaluation support',
         ]}
-        signing={assessSigning}
-        signError={assessSignError}
-        onConfirm={handleAssessPaymentConfirm}
-        onCancel={handleAssessPaymentCancel}
+        signing={assessPayment.signing}
+        signError={assessPayment.signError}
+        onConfirm={assessPayment.confirm}
+        onCancel={assessPayment.cancel}
       />
 
       {/* Header */}

@@ -30,6 +30,7 @@ import {
 import { PLATFORM_WALLET, LOAN_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
 import { AgentExplainer } from '../components/AgentExplainer';
 import PaymentModal from '../components/PaymentModal';
+import { usePaymentFlow } from '../hooks/usePaymentFlow';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -472,11 +473,13 @@ export const BorrowView: React.FC = () => {
   const [repayAmount, setRepayAmount] = useState('');
   const [repayLoanId, setRepayLoanId] = useState<string | null>(null);
 
-  // Assessment payment state
-  const [showAssessPaymentModal, setShowAssessPaymentModal] = useState(false);
-  const [assessSigning, setAssessSigning] = useState(false);
-  const [assessSignError, setAssessSignError] = useState<string | null>(null);
+  // Assessment payment flow (shared hook)
   const pendingAssessRequest = useRef<AssessmentRequest | null>(null);
+  const assessPayment = usePaymentFlow(signPayment, ASSESSMENT_FEE_CSPR, async (paymentProof) => {
+    const request = pendingAssessRequest.current;
+    if (!request) return;
+    await submitAssessmentWithProof(request, paymentProof);
+  });
 
   // Load existing loans on mount
   useEffect(() => {
@@ -504,7 +507,6 @@ export const BorrowView: React.FC = () => {
   const handleSubmitAsset = useCallback(() => {
     if (!assetName || !assetValue) return;
 
-    // Store the request and show payment modal
     pendingAssessRequest.current = {
       assetType,
       name: assetName,
@@ -514,52 +516,8 @@ export const BorrowView: React.FC = () => {
       artistOrMedium: assetType === 'art' ? artistOrMedium : undefined,
       weightOz: assetType === 'commodity' ? parseFloat(weightOz) || 1 : undefined,
     };
-    setAssessSignError(null);
-    setShowAssessPaymentModal(true);
-  }, [assetType, assetName, assetDescription, assetValue, location, artistOrMedium, weightOz]);
-
-  const handleAssessPaymentConfirm = useCallback(async () => {
-    const request = pendingAssessRequest.current;
-    if (!request) return;
-
-    // If wallet not connected, connect first
-    if (!connected) {
-      try {
-        await wallet.connect();
-      } catch {
-        setAssessSignError('Please connect your wallet first.');
-        return;
-      }
-      if (!connected) {
-        setAssessSignError('Wallet connection is required to proceed.');
-        return;
-      }
-    }
-
-    setAssessSigning(true);
-    setAssessSignError(null);
-
-    try {
-      const { paymentProof } = await signPayment(PLATFORM_WALLET, ASSESSMENT_FEE_CSPR);
-      setShowAssessPaymentModal(false);
-      await submitAssessmentWithProof(request, paymentProof);
-    } catch (err: any) {
-      if (err?.message?.includes('cancelled')) {
-        setAssessSignError('Payment was cancelled. Please approve the transfer in your wallet.');
-      } else {
-        setAssessSignError(err?.message || 'Failed to sign payment. Please try again.');
-      }
-    } finally {
-      setAssessSigning(false);
-    }
-  }, [connected, wallet, signPayment, submitAssessmentWithProof]);
-
-  const handleAssessPaymentCancel = useCallback(() => {
-    setShowAssessPaymentModal(false);
-    setAssessSigning(false);
-    setAssessSignError(null);
-    pendingAssessRequest.current = null;
-  }, []);
+    assessPayment.openModal();
+  }, [assetType, assetName, assetDescription, assetValue, location, artistOrMedium, weightOz, assessPayment]);
 
   const handleRequestLoan = useCallback(async () => {
     if (!assessmentResult || !publicKey) return;
@@ -653,7 +611,7 @@ export const BorrowView: React.FC = () => {
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
       {/* Assessment Payment Modal */}
       <PaymentModal
-        open={showAssessPaymentModal}
+        open={assessPayment.showModal}
         title="Confirm Assessment Payment"
         description="A micropayment is required to run the AI valuation pipeline."
         feeLabel="Assessment Fee"
@@ -663,10 +621,10 @@ export const BorrowView: React.FC = () => {
           'Agent deliberation (if agents diverge >15%)',
           'Full analysis report with data sources',
         ]}
-        signing={assessSigning}
-        signError={assessSignError}
-        onConfirm={handleAssessPaymentConfirm}
-        onCancel={handleAssessPaymentCancel}
+        signing={assessPayment.signing}
+        signError={assessPayment.signError}
+        onConfirm={assessPayment.confirm}
+        onCancel={assessPayment.cancel}
       />
 
       {/* Header */}

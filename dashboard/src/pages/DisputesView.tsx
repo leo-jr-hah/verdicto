@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { fetchOracleVerdicts, fetchDisputes, fileDispute, triggerRetrial, type OracleVerdict, type Dispute } from '../services/api';
 import { useWallet } from '../contexts/CSPRClickContext';
-import { PLATFORM_WALLET, DISPUTE_FEE_CSPR } from '../config/casper';
+import { DISPUTE_FEE_CSPR } from '../config/casper';
 import PaymentModal from '../components/PaymentModal';
+import { usePaymentFlow } from '../hooks/usePaymentFlow';
 
 function formatTime(ts: number): string {
   const date = new Date(ts);
@@ -36,13 +37,31 @@ export const DisputesView: React.FC = () => {
   const [disputeReason, setDisputeReason] = useState('');
   const [reasonError, setReasonError] = useState<string | null>(null);
 
-  // Step 2: payment modal
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [signingPayment, setSigningPayment] = useState(false);
-  const [signError, setSignError] = useState<string | null>(null);
-
-  // Pending request (stored between step 1 → step 2)
+  // Step 2: payment flow (shared hook)
   const pendingRequestRef = useRef<{ assetId: string; reason: string } | null>(null);
+  const [lastTxHashByAsset, setLastTxHashByAsset] = useState<Record<string, string>>({});
+
+  const payment = usePaymentFlow(wallet.signPayment, DISPUTE_FEE_CSPR, async (paymentProof, deployHash) => {
+    const request = pendingRequestRef.current;
+    if (!request) return;
+    pendingRequestRef.current = null;
+
+    const result = await fileDispute(request.assetId, wallet.publicKey!, request.reason, paymentProof);
+
+    if (result.status === 'success') {
+      setDisputeReason('');
+      setLastTxHashByAsset(prev => ({ ...prev, [request.assetId]: deployHash || '' }));
+      // Auto-trigger re-trial immediately after dispute is filed
+      try {
+        await triggerRetrial(result.dispute.id);
+      } catch {
+        // Retrial may fail silently, dispute is still filed
+      }
+      await loadData();
+    } else {
+      throw new Error('error' in result ? result.error : 'Dispute filing failed');
+    }
+  });
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -80,87 +99,8 @@ export const DisputesView: React.FC = () => {
     pendingRequestRef.current = { assetId: showReasonModal, reason: disputeReason.trim() };
     setReasonError(null);
     setShowReasonModal(null); // close reason modal
-    setSignError(null);
-    setShowPaymentModal(true); // open payment modal
-  }, [showReasonModal, disputeReason, wallet.connected, wallet.publicKey]);
-
-  // Track the last successful dispute tx for display
-  const [lastTxHashByAsset, setLastTxHashByAsset] = useState<Record<string, string>>({});
-
-  // ── Step 2: User confirms payment in PaymentModal ─────────────────────
-  const handlePaymentConfirm = useCallback(async () => {
-    const request = pendingRequestRef.current;
-    if (!request) return;
-
-    // If wallet not connected, try to connect first
-    if (!wallet.connected) {
-      try {
-        await wallet.connect();
-      } catch {
-        setSignError('Please connect your wallet first.');
-        return;
-      }
-      if (!wallet.connected) {
-        setSignError('Wallet connection is required to proceed.');
-        return;
-      }
-    }
-
-    setSigningPayment(true);
-    setSignError(null);
-
-    try {
-      // Sign the payment via wallet (opens the wallet popup)
-      const { paymentProof, deployHash } = await wallet.signPayment(
-        PLATFORM_WALLET,
-        DISPUTE_FEE_CSPR,
-      );
-
-      // Payment signed. Close modal and submit the dispute
-      setShowPaymentModal(false);
-      pendingRequestRef.current = null;
-
-      // Submit the dispute with the payment proof
-      const result = await fileDispute(request.assetId, wallet.publicKey!, request.reason, paymentProof);
-
-      if (result.status === 'success') {
-        setDisputeReason('');
-        setLastTxHashByAsset(prev => ({ ...prev, [request.assetId]: deployHash || '' }));
-        // Auto-trigger re-trial immediately after dispute is filed
-        try {
-          await triggerRetrial(result.dispute.id);
-        } catch {
-          // Retrial may fail silently, dispute is still filed
-        }
-        await loadData();
-      } else if (result.status === 'payment_required') {
-        setSignError('Payment was not accepted by the server. Please try again.');
-        setShowPaymentModal(true);
-      } else if (result.status === 'error') {
-        setSignError(result.error);
-        setShowPaymentModal(true);
-      }
-    } catch (err: any) {
-      const msg = err?.message || 'Failed to sign payment.';
-      if (msg.includes('cancelled') || msg.includes('reject')) {
-        setSignError('Payment was cancelled. Please approve the transfer in your wallet.');
-      } else {
-        setSignError(msg);
-      }
-      // Re-open modal so user can retry
-      setShowPaymentModal(true);
-    } finally {
-      setSigningPayment(false);
-    }
-  }, [wallet, loadData]);
-
-  // ── Cancel payment ────────────────────────────────────────────────────
-  const handlePaymentCancel = useCallback(() => {
-    setShowPaymentModal(false);
-    setSigningPayment(false);
-    setSignError(null);
-    pendingRequestRef.current = null;
-  }, []);
+    payment.openModal(); // open payment modal
+  }, [showReasonModal, disputeReason, wallet.connected, wallet.publicKey, payment]);
 
   // ── Cancel reason form ────────────────────────────────────────────────
   const handleReasonCancel = useCallback(() => {
@@ -850,7 +790,7 @@ export const DisputesView: React.FC = () => {
 
       {/* ── Step 2: Payment Confirmation Modal (shared component) ── */}
       <PaymentModal
-        open={showPaymentModal}
+        open={payment.showModal}
         title="Confirm Dispute Filing"
         description={`Stake ${DISPUTE_FEE_CSPR} CSPR to challenge this verdict. An independent AI panel will re-evaluate the case.`}
         feeLabel="Dispute Stake"
@@ -860,10 +800,10 @@ export const DisputesView: React.FC = () => {
           'Market Analyst, Value Auditor, and Devil\'s Advocate',
           'Stake returned if you win the challenge',
         ]}
-        signing={signingPayment}
-        signError={signError}
-        onConfirm={handlePaymentConfirm}
-        onCancel={handlePaymentCancel}
+        signing={payment.signing}
+        signError={payment.signError}
+        onConfirm={payment.confirm}
+        onCancel={payment.cancel}
       />
     </>
   );

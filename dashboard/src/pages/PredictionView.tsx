@@ -15,13 +15,13 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { useWallet } from '../contexts/CSPRClickContext';
-import { PLATFORM_WALLET, PREDICTION_FEE_CSPR } from '../config/casper';
+import { PREDICTION_FEE_CSPR } from '../config/casper';
 import PaymentModal from '../components/PaymentModal';
+import { usePaymentFlow } from '../hooks/usePaymentFlow';
 import {
   submitPrediction,
   type PredictionResult as APIPredictionResult,
   type PredictionAgent as APIPredictionAgent,
-  type X402PaymentRequirements,
 } from '../services/api';
 
 // ─── Types (re-exported from API) ───────────────────────────────────────────
@@ -262,13 +262,13 @@ export const PredictionView: React.FC = () => {
   const [result, setResult] = useState<PredictionResult | null>(null);
   const [showDemos, setShowDemos] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Payment
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [signingPayment, setSigningPayment] = useState(false);
-  const [signError, setSignError] = useState<string | null>(null);
   const [lastDeployHash, setLastDeployHash] = useState<string | null>(null);
-  const [pendingRequirements, setPendingRequirements] = useState<X402PaymentRequirements | null>(null);
+
+  // Payment flow (shared hook)
+  const payment = usePaymentFlow(wallet.signPayment, PREDICTION_FEE_CSPR, async (paymentProof, deployHash) => {
+    setLastDeployHash(deployHash);
+    await runPrediction(paymentProof);
+  });
 
   const runPrediction = async (paymentProof?: string) => {
     setLoading(true);
@@ -283,8 +283,7 @@ export const PredictionView: React.FC = () => {
     if (response.status === 'success') {
       setResult(response.prediction);
     } else if (response.status === 'payment_required') {
-      setPendingRequirements(response.paymentRequirements);
-      setShowPaymentModal(true);
+      payment.openModal();
       setLoading(false);
       return;
     } else {
@@ -295,60 +294,7 @@ export const PredictionView: React.FC = () => {
 
   const handlePredict = () => {
     if (!question.trim()) return;
-    setSignError(null);
-    setPendingRequirements(null);
     runPrediction();
-  };
-
-  const handlePaymentConfirm = async () => {
-    if (!wallet.connected) {
-      try { await wallet.connect(); } catch {
-        setSignError('Please connect your wallet first.');
-        return;
-      }
-      if (!wallet.connected) {
-        setSignError('Wallet connection is required to proceed.');
-        return;
-      }
-    }
-
-    setSigningPayment(true);
-    setSignError(null);
-
-    try {
-      const amount = pendingRequirements
-        ? parseFloat(pendingRequirements.paymentRequirements.maxAmountRequired)
-        : PREDICTION_FEE_CSPR;
-      const payTo = pendingRequirements
-        ? pendingRequirements.paymentRequirements.payTo
-        : PLATFORM_WALLET;
-
-      const { deployHash } = await wallet.signPayment(payTo, amount);
-      setShowPaymentModal(false);
-      setLastDeployHash(deployHash);
-
-      const proof = btoa(JSON.stringify({
-        payer: wallet.publicKey,
-        deployHash,
-        amount,
-      }));
-
-      await runPrediction(proof);
-    } catch (err: any) {
-      if (err?.message?.includes('cancelled')) {
-        setSignError('Payment was cancelled. Please approve the transfer in your wallet.');
-      } else {
-        setSignError(err?.message || 'Failed to sign payment. Please try again.');
-      }
-    } finally {
-      setSigningPayment(false);
-    }
-  };
-
-  const handlePaymentCancel = () => {
-    setShowPaymentModal(false);
-    setSigningPayment(false);
-    setSignError(null);
   };
 
   const handleDemoSelect = (demo: typeof DEMO_QUESTIONS[number]) => {
@@ -901,7 +847,7 @@ export const PredictionView: React.FC = () => {
 
       {/* ─── Payment Modal ──────────────────────────────────────── */}
       <PaymentModal
-        open={showPaymentModal}
+        open={payment.showModal}
         title="Confirm Payment"
         description="Micropayment required to run the 5-agent prediction analysis."
         feeLabel="Prediction Fee"
@@ -911,10 +857,10 @@ export const PredictionView: React.FC = () => {
           'Multi-methodology consensus',
           'On-chain verdict with receipt',
         ]}
-        signing={signingPayment}
-        signError={signError}
-        onConfirm={handlePaymentConfirm}
-        onCancel={handlePaymentCancel}
+        signing={payment.signing}
+        signError={payment.signError}
+        onConfirm={payment.confirm}
+        onCancel={payment.cancel}
       />
     </div>
   );
