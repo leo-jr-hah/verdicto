@@ -13,6 +13,7 @@ import { InsureView } from './pages/InsureView';
 import { HowItWorksView } from './pages/HowItWorksView';
 import { RoadmapView } from './pages/RoadmapView';
 import { OracleView } from './pages/OracleView';
+import { DisputesView } from './pages/DisputesView';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="architecture" element={<ArchitectureView />} />
         <Route path="roadmap" element={<RoadmapView />} />
         <Route path="oracle" element={<OracleView />} />
+        <Route path="disputes" element={<DisputesView />} />
       </Route>
     </Routes>
   );

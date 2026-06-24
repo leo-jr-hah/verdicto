@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Menu, X, Bot, LayoutDashboard, Users, Scale, History, Cpu, ChevronRight, Droplets, Target, Map, Landmark, Shield, GitBranch, Radio } from 'lucide-react';
+import { Moon, Sun, Menu, X, Bot, LayoutDashboard, Users, Scale, History, Cpu, ChevronRight, Droplets, Target, Map, Landmark, Shield, GitBranch, Radio, Gavel } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import verdictLogo from '../assets/logo.jpeg';
 import { ConnectionStatus } from '../components/ConnectionStatus';
@@ -21,13 +21,14 @@ const NAV_SECTIONS = [
       { name: 'Borrow', path: '/borrow', icon: Landmark },
       { name: 'Insure', path: '/insure', icon: Shield },
       { name: 'Predict', path: '/predict', icon: Target },
+      { name: 'Oracle', path: '/oracle', icon: Radio },
+      { name: 'Disputes', path: '/disputes', icon: Gavel },
     ],
   },
   {
     title: 'DATA',
     items: [
       { name: 'Agents', path: '/reputation', icon: Users },
-      { name: 'Oracle', path: '/oracle', icon: Radio },
       { name: 'History', path: '/transactions', icon: History },
       { name: 'How Verdicto Works', path: '/how-it-works', icon: Cpu },
       { name: 'Architecture', path: '/architecture', icon: GitBranch },

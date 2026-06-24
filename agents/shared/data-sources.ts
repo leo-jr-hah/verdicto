@@ -156,11 +156,12 @@ export async function getArtData(query: string): Promise<AssetData> {
 const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY;
 const COINGECKO_BASE = 'https://api.coingecko.com/api/v3';
 
-// Map commodity names to CoinGecko IDs for gold-backed tokens
+// Map commodity names to CoinGecko IDs (verified working on free API tier)
 const COMMODITY_IDS: Record<string, string> = {
-  gold: 'pax-gold',       // PAX Gold, tracks physical gold spot price
-  silver: 'coin-wind',    // fallback, may not exist
-  platinum: 'platinum',   // may not exist on CoinGecko
+  gold: 'pax-gold',                // PAX Gold — tracks physical gold spot price
+  silver: 'kinesis-silver',        // Kinesis Silver (KAG) — tracks physical silver
+  platinum: 'gram-platinum',       // Gram Platinum — tracks physical platinum
+  palladium: 'palladium-rstock',   // Palladium rStock — tracks physical palladium
 };
 
 export async function getGoldData(): Promise<AssetData> {
