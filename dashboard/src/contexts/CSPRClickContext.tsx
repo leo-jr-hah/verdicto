@@ -100,6 +100,8 @@ function accountHashFromPublicKey(publicKeyHex: string): string {
 
 /* ---------- Provider ---------- */
 
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
+
 export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [connected, setConnected] = useState(false);
   const [publicKey, setPublicKey] = useState<string | null>(null);
@@ -110,6 +112,17 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [walletInstalled, setWalletInstalled] = useState(false);
 
   const providerRef = useRef<CasperWalletProvider | null>(null);
+
+  // Demo mode: auto-connect with a fake wallet
+  useEffect(() => {
+    if (DEMO_MODE) {
+      setConnected(true);
+      setPublicKey('demo_public_key_' + Math.random().toString(36).slice(2, 10));
+      setAccountHash('account-hash-demo1234');
+      setAccountName('Demo User');
+      setWalletInstalled(true);
+    }
+  }, []);
 
   // Helper to update wallet state from a public key
   const updateFromPublicKey = useCallback((pk: string) => {
@@ -207,6 +220,11 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
   const connect = useCallback(async () => {
     setError(null);
 
+    // Demo mode: already auto-connected, no-op
+    if (DEMO_MODE) {
+      return;
+    }
+
     // If wallet not installed, open Chrome Web Store
     if (!isCasperWalletInstalled()) {
       window.open(CHROME_WEB_STORE_URL, '_blank');
@@ -255,6 +273,15 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, [updateFromPublicKey]);
 
   const disconnect = useCallback(() => {
+    // Demo mode: reset to demo state instead of real wallet
+    if (DEMO_MODE) {
+      setConnected(true);
+      setPublicKey('demo_public_key_' + Math.random().toString(36).slice(2, 10));
+      setAccountHash('account-hash-demo1234');
+      setAccountName('Demo User');
+      return;
+    }
+
     const provider = providerRef.current;
 
     if (provider) {
@@ -276,6 +303,20 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
     recipientAddress: string,
     amountCSPR: number,
   ): Promise<{ paymentProof: string; deployHash: string }> => {
+    // Demo mode: generate fake payment proof without wallet
+    if (DEMO_MODE) {
+      const fakeDeployHash = 'demo_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      const fakeProof = {
+        scheme: 'demo',
+        payload: { deploy: 'demo', payer: publicKey || 'demo-user', amount: amountCSPR, network: 'casper-testnet' },
+        deployHash: fakeDeployHash,
+        broadcast: true,
+      };
+      const paymentProof = btoa(JSON.stringify(fakeProof));
+      console.log('[DEMO] 🎭 Simulated signPayment:', { deployHash: fakeDeployHash, amountCSPR });
+      return { paymentProof, deployHash: fakeDeployHash };
+    }
+
     const provider = providerRef.current;
     if (!provider || !publicKey) {
       throw new Error('Wallet not connected');

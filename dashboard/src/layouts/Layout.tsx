@@ -6,6 +6,7 @@ import verdictLogo from '../assets/logo.jpeg';
 import { ConnectionStatus } from '../components/ConnectionStatus';
 import { WalletConnectButton } from '../components/WalletConnectButton';
 import { InteractiveStory } from '../components/story/InteractiveStory';
+import { DemoModeBanner } from '../components/DemoModeBanner';
 
 const NAV_SECTIONS = [
   {
@@ -259,6 +260,7 @@ export const Layout: React.FC = () => {
 
       {/* Main Content Area */}
       <main className="main-content-area">
+        <DemoModeBanner />
         <div className="page-layout">
           <Outlet />
         </div>

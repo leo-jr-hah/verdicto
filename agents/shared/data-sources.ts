@@ -20,6 +20,9 @@ import type { AssetType, AssetListing } from './types.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+// ─── Demo Mode ───────────────────────────────────────────────────────────────
+const DEMO_MODE = process.env.DEMO_MODE === 'true';
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface AssetData {
@@ -33,12 +36,118 @@ export interface AssetData {
   timestamp: number;
 }
 
+// ─── Demo Mode Data Generators ────────────────────────────────────────────────
+// Returns realistic-looking mock data without hitting any external APIs.
+
+function jitter(base: number, range: number): number {
+  return Math.round(base * (1 + (Math.random() - 0.5) * range));
+}
+
+function demoRealEstateData(address: string): AssetData {
+  const city = address.toLowerCase();
+  const basePrice = city.includes('miami') ? 620_000
+    : city.includes('new york') ? 1_850_000
+    : city.includes('los angeles') ? 1_200_000
+    : city.includes('san francisco') ? 1_650_000
+    : city.includes('chicago') ? 420_000
+    : city.includes('austin') ? 550_000
+    : city.includes('denver') ? 520_000
+    : city.includes('seattle') ? 880_000
+    : 550_000;
+
+  const comps = Array.from({ length: 5 }, (_, i) => ({
+    address: `${100 + i * 123} Demo St, ${address}`,
+    price: jitter(basePrice, 0.2),
+    sqft: jitter(1800, 0.3),
+    pricePerSqft: jitter(Math.round(basePrice / 1800), 0.15),
+    daysOnMarket: Math.floor(Math.random() * 60) + 5,
+  }));
+
+  return {
+    type: 'real-estate',
+    name: address,
+    query: address,
+    priceData: {
+      estimatedValue: jitter(basePrice, 0.1),
+      sqft: jitter(1800, 0.3),
+      bedrooms: Math.floor(Math.random() * 3) + 2,
+      bathrooms: Math.floor(Math.random() * 2) + 1,
+      yearBuilt: 1990 + Math.floor(Math.random() * 30),
+      propertyType: 'Single Family',
+    },
+    comparables: comps,
+    marketContext: { source: 'Demo Data', totalComps: comps.length },
+    source: 'Demo Data',
+    timestamp: Date.now(),
+  };
+}
+
+function demoArtData(query: string): AssetData {
+  const mediums = ['Oil on canvas', 'Acrylic on panel', 'Mixed media', 'Bronze sculpture', 'Watercolor'];
+  const artists = ['Demo Artist A', 'Demo Artist B', 'Demo Artist C', 'Demo Artist D', 'Demo Artist E'];
+  const departments = ['Modern Art', 'Contemporary', 'European Paintings', 'American Art', 'Photography'];
+
+  const artworks = Array.from({ length: 4 }, (_, i) => ({
+    title: `${query} Study #${i + 1}`,
+    artist: artists[i % artists.length],
+    date: `${1950 + Math.floor(Math.random() * 70)}`,
+    medium: mediums[i % mediums.length],
+    dimensions: `${20 + i * 10} × ${15 + i * 8} in`,
+    department: departments[i % departments.length],
+    metUrl: null,
+    imageUrl: null,
+  }));
+
+  return {
+    type: 'art',
+    name: query,
+    query,
+    priceData: {
+      estimatedValue: null,
+      note: 'Demo mode — art valuation uses comparable auction data',
+    },
+    comparables: artworks,
+    marketContext: { source: 'Demo Data', totalResults: artworks.length, queriedResults: artworks.length },
+    source: 'Demo Data',
+    timestamp: Date.now(),
+  };
+}
+
+function demoCommodityData(commodityId: string): AssetData {
+  const prices: Record<string, number> = { gold: 3_300, silver: 32, platinum: 1_020, palladium: 980 };
+  const base = prices[commodityId] || 3_300;
+
+  return {
+    type: 'commodity',
+    name: commodityId.charAt(0).toUpperCase() + commodityId.slice(1),
+    query: commodityId,
+    priceData: {
+      pricePerOz: jitter(base, 0.03),
+      change24h: (Math.random() - 0.5) * 4,
+    },
+    comparables: [],
+    marketContext: { source: 'Demo Data', currency: 'USD' },
+    source: 'Demo Data',
+    timestamp: Date.now(),
+  };
+}
+
+function demoMacroContext(): any {
+  return {
+    mortgageRate: 0.068 + (Math.random() - 0.5) * 0.01,
+    date: new Date().toISOString().slice(0, 10),
+    source: 'Demo Data',
+  };
+}
+
 // ─── Real Estate (RentCast API) ──────────────────────────────────────────────
 
 const RENTCAST_API_KEY = process.env.RENTCAST_API_KEY;
 const RENTCAST_BASE = 'https://api.rentcast.io/v1';
 
 export async function getRealEstateData(address: string): Promise<AssetData> {
+  if (DEMO_MODE) return demoRealEstateData(address);
+
   const [propertyRes, compsRes] = await Promise.allSettled([
     // Property details
     RENTCAST_API_KEY ? axios.get(
@@ -89,6 +198,8 @@ export async function getRealEstateData(address: string): Promise<AssetData> {
 const MET_API_BASE = 'https://collectionapi.metmuseum.org/public/collection/v1';
 
 export async function getArtData(query: string): Promise<AssetData> {
+  if (DEMO_MODE) return demoArtData(query);
+
   // Search for artworks
   const searchRes = await axios.get(
     `${MET_API_BASE}/search?q=${encodeURIComponent(query)}&hasImages=true`,
@@ -207,6 +318,8 @@ export async function getGoldData(): Promise<AssetData> {
  * Get commodity price by ID (gold, silver, platinum, etc.)
  */
 export async function getCommodityData(commodityId: string): Promise<AssetData> {
+  if (DEMO_MODE) return demoCommodityData(commodityId);
+
   const coinId = COMMODITY_IDS[commodityId] || commodityId;
   const params: any = {
     ids: coinId,
@@ -248,6 +361,8 @@ export async function getCommodityData(commodityId: string): Promise<AssetData> 
 const FRED_API_KEY = process.env.FRED_API_KEY;
 
 export async function getMacroContext(): Promise<any> {
+  if (DEMO_MODE) return demoMacroContext();
+
   if (!FRED_API_KEY) {
     return {
       mortgageRate: null,
