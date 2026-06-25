@@ -4,8 +4,8 @@
 
 // In dev, empty string uses Vite proxy (/api/* → localhost:3011)
 // In production, set VITE_ORCHESTRATOR_URL to the deployed backend URL
-export const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || '';
-const WS_URL = import.meta.env.VITE_WS_URL || '';
+export const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || (import.meta.env.PROD ? 'https://verdicto-production.up.railway.app' : '');
+const WS_URL = import.meta.env.VITE_WS_URL || (import.meta.env.PROD ? 'wss://verdicto-production.up.railway.app/ws' : '');
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
