@@ -7,7 +7,7 @@ const CONTRACTS = [
   {
     name: 'VerdictOracle',
     hash: 'pending',
-    description: "Stores multi-agent consensus valuations as a composable on-chain primitive. Any Casper dApp can query verdicts via cross-contract call and pay 0.1 CSPR per query.",
+    description: "Stores multi-agent consensus valuations on-chain. Other CASPER products query verdicts directly — first-party composable primitive.",
     highlight: true,
   },
   {

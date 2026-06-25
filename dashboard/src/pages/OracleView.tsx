@@ -110,7 +110,7 @@ export const OracleView: React.FC = () => {
               </h1>
             </div>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.95rem' }}>
-              On-chain RWA price feed, composable primitive for Casper dApps
+              On-chain RWA price feed — first-party composable oracle
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

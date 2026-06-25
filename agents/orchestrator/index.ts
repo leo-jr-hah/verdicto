@@ -3411,9 +3411,9 @@ Respond in JSON format:
     // Populates the in-memory oracle store so the dashboard shows live data
     // on first load. Real assessment verdicts overwrite these by asset_id.
     try {
-      const { seedDemoVerdicts } = await import('../shared/casper-contracts.js');
+      const { seedDemoVerdicts, seedDemoDisputes } = await import('../shared/casper-contracts.js');
       seedDemoVerdicts();
-      // Demo disputes are NOT seeded — users file real disputes from the UI
+      seedDemoDisputes();
     } catch (err: any) {
       console.warn(`  ⚠️ Oracle seed failed (non-critical): ${err.message}`);
     }

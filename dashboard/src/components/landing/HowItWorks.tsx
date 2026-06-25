@@ -32,7 +32,7 @@ const STEPS = [
     title: 'Stored in the Verdict Oracle',
     color: '#10B981',
     icon: ShieldCheck,
-    description: 'The consensus valuation is committed to the Verdict Oracle, an on-chain smart contract. Any Casper dApp can query it via cross-contract call. An HMAC receipt chain ensures nothing was altered after the fact.',
+    description: 'The consensus valuation is committed to the Verdict Oracle, an on-chain smart contract. Our Borrow, Insure, and Predict products query it directly. An HMAC receipt chain ensures nothing was altered after the fact.',
     detail: 'Composable On-Chain Primitive',
   },
   {

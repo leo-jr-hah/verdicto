@@ -1,5 +1,38 @@
 [
   {
+    "id": "tx-1782381849969-5dio9u",
+    "type": "SubmitAssessment",
+    "action": "Assessment: Manhattan Studio Apartment (real-estate) - 1,896,647",
+    "hash": "RE-1782381849960-qm52",
+    "contract": "Orchestrator",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-25T10:04:09.969Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assetType": "real-estate",
+      "askingPrice": 650000,
+      "assessedValue": 1896647,
+      "divergence": 3.258093122821495
+    }
+  },
+  {
+    "id": "tx-1782381849960-nd15io",
+    "type": "x402 Payment",
+    "action": "Assessment fee: 2.5 CSPR from demo-user...",
+    "hash": "demo_nebn1zoc26r",
+    "contract": "Native Transfer",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-25T10:04:09.960Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/demo_nebn1zoc26r",
+    "onChain": true,
+    "metadata": {
+      "payer": "demo-user",
+      "amount": 2.5,
+      "fee": 2.5
+    }
+  },
+  {
     "id": "tx-1782342958467-xxkmhp",
     "type": "SubmitAssessment",
     "action": "Assessment: Gold Bar (commodity) - 47,039",
