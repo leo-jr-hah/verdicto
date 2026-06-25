@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './layouts/Layout';
 import { LandingLayout } from './layouts/LandingLayout';
 import { LandingPage } from './pages/LandingPage';
@@ -25,6 +25,7 @@ function App() {
         <Route path="dashboard" element={<DashboardView />} />
         <Route path="assess" element={<AssessView />} />
         <Route path="confidence" element={<PredictionView />} />
+        <Route path="predict" element={<Navigate to="/confidence" replace />} />
         <Route path="borrow" element={<BorrowView />} />
         <Route path="insure" element={<InsureView />} />
         <Route path="reputation" element={<ReputationView />} />

@@ -2,18 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { Reveal } from './UIComponents';
+import { fetchContractState, type ContractState } from '../../services/api';
 
 export const TestnetProof: React.FC = () => {
-  const [blockHeight, setBlockHeight] = useState(1489230);
+  const [state, setState] = useState<ContractState | null>(null);
+  const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(new Date().toLocaleTimeString());
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setBlockHeight(prev => prev + Math.floor(Math.random() * 3));
+    const fetchData = async () => {
+      const data = await fetchContractState();
+      setState(data);
       setLastRefresh(new Date().toLocaleTimeString());
-    }, 30000);
+      setLoading(false);
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const assessments = state?.assessments?.total ?? 0;
+  const csprCollected = state?.payments?.totalCollected
+    ? (state.payments.totalCollected / 1e8).toFixed(1)
+    : '0';
+  const receipts = state?.receipts?.total ?? 0;
 
   return (
     <section style={{ width: '100%', maxWidth: 1100, margin: '0 auto', padding: '96px 32px' }}>
@@ -87,19 +100,19 @@ export const TestnetProof: React.FC = () => {
               <div style={{ padding: '24px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                   <span>STATUS</span>
-                  <span style={{ color: '#10B981' }}>SYNCED</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <span>LAST BLOCK</span>
-                  <span style={{ color: 'var(--text-primary)' }}>{blockHeight.toLocaleString()}</span>
+                  <span style={{ color: '#10B981' }}>{loading ? 'CONNECTING...' : 'SYNCED'}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                   <span>ASSESSMENTS RUN</span>
-                  <span style={{ color: 'var(--text-primary)' }}>1,402</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{loading ? '...' : assessments.toLocaleString()}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <span>RECEIPTS CHAINED</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{loading ? '...' : receipts.toLocaleString()}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
                   <span>CSPR COLLECTED</span>
-                  <span style={{ color: 'var(--text-primary)' }}>345.8 CSPR</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{loading ? '...' : `${csprCollected} CSPR`}</span>
                 </div>
 
                 <div style={{ borderTop: '1px dashed var(--border-color)', paddingTop: '24px' }}>
@@ -108,7 +121,7 @@ export const TestnetProof: React.FC = () => {
                   </div>
                   <div style={{ color: '#10B981', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <motion.div animate={{ opacity: [1, 0] }} transition={{ duration: 1, repeat: Infinity }} style={{ width: 8, height: 16, background: '#10B981' }} />
-                    polling contract state...
+                    {loading ? 'connecting to contract state...' : 'polling contract state...'}
                   </div>
                 </div>
               </div>
