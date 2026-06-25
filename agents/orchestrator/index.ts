@@ -64,7 +64,7 @@ const CSPR_RPC_URL = 'https://node.testnet.cspr.cloud/rpc';
 const SETTLEMENT_AMOUNT_MOTES = 2_500_000_000; // 2.5 CSPR
 const DEPLOY_PAYMENT_MOTES = 100_000_000;       // 0.1 CSPR deploy cost
 const ASSESSMENT_TIMEOUT_MS = 5 * 60 * 1000;       // 5 minutes max per assessment
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5174,http://localhost:3000').split(',');
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5174,http://localhost:3000,https://verdicto.xyz,https://www.verdicto.xyz').split(',');
 const JUROR_IDS = ['evidence', 'market', 'precedent'] as const;
 
 // ─── x402 Payment Constants ──────────────────────────────────────────────────
