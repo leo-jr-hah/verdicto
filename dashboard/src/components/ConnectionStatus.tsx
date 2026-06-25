@@ -1,34 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Wifi, WifiOff } from 'lucide-react';
-import { createWebSocket } from '../services/api';
+import { ORCHESTRATOR_URL } from '../services/api';
 
+/**
+ * Pings the orchestrator's /api/contract-state endpoint every 30s
+ * to determine if the backend is reachable.
+ */
 export const ConnectionStatus: React.FC = () => {
-  const [wsConnected, setWsConnected] = useState(false);
+  const [online, setOnline] = useState<boolean | null>(null); // null = unknown (first check pending)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const checkConnection = async () => {
+    try {
+      const res = await fetch(`${ORCHESTRATOR_URL}/api/contract-state`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(8000), // 8s timeout
+      });
+      setOnline(res.ok);
+    } catch {
+      setOnline(false);
+    }
+  };
 
   useEffect(() => {
-    const ws = createWebSocket(() => {});
-    
-    ws.onopen = () => setWsConnected(true);
-    ws.onclose = () => setWsConnected(false);
-    
-    return () => ws.close();
+    // Check immediately on mount
+    checkConnection();
+
+    // Then every 30 seconds
+    intervalRef.current = setInterval(checkConnection, 30_000);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, []);
 
+  const isOnline = online === true;
+  const label = online === null ? 'Checking…' : isOnline ? 'Network Online' : 'Network Offline';
+
   return (
-    <div style={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      gap: '0.5rem', 
-      padding: '0.5rem 1rem', 
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      padding: '0.5rem 1rem',
       fontSize: '0.85rem',
       fontWeight: 600,
-      color: wsConnected ? '#10B981' : 'var(--text-tertiary)',
+      color: isOnline ? '#10B981' : 'var(--text-tertiary)',
       background: 'var(--bg-surface)',
       border: '1px solid var(--border-color)',
       borderRadius: '999px'
     }}>
-      {wsConnected ? <Wifi size={14} /> : <WifiOff size={14} />}
-      {wsConnected ? 'Network Online' : 'Network Offline'}
+      {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />}
+      {label}
     </div>
   );
 };
