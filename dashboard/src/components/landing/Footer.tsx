@@ -29,7 +29,7 @@ export const Footer: React.FC = () => {
                 <Link to="/oracle" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Oracle</Link>
                 <Link to="/borrow" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Borrow</Link>
                 <Link to="/insure" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Insure</Link>
-                <Link to="/predict" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Predict</Link>
+                <Link to="/confidence" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Confidence</Link>
                 <Link to="/reputation" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>Agents</Link>
                 <Link to="/transactions" className="footer-link" style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}>History</Link>
               </div>

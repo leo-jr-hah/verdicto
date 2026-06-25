@@ -21,7 +21,7 @@ const NAV_SECTIONS = [
       { name: 'Value Asset', path: '/assess', icon: Scale },
       { name: 'Borrow', path: '/borrow', icon: Landmark },
       { name: 'Insure', path: '/insure', icon: Shield },
-      { name: 'Predict', path: '/predict', icon: Target },
+      { name: 'Confidence', path: '/confidence', icon: Target },
       { name: 'Oracle', path: '/oracle', icon: Radio },
       { name: 'Disputes', path: '/disputes', icon: Gavel },
     ],

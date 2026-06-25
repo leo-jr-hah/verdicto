@@ -16,8 +16,8 @@ const STEPS = [
     title: 'Choose Your Product',
     color: '#3B82F6',
     icon: BarChart3,
-    description: 'Pick what you need: Assess an asset for its market value, Borrow against it, Insure it against loss, or Predict a real-world outcome. Each product uses the same multi-agent AI engine.',
-    detail: 'Assess, Borrow, Insure, or Predict',
+    description: 'Pick what you need: Assess an asset for its market value, Borrow against it, Insure it against loss, or run a Confidence Analysis on a real-world outcome. Each product uses the same multi-agent AI engine.',
+    detail: 'Assess, Borrow, Insure, or Confidence',
   },
   {
     num: '03',
@@ -32,7 +32,7 @@ const STEPS = [
     title: 'Stored in the Verdict Oracle',
     color: '#10B981',
     icon: ShieldCheck,
-    description: 'The consensus valuation is committed to the Verdict Oracle, an on-chain smart contract. Our Borrow, Insure, and Predict products query it directly. An HMAC receipt chain ensures nothing was altered after the fact.',
+    description: 'The consensus valuation is committed to the Verdict Oracle, an on-chain smart contract. Our Borrow, Insure, and Confidence products query it directly. An HMAC receipt chain ensures nothing was altered after the fact.',
     detail: 'Composable On-Chain Primitive',
   },
   {
@@ -53,11 +53,11 @@ const STEPS = [
   },
   {
     num: '07',
-    title: 'Predict Outcomes',
+    title: 'Confidence Analysis',
     color: '#6366F1',
     icon: TrendingUp,
-    description: 'Ask any yes-or-no question about the real world. Five agents analyze available data, estimate probabilities, and produce a weighted consensus. Track resolution as events unfold.',
-    detail: '5-Agent Probability Consensus',
+    description: 'Ask any yes-or-no question about the real world. Five agents independently estimate probabilities and produce a weighted confidence score. Results feed into Oracle verdicts.',
+    detail: '5-Agent Confidence Scoring',
   },
 ];
 

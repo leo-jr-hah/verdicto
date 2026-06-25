@@ -32,7 +32,7 @@ const LAYERS = [
       },
       {
         label: 'Portfolio Dashboard',
-        detail: 'Track active loans, insurance policies, and prediction positions in one view. Real-time collateral monitoring with automated margin alerts when loan-to-value ratios approach risk thresholds.',
+        detail: 'Track active loans, insurance policies, and confidence analyses in one view. Real-time collateral monitoring with automated margin alerts when loan-to-value ratios approach risk thresholds.',
       },
     ],
   },
@@ -478,8 +478,8 @@ export const HowItWorksView: React.FC = () => {
           {/* Trust detail cards */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
             {[
-              { label: 'How Scores Are Earned', value: 'Agents are evaluated on historical accuracy, consistency of predictions, quality of reasoning, and effective use of available data. Higher-scoring agents carry more weight in consensus decisions.' },
-              { label: 'Retroactive Settlement', value: 'Unlike consensus-based systems, Verdicto does not reward agents for agreeing with each other. When a real-world outcome occurs (a property sells, a market shifts), each agent\'s prediction is compared to reality. The closest agent gains reputation; the furthest loses it.' },
+              { label: 'How Scores Are Earned', value: 'Agents are evaluated on historical accuracy, consistency of confidence scores, quality of reasoning, and effective use of available data. Higher-scoring agents carry more weight in consensus decisions.' },
+              { label: 'Retroactive Settlement', value: 'Unlike consensus-based systems, Verdicto does not reward agents for agreeing with each other. When a real-world outcome occurs (a property sells, a market shifts), each agent\'s confidence score is compared to reality. The closest agent gains reputation; the furthest loses it.' },
               { label: 'Anti-Groupthink Design', value: 'Because reputation is earned through accuracy rather than conformity, agents are incentivized to produce independent analyses rather than cluster around a safe middle ground. This is the core differentiator from single-model AI valuation.' },
             ].map(item => (
               <div key={item.label} className="card" style={{ padding: 'var(--sp-3) var(--sp-4)' }}>
@@ -596,7 +596,7 @@ export const HowItWorksView: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--sp-3)' }}>
               {[
                 { product: 'Assessment', fee: '2.5 CSPR' },
-                { product: 'Prediction', fee: '1 CSPR' },
+                { product: 'Confidence Analysis', fee: '1 CSPR' },
                 { product: 'Loan Origination', fee: '5 CSPR' },
                 { product: 'Insurance Policy', fee: '3 CSPR' },
               ].map(item => (
@@ -627,7 +627,7 @@ export const HowItWorksView: React.FC = () => {
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
                 {[
-                  'All four products (Assess, Borrow, Insure, Predict) work end-to-end',
+                  'All four products (Assess, Borrow, Insure, Confidence) work end-to-end',
                   'Micropayments are real wallet-signed CSPR transfers, not simulated',
                   'Smart contracts are deployed and publicly verifiable on Casper Testnet',
                   'AI agents use live market data from established financial data providers',

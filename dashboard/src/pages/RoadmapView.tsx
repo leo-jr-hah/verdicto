@@ -65,8 +65,8 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
   },
   {
     id: 'p4',
-    title: 'Predict: Prediction Market Resolution',
-    description: 'Ask real-world outcome questions. 5 AI agents analyze data and produce probability estimates with full reasoning.',
+    title: 'Confidence: Multi-Agent Confidence Scoring',
+    description: 'Ask real-world outcome questions. 5 AI agents independently estimate probabilities and produce a weighted confidence score.',
     category: 'economic',
     status: 'live',
     icon: <TrendingUp size={18} />,
@@ -98,7 +98,7 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
   {
     id: 'v4',
     title: 'Retroactive Trust Scoring',
-    description: 'Agent reputation is not consensus-based. Predictions are recorded, then compared to actual market outcomes. Accurate agents gain trust; inaccurate ones lose it.',
+    description: 'Agent reputation is not consensus-based. Confidence scores are recorded, then compared to actual market outcomes. Accurate agents gain trust; inaccurate ones lose it.',
     category: 'verifiable',
     status: 'live',
     icon: <BarChart3 size={18} />,
@@ -219,8 +219,8 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
 
   {
     id: 'f1',
-    title: 'Accuracy Prediction Market',
-    description: 'Users bet on whether an agent\'s valuation will prove accurate when the asset eventually sells. A market on prediction quality itself.',
+    title: 'Accuracy Confidence Market',
+    description: 'Users bet on whether an agent\'s valuation will prove accurate when the asset eventually sells. A market on confidence quality itself.',
     category: 'network',
     status: 'future',
     icon: <TrendingUp size={18} />,

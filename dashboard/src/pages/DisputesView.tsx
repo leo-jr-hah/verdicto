@@ -279,7 +279,7 @@ export const DisputesView: React.FC = () => {
             <Scale size={40} style={{ color: 'var(--text-tertiary)', marginBottom: '12px', opacity: 0.5 }} />
             <p style={{ margin: '0 0 4px', fontWeight: 500 }}>No verdicts yet</p>
             <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
-              Run an assessment, loan, insurance, or prediction first to generate verdicts.
+              Run an assessment, loan, insurance, or confidence analysis first to generate verdicts.
             </p>
           </div>
         ) : (

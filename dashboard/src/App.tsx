@@ -24,7 +24,7 @@ function App() {
       <Route path="/" element={<Layout />}>
         <Route path="dashboard" element={<DashboardView />} />
         <Route path="assess" element={<AssessView />} />
-        <Route path="predict" element={<PredictionView />} />
+        <Route path="confidence" element={<PredictionView />} />
         <Route path="borrow" element={<BorrowView />} />
         <Route path="insure" element={<InsureView />} />
         <Route path="reputation" element={<ReputationView />} />

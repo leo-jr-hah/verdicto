@@ -341,14 +341,14 @@ export const PredictionView: React.FC = () => {
                 fontSize: '1.8rem', fontWeight: 700,
                 color: 'var(--text-primary)', marginBottom: 8,
               }}>
-                Prediction Engine
+                Confidence Analysis
               </h1>
               <p style={{
                 color: 'var(--text-secondary)',
                 fontSize: '0.95rem', lineHeight: 1.6,
                 maxWidth: 520, margin: '0 auto',
               }}>
-                Ask any outcome question about RWA assets. 5 AI agents analyze market data and give probability estimates with full reasoning.
+                Ask any outcome question about RWA assets. 5 AI agents independently estimate probability, producing a weighted confidence score that feeds into Oracle verdicts.
               </p>
             </div>
 
@@ -369,7 +369,7 @@ export const PredictionView: React.FC = () => {
                   color: 'var(--text-primary)', marginBottom: 8,
                 }}>
                   <Target size={14} color="var(--primary)" />
-                  Prediction Question
+                  Confidence Question
                 </label>
                 <textarea
                   value={question}
@@ -458,7 +458,7 @@ export const PredictionView: React.FC = () => {
                   }}
                 >
                   <Wallet size={16} />
-                  Pay {PREDICTION_FEE_CSPR} CSPR & Run
+                  Pay {PREDICTION_FEE_CSPR} CSPR & Run Analysis
                   <ArrowRight size={16} />
                 </button>
 
@@ -600,10 +600,10 @@ export const PredictionView: React.FC = () => {
               <Loader2 size={48} color="var(--primary)" />
             </motion.div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>
-              Running Prediction Analysis
+              Running Confidence Analysis
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: 400, lineHeight: 1.5 }}>
-              5 AI agents are analyzing market data, historical precedents, and economic indicators...
+              5 AI agents are analyzing market data, historical precedents, and economic indicators to produce a confidence score...
             </p>
             <div style={{
               display: 'flex', gap: 8, marginTop: 24, flexWrap: 'wrap', justifyContent: 'center',
@@ -641,11 +641,11 @@ export const PredictionView: React.FC = () => {
           >
             <AlertTriangle size={48} color="#ef4444" style={{ marginBottom: 20 }} />
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>
-              Prediction Failed
+              Analysis Failed
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: 24 }}>
               {error.includes('Unexpected token') || error.includes('JSON')
-                ? 'Could not connect to the Verdicto backend. The prediction service may be temporarily offline - please try again in a moment.'
+                ? 'Could not connect to the Verdicto backend. The confidence analysis service may be temporarily offline. Please try again in a moment.'
                 : error}
             </p>
             <button
@@ -693,7 +693,7 @@ export const PredictionView: React.FC = () => {
                 flexShrink: 0,
               }}>
                 <RefreshCw size={14} />
-                New Prediction
+                New Analysis
               </button>
             </div>
 
@@ -715,7 +715,7 @@ export const PredictionView: React.FC = () => {
                   fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-tertiary)',
                   textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12,
                 }}>
-                  Predicted Outcome
+                  Confidence Assessment
                 </div>
 
                 <div style={{

@@ -34,7 +34,7 @@ const USE_CASES = [
   { label: 'Lending Protocols', desc: 'Query asset value → calculate LTV → disburse loan', icon: <TrendingUp size={16} /> },
   { label: 'DAO Treasuries', desc: 'Verify RWA collateral before governance votes', icon: <Shield size={16} /> },
   { label: 'Insurance Contracts', desc: 'Price policies against oracle valuations', icon: <Shield size={16} /> },
-  { label: 'Prediction Markets', desc: 'Resolve RWA-based markets with oracle data', icon: <TrendingUp size={16} /> },
+  { label: 'Confidence Analysis', desc: 'Run multi-agent confidence scoring for RWA outcomes', icon: <TrendingUp size={16} /> },
 ];
 
 const CODE_SNIPPET = `// Cross-contract call from any Casper dApp
