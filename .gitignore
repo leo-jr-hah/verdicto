@@ -20,11 +20,18 @@ dist/
 *.log
 logs/
 
-# Vectra index
-deliberation/precedents/index/
-
 # OS
 .DS_Store
 
+# Dev artifacts
 deploy-*.json
 test_transfer.json
+test-*.ts
+test-*.mjs
+test-*.js
+*.diff
+*.patch
+*_broadcast.json
+*_deploy.json
+*_result.json
+test_output.txt

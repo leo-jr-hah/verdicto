@@ -1,6 +1,6 @@
-# Casper RWA Court Dashboard
+# Verdicto Dashboard
 
-React 19 frontend for the Casper RWA Court multi-agent dispute resolution system.
+React 19 frontend for the Verdicto platform — AI-powered RWA valuation, lending, insurance, prediction markets, and dispute resolution on Casper.
 
 ## Tech Stack
 
@@ -16,39 +16,56 @@ React 19 frontend for the Casper RWA Court multi-agent dispute resolution system
 
 | Route | Layout | Description |
 |-------|--------|-------------|
-| `/` | LandingLayout (top-nav) | Premium landing page with particle effects |
-| `/dashboard` | Layout (sidebar) | Live contract state + x402 payment stream |
+| `/` | LandingLayout (top-nav) | Premium landing page with GSAP effects |
+| `/dashboard` | Layout (sidebar) | Portfolio overview |
 | `/assess` | Layout (sidebar) | Asset valuation (2.5 CSPR fee) |
+| `/borrow` | Layout (sidebar) | Borrow against assessments (5 CSPR fee) |
+| `/insure` | Layout (sidebar) | Insure assets against loss (3 CSPR fee) |
 | `/predict` | Layout (sidebar) | Prediction market (1 CSPR fee) |
+| `/oracle` | Layout (sidebar) | Verdict dashboard (read-only) |
+| `/disputes` | Layout (sidebar) | Challenge verdicts (5 CSPR stake) |
 | `/reputation` | Layout (sidebar) | Agent reputation scores |
 | `/transactions` | Layout (sidebar) | Transaction history |
-| `/architecture` | Layout (sidebar) | How it works |
+| `/how-it-works` | Layout (sidebar) | System explainer |
+| `/architecture` | Layout (sidebar) | Technical architecture |
 | `/roadmap` | Layout (sidebar) | Product roadmap |
 
 ## Key Components
 
 ### Landing Page (`LandingPage.tsx`)
-- `ParticleField` - Canvas particles with mouse repulsion + connections
-- `GradientOrb` - Pulsing radial gradient blobs
-- `ScrambleText` - use-scramble hook on hero headline
-- `AnimatedNumber` - Counts up when scrolled into view
-- `Reveal` - Scroll-triggered fade animations
-- `LiveAssessmentVisual` - 5-step animated asset valuation sequence
-- `StickyScrollSection` - Horizontal scroll with pinned container
-- `CursorGlow` - Subtle radial gradient follows mouse
-- Scroll progress bar at top
+- `HeroSection` — Particle canvas, scramble text, CTA buttons
+- `StatsBar` — Animated counters
+- `HowItWorks` — 5-step flow explanation
+- `AgentGrid` — Agent cards with methodology details
+- `ArchitectureDiagram` — "How the Oracle Gets Fed" visual
+- `OracleSection` — Oracle composability explainer
+- `X402PaymentFlow` — Payment flow visualization
+- `LiveAssessmentVisual` — 5-step animated asset valuation sequence
+- `TestnetProof` — On-chain proof display
+- `ContractCards` — Smart contract details
+- `BlockchainRecord` — Receipt chain visualization
+- `CTASection` — Call to action
+- `Navigation` — Top nav with smooth scroll
+- `Footer` — Links and social
 
 ### App Pages
-- **DashboardView** - Stats grid, agent reputation table, x402 payment stream
-- **AssessView** - Multi-methodology dashboard, 5 agent cards, divergence range, risk flags
-- **PredictionView** - Probability cards, weighted consensus, risk factors
-- **ReputationView** - Accordion tabs, score history sparklines, tier badges
-- **RoadmapView** - 16 features across 4 categories
+- **DashboardView** — Portfolio overview, stats grid
+- **AssessView** — Multi-methodology dashboard, agent cards, divergence range, risk flags
+- **BorrowView** — 6-step loan wizard (select assessment → configure LTV → sign → disburse → monitor)
+- **InsureView** — 6-step insurance wizard (select asset → risk score → premium → sign → policy → monitor)
+- **PredictionView** — Yes/No questions, 3-agent consensus, probability cards
+- **OracleView** — Verdict list, stats, oracle health
+- **DisputesView** — Challenge verdicts, re-trial results, stake distribution
+- **ReputationView** — Agent trust scores, tier badges, history sparklines
+- **TransactionsView** — Payment history with explorer links
+- **HowItWorksView** — System explainer
+- **ArchitectureView** — Technical architecture
+- **RoadmapView** — Product roadmap
 
 ### Wallet Integration
-- `CSPRClickContext` - Wallet provider using window.CasperWalletProvider
-- `WalletConnectButton` - Connect/disconnect, copy address, faucet link
-- `PaymentModal` - Shows fee before signing, handles CSPR transfer
+- `CSPRClickContext` — Wallet provider using window.CasperWalletProvider
+- `WalletConnectButton` — Connect/disconnect, copy address, faucet link
+- `PaymentModal` — Shows fee before signing, handles CSPR transfer (shared by all products)
 
 ## Design System
 
@@ -83,8 +100,8 @@ npm run dev
 # Build for production
 npm run build
 
-# Run tests
-npm test
+# Preview production build
+npm run preview
 ```
 
 ## Environment Variables
@@ -95,6 +112,8 @@ VITE_CASPER_NETWORK=testnet
 VITE_PLATFORM_WALLET=02039cd256da1f2e13fc24a6f2ad1c15166f45070befa52bc2da46bbe194e7381010
 VITE_ASSESSMENT_FEE=2500000000
 VITE_PREDICTION_FEE=1000000000
+VITE_ORCHESTRATOR_URL=https://verdicto-production.up.railway.app
+VITE_WS_URL=wss://verdicto-production.up.railway.app/ws
 ```
 
 ## Project Structure
@@ -103,39 +122,56 @@ VITE_PREDICTION_FEE=1000000000
 dashboard/
 ├── src/
 │   ├── pages/
-│   │   ├── LandingPage.tsx      # Premium landing with GSAP effects
-│   │   ├── DashboardView.tsx    # Live contract state
-│   │   ├── AssessView.tsx       # Asset valuation
-│   │   ├── PredictionView.tsx   # Prediction market
-│   │   ├── ReputationView.tsx   # Agent reputation
-│   │   ├── RoadmapView.tsx      # Product roadmap
-│   │   ├── TransactionsView.tsx # Transaction history
-│   │   └── ArchitectureView.tsx # How it works
+│   │   ├── LandingPage.tsx       # Premium landing with GSAP effects
+│   │   ├── DashboardView.tsx     # Portfolio overview
+│   │   ├── AssessView.tsx        # Asset valuation
+│   │   ├── BorrowView.tsx        # Borrow against assessments
+│   │   ├── InsureView.tsx        # Insure assets
+│   │   ├── PredictionView.tsx    # Prediction market
+│   │   ├── OracleView.tsx        # Verdict dashboard
+│   │   ├── DisputesView.tsx      # Challenge verdicts
+│   │   ├── ReputationView.tsx    # Agent reputation
+│   │   ├── TransactionsView.tsx  # Transaction history
+│   │   ├── HowItWorksView.tsx    # System explainer
+│   │   ├── ArchitectureView.tsx  # Technical architecture
+│   │   └── RoadmapView.tsx       # Product roadmap
 │   ├── layouts/
-│   │   ├── LandingLayout.tsx    # Top-nav (landing page only)
-│   │   └── Layout.tsx           # Sidebar (all other pages)
+│   │   ├── LandingLayout.tsx     # Top-nav (landing page only)
+│   │   └── Layout.tsx            # Sidebar (all other pages)
 │   ├── contexts/
-│   │   └── CSPRClickContext.tsx  # Wallet provider
+│   │   └── CSPRClickContext.tsx   # Wallet provider
+│   ├── hooks/
+│   │   ├── useAssessment.ts      # Assessment state machine
+│   │   ├── useLoan.ts            # Loan lifecycle
+│   │   ├── useInsurance.ts       # Insurance policy management
+│   │   └── usePaymentFlow.ts     # CSPR payment signing
 │   ├── components/
 │   │   ├── WalletConnectButton.tsx
 │   │   ├── PaymentModal.tsx
-│   │   ├── AgentCard.tsx
-│   │   └── ... (other UI components)
+│   │   ├── MultiMethodologyDashboard.tsx
+│   │   ├── ReputationGraph.tsx
+│   │   ├── LiveContractPanel.tsx
+│   │   ├── ConnectionStatus.tsx
+│   │   ├── ErrorBoundary.tsx
+│   │   ├── landing/              # 18 landing page components
+│   │   └── story/                # Interactive story explainer
+│   ├── services/
+│   │   └── api.ts                # All backend API calls
 │   ├── config/
-│   │   └── casper.ts            # Wallet address, fees, RPC URL
-│   ├── App.tsx                  # Router setup
-│   └── main.tsx                 # Entry point
+│   │   └── casper.ts             # Fees, wallet address, RPC URL
+│   ├── App.tsx                   # Router setup
+│   └── main.tsx                  # Entry point
 ├── public/
 ├── package.json
 ├── vite.config.ts
-└── tailwind.config.js
+└── vercel.json
 ```
 
 ## Key Files
 
-- `src/contexts/CSPRClickContext.tsx` - Wallet provider (CasperWalletProvider API)
-- `src/components/WalletConnectButton.tsx` - UI button with dropdown
-- `src/layouts/LandingLayout.tsx` - Standalone top-nav layout
-- `src/layouts/Layout.tsx` - Sidebar layout with wallet integration
-- `src/pages/LandingPage.tsx` - Premium landing page (~1215 lines)
-- `src/config/casper.ts` - Single source of truth for wallet address, fees, RPC URL
+- `src/contexts/CSPRClickContext.tsx` — Wallet provider (CasperWalletProvider API)
+- `src/components/WalletConnectButton.tsx` — UI button with dropdown
+- `src/components/PaymentModal.tsx` — Shared payment modal (all products)
+- `src/layouts/Layout.tsx` — Sidebar navigation with all routes
+- `src/services/api.ts` — All backend API calls + types
+- `src/config/casper.ts` — Single source of truth for fees, wallet address
