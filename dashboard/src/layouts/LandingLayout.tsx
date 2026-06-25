@@ -41,7 +41,7 @@ export const LandingLayout: React.FC = () => {
 
         {/* Open App button only */}
         <Link
-          to="/assess"
+          to="/dashboard"
           style={{
             display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
             background: '#FF3B3B', color: '#fff',
