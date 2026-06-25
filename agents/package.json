@@ -10,6 +10,7 @@
     "juror-market": "tsx market-data-interpreter/server.ts",
     "juror-precedent": "tsx precedent-researcher/server.ts",
     "orchestrator": "tsx orchestrator/index.ts",
+    "start": "concurrently \"npm run valuation-a\" \"npm run valuation-b\" \"npm run juror-evidence\" \"npm run juror-market\" \"npm run juror-precedent\" \"sleep 5 && npm run orchestrator\"",
     "test-agents": "concurrently \"npm run valuation-a\" \"npm run valuation-b\" \"npm run juror-evidence\" \"npm run juror-market\" \"npm run juror-precedent\" \"sleep 4 && npm run orchestrator\"",
     "dev": "concurrently \"npm run valuation-a\" \"npm run valuation-b\" \"npm run juror-evidence\" \"npm run juror-market\" \"npm run juror-precedent\"",
     "test": "vitest run",
