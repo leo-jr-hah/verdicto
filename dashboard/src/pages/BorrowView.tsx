@@ -127,66 +127,8 @@ function statusColor(status: string): string {
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const tooltipStyle: React.CSSProperties = {
-  position: 'absolute',
-  bottom: 'calc(100% + 8px)',
-  left: '50%',
-  transform: 'translateX(-50%)',
-  background: 'var(--bg-surface, #1a1a2e)',
-  border: '1px solid var(--border-color)',
-  borderRadius: '8px',
-  padding: '0.75rem 1rem',
-  fontSize: '0.8rem',
-  lineHeight: 1.5,
-  color: 'var(--text-secondary)',
-  width: '280px',
-  boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
-  zIndex: 100,
-  pointerEvents: 'none',
-};
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '0.7rem 0.9rem',
-  borderRadius: '6px',
-  border: '1px solid var(--border-color)',
-  background: 'var(--bg-main)',
-  color: 'var(--text-primary)',
-  fontSize: '0.95rem',
-  fontFamily: 'var(--font-sans)',
-  outline: 'none',
-  transition: 'border-color 0.15s ease',
-};
-
-const btnPrimary: React.CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '0.5rem',
-  padding: '0.75rem 1.5rem',
-  borderRadius: '8px',
-  border: 'none',
-  background: 'var(--primary)',
-  color: '#fff',
-  fontSize: '0.95rem',
-  fontWeight: 600,
-  cursor: 'pointer',
-  transition: 'all 0.15s ease',
-};
-
-const btnSecondary: React.CSSProperties = {
-  ...btnPrimary,
-  background: 'var(--bg-surface)',
-  color: 'var(--text-primary)',
-  border: '1px solid var(--border-color)',
-};
-
-const cardStyle: React.CSSProperties = {
-  background: 'var(--bg-surface)',
-  border: '1px solid var(--border-color)',
-  borderRadius: '12px',
-  padding: '1.5rem',
-};
+// CSS classes are now in styles/borrow-responsive.css
+// Only dynamic/computed styles remain as JS objects
 
 // ─── LTV Tooltip ─────────────────────────────────────────────────────────────
 
@@ -194,21 +136,19 @@ const LTVTooltip: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [show, setShow] = useState(false);
   return (
     <span
-      style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', cursor: 'help' }}
+      className="borrow-tooltip"
       onMouseEnter={() => setShow(true)}
       onMouseLeave={() => setShow(false)}
     >
       {children}
       <Info size={14} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
       {show && (
-        <span style={tooltipStyle}>
-          <strong style={{ color: 'var(--text-primary)', display: 'block', marginBottom: '0.25rem' }}>
-            Loan-to-Value (LTV) Ratio
-          </strong>
+        <span className="borrow-tooltip__popup">
+          <strong>Loan-to-Value (LTV) Ratio</strong>
           LTV measures the loan amount as a percentage of the asset's appraised value.
           For example, a 65% LTV on a $1M asset means you can borrow up to $650K.
           <br /><br />
-          <strong style={{ color: 'var(--text-primary)' }}>Lower LTV = safer loan</strong> - you keep more equity,
+          <strong>Lower LTV = safer loan</strong> - you keep more equity,
           and lenders offer better rates. Higher LTV means more leverage but higher liquidation risk.
         </span>
       )}
@@ -219,29 +159,23 @@ const LTVTooltip: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 // ─── Step Indicator ──────────────────────────────────────────────────────────
 
 const StepIndicator: React.FC<{ current: number; steps: string[] }> = ({ current, steps }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
+  <div className="borrow-steps">
     {steps.map((label, i) => (
       <React.Fragment key={i}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: '0.4rem',
+        <div className="borrow-step" style={{
           color: i <= current ? 'var(--primary)' : 'var(--text-tertiary)',
           fontWeight: i === current ? 700 : 500,
-          fontSize: '0.85rem',
         }}>
-          <div style={{
-            width: 24, height: 24, borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          <div className="borrow-step__dot" style={{
             background: i < current ? 'var(--primary)' : i === current ? 'rgba(255,59,59,0.1)' : 'var(--bg-main)',
             color: i < current ? '#fff' : i === current ? 'var(--primary)' : 'var(--text-tertiary)',
-            fontSize: '0.75rem', fontWeight: 700,
           }}>
             {i < current ? <CheckCircle2 size={14} /> : i + 1}
           </div>
           <span>{label}</span>
         </div>
         {i < steps.length - 1 && (
-          <div style={{
-            flex: 1, height: 2,
+          <div className="borrow-step__line" style={{
             background: i < current ? 'var(--primary)' : 'var(--border-color)',
           }} />
         )}
@@ -265,42 +199,37 @@ const LoanCard: React.FC<{
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      style={{ ...cardStyle, marginBottom: '1rem' }}
+      className="borrow-loan-card"
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+      <div className="borrow-loan-card__header">
         <div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>
+          <div className="borrow-loan-card__id">
             Loan #{loan.loanId.slice(0, 8)}
           </div>
-          <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+          <div className="borrow-loan-card__amount">
             ${loan.loanAmountCSPR.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </div>
         </div>
-        <span style={{
-          padding: '0.25rem 0.75rem',
-          borderRadius: '999px',
-          fontSize: '0.75rem',
-          fontWeight: 600,
+        <span className="borrow-loan-card__status" style={{
           background: `${statusColor(loan.status)}15`,
           color: statusColor(loan.status),
-          textTransform: 'capitalize',
         }}>
           {loan.status}
         </span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
+      <div className="borrow-loan-card__stats">
         <div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.2rem' }}>Collateral</div>
-          <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{formatCurrency(loan.assessedValue)}</div>
+          <div className="borrow-loan-card__stat-label">Collateral</div>
+          <div className="borrow-loan-card__stat-value">{formatCurrency(loan.assessedValue)}</div>
         </div>
         <div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.2rem' }}><LTVTooltip>LTV</LTVTooltip></div>
-          <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{(ltv * 100).toFixed(0)}%</div>
+          <div className="borrow-loan-card__stat-label"><LTVTooltip>LTV</LTVTooltip></div>
+          <div className="borrow-loan-card__stat-value">{(ltv * 100).toFixed(0)}%</div>
         </div>
         <div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.2rem' }}>Health</div>
-          <div style={{ fontSize: '0.9rem', fontWeight: 600, color: healthColor(health) }}>
+          <div className="borrow-loan-card__stat-label">Health</div>
+          <div className="borrow-loan-card__stat-value" style={{ color: healthColor(health) }}>
             {health.toFixed(2)}x - {healthLabel(health)}
           </div>
         </div>
@@ -308,17 +237,11 @@ const LoanCard: React.FC<{
 
       {/* Verdicto Point 1: Trust breakdown - shows why LTV is what it is */}
       {loan.trustBreakdown && (
-        <div style={{
-          padding: '0.75rem 1rem',
-          background: 'var(--bg-main)',
-          borderRadius: '8px',
-          marginBottom: '1rem',
-          fontSize: '0.8rem',
-        }}>
-          <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+        <div className="borrow-loan-card__info-box">
+          <div className="borrow-loan-card__info-title">
             Trust-Score LTV Breakdown
           </div>
-          <div style={{ display: 'flex', gap: '1.5rem', color: 'var(--text-secondary)' }}>
+          <div className="borrow-loan-card__info-row">
             <span>Confidence: <strong>{(loan.trustBreakdown.confidence * 100).toFixed(0)}%</strong></span>
             <span>Value Ratio: <strong>{(loan.trustBreakdown.valueRatio * 100).toFixed(0)}%</strong></span>
             <span>LTV Range: <strong>{loan.trustBreakdown.ltvRange}</strong></span>
@@ -328,14 +251,8 @@ const LoanCard: React.FC<{
 
       {/* Verdicto Point 2: Escrow tx hashes - visible on-chain proof */}
       {(loan.escrowLockTxHash || loan.escrowReleaseTxHash) && (
-        <div style={{
-          padding: '0.75rem 1rem',
-          background: 'var(--bg-main)',
-          borderRadius: '8px',
-          marginBottom: '1rem',
-          fontSize: '0.8rem',
-        }}>
-          <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+        <div className="borrow-loan-card__info-box">
+          <div className="borrow-loan-card__info-title">
             Escrow Transactions
           </div>
           {loan.escrowLockTxHash && (
@@ -357,25 +274,15 @@ const LoanCard: React.FC<{
 
       {/* Verdicto Point 3: Revaluation history - shows juror deliberation */}
       {loan.revaluationHistory && loan.revaluationHistory.length > 0 && (
-        <div style={{
-          padding: '0.75rem 1rem',
-          background: 'var(--bg-main)',
-          borderRadius: '8px',
-          marginBottom: '1rem',
-          fontSize: '0.8rem',
-        }}>
-          <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+        <div className="borrow-loan-card__info-box">
+          <div className="borrow-loan-card__info-title">
             Revaluation History ({loan.revaluationHistory.length})
           </div>
           {loan.revaluationHistory.slice(-3).map((rev, i) => (
-            <div key={i} style={{
-              padding: '0.5rem',
-              background: 'var(--bg-surface)',
-              borderRadius: '6px',
-              marginBottom: '0.5rem',
+            <div key={i} className="borrow-loan-card__reval-item" style={{
               borderLeft: `3px solid ${rev.status === 'warning' ? '#f59e0b' : rev.status === 'liquidated' ? '#ef4444' : '#10b981'}`,
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+              <div className="borrow-loan-card__reval-header">
                 <span style={{ color: 'var(--text-secondary)' }}>
                   {new Date(rev.timestamp).toLocaleString()}
                 </span>
@@ -383,7 +290,7 @@ const LoanCard: React.FC<{
                   {rev.previousValue <= rev.newValue ? '+' : ''}{((rev.newValue - rev.previousValue) / rev.previousValue * 100).toFixed(1)}%
                 </span>
               </div>
-              <div style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
+              <div className="borrow-loan-card__reval-detail">
                 Agent A ({rev.valuationA.method}): ${rev.valuationA.value.toLocaleString()} | 
                 Agent B ({rev.valuationB.method}): ${rev.valuationB.value.toLocaleString()}
               </div>
@@ -398,30 +305,31 @@ const LoanCard: React.FC<{
       )}
 
       {/* Health bar */}
-      <div style={{ marginBottom: '1rem' }}>
-        <div style={{ height: 6, borderRadius: 3, background: 'var(--bg-main)', overflow: 'hidden' }}>
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.min((health / 2) * 100, 100)}%` }}
-            transition={{ duration: 0.5 }}
-            style={{ height: '100%', background: healthColor(health), borderRadius: 3 }}
-          />
-        </div>
+      <div className="borrow-loan-card__health-bar">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.min((health / 2) * 100, 100)}%` }}
+          transition={{ duration: 0.5 }}
+          className="borrow-loan-card__health-fill"
+          style={{ background: healthColor(health) }}
+        />
       </div>
 
       {loan.status === 'active' && (
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div className="borrow-loan-card__actions">
           <button
             onClick={() => onRepay(loan.loanId)}
             disabled={loading}
-            style={{ ...btnPrimary, flex: 1, fontSize: '0.85rem', padding: '0.6rem' }}
+            className="btn btn-primary"
+            style={{ flex: 1, fontSize: '0.85rem', padding: '0.6rem' }}
           >
             <DollarSign size={14} /> Repay
           </button>
           <button
             onClick={() => onRevalue(loan.loanId)}
             disabled={loading}
-            style={{ ...btnSecondary, flex: 1, fontSize: '0.85rem', padding: '0.6rem' }}
+            className="btn"
+            style={{ flex: 1, fontSize: '0.85rem', padding: '0.6rem' }}
           >
             <RefreshCw size={14} /> Revalue
           </button>
@@ -608,7 +516,7 @@ export const BorrowView: React.FC = () => {
   // ─── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
+    <div className="borrow-page">
       {/* Assessment Payment Modal */}
       <PaymentModal
         open={assessPayment.showModal}
@@ -628,18 +536,18 @@ export const BorrowView: React.FC = () => {
       />
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div className="borrow-header">
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
+          <h1 className="borrow-header__title">
             <Landmark size={24} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
             Borrow
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>
+          <p className="borrow-header__subtitle">
             Get instant liquidity against your RWA collateral
           </p>
         </div>
         {step < 3 && (
-          <button onClick={() => setStep(4)} style={{ ...btnSecondary, fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
+          <button onClick={() => setStep(4)} className="btn" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
             <FileText size={14} /> My Loans ({loans.length})
           </button>
         )}

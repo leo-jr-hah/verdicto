@@ -1,4 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist:wght@400;500;600;700&display=swap');
+@import './styles/landing-responsive.css';
+@import './styles/dashboard-responsive.css';
+@import './styles/assess-responsive.css';
+@import './styles/borrow-responsive.css';
+@import './styles/insure-responsive.css';
+@import './styles/disputes-responsive.css';
+@import './styles/how-it-works-responsive.css';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    VERDICTO: Design System
@@ -397,6 +404,21 @@ button {
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 
+/* Touch-friendly tap targets */
+@media (pointer: coarse) {
+  .tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .btn {
+    padding: 12px 20px;
+  }
+  input, textarea, select {
+    font-size: 16px; /* Prevents iOS zoom */
+    padding: 12px;
+  }
+}
+
 /* Tablet (769px–1024px) */
 @media (min-width: 769px) and (max-width: 1024px) {
   .sidebar {
@@ -439,6 +461,25 @@ button {
   .page-layout {
     padding: 16px;
   }
+
+  /* Reduce heading sizes */
+  h1 { font-size: clamp(1.75rem, 6vw, 2.5rem) !important; }
+  h2 { font-size: clamp(1.5rem, 5vw, 2rem) !important; }
+
+  /* Reduce card padding */
+  .card { padding: 16px !important; }
+
+  /* Full-width buttons on mobile */
+  .btn-mobile-full { width: 100%; }
+
+  /* Hide desktop-only elements */
+  .hide-mobile { display: none !important; }
+
+  /* Show mobile-only elements */
+  .show-mobile { display: flex !important; }
+
+  /* Stack any flex-row */
+  .flex-stack-mobile { flex-direction: column !important; }
 }
 
 @media (min-width: 769px) {

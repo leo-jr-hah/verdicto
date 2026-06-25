@@ -1,0 +1,19 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   DASHBOARD VIEW — Responsive Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dashboard-panels {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;
+}
+
+.dashboard-bottom-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE (<768px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .dashboard-panels { grid-template-columns: 1fr; }
+  .dashboard-bottom-row { grid-template-columns: 1fr; }
+}

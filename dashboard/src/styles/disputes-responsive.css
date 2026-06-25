@@ -1,0 +1,152 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   DISPUTES VIEW — Responsive Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.disputes-page { max-width: 1000px; margin: 0 auto; }
+
+.disputes-header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;
+}
+
+.disputes-stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem; margin-bottom: 2rem;
+}
+
+.disputes-how-banner {
+  display: flex; align-items: flex-start; gap: 1rem;
+  padding: 1.5rem; margin-bottom: 2rem;
+}
+
+.disputes-how-banner__icon { flex-shrink: 0; }
+
+.disputes-how-banner__text { flex: 1; }
+
+/* Filter buttons */
+.disputes-filters {
+  display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+}
+
+/* Verdict/dispute list items */
+.disputes-list-item {
+  padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color);
+  cursor: pointer; transition: background 0.15s ease;
+}
+
+.disputes-list-item:hover { background: var(--bg-elevated); }
+
+.disputes-list-item__header {
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.disputes-list-item__left { flex: 1; }
+
+.disputes-list-item__right {
+  display: flex; align-items: center; gap: 0.75rem;
+}
+
+/* Expanded detail */
+.disputes-detail {
+  padding: 1.5rem; background: var(--bg-elevated); border-radius: 8px;
+  margin: 0.75rem 0;
+}
+
+.disputes-detail__section {
+  margin-bottom: 1.5rem;
+}
+
+.disputes-detail__section-title {
+  font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);
+  margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+/* Re-trial comparison grid */
+.disputes-retrial-grid {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  gap: 0.5rem; align-items: center;
+}
+
+.disputes-retrial-grid__arrow {
+  font-size: 1.2rem; color: var(--text-tertiary); text-align: center;
+}
+
+.disputes-retrial-grid__value { text-align: center; }
+
+/* Panel votes */
+.disputes-panel-votes {
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+
+.disputes-panel-vote {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.5rem 0.75rem; background: var(--bg-main); border-radius: 6px;
+}
+
+/* Reason modal */
+.disputes-reason-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 1rem;
+}
+
+.disputes-reason-modal {
+  background: var(--bg-surface); border: 1px solid var(--border-color);
+  border-radius: 12px; padding: 1.5rem; width: 100%; max-width: 480px;
+}
+
+.disputes-reason-modal textarea {
+  width: 100%; min-height: 120px; padding: 0.75rem;
+  border-radius: 6px; border: 1px solid var(--border-color);
+  background: var(--bg-main); color: var(--text-primary);
+  font-size: 0.95rem; font-family: var(--font-sans);
+  resize: vertical; margin-bottom: 1rem;
+}
+
+.disputes-reason-modal__actions { display: flex; gap: 0.75rem; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE (<768px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .disputes-page { max-width: 100%; }
+
+  .disputes-header {
+    flex-direction: column; align-items: flex-start;
+  }
+
+  .disputes-how-banner {
+    flex-direction: column; gap: 0.75rem;
+  }
+
+  .disputes-filters {
+    overflow-x: auto; flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+  }
+
+  .disputes-filters .btn { white-space: nowrap; flex-shrink: 0; }
+
+  .disputes-list-item { padding: 0.75rem 1rem; }
+
+  .disputes-list-item__header {
+    flex-direction: column; align-items: flex-start; gap: 0.5rem;
+  }
+
+  .disputes-list-item__right { width: 100%; justify-content: flex-end; }
+
+  /* Re-trial comparison: stack vertically */
+  .disputes-retrial-grid {
+    grid-template-columns: 1fr; gap: 0.75rem; text-align: center;
+  }
+
+  .disputes-retrial-grid__arrow {
+    transform: rotate(90deg);
+  }
+
+  .disputes-retrial-grid__value { text-align: center; }
+
+  .disputes-detail { padding: 1rem; }
+
+  .disputes-reason-modal { max-width: 100%; }
+}

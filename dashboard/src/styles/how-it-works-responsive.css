@@ -1,0 +1,39 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOW-IT-WORKS VIEW — Responsive Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.why-verdict-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+}
+
+.flow-diagram {
+  display: flex; align-items: flex-start; gap: 0.5rem; overflow-x: auto;
+}
+
+.agent-table-container { overflow-x: auto; }
+
+.tier-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+}
+
+.limitations-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+}
+
+.fee-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE (<768px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .why-verdict-grid { grid-template-columns: 1fr; }
+  .tier-grid { grid-template-columns: repeat(2, 1fr); }
+  .limitations-grid { grid-template-columns: 1fr; }
+  .fee-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .flow-diagram {
+    padding-bottom: 0.5rem;
+  }
+}

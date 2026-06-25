@@ -1,0 +1,506 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   BORROW VIEW — Responsive Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.borrow-page { max-width: 800px; margin: 0 auto; }
+
+.borrow-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.borrow-header__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.borrow-header__subtitle {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin: 0.25rem 0 0;
+}
+
+/* ── Step Indicator ──────────────────────────────────────────────────────── */
+.borrow-steps {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.borrow-step {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.borrow-step__dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.borrow-step__line {
+  flex: 1;
+  height: 2px;
+}
+
+/* ── Asset Type Grid ─────────────────────────────────────────────────────── */
+.borrow-asset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.borrow-asset-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 1rem;
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-surface);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--text-secondary);
+}
+
+.borrow-asset-btn--active {
+  border-color: var(--primary);
+  background: rgba(255, 59, 59, 0.04);
+  color: var(--primary);
+}
+
+.borrow-asset-btn__label { font-weight: 600; font-size: 0.9rem; }
+.borrow-asset-btn__ltv { font-size: 0.75rem; color: var(--text-tertiary); }
+
+/* ── Form ────────────────────────────────────────────────────────────────── */
+.borrow-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.borrow-form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.borrow-form-group label .required { color: var(--primary); }
+
+.borrow-form-group textarea {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color 0.15s ease;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.borrow-form-group--full { grid-column: 1 / -1; }
+
+/* ── Assessment Summary Grid ─────────────────────────────────────────────── */
+.borrow-assess-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.borrow-assess-stat {
+  text-align: center;
+  padding: 1rem;
+  background: var(--bg-main);
+  border-radius: 8px;
+}
+
+.borrow-assess-stat__label {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-bottom: 0.25rem;
+}
+
+.borrow-assess-stat__value {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* ── Loan Offer ──────────────────────────────────────────────────────────── */
+.borrow-offer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.borrow-offer-stat {
+  padding: 1rem;
+  background: var(--bg-main);
+  border-radius: 8px;
+}
+
+.borrow-offer-stat__label {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-bottom: 0.25rem;
+}
+
+.borrow-offer-stat__value {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* ── Loan Card ───────────────────────────────────────────────────────────── */
+.borrow-loan-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.borrow-loan-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.borrow-loan-card__id {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-bottom: 0.25rem;
+}
+
+.borrow-loan-card__amount {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.borrow-loan-card__status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.borrow-loan-card__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.borrow-loan-card__stat-label {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-bottom: 0.2rem;
+}
+
+.borrow-loan-card__stat-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.borrow-loan-card__info-box {
+  padding: 0.75rem 1rem;
+  background: var(--bg-main);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+}
+
+.borrow-loan-card__info-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.borrow-loan-card__info-row {
+  display: flex;
+  gap: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.borrow-loan-card__health-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg-main);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.borrow-loan-card__health-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.borrow-loan-card__actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.borrow-loan-card__reval-item {
+  padding: 0.5rem;
+  background: var(--bg-surface);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.borrow-loan-card__reval-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.borrow-loan-card__reval-detail {
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+}
+
+/* ── My Loans Header ─────────────────────────────────────────────────────── */
+.borrow-my-loans-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.borrow-my-loans-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ── Repay Modal ─────────────────────────────────────────────────────────── */
+.borrow-repay-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.borrow-repay-modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.borrow-repay-modal__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.borrow-repay-modal__input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
+  outline: none;
+  margin-bottom: 1rem;
+}
+
+.borrow-repay-modal__actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* ── LTV Tooltip ─────────────────────────────────────────────────────────── */
+.borrow-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: help;
+}
+
+.borrow-tooltip__popup {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-surface, #1a1a2e);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  width: 280px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.borrow-tooltip__popup strong {
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* ── Success Banner ──────────────────────────────────────────────────────── */
+.borrow-success-banner {
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(16,185,129,0.2);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.borrow-error-banner {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.borrow-error-banner__msg {
+  flex: 1;
+  font-size: 0.85rem;
+  color: #ef4444;
+}
+
+.borrow-empty-state {
+  text-align: center;
+  padding: 3rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE (<768px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .borrow-page { max-width: 100%; }
+
+  .borrow-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .borrow-header__title { font-size: 1.25rem; }
+
+  /* Step indicator: horizontal scroll */
+  .borrow-steps {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+    gap: 0.35rem;
+  }
+
+  .borrow-step span { display: none; }
+
+  /* Asset grid: 1 column */
+  .borrow-asset-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .borrow-asset-btn {
+    flex-direction: row;
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  /* Form grid: 1 column */
+  .borrow-form-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  /* Assessment summary: 1 column */
+  .borrow-assess-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  /* Loan offer: 1 column */
+  .borrow-offer-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  /* Loan card stats: 1 column */
+  .borrow-loan-card {
+    padding: 1rem;
+  }
+
+  .borrow-loan-card__stats {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .borrow-loan-card__info-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .borrow-loan-card__actions {
+    flex-direction: column;
+  }
+
+  .borrow-loan-card__actions .btn {
+    width: 100%;
+  }
+
+  /* My loans header */
+  .borrow-my-loans-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .borrow-my-loans-actions {
+    width: 100%;
+  }
+
+  .borrow-my-loans-actions .btn {
+    flex: 1;
+  }
+
+  /* Repay modal */
+  .borrow-repay-modal {
+    max-width: 100%;
+  }
+
+  /* Tooltip */
+  .borrow-tooltip__popup {
+    width: 220px;
+    left: 0;
+    transform: none;
+  }
+}

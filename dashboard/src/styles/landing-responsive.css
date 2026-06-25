@@ -1,0 +1,92 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   LANDING PAGE — Responsive Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Oracle Section ──────────────────────────────────────────────────────── */
+.oracle-section-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+}
+
+/* ── Testnet Proof ───────────────────────────────────────────────────────── */
+.testnet-section-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+}
+
+/* ── X402 Payment Flow ───────────────────────────────────────────────────── */
+.x402-section-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+}
+
+.x402-svg-container {
+  width: 100%; max-width: 320px; overflow: hidden;
+}
+
+/* ── Agent Grid ──────────────────────────────────────────────────────────── */
+.agent-grid-top {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+}
+
+.agent-grid-bottom {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  max-width: 66%; margin: 0 auto; gap: 1rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE (<768px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Hero */
+  .hero-section {
+    padding: 5rem 1.5rem 3rem !important;
+    min-height: 90vh;
+  }
+
+  .hero-headline {
+    font-size: clamp(1.75rem, 7vw, 2.5rem) !important;
+  }
+
+  .hero-subheadline {
+    font-size: 1rem !important;
+  }
+
+  /* Oracle */
+  .oracle-section-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Testnet */
+  .testnet-section-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* X402 */
+  .x402-section-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .x402-svg-container {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* Agent Grid */
+  .agent-grid-top,
+  .agent-grid-bottom {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+
+  /* Footer */
+  .landing-footer-full {
+    text-align: center;
+  }
+
+  .landing-footer-full__grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .landing-footer-full__social {
+    justify-content: center;
+  }
+}
