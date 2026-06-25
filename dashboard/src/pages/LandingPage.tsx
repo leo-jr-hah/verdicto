@@ -1,5 +1,4 @@
 import React from 'react';
-import { Navigation } from '../components/landing/Navigation';
 import { HeroSection } from '../components/landing/HeroSection';
 import { StatsBar } from '../components/landing/StatsBar';
 import { OracleSection } from '../components/landing/OracleSection';
@@ -13,8 +12,6 @@ import { Footer } from '../components/landing/Footer';
 export const LandingPage: React.FC = () => {
   return (
     <div style={{ position: 'relative', overflowX: 'hidden', background: 'var(--bg-main)' }}>
-      <Navigation />
-
       <main>
         <HeroSection />
         <StatsBar />

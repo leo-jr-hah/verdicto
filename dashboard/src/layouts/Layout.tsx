@@ -57,9 +57,9 @@ export const Layout: React.FC = () => {
       <aside className="sidebar" data-collapsed={sidebarCollapsed}>
         {/* Logo */}
         <div className="sidebar-header">
-          <Link to="/" className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-            <img src={verdictLogo} alt="Verdicto" style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover' }} />
-            <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>Verdicto</span>
+          <Link to="/" className="sidebar-logo">
+            <img src={verdictLogo} alt="Verdicto" className="logo-img logo-img--lg" />
+            <span className="sidebar-logo-text">Verdicto</span>
           </Link>
           <button
             className="sidebar-collapse-btn"
@@ -68,10 +68,7 @@ export const Layout: React.FC = () => {
           >
             <ChevronRight
               size={16}
-              style={{
-                transform: sidebarCollapsed ? 'rotate(0deg)' : 'rotate(180deg)',
-                transition: 'transform 0.2s ease',
-              }}
+              className={`sidebar-collapse-icon ${sidebarCollapsed ? 'sidebar-collapse-icon--collapsed' : 'sidebar-collapse-icon--expanded'}`}
             />
           </button>
         </div>
@@ -107,36 +104,12 @@ export const Layout: React.FC = () => {
         <div className="sidebar-footer">
           {/* Get Testnet Tokens link */}
           {!sidebarCollapsed && (
-            <div style={{ padding: '0 0.5rem', marginBottom: '0.5rem' }}>
+            <div className="sidebar-footer-section">
               <a
                 href="https://testnet.cspr.live/tools/faucet"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  padding: '0.5rem 0.75rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 500,
-                  color: '#06b6d4',
-                  background: 'rgba(6, 182, 212, 0.06)',
-                  border: '1px solid rgba(6, 182, 212, 0.15)',
-                  borderRadius: '999px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  textDecoration: 'none',
-                  width: '100%',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(6, 182, 212, 0.12)';
-                  e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(6, 182, 212, 0.06)';
-                  e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.15)';
-                }}
+                className="faucet-link sidebar-faucet-link"
               >
                 <Droplets size={14} />
                 <span>Get Testnet Tokens</span>
@@ -144,24 +117,13 @@ export const Layout: React.FC = () => {
             </div>
           )}
           {sidebarCollapsed && (
-            <div style={{ padding: '0 0.25rem', marginBottom: '0.5rem' }}>
+            <div className="sidebar-footer-section--collapsed">
               <a
                 href="https://testnet.cspr.live/tools/faucet"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Get Testnet Tokens"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '0.5rem',
-                  color: '#06b6d4',
-                  background: 'rgba(6, 182, 212, 0.06)',
-                  border: '1px solid rgba(6, 182, 212, 0.15)',
-                  borderRadius: '999px',
-                  cursor: 'pointer',
-                  textDecoration: 'none',
-                }}
+                className="faucet-link"
               >
                 <Droplets size={16} />
               </a>
@@ -169,12 +131,12 @@ export const Layout: React.FC = () => {
           )}
           {/* Wallet Connect Button */}
           {!sidebarCollapsed && (
-            <div style={{ padding: '0 0.5rem', marginBottom: '0.5rem' }}>
+            <div className="sidebar-footer-section">
               <WalletConnectButton />
             </div>
           )}
           {sidebarCollapsed && (
-            <div style={{ padding: '0 0.25rem', marginBottom: '0.5rem' }}>
+            <div className="sidebar-footer-section--collapsed">
               <WalletConnectButton />
             </div>
           )}
@@ -200,11 +162,11 @@ export const Layout: React.FC = () => {
         >
           {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-          <img src={verdictLogo} alt="Verdicto" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
-          <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>Verdicto</span>
+        <Link to="/" className="sidebar-logo">
+          <img src={verdictLogo} alt="Verdicto" className="logo-img logo-img--md" />
+          <span className="sidebar-logo-text">Verdicto</span>
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="flex items-center gap-2">
           <WalletConnectButton />
           <button
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
@@ -235,7 +197,7 @@ export const Layout: React.FC = () => {
             >
               {NAV_SECTIONS.map((section) => (
                 <div key={section.title}>
-                  <div className="sidebar-section-title" style={{ padding: '1rem 1.25rem 0.5rem' }}>{section.title}</div>
+                  <div className="sidebar-section-title mobile-section-title">{section.title}</div>
                   {section.items.map((item) => {
                     const Icon = item.icon;
                     const active = isActive(item.path);

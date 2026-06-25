@@ -5,19 +5,6 @@ import { Zap, Wallet, Loader2 } from 'lucide-react';
 /**
  * Shared payment confirmation modal used across all products.
  * Consistent design: dark overlay, centered card, fee breakdown, confirm/cancel buttons.
- *
- * Props:
- *  - open: whether to show
- *  - title: e.g. "Confirm Assessment Payment"
- *  - description: e.g. "A micropayment is required to run the AI valuation pipeline."
- *  - feeLabel: e.g. "Assessment Fee"
- *  - feeAmount: numeric CSPR amount
- *  - networkLabel: defaults to "Casper Testnet"
- *  - features: bullet points for "You'll receive" section (optional)
- *  - signing: true while waiting for wallet
- *  - signError: error message to display (null if none)
- *  - onConfirm: called when user clicks Pay
- *  - onCancel: called when user clicks Cancel or overlay
  */
 export interface PaymentModalProps {
   open: boolean;
@@ -55,16 +42,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-          }}
+          className="payment-modal-overlay"
+          style={{ zIndex: 9999 }}
           onClick={onCancel}
         >
           <motion.div
@@ -73,44 +52,24 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '16px',
-              padding: '2rem',
-              maxWidth: '420px',
-              width: '90%',
-              boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
-            }}
+            className="payment-modal"
+            style={{ background: 'var(--bg-surface)', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}
           >
             {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <div className="text-center" style={{ marginBottom: '1.5rem' }}>
               <div style={{
-                width: 56,
-                height: 56,
-                borderRadius: '50%',
+                width: 56, height: 56, borderRadius: '50%',
                 background: 'rgba(139, 92, 246, 0.1)',
                 border: '2px solid rgba(139, 92, 246, 0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
                 margin: '0 auto 1rem',
               }}>
                 <Zap size={24} color="#8B5CF6" />
               </div>
-              <h3 style={{
-                fontSize: '1.2rem',
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                marginBottom: '0.5rem',
-              }}>
+              <h3 className="text-xl" style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
                 {title}
               </h3>
-              <p style={{
-                fontSize: '0.85rem',
-                color: 'var(--text-secondary)',
-                lineHeight: 1.5,
-              }}>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                 {description}
               </p>
             </div>
@@ -118,28 +77,17 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             {/* Fee breakdown */}
             <div style={{
               background: 'var(--bg-surface-alt)',
-              borderRadius: '10px',
+              borderRadius: 'var(--card-radius)',
               padding: '1rem 1.25rem',
               marginBottom: '1.5rem',
             }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '0.5rem',
-              }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{feeLabel}</span>
-                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              <div className="flex justify-between items-center" style={{ marginBottom: '0.5rem' }}>
+                <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{feeLabel}</span>
+                <span className="text-xl" style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
                   {feeAmount} CSPR
                 </span>
               </div>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                fontSize: '0.75rem',
-                color: 'var(--text-tertiary)',
-              }}>
+              <div className="flex justify-between items-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
                 <span>Network</span>
                 <span>{networkLabel}</span>
               </div>
@@ -147,12 +95,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
             {/* What you get */}
             {features && features.length > 0 && (
-              <div style={{
-                fontSize: '0.8rem',
-                color: 'var(--text-secondary)',
-                marginBottom: '1.5rem',
-                lineHeight: 1.6,
-              }}>
+              <div className="text-sm" style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
                 <div style={{ fontWeight: 600, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>You'll receive:</div>
                 {features.map((f, i) => (
                   <div key={i}>• {f}</div>
@@ -168,27 +111,20 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 borderRadius: '8px',
                 padding: '0.75rem',
                 marginBottom: '1rem',
-                fontSize: '0.8rem',
-                color: '#EF4444',
-              }}>
+              }} className="text-sm text-error">
                 {signError}
               </div>
             )}
 
             {/* Buttons */}
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <div className="flex gap-3">
               <button
                 onClick={onCancel}
                 disabled={signing}
+                className="btn btn-secondary"
                 style={{
                   flex: 1,
                   padding: '0.75rem',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)',
-                  background: 'transparent',
-                  color: 'var(--text-secondary)',
-                  fontSize: '0.9rem',
-                  fontWeight: 600,
                   cursor: signing ? 'not-allowed' : 'pointer',
                   opacity: signing ? 0.5 : 1,
                 }}
@@ -198,31 +134,24 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               <button
                 onClick={onConfirm}
                 disabled={signing}
+                className="btn"
                 style={{
                   flex: 2,
                   padding: '0.75rem',
-                  borderRadius: '8px',
-                  border: 'none',
                   background: signing ? '#6366f1aa' : '#6366f1',
                   color: 'white',
-                  fontSize: '0.9rem',
-                  fontWeight: 600,
                   cursor: signing ? 'wait' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
                 }}
               >
                 {signing ? (
                   <>
-                    <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                    Waiting for wallet...
+                    <Loader2 size={16} className="spin" />
+                    Waiting for Wallet…
                   </>
                 ) : (
                   <>
                     <Wallet size={16} />
-                    Pay {feeAmount} CSPR & Confirm
+                    Pay {feeAmount} CSPR
                   </>
                 )}
               </button>

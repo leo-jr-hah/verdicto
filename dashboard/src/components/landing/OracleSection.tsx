@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
-import { Radio, Zap, Shield, Globe, ArrowRight, Code, TrendingUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Radio, Zap, Shield, Globe, Code, TrendingUp } from 'lucide-react';
 
 const FEATURES = [
   {
@@ -55,43 +54,20 @@ export const OracleSection: React.FC = () => {
   const inView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <section
-      ref={ref}
-      id="oracle"
-      style={{
-        padding: '6rem 2rem',
-        maxWidth: 1200,
-        margin: '0 auto',
-      }}
-    >
+    <section ref={ref} id="oracle" className="oracle-section">
       {/* Section Header */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.7 }}
-        style={{ textAlign: 'center', marginBottom: '4rem' }}
+        className="landing-section__header"
       >
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-          background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)',
-          padding: '0.375rem 1rem', borderRadius: '999px', marginBottom: '1.5rem',
-        }}>
+        <div className="landing-badge landing-badge--purple">
           <Radio size={14} style={{ color: '#8B5CF6' }} />
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#8B5CF6', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            Composable Primitive
-          </span>
+          <span>Composable Primitive</span>
         </div>
-        <h2 style={{
-          fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, lineHeight: 1.1,
-          letterSpacing: '-0.03em', color: 'var(--text-primary)', margin: '0 0 1rem',
-          fontFamily: 'var(--font-display)',
-        }}>
-          The GPS for Asset Prices
-        </h2>
-        <p style={{
-          fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.65,
-          maxWidth: 600, margin: '0 auto',
-        }}>
+        <h2 className="landing-section__title">The Oracle for Real-World Assets</h2>
+        <p className="landing-section__subtitle">
           Verdict Oracle stores multi-agent consensus valuations on-chain.
           We built it and are our own first integrator, powering Borrow and Insure.
           Any future dApp can compose with the same data.
@@ -99,38 +75,20 @@ export const OracleSection: React.FC = () => {
       </motion.div>
 
       {/* Feature Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-        gap: '1.25rem',
-        marginBottom: '3.5rem',
-      }}>
+      <div className="oracle-features-grid">
         {FEATURES.map((f, i) => (
           <motion.div
             key={f.title}
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.1 + i * 0.08 }}
-            className="card"
-            style={{
-              padding: '1.5rem',
-              display: 'flex', flexDirection: 'column', gap: '0.75rem',
-            }}
+            className="card oracle-feature-card"
           >
-            <div style={{
-              width: 40, height: 40, borderRadius: 10,
-              background: `${f.color}12`, display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
-              color: f.color,
-            }}>
+            <div className="oracle-feature-icon" style={{ background: `${f.color}12`, color: f.color }}>
               {f.icon}
             </div>
-            <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-              {f.title}
-            </h3>
-            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.55, margin: 0 }}>
-              {f.desc}
-            </p>
+            <h3 className="oracle-feature-title">{f.title}</h3>
+            <p className="oracle-feature-desc">{f.desc}</p>
           </motion.div>
         ))}
       </div>
@@ -140,12 +98,6 @@ export const OracleSection: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, delay: 0.4 }}
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '1.5rem',
-          marginBottom: '3rem',
-        }}
         className="oracle-bottom-grid"
       >
         {/* Code Snippet */}
@@ -156,12 +108,7 @@ export const OracleSection: React.FC = () => {
               Query the Oracle
             </span>
           </div>
-          <pre style={{
-            margin: 0, padding: '1rem', borderRadius: 8,
-            background: 'var(--bg-secondary)', border: '1px solid var(--border-color)',
-            fontSize: '0.8rem', lineHeight: 1.6, overflow: 'auto',
-            color: 'var(--text-primary)', fontFamily: "'SF Mono', 'Fira Code', monospace",
-          }}>
+          <pre className="oracle-code-pre">
             {CODE_SNIPPET}
           </pre>
         </div>
@@ -174,46 +121,18 @@ export const OracleSection: React.FC = () => {
               Use Cases
             </span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div className="oracle-use-cases">
             {USE_CASES.map((uc) => (
-              <div key={uc.label} style={{
-                display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
-                padding: '0.75rem', borderRadius: 8,
-                background: 'var(--bg-secondary)', border: '1px solid var(--border-color)',
-              }}>
-                <div style={{ color: '#8B5CF6', marginTop: 2, flexShrink: 0 }}>{uc.icon}</div>
+              <div key={uc.label} className="oracle-use-case">
+                <div style={{ color: 'var(--text-tertiary)', marginTop: 2 }}>{uc.icon}</div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: 2 }}>
-                    {uc.label}
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                    {uc.desc}
-                  </div>
+                  <div className="oracle-use-case__label">{uc.label}</div>
+                  <div className="oracle-use-case__desc">{uc.desc}</div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </motion.div>
-
-      {/* CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.5, delay: 0.6 }}
-        style={{ textAlign: 'center' }}
-      >
-        <Link
-          to="/oracle"
-          className="btn btn-primary"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-            padding: '0.875rem 1.75rem', fontSize: '0.95rem',
-            textDecoration: 'none',
-          }}
-        >
-          Explore the Oracle Dashboard <ArrowRight size={16} />
-        </Link>
       </motion.div>
     </section>
   );

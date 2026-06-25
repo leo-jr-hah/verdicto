@@ -16,7 +16,6 @@ export const TestnetProof: React.FC = () => {
       setLastRefresh(new Date().toLocaleTimeString());
       setLoading(false);
     };
-
     fetchData();
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
@@ -29,34 +28,20 @@ export const TestnetProof: React.FC = () => {
   const receipts = state?.receipts?.total ?? 0;
 
   return (
-    <section style={{ width: '100%', maxWidth: 1100, margin: '0 auto', padding: '96px 32px' }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '48px', alignItems: 'center' }}>
-        
+    <section className="testnet-section">
+      <div className="testnet-layout">
         {/* Left Side: Text */}
-        <div style={{ flex: '1 1 400px' }}>
+        <div className="testnet-text">
           <Reveal direction="left" duration={0.7}>
-            <div className="badge" style={{
-              display: 'inline-block',
-              background: 'rgba(16,185,129,0.1)',
-              color: '#10B981',
-              border: '1px solid rgba(16,185,129,0.2)',
-              marginBottom: '16px'
-            }}>
+            <div className="landing-badge landing-badge--green">
               Testnet Deployment
             </div>
-            
-            <h2 style={{
-              fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-primary)',
-              marginBottom: '20px', fontFamily: 'var(--font-display)', letterSpacing: '-0.02em',
-              lineHeight: 1.1
-            }}>
+            <h2 className="landing-section__title" style={{ textAlign: 'left', marginBottom: '20px' }}>
               Deployed on<br/>Casper Testnet.
             </h2>
-            
             <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '32px' }}>
-              All three smart contracts are live. Assessments have been submitted, analyzed, and recorded. Every deploy hash is verifiable on the public explorer.
+              All smart contracts are live. Assessments have been submitted, analyzed, and recorded. Every deploy hash is verifiable on the public explorer.
             </p>
-            
             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
               <Link to="/dashboard" className="btn btn-primary" style={{ padding: '12px 24px', borderRadius: '10px' }}>
                 View Live Dashboard
@@ -69,58 +54,48 @@ export const TestnetProof: React.FC = () => {
         </div>
 
         {/* Right Side: Terminal Panel */}
-        <div style={{ flex: '1 1 400px' }}>
+        <div className="testnet-terminal-wrap">
           <Reveal direction="right" delay={0.3} duration={0.7}>
-            <div className="card" style={{
-              padding: 0,
-              overflow: 'hidden',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
-              fontFamily: 'var(--font-mono)'
-            }}>
+            <div className="card testnet-terminal">
               {/* Terminal Header */}
-              <div style={{
-                background: 'var(--bg-surface)',
-                padding: '12px 16px',
-                borderBottom: '1px solid var(--border-color)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#EF4444' }} />
-                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#F59E0B' }} />
-                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#10B981' }} />
+              <div className="testnet-terminal__header">
+                <div className="testnet-terminal__dots">
+                  <div className="testnet-terminal__dot" style={{ background: 'var(--error)' }} />
+                  <div className="testnet-terminal__dot" style={{ background: 'var(--warning)' }} />
+                  <div className="testnet-terminal__dot" style={{ background: 'var(--success)' }} />
                 </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
-                  cspr-testnet / node-4
-                </div>
+                <div className="testnet-terminal__label">cspr-testnet / node-4</div>
               </div>
 
               {/* Terminal Body */}
-              <div style={{ padding: '24px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <div className="testnet-terminal__body">
+                <div className="testnet-terminal__row">
                   <span>STATUS</span>
-                  <span style={{ color: '#10B981' }}>{loading ? 'CONNECTING...' : 'SYNCED'}</span>
+                  <span className="testnet-terminal__row--status">{loading ? 'CONNECTING...' : 'SYNCED'}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <div className="testnet-terminal__row">
                   <span>ASSESSMENTS RUN</span>
                   <span style={{ color: 'var(--text-primary)' }}>{loading ? '...' : assessments.toLocaleString()}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <div className="testnet-terminal__row">
                   <span>RECEIPTS CHAINED</span>
                   <span style={{ color: 'var(--text-primary)' }}>{loading ? '...' : receipts.toLocaleString()}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+                <div className="testnet-terminal__row" style={{ marginBottom: '24px' }}>
                   <span>CSPR COLLECTED</span>
                   <span style={{ color: 'var(--text-primary)' }}>{loading ? '...' : `${csprCollected} CSPR`}</span>
                 </div>
 
-                <div style={{ borderTop: '1px dashed var(--border-color)', paddingTop: '24px' }}>
-                  <div style={{ marginBottom: '12px', color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
+                <div className="testnet-terminal__divider">
+                  <div className="testnet-terminal__refresh">
                     LAST REFRESH: {lastRefresh}
                   </div>
-                  <div style={{ color: '#10B981', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <motion.div animate={{ opacity: [1, 0] }} transition={{ duration: 1, repeat: Infinity }} style={{ width: 8, height: 16, background: '#10B981' }} />
+                  <div className="testnet-terminal__polling">
+                    <motion.div
+                      className="testnet-terminal__cursor"
+                      animate={{ opacity: [1, 0] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    />
                     {loading ? 'connecting to contract state...' : 'polling contract state...'}
                   </div>
                 </div>
@@ -128,7 +103,6 @@ export const TestnetProof: React.FC = () => {
             </div>
           </Reveal>
         </div>
-
       </div>
     </section>
   );

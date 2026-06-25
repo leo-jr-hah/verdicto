@@ -27,28 +27,17 @@ const NodeIcon = ({ type }: { type: string }) => {
   }
 };
 
-/*
-  Path geometry:
-  - SVG viewBox: 0 0 320 440
-  - 4 node boxes, each 180×44, centered at x=160
-  - Box left=70, right=250, corner radius=10
-  - Node tops: y = 60, 165, 270, 375
-  - Path starts at top (160, 10), goes to first box top-center,
-    traces clockwise perimeter, continues to next box, etc.
-*/
 const BOX_W = 180, BOX_H = 44, BOX_R = 10;
 const CX = 160;
-const BL = CX - BOX_W / 2;  // 70
-const BR = CX + BOX_W / 2;  // 250
+const BL = CX - BOX_W / 2;
+const BR = CX + BOX_W / 2;
 const TOPS = [60, 165, 270, 375];
 
 function buildMotionPath(): string {
   const parts: string[] = [`M ${CX} 10`];
   for (let i = 0; i < 4; i++) {
     const t = TOPS[i], b = t + BOX_H;
-    // Travel down to box top-center
     parts.push(`L ${CX} ${t}`);
-    // Trace perimeter clockwise (top-center → top-right → bottom-right → bottom-left → top-left → top-center)
     parts.push(`L ${BR - BOX_R} ${t}`);
     parts.push(`A ${BOX_R} ${BOX_R} 0 0 1 ${BR} ${t + BOX_R}`);
     parts.push(`L ${BR} ${b - BOX_R}`);
@@ -59,53 +48,36 @@ function buildMotionPath(): string {
     parts.push(`A ${BOX_R} ${BOX_R} 0 0 1 ${BL + BOX_R} ${t}`);
     parts.push(`L ${CX} ${t}`);
   }
-  // Continue past last box
   parts.push(`L ${CX} ${TOPS[3] + BOX_H + 20}`);
   return parts.join(' ');
 }
 
 const MOTION_D = buildMotionPath();
-const ANIM_DURATION = 10; // seconds per full loop
+const ANIM_DURATION = 10;
 
 export const X402PaymentFlow: React.FC = () => {
   const pathRef = useRef<SVGPathElement>(null);
   const dotRef = useRef<SVGCircleElement>(null);
   const glowRef = useRef<SVGCircleElement>(null);
   const trailRef = useRef<SVGCircleElement>(null);
-
-  // Animated dot position along path using requestAnimationFrame
   const animRef = useRef<number>(0);
   const startRef = useRef<number>(0);
 
   const animate = useCallback((now: number) => {
     if (!startRef.current) startRef.current = now;
-    const elapsed = (now - startRef.current) / 1000; // seconds
-    const progress = (elapsed % ANIM_DURATION) / ANIM_DURATION; // 0..1
+    const elapsed = (now - startRef.current) / 1000;
+    const progress = (elapsed % ANIM_DURATION) / ANIM_DURATION;
     const path = pathRef.current;
 
     if (path) {
       const len = path.getTotalLength();
       const pt = path.getPointAtLength(progress * len);
-
-      // Main dot
-      if (dotRef.current) {
-        dotRef.current.setAttribute('cx', String(pt.x));
-        dotRef.current.setAttribute('cy', String(pt.y));
-      }
-      // Glow behind dot
-      if (glowRef.current) {
-        glowRef.current.setAttribute('cx', String(pt.x));
-        glowRef.current.setAttribute('cy', String(pt.y));
-      }
-      // Trail (slightly behind)
+      if (dotRef.current) { dotRef.current.setAttribute('cx', String(pt.x)); dotRef.current.setAttribute('cy', String(pt.y)); }
+      if (glowRef.current) { glowRef.current.setAttribute('cx', String(pt.x)); glowRef.current.setAttribute('cy', String(pt.y)); }
       const trailProgress = ((elapsed - 0.25) % ANIM_DURATION) / ANIM_DURATION;
       const trailPt = path.getPointAtLength(Math.max(0, trailProgress) * len);
-      if (trailRef.current) {
-        trailRef.current.setAttribute('cx', String(trailPt.x));
-        trailRef.current.setAttribute('cy', String(trailPt.y));
-      }
+      if (trailRef.current) { trailRef.current.setAttribute('cx', String(trailPt.x)); trailRef.current.setAttribute('cy', String(trailPt.y)); }
     }
-
     animRef.current = requestAnimationFrame(animate);
   }, []);
 
@@ -115,43 +87,29 @@ export const X402PaymentFlow: React.FC = () => {
   }, [animate]);
 
   return (
-    <section style={{ width: '100%', background: 'var(--bg-main)', padding: '96px 32px' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: '48px', alignItems: 'center' }}>
-        
+    <section className="x402-section">
+      <div className="x402-layout">
         {/* Left Side: Text */}
-        <div style={{ flex: '1 1 400px' }}>
+        <div className="x402-text">
           <Reveal direction="left" duration={0.7}>
-            <div className="badge" style={{
-              background: 'rgba(255,59,59,0.1)',
-              color: 'var(--primary)',
-              border: '1px solid rgba(255,59,59,0.2)',
-              marginBottom: '16px',
-              display: 'inline-flex'
-            }}>
+            <div className="landing-badge landing-badge--red">
               x402 Protocol
             </div>
-            
-            <h2 style={{
-              fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-primary)',
-              marginBottom: '20px', fontFamily: 'var(--font-display)', letterSpacing: '-0.02em',
-              lineHeight: 1.1
-            }}>
+            <h2 className="landing-section__title" style={{ textAlign: 'left', marginBottom: '20px' }}>
               Real CSPR.<br/>Real Agents.<br/>Real Payments.
             </h2>
-            
             <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '24px' }}>
               The Orchestrator creates native CSPR transfer deploys for every agent request. Each agent validates the cryptographic proof before responding. No credits. No promises. On-chain settlement for every API call.
             </p>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="x402-check-list">
               {[
                 '2.5 CSPR per assessment',
                 'HMAC-signed receipt chain',
                 'Verifiable on testnet.cspr.live'
               ].map((text, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div key={i} className="x402-check-item">
                   <CheckCircle2 size={18} color="var(--primary)" />
-                  <span style={{ fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 500 }}>{text}</span>
+                  <span>{text}</span>
                 </div>
               ))}
             </div>
@@ -159,20 +117,10 @@ export const X402PaymentFlow: React.FC = () => {
         </div>
 
         {/* Right Side: Animated Diagram */}
-        <div style={{ flex: '1 1 400px', display: 'flex', justifyContent: 'center' }}>
+        <div className="x402-diagram">
           <Reveal direction="right" delay={0.3} duration={0.7}>
-            <div className="card" style={{
-              position: 'relative',
-              width: 320,
-              height: 440,
-              padding: '32px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
-            }}>
-              {/* SVG diagram with animated dot */}
-              <svg
-                viewBox="0 0 320 440"
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 10 }}
-              >
+            <div className="card x402-diagram-card">
+              <svg viewBox="0 0 320 440" className="x402-diagram-svg">
                 <defs>
                   <filter id="dotGlow" x="-100%" y="-100%" width="300%" height="300%">
                     <feGaussianBlur stdDeviation="5" result="blur"/>
@@ -182,37 +130,15 @@ export const X402PaymentFlow: React.FC = () => {
                     </feMerge>
                   </filter>
                 </defs>
-
-                {/* The motion path (invisible, used for getPointAtLength) */}
                 <path ref={pathRef} d={MOTION_D} fill="none" stroke="none"/>
-
-                {/* Trail circle (behind main dot) */}
                 <circle ref={trailRef} r="10" fill="var(--primary)" opacity="0.15"/>
-
-                {/* Glow circle */}
                 <circle ref={glowRef} r="16" fill="var(--primary)" opacity="0.12" filter="url(#dotGlow)"/>
-
-                {/* Main dot */}
                 <circle ref={dotRef} r="5" fill="var(--primary)"/>
               </svg>
-
-              {/* Nodes */}
-              <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', zIndex: 5 }}>
+              <div className="x402-nodes">
                 {NODES.map((node, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'center' }}>
-                    <div className="card" style={{
-                      border: '1px solid var(--border-color)',
-                      padding: '10px 20px',
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      minWidth: 160,
-                      textAlign: 'center',
-                      background: 'var(--bg-card)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px'
-                    }}>
+                  <div key={i} className="x402-node">
+                    <div className="card x402-node-card" style={{ border: '1px solid var(--border-color)' }}>
                       <NodeIcon type={node.icon} />
                       {node.label}
                     </div>
@@ -222,7 +148,6 @@ export const X402PaymentFlow: React.FC = () => {
             </div>
           </Reveal>
         </div>
-
       </div>
     </section>
   );

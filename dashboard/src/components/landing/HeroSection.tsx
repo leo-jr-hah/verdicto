@@ -15,9 +15,7 @@ const ParticleField: React.FC = () => {
   const animFrame = useRef(0);
 
   const initParticles = useCallback((w: number, h: number) => {
-    // ~250 particles, but skip the center "safe zone" where text lives
     const count = Math.min(Math.floor((w * h) / 4000), 280);
-    // Safe zone: center 50% width × 55% height - where headline, subtitle, buttons sit
     const safeLeft = w * 0.25;
     const safeRight = w * 0.75;
     const safeTop = h * 0.22;
@@ -28,7 +26,6 @@ const ParticleField: React.FC = () => {
       attempts++;
       const x = Math.random() * w;
       const y = Math.random() * h;
-      // Skip particles inside the safe zone
       if (x > safeLeft && x < safeRight && y > safeTop && y < safeBottom) continue;
       const typeRoll = Math.random();
       arr.push({
@@ -69,7 +66,6 @@ const ParticleField: React.FC = () => {
     canvas.addEventListener('mousemove', handleMouse);
     canvas.addEventListener('mouseleave', () => { mouse.current = { x: -999, y: -999 }; });
 
-    // Safe zone bounds (same proportions as initParticles)
     const safeLeft = w * 0.25;
     const safeRight = w * 0.75;
     const safeTop = h * 0.22;
@@ -83,8 +79,6 @@ const ParticleField: React.FC = () => {
 
       for (let i = 0; i < ps.length; i++) {
         const p = ps[i];
-
-        // Mouse attraction - wider radius, stronger pull
         const dx = mx - p.x;
         const dy = my - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -93,19 +87,13 @@ const ParticleField: React.FC = () => {
           p.vx += (dx / dist) * force * 0.15;
           p.vy += (dy / dist) * force * 0.15;
         }
-
-        // Return to base position gently
         p.vx += (p.baseX - p.x) * 0.004;
         p.vy += (p.baseY - p.y) * 0.004;
-
-        // Damping
         p.vx *= 0.96;
         p.vy *= 0.96;
-
         p.x += p.vx;
         p.y += p.vy;
 
-        // Push particles out of the safe zone
         if (p.x > safeLeft && p.x < safeRight && p.y > safeTop && p.y < safeBottom) {
           const distLeft = p.x - safeLeft;
           const distRight = safeRight - p.x;
@@ -118,7 +106,6 @@ const ParticleField: React.FC = () => {
           else { p.y = safeBottom + 2; p.vy = Math.abs(p.vy) * 0.5; }
         }
 
-        // Draw particle - boosted opacity
         ctx.beginPath();
         if (p.type === 'verdict') {
           ctx.save();
@@ -136,14 +123,12 @@ const ParticleField: React.FC = () => {
         }
         ctx.fill();
 
-        // Draw connections to nearby particles - skip if line crosses safe zone
         for (let j = i + 1; j < ps.length; j++) {
           const q = ps[j];
           const ddx = p.x - q.x;
           const ddy = p.y - q.y;
           const dd = Math.sqrt(ddx * ddx + ddy * ddy);
           if (dd < 140) {
-            // Skip connection if midpoint is inside safe zone
             const midX = (p.x + q.x) / 2;
             const midY = (p.y + q.y) / 2;
             if (midX > safeLeft && midX < safeRight && midY > safeTop && midY < safeBottom) continue;
@@ -160,7 +145,6 @@ const ParticleField: React.FC = () => {
         }
       }
 
-      // Draw lines from mouse to nearby particles - much more visible
       if (mx > 0 && my > 0) {
         for (const p of ps) {
           const d = Math.sqrt((mx - p.x) ** 2 + (my - p.y) ** 2);
@@ -215,8 +199,6 @@ const FlipButton: React.FC<{
 
   const isPrimary = variant === 'primary';
 
-  // Primary: red bg → white bg on hover
-  // Secondary: dark bg → red bg on hover
   const normalStyle: React.CSSProperties = isPrimary
     ? { background: 'var(--primary)', color: '#fff', border: '2px solid var(--primary)' }
     : { background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '2px solid var(--border-color)' };
@@ -254,42 +236,23 @@ const FlipButton: React.FC<{
 /* ── Hero Section ─────────────────────────────────────────────────── */
 export const HeroSection: React.FC = () => {
   return (
-    <section style={{
-      minHeight: '100vh',
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      padding: '6rem 2rem 4rem',
-      position: 'relative',
-      textAlign: 'center',
-      overflow: 'hidden',
-    }}>
-      {/* Particle canvas behind everything */}
+    <section className="hero-section">
       <ParticleField />
 
-      {/* Content above particles - pointer-events: none so canvas gets mouse, buttons get pointer-events: auto */}
-      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: 'none' }}>
+      <div className="hero-headline-wrapper">
         {/* Eyebrow badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="badge"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-            background: 'var(--primary-bg)',
-            border: '1px solid rgba(255, 59, 59, 0.15)',
-            padding: '0.375rem 1rem',
-            marginBottom: '2rem',
-          }}
+          className="landing-badge landing-badge--red"
         >
           <motion.div
             animate={{ opacity: [1, 0.4, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
             style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--primary)' }}
           />
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            Live on Casper Testnet
-          </span>
+          <span>Live on Casper Testnet</span>
         </motion.div>
 
         {/* Headline */}
@@ -304,20 +267,19 @@ export const HeroSection: React.FC = () => {
             color: 'var(--text-primary)',
             maxWidth: 800,
             margin: '0 auto 1.5rem',
-            fontFamily: 'var(--font-display)',
           }}
         >
           The On-Chain Oracle{' '}
           <span style={{ color: 'var(--primary)' }}>for Real-World Assets</span>
         </motion.h1>
 
-        {/* Subheadline - qualitative */}
+        {/* Subheadline */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.25 }}
+          className="text-lg"
           style={{
-            fontSize: '1.15rem',
             color: 'var(--text-secondary)',
             lineHeight: 1.65,
             maxWidth: 560,
@@ -334,32 +296,41 @@ export const HeroSection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '4rem', pointerEvents: 'auto' }}
+          className="flex gap-4 justify-center"
+          style={{ flexWrap: 'wrap', marginBottom: '2rem', pointerEvents: 'auto' }}
         >
-          <FlipButton
-            to="/oracle"
-            variant="primary"
-            className="btn btn-primary"
-            style={{ padding: '0.875rem 1.75rem', fontSize: '0.95rem' }}
-          >
+          <FlipButton to="/oracle" variant="primary" className="btn btn-primary btn-lg">
             Explore the Oracle <ArrowRight size={16} />
           </FlipButton>
-          <FlipButton
-            to="/assess"
-            variant="secondary"
-            className="btn"
-            style={{ padding: '0.875rem 1.75rem', fontSize: '0.95rem' }}
-          >
+          <FlipButton to="/assess" variant="secondary" className="btn btn-lg">
             Value an Asset <ArrowRight size={16} />
           </FlipButton>
           <FlipButton
             variant="secondary"
-            className="btn"
-            style={{ padding: '0.875rem 1.75rem', fontSize: '0.95rem' }}
+            className="btn btn-lg"
             onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
           >
             How It Works
           </FlipButton>
+        </motion.div>
+
+        {/* Social Proof Bar */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="hero-proof-bar"
+        >
+          <span className="hero-proof-bar__item">
+            <span className="hero-proof-bar__dot" />
+            Live on Casper Testnet
+          </span>
+          <span>·</span>
+          <span>3 Smart Contracts Deployed</span>
+          <span>·</span>
+          <span>5 AI Agents</span>
+          <span>·</span>
+          <span>Real x402 Payments</span>
         </motion.div>
 
         {/* Scroll cue */}
@@ -367,7 +338,7 @@ export const HeroSection: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5 }}
-          style={{ position: 'relative' }}
+          style={{ position: 'relative', marginTop: '2rem' }}
         >
           <motion.div
             animate={{ y: [0, 8, 0] }}

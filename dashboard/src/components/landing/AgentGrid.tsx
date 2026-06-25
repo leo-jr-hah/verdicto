@@ -5,49 +5,30 @@ import { GradientOrb } from './Backgrounds';
 
 export const AgentGrid: React.FC = () => {
   return (
-    <section id="agents" style={{ padding: '8rem 2rem', borderTop: '1px solid var(--border-color)', position: 'relative' }}>
+    <section id="agents" className="landing-section" style={{ borderTop: '1px solid var(--border-color)', position: 'relative' }}>
       <GradientOrb color1="rgba(6,182,212,0.06)" color2="rgba(59,130,246,0.04)" size={400} x="15%" y="40%" delay={2} />
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+      <div className="landing-section__container" style={{ position: 'relative', zIndex: 1 }}>
         <Reveal>
-          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <div className="badge" style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-              background: 'rgba(6, 182, 212, 0.06)',
-              border: '1px solid rgba(6, 182, 212, 0.15)',
-              marginBottom: '1.5rem',
-            }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#06B6D4', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                The Agents
-              </span>
+          <div className="landing-section__header">
+            <div className="landing-badge landing-badge--cyan">
+              <span>The Agents</span>
             </div>
-            <h2 style={{
-              fontSize: 'clamp(1.8rem, 4vw, 3rem)',
-              fontWeight: 800, lineHeight: 1.1,
-              letterSpacing: '-0.03em',
-              color: 'var(--text-primary)',
-              marginBottom: '1rem',
-            }}>
+            <h2 className="landing-section__title">
               Two valuations. Three jurors.<br />
               <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Every analysis formed independently.</span>
             </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>
+            <p className="landing-section__subtitle">
               Two valuation agents produce independent estimates using different methodologies.
               Three specialized jurors then evaluate which is more credible, weighted by on-chain trust scores.
             </p>
           </div>
         </Reveal>
 
-        {/* Top row: 3 agents */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
-          {AGENTS.slice(0, 3).map((agent, i) => (
+        {/* Single 5-column grid */}
+        <div className="agent-grid">
+          {AGENTS.map((agent, i) => (
             <AgentCard key={agent.name} agent={agent} index={i} />
-          ))}
-        </div>
-        {/* Bottom row: 2 agents centered */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', maxWidth: 720, margin: '0 auto' }}>
-          {AGENTS.slice(3).map((agent, i) => (
-            <AgentCard key={agent.name} agent={agent} index={i + 3} />
           ))}
         </div>
       </div>
