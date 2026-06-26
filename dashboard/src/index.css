@@ -2576,6 +2576,19 @@ a:focus-visible {
   margin-bottom: 0.5rem;
   display: flex;
   justify-content: center;
+  overflow: hidden;
+}
+
+/* When sidebar is collapsed, center and constrain all footer children */
+.sidebar[data-collapsed="true"] .sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+}
+
+.sidebar[data-collapsed="true"] .sidebar-theme-toggle {
+  justify-content: center;
 }
 
 .sidebar-faucet-link {

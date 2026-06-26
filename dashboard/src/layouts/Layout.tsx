@@ -147,7 +147,7 @@ export const Layout: React.FC = () => {
           )}
           {sidebarCollapsed && (
             <div className="sidebar-footer-section--collapsed">
-              <WalletConnectButton />
+              <WalletConnectButton collapsed />
             </div>
           )}
           <div className="sidebar-theme-toggle">

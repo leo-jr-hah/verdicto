@@ -70,8 +70,10 @@ export function usePaymentFlow(
         deployHash = result.deployHash;
       }
 
-      await onSuccess(paymentProof, deployHash);
+      // Close modal immediately after signing — don't block on the API call
       setShowModal(false);
+      setSigning(false);
+      await onSuccess(paymentProof, deployHash);
     } catch (err: any) {
       if (err?.message?.includes('cancelled') || err?.message?.includes('denied')) {
         setSignError('Payment was cancelled. Please approve the transfer in your wallet.');
