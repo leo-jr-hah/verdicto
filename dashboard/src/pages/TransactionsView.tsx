@@ -88,30 +88,41 @@ export const TransactionsView: React.FC = () => {
     let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     let reconnectDelay = 1000;
     const MAX_RECONNECT_DELAY = 30_000;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 3;
     let unmounted = false;
 
     function connect() {
       if (unmounted) return;
-      ws = createWebSocket((msg: WSMessage) => {
-        if (msg.type === 'transaction') {
-          setTransactions(prev => [msg.payload as TransactionEntry, ...prev]);
-          setLastUpdate(new Date());
-        }
-      });
+      try {
+        ws = createWebSocket((msg: WSMessage) => {
+          if (msg.type === 'transaction') {
+            setTransactions(prev => [msg.payload as TransactionEntry, ...prev]);
+            setLastUpdate(new Date());
+          }
+        });
 
-      ws.onopen = () => {
-        setWsConnected(true);
-        reconnectDelay = 1000;
-      };
-      ws.onclose = () => {
-        setWsConnected(false);
-        if (!unmounted) {
-          reconnectTimeout = setTimeout(() => {
-            reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY);
-            connect();
-          }, reconnectDelay);
-        }
-      };
+        ws.onopen = () => {
+          setWsConnected(true);
+          reconnectDelay = 1000;
+          reconnectAttempts = 0;
+        };
+        ws.onclose = () => {
+          setWsConnected(false);
+          if (!unmounted && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            reconnectAttempts++;
+            reconnectTimeout = setTimeout(() => {
+              reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY);
+              connect();
+            }, reconnectDelay);
+          }
+        };
+        ws.onerror = () => {
+          // Silently handle — WS is optional
+        };
+      } catch {
+        // WebSocket URL invalid or unsupported — skip silently
+      }
     }
 
     connect();

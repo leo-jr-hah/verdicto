@@ -568,6 +568,10 @@ export function createWebSocket(onMessage: (msg: WSMessage) => void): WebSocket 
     }
   };
 
+  ws.onerror = () => {
+    // Silently handle — WS is optional for live updates
+  };
+
   ws.onclose = () => {
     console.log('[WS] Disconnected');
   };

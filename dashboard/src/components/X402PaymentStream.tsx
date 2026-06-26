@@ -126,9 +126,10 @@ export const X402PaymentStream: React.FC = () => {
       wsRef.current = ws;
       ws.onopen = () => setConnected(true);
       ws.onclose = () => setConnected(false);
-      return () => ws.close();
+      ws.onerror = () => { /* WS is optional */ };
+      return () => { try { ws.close(); } catch { /* ignore */ } };
     } catch {
-      setConnected(false);
+      // WebSocket not available — skip silently
     }
   }, []);
 

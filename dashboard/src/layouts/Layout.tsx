@@ -78,18 +78,6 @@ export const Layout: React.FC = () => {
               <img src={verdictLogo} alt="Verdicto" className="logo-img logo-img--lg" />
             </Link>
           )}
-          <button
-            className={`sidebar-collapse-btn ${sidebarCollapsed ? 'sidebar-collapse-btn--collapsed' : ''}`}
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {sidebarCollapsed ? (
-              <ChevronRight size={18} />
-            ) : (
-              <ChevronLeft size={18} />
-            )}
-          </button>
         </div>
 
         {/* Navigation */}
@@ -171,6 +159,20 @@ export const Layout: React.FC = () => {
           </div>
         </div>
       </aside>
+
+      {/* Edge collapse/expand handle — positioned on sidebar right border */}
+      <button
+        className={`sidebar-edge-handle ${sidebarCollapsed ? 'sidebar-edge-handle--collapsed' : ''}`}
+        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+        aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      >
+        {sidebarCollapsed ? (
+          <ChevronRight size={14} />
+        ) : (
+          <ChevronLeft size={14} />
+        )}
+      </button>
 
       {/* Mobile Header */}
       <header className="mobile-header">
