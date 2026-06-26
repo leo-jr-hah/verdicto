@@ -6,10 +6,6 @@
 @import './styles/insure-responsive.css';
 @import './styles/disputes-responsive.css';
 @import './styles/how-it-works-responsive.css';
-@import './styles/oracle-responsive.css';
-@import './styles/prediction-responsive.css';
-@import './styles/reputation-responsive.css';
-@import './styles/roadmap-responsive.css';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    VERDICTO: Design System
@@ -177,8 +173,25 @@ button {
 }
 
 .sidebar[data-collapsed="true"] {
-  width: 64px;
-  min-width: 64px;
+  width: 72px;
+  min-width: 72px;
+}
+
+.sidebar[data-collapsed="true"] .sidebar-header {
+  justify-content: center;
+  padding: 20px 8px;
+}
+
+.sidebar[data-collapsed="true"] .sidebar-collapse-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.sidebar[data-collapsed="true"] .sidebar-logo--collapsed {
+  justify-content: center;
+  width: 100%;
 }
 
 .sidebar-header {
@@ -188,6 +201,7 @@ button {
   padding: 20px 16px;
   border-bottom: 1px solid var(--border-color);
   height: 60px;
+  position: relative;
 }
 
 .sidebar-logo {
@@ -222,6 +236,20 @@ button {
 .sidebar-collapse-btn:hover {
   background: var(--bg-surface);
   color: var(--text-secondary);
+}
+
+.sidebar-collapse-btn--collapsed {
+  margin: 0 auto;
+  padding: 6px;
+  border-radius: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+}
+
+.sidebar-collapse-btn--collapsed:hover {
+  background: var(--primary-bg);
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 .sidebar-nav {
@@ -264,6 +292,37 @@ button {
   color: var(--text-primary);
 }
 
+.sidebar-link--collapsed {
+  justify-content: center;
+  padding: 10px 0;
+  margin: 2px 8px;
+  position: relative;
+}
+
+.sidebar-link--collapsed:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.sidebar-link--collapsed:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  z-index: 100;
+  pointer-events: none;
+}
+
 .sidebar-link.active {
   background: var(--primary-bg);
   color: var(--primary);
@@ -279,6 +338,15 @@ button {
   height: 18px;
   background: var(--primary);
   border-radius: 0 3px 3px 0;
+}
+
+.sidebar-link--collapsed .sidebar-active-indicator {
+  left: 0;
+  top: 0;
+  transform: none;
+  width: 100%;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
 }
 
 .sidebar-footer {
@@ -431,8 +499,8 @@ button {
   }
 
   .sidebar[data-collapsed="true"] {
-    width: 56px;
-    min-width: 56px;
+    width: 64px;
+    min-width: 64px;
   }
 
   .page-layout {
@@ -2430,8 +2498,10 @@ a:focus-visible {
 }
 
 .sidebar-footer-section--collapsed {
-  padding: 0 0.25rem;
+  padding: 0 0.5rem;
   margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: center;
 }
 
 .sidebar-faucet-link {
@@ -2445,10 +2515,6 @@ a:focus-visible {
 }
 
 /* ── Sidebar Chevron ───────────────────────────────────────────────────── */
-
-.sidebar-collapse-icon {
-  transition: transform 0.2s ease;
-}
 
 .sidebar-collapse-icon--collapsed {
   transform: rotate(0deg);

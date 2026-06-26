@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Menu, X, Bot, LayoutDashboard, Users, Scale, History, Cpu, ChevronRight, Droplets, Target, Map, Landmark, Shield, GitBranch, Radio, Gavel } from 'lucide-react';
+import { Moon, Sun, Menu, X, Bot, LayoutDashboard, Users, Scale, History, Cpu, ChevronLeft, ChevronRight, Droplets, Target, Map, Landmark, Shield, GitBranch, Radio, Gavel } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import verdictLogo from '../assets/logo.jpeg';
 import { ConnectionStatus } from '../components/ConnectionStatus';
@@ -67,19 +67,28 @@ export const Layout: React.FC = () => {
       <aside className="sidebar" data-collapsed={sidebarCollapsed}>
         {/* Logo */}
         <div className="sidebar-header">
-          <Link to="/" className="sidebar-logo">
-            <img src={verdictLogo} alt="Verdicto" className="logo-img logo-img--lg" />
-            <span className="sidebar-logo-text">Verdicto</span>
-          </Link>
+          {!sidebarCollapsed && (
+            <Link to="/" className="sidebar-logo">
+              <img src={verdictLogo} alt="Verdicto" className="logo-img logo-img--lg" />
+              <span className="sidebar-logo-text">Verdicto</span>
+            </Link>
+          )}
+          {sidebarCollapsed && (
+            <Link to="/" className="sidebar-logo sidebar-logo--collapsed" title="Verdicto">
+              <img src={verdictLogo} alt="Verdicto" className="logo-img logo-img--lg" />
+            </Link>
+          )}
           <button
-            className="sidebar-collapse-btn"
+            className={`sidebar-collapse-btn ${sidebarCollapsed ? 'sidebar-collapse-btn--collapsed' : ''}`}
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            aria-label="Toggle sidebar"
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            <ChevronRight
-              size={16}
-              className={`sidebar-collapse-icon ${sidebarCollapsed ? 'sidebar-collapse-icon--collapsed' : 'sidebar-collapse-icon--expanded'}`}
-            />
+            {sidebarCollapsed ? (
+              <ChevronRight size={18} />
+            ) : (
+              <ChevronLeft size={18} />
+            )}
           </button>
         </div>
 
@@ -97,10 +106,10 @@ export const Layout: React.FC = () => {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`sidebar-link ${active ? 'active' : ''}`}
+                    className={`sidebar-link ${active ? 'active' : ''} ${sidebarCollapsed ? 'sidebar-link--collapsed' : ''}`}
                     title={sidebarCollapsed ? item.name : undefined}
                   >
-                    <Icon size={18} />
+                    <Icon size={sidebarCollapsed ? 20 : 18} />
                     {!sidebarCollapsed && <span>{item.name}</span>}
                     {active && <div className="sidebar-active-indicator" />}
                   </Link>
