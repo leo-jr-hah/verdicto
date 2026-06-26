@@ -481,28 +481,36 @@ export const ReputationView: React.FC = () => {
         ))}
       </div>
 
-      {/* Agent Cards Grid */}
-      <div className="reputation-agents-grid"
-        style={{ gap: 12 }}>
-        {agents.map((agent, index) => (
-          <AgentCard
-            key={agent.id}
-            agent={agent}
-            rank={index + 1}
-            isSelected={selectedAgentId === agent.id}
-            onClick={() => setSelectedAgentId(
-              selectedAgentId === agent.id ? null : agent.id
-            )}
-          />
-        ))}
-      </div>
+      {/* Two-column layout: Agent list + Detail panel */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: selectedAgent ? '340px 1fr' : '1fr',
+        gap: 24,
+        alignItems: 'start',
+        transition: 'grid-template-columns 0.3s ease',
+      }}>
+        {/* Agent Cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {agents.map((agent, index) => (
+            <AgentCard
+              key={agent.id}
+              agent={agent}
+              rank={index + 1}
+              isSelected={selectedAgentId === agent.id}
+              onClick={() => setSelectedAgentId(
+                selectedAgentId === agent.id ? null : agent.id
+              )}
+            />
+          ))}
+        </div>
 
-      {/* Detail Panel - renders BELOW the grid, not inside any card */}
-      <AnimatePresence mode="wait">
-        {selectedAgent && (
-          <AgentDetailPanel key={selectedAgent.id} agent={selectedAgent} />
-        )}
-      </AnimatePresence>
+        {/* Detail Panel - renders on the right side */}
+        <AnimatePresence mode="wait">
+          {selectedAgent && (
+            <AgentDetailPanel key={selectedAgent.id} agent={selectedAgent} />
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };

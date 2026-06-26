@@ -39,10 +39,10 @@ const LAYERS = [
   {
     id: 'backend',
     title: 'AI Agent Network',
-    subtitle: 'Five independent analysts with autonomous methodology selection and juror deliberation',
+    subtitle: 'Multiple independent analysts with autonomous methodology selection and juror deliberation',
     icon: <Server size={20} />,
     color: '#8B5CF6',
-    stats: ['5 independent agents', 'Autonomous reasoning', 'Juror peer review'],
+    stats: ['Multiple independent agents', 'Autonomous reasoning', 'Juror peer review'],
     items: [
       {
         label: 'Dual Valuation Engine',
@@ -145,7 +145,7 @@ const TIERS = [
 
 const WHY_VERDICT = [
   { icon: <Zap size={18} />, title: '60-Second Valuations', desc: 'What takes traditional appraisers 2 to 4 weeks, Verdicto delivers in under a minute with full methodology transparency.' },
-  { icon: <Users size={18} />, title: 'Multi-Agent Deliberation', desc: 'No single AI model decides. Five independent agents analyze, three jurors review, and consensus is weighted by proven accuracy.' },
+  { icon: <Users size={18} />, title: 'Multi-Agent Deliberation', desc: 'No single AI model decides. Multiple independent agents analyze, jurors review, and consensus is weighted by proven accuracy.' },
   { icon: <Shield size={18} />, title: 'On-Chain Verifiability', desc: 'Every verdict, vote, and payment is recorded on the Casper blockchain. Results are tamper-proof and publicly auditable.' },
   { icon: <TrendingUp size={18} />, title: 'Self-Improving Accuracy', desc: 'Agents earn reputation through retroactive settlement. When reality proves one analysis closer than others, scores adjust. The system gets smarter over time.' },
 ];
@@ -381,7 +381,7 @@ export const HowItWorksView: React.FC = () => {
             fontSize: '1rem', color: 'var(--text-secondary)', lineHeight: 1.65,
             maxWidth: 640, margin: '0 auto',
           }}>
-            Five independent AI analysts evaluate every asset. Three juror agents
+            Multiple independent AI analysts evaluate every asset. Juror agents
             deliberate when valuations disagree. Results are settled on-chain with
             cryptographic receipts. No black boxes.
           </p>
@@ -465,7 +465,7 @@ export const HowItWorksView: React.FC = () => {
           <SectionHeading
             icon={<Bot size={13} />}
             title="AI Agent Network"
-            subtitle="Five independent analysts, each specializing in a different evaluation methodology. No single agent controls the outcome."
+            subtitle="Multiple independent analysts, each specializing in a different evaluation methodology. No single agent controls the outcome."
           />
           <AgentTable />
         </section>
@@ -574,7 +574,7 @@ export const HowItWorksView: React.FC = () => {
           <SectionHeading
             icon={<Coins size={13} />}
             title="Micropayment Protocol"
-            subtitle="Every assessment, loan, and insurance policy is gated by a small CSPR micropayment, signed directly by the user's wallet. No accounts, no subscriptions, no stored payment methods."
+            subtitle="Every assessment, loan, and insurance policy is gated by a small CSPR micropayment, signed directly by the user's wallet. No subscriptions, no stored payment methods."
           />
 
           {/* Payment flow */}

@@ -47,7 +47,7 @@ import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
 import { getCasperMcpClient } from '../shared/casper-mcp-client.js';
-import { emitEvent } from '../websocket-server.js';
+import { attachWebSocket, emitEvent } from '../websocket-server.js';
 import { computeAggregateTrust } from '../shared/trust-framework.js';
 import { createDeliberationReceipt, DeliberationReceipt, verifyReceiptChain } from '../shared/audit-trail.js';
 import { createExecutionCommitment, storeCommitmentOnCasper } from '../shared/verifiable-execution.js';
@@ -3563,7 +3563,13 @@ Respond in JSON format:
   });
 
   const PORT = process.env.ORCHESTRATOR_API_PORT || 3011;
-  app.listen(PORT, async () => {
+  const { createServer } = await import('node:http');
+  const server = createServer(app);
+  
+  // Attach WebSocket server to the same HTTP server (shared port)
+  attachWebSocket(server);
+  
+  server.listen(PORT, async () => {
     console.log(`🚀 Orchestrator API running on http://localhost:${PORT}`);
 
     // ─── Seed demo oracle verdicts ────────────────────────────────────────────

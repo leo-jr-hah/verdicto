@@ -1180,12 +1180,21 @@ button {
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-lg);
-  z-index: 30;
+  z-index: 55;
   transition: transform var(--transition-fast);
 }
 
 .story-fab:hover {
   transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .story-fab {
+    bottom: 80px;  /* Above the mobile bottom nav (nav height ~56px + safe area) */
+    right: 16px;
+    width: 48px;
+    height: 48px;
+  }
 }
 
 /* ── Agent Hover Explanations ─────────────────────────────────────────────── */
@@ -2896,6 +2905,10 @@ a:focus-visible {
   border-top: 1px solid var(--border-color);
   font-size: 0.85rem;
   color: var(--text-secondary);
+  text-align: center;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (max-width: 768px) {

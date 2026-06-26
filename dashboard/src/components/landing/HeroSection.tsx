@@ -326,11 +326,9 @@ export const HeroSection: React.FC = () => {
             Live on Casper Testnet
           </span>
           <span>·</span>
-          <span>3 Smart Contracts Deployed</span>
+          <span>Multi-Agent AI Consensus</span>
           <span>·</span>
-          <span>5 AI Agents</span>
-          <span>·</span>
-          <span>Real x402 Payments</span>
+          <span>On-Chain Verifiable</span>
         </motion.div>
 
         {/* Scroll cue */}

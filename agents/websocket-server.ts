@@ -1,37 +1,45 @@
 import { WebSocketServer, WebSocket } from 'ws';
-
-const PORT = 3010;
-const wss = new WebSocketServer({ port: PORT });
+import type { Server } from 'http';
 
 const clients = new Set<WebSocket>();
 
 let connectionCallback: (() => void) | null = null;
 
-wss.on('connection', (ws) => {
-  console.log('[WebSocket] Dashboard client connected');
-  clients.add(ws);
-  if (connectionCallback) {
-    connectionCallback();
-    connectionCallback = null; // Only run once
-  }
+/**
+ * Attach WebSocket server to an existing HTTP server.
+ * This allows WS and HTTP to share the same port (required for Railway deployment).
+ */
+export function attachWebSocket(server: Server) {
+  const wss = new WebSocketServer({ server, path: '/ws' });
 
-  ws.on('error', (err) => {
-    console.error('[WebSocket] Client error:', err.message);
-    clients.delete(ws);
+  wss.on('connection', (ws) => {
+    console.log('[WebSocket] Dashboard client connected');
+    clients.add(ws);
+    if (connectionCallback) {
+      connectionCallback();
+      connectionCallback = null;
+    }
+
+    ws.on('error', (err) => {
+      console.error('[WebSocket] Client error:', err.message);
+      clients.delete(ws);
+    });
+
+    ws.on('close', () => {
+      console.log('[WebSocket] Dashboard client disconnected');
+      clients.delete(ws);
+    });
   });
 
-  ws.on('close', () => {
-    console.log('[WebSocket] Dashboard client disconnected');
-    clients.delete(ws);
-  });
-});
+  console.log('[WebSocket] Attached to HTTP server on /ws');
+}
 
 export function waitForConnection(callback: () => void) {
   if (clients.size > 0) {
     callback();
   } else {
     connectionCallback = callback;
-    console.log('[WebSocket] Waiting for dashboard client to connect on http://localhost:5173 ...');
+    console.log('[WebSocket] Waiting for dashboard client to connect...');
   }
 }
 
@@ -43,5 +51,3 @@ export function emitEvent(type: string, payload: any) {
     }
   });
 }
-
-console.log(`[WebSocket] Server running on ws://localhost:${PORT}`);

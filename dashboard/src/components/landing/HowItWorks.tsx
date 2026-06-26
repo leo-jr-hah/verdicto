@@ -8,7 +8,7 @@ const STEPS = [
     title: 'Connect Your Wallet',
     color: '#FF3B3B',
     icon: Upload,
-    description: 'Connect your Casper Wallet in one click. Your wallet handles all payments and receives all disbursements. No accounts, no passwords, no email.',
+    description: 'Connect your Casper Wallet in one click. Your wallet handles all payments and receives all disbursements. No account creation needed.',
     detail: 'Casper Wallet via CSPRClick SDK',
   },
   {
@@ -24,8 +24,8 @@ const STEPS = [
     title: 'AI Agents Analyze',
     color: '#8B5CF6',
     icon: Users,
-    description: 'Five independent AI agents work in parallel. Each queries real market data, selects its own methodology, and produces a result with full reasoning. If agents disagree, three jurors deliberate across two rounds with peer review.',
-    detail: '5 Agents, 2 Rounds, Peer Review',
+    description: 'Multiple independent AI agents work in parallel. Each queries real market data, selects its own methodology, and produces a result with full reasoning. If agents disagree, jurors deliberate with peer review.',
+    detail: 'Multi-Agent Analysis with Peer Review',
   },
   {
     num: '04',

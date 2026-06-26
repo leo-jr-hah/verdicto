@@ -18,7 +18,7 @@ const FEATURES = [
   {
     icon: <Shield size={22} />,
     title: 'Multi-Agent Consensus',
-    desc: 'Each verdict is the output of 5 independent AI agents: 2 valuation specialists and 3 jurors, with cryptographic receipt chains proving nothing was altered.',
+    desc: 'Each verdict is the output of multiple independent AI agents: valuation specialists and jurors, with cryptographic receipt chains proving nothing was altered.',
     color: '#10B981',
   },
   {

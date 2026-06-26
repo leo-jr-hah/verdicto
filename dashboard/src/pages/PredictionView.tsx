@@ -348,7 +348,7 @@ export const PredictionView: React.FC = () => {
                 fontSize: '0.95rem', lineHeight: 1.6,
                 maxWidth: 520, margin: '0 auto',
               }}>
-                Ask any outcome question about RWA assets. 5 AI agents independently estimate probability, producing a weighted confidence score that feeds into Oracle verdicts.
+                Ask any outcome question about RWA assets. Multiple AI agents independently estimate probability, producing a weighted confidence score that feeds into Oracle verdicts.
               </p>
             </div>
 
@@ -599,7 +599,7 @@ export const PredictionView: React.FC = () => {
               Running Confidence Analysis
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: 400, lineHeight: 1.5 }}>
-              5 AI agents are analyzing market data, historical precedents, and economic indicators to produce a confidence score...
+              Multiple AI agents are analyzing market data, historical precedents, and economic indicators to produce a confidence score...
             </p>
             <div style={{
               display: 'flex', gap: 8, marginTop: 24, flexWrap: 'wrap', justifyContent: 'center',

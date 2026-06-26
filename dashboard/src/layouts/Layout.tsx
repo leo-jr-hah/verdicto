@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import verdictLogo from '../assets/logo.jpeg';
 import { ConnectionStatus } from '../components/ConnectionStatus';
 import { WalletConnectButton } from '../components/WalletConnectButton';
-import { InteractiveStory } from '../components/story/InteractiveStory';
+
 import { DemoModeBanner } from '../components/DemoModeBanner';
 
 const NAV_SECTIONS = [
@@ -13,6 +13,8 @@ const NAV_SECTIONS = [
     title: 'OVERVIEW',
     items: [
       { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+      { name: 'Agents', path: '/reputation', icon: Users },
+      { name: 'History', path: '/transactions', icon: History },
     ],
   },
   {
@@ -27,10 +29,8 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    title: 'DATA',
+    title: '',  // No group name — standalone items
     items: [
-      { name: 'Agents', path: '/reputation', icon: Users },
-      { name: 'History', path: '/transactions', icon: History },
       { name: 'How Verdicto Works', path: '/how-it-works', icon: Cpu },
       { name: 'Architecture', path: '/architecture', icon: GitBranch },
       { name: 'Roadmap', path: '/roadmap', icon: Map },
@@ -44,13 +44,20 @@ export const Layout: React.FC = () => {
     return localStorage.getItem('verdicto-theme') || 'light';
   });
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [isStoryOpen, setIsStoryOpen] = React.useState(false);
+
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('verdicto-theme', theme);
   }, [theme]);
+
+  // Reset scroll position on route change
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+    const mainEl = document.querySelector('.main-content-area');
+    if (mainEl) mainEl.scrollTop = 0;
+  }, [location.pathname]);
 
   // Lock body scroll when mobile menu is open
   React.useEffect(() => {
@@ -87,7 +94,7 @@ export const Layout: React.FC = () => {
         <nav className="sidebar-nav">
           {NAV_SECTIONS.map((section) => (
             <div key={section.title} className="sidebar-section">
-              {!sidebarCollapsed && (
+              {!sidebarCollapsed && section.title && (
                 <div className="sidebar-section-title">{section.title}</div>
               )}
               {section.items.map((item) => {
@@ -220,8 +227,8 @@ export const Layout: React.FC = () => {
               onClick={(e) => e.stopPropagation()}
             >
               {NAV_SECTIONS.map((section) => (
-                <div key={section.title}>
-                  <div className="sidebar-section-title mobile-section-title">{section.title}</div>
+                  <div key={section.title || section.items[0].path}>
+                  {section.title && <div className="sidebar-section-title mobile-section-title">{section.title}</div>}
                   {section.items.map((item) => {
                     const Icon = item.icon;
                     const active = isActive(item.path);
@@ -252,19 +259,7 @@ export const Layout: React.FC = () => {
         </div>
       </main>
 
-      {/* Floating Action Button for Story */}
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1, type: 'spring' }}
-        onClick={() => setIsStoryOpen(true)}
-        className="story-fab"
-      >
-        <Bot size={22} />
-      </motion.button>
 
-      {/* Interactive Story Modal Overlay */}
-      <InteractiveStory isOpen={isStoryOpen} onClose={() => setIsStoryOpen(false)} />
 
       {/* Enterprise Mobile Bottom Navigation */}
       <nav className="mobile-bottom-nav">

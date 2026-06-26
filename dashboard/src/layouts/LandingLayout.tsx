@@ -47,17 +47,6 @@ export const LandingLayout: React.FC = () => {
       <main className="landing-main">
         <Outlet />
       </main>
-
-      {/* ── Footer ── */}
-      <footer className="landing-footer">
-        <div className="landing-footer-brand">
-          <img src={verdictoLogo} alt="Verdicto" className="logo-img logo-img--sm" />
-          <span className="landing-footer-brand-name">Verdicto</span>
-        </div>
-        <p className="text-sm landing-footer-tagline">
-          Autonomous RWA Assessment on Casper Blockchain
-        </p>
-      </footer>
     </div>
   );
 };

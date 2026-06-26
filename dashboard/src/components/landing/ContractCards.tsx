@@ -37,7 +37,7 @@ export const ContractCards: React.FC = () => {
         <div className="landing-section__header">
           <h2 className="landing-section__title">Deployed Infrastructure</h2>
           <p className="landing-section__subtitle">
-            Four specialized Odra contracts power the Verdicto ecosystem, with the Verdict Oracle as the composable core.
+            Specialized smart contracts power the Verdicto ecosystem, with the Verdict Oracle as the composable core.
           </p>
         </div>
       </Reveal>

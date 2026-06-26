@@ -2,9 +2,9 @@ import React from 'react';
 import { AnimatedNumber, Reveal } from './UIComponents';
 
 const STATS = [
-  { value: 5, label: 'AI Analysts', suffix: '', color: '#3B82F6' },
+  { value: 5, label: 'AI Agents', suffix: '', color: '#3B82F6' },
   { value: 60, label: 'Seconds per Assessment', suffix: 's', color: '#10B981' },
-  { value: 3, label: 'Asset Classes', suffix: '', color: '#8B5CF6' },
+  { value: 4, label: 'Products', suffix: '', color: '#8B5CF6' },
   { value: 100, label: 'On-Chain Verification', suffix: '%', color: '#FF3B3B' },
 ];
 
