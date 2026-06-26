@@ -16,6 +16,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import * as db from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -407,6 +408,18 @@ export async function storeVerdictOnChain(verdict: OracleVerdict): Promise<{ suc
     // Fallback: store in memory
     console.log(`  📡 VerdictOracle: [NO CONTRACT HASH] storing in-memory for ${verdict.assetId}`);
     oracleVerdictStore.set(verdict.assetId, verdict);
+    // ── DB: Persist verdict to Supabase ──
+    db.saveVerdict({
+      asset_id: verdict.assetId,
+      value: verdict.value,
+      confidence: verdict.confidence,
+      juror_count: verdict.jurorCount,
+      receipt_hash: verdict.receiptHash,
+      timestamp: verdict.timestamp,
+      expiry: verdict.expiry,
+      agent_weights: verdict.agentWeights,
+      decision: verdict.decision,
+    }).catch(err => console.warn(`  [DB] ⚠️ Failed to save verdict: ${err.message}`));
     return { success: true, txHash: `oracle-mem-${Date.now()}` };
   }
 
@@ -427,10 +440,34 @@ export async function storeVerdictOnChain(verdict: OracleVerdict): Promise<{ suc
     console.log(`  📡 VerdictOracle ✅ store_verdict → ${txHash.slice(0, 16)}...`);
     // Also keep in memory for fast reads
     oracleVerdictStore.set(verdict.assetId, verdict);
+    // ── DB: Persist verdict to Supabase ──
+    db.saveVerdict({
+      asset_id: verdict.assetId,
+      value: verdict.value,
+      confidence: verdict.confidence,
+      juror_count: verdict.jurorCount,
+      receipt_hash: verdict.receiptHash,
+      timestamp: verdict.timestamp,
+      expiry: verdict.expiry,
+      agent_weights: verdict.agentWeights,
+      decision: verdict.decision,
+    }).catch(err => console.warn(`  [DB] ⚠️ Failed to save verdict: ${err.message}`));
     return { success: true, txHash };
   } catch (err: any) {
     console.warn(`  ⚠️ VerdictOracle store_verdict failed: ${err.message}. Storing in-memory.`);
     oracleVerdictStore.set(verdict.assetId, verdict);
+    // ── DB: Persist verdict to Supabase (fallback) ──
+    db.saveVerdict({
+      asset_id: verdict.assetId,
+      value: verdict.value,
+      confidence: verdict.confidence,
+      juror_count: verdict.jurorCount,
+      receipt_hash: verdict.receiptHash,
+      timestamp: verdict.timestamp,
+      expiry: verdict.expiry,
+      agent_weights: verdict.agentWeights,
+      decision: verdict.decision,
+    }).catch(e => console.warn(`  [DB] ⚠️ Failed to save verdict (fallback): ${e.message}`));
     return { success: false, txHash: '' };
   }
 }
@@ -468,22 +505,37 @@ export async function getOracleVerdictOnChain(assetId: string): Promise<OracleVe
  * Get all stored verdicts (in-memory + any on-chain).
  * Used by the dashboard oracle view.
  */
-export function getAllVerdicts(): OracleVerdict[] {
-  return Array.from(oracleVerdictStore.values()).sort((a, b) => b.timestamp - a.timestamp);
+export async function getAllVerdicts(): Promise<OracleVerdict[]> {
+  const inMemory = Array.from(oracleVerdictStore.values());
+  if (inMemory.length > 0) return inMemory.sort((a, b) => b.timestamp - a.timestamp);
+  // Supabase fallback after server restart
+  const rows = await db.getAllVerdicts();
+  if (!rows || rows.length === 0) return [];
+  return rows.map(r => ({
+    assetId: r.asset_id,
+    value: r.value,
+    confidence: r.confidence,
+    jurorCount: r.juror_count,
+    receiptHash: r.receipt_hash,
+    timestamp: r.timestamp,
+    expiry: r.expiry,
+    agentWeights: r.agent_weights,
+    decision: r.decision as any,
+  }));
 }
 
 /**
  * Get oracle statistics for the dashboard.
  */
-export function getOracleStats(): { totalVerdicts: number; freshVerdicts: number; avgConfidence: number; totalQueries: number; activeDisputes: number; overturnedVerdicts: number } {
-  const all = Array.from(oracleVerdictStore.values());
+export async function getOracleStats(): Promise<{ totalVerdicts: number; freshVerdicts: number; avgConfidence: number; totalQueries: number; activeDisputes: number; overturnedVerdicts: number }> {
+  const all = await getAllVerdicts();
   const now = Date.now();
   const fresh = all.filter(v => v.expiry > now);
   const avgConfidence = all.length > 0
     ? Math.round(all.reduce((sum, v) => sum + v.confidence, 0) / all.length)
     : 0;
 
-  const disputes = Array.from(disputeStore.values());
+  const disputes = await getAllDisputes();
   const activeDisputes = disputes.filter(d => d.status === 'pending' || d.status === 'under_retrial').length;
   const overturnedVerdicts = disputes.filter(d => d.status === 'resolved' && d.outcome === 'overturned').length;
 
@@ -603,6 +655,23 @@ export function seedDemoDisputes(): void {
 
   disputeStore.set(resolvedDispute.id, resolvedDispute);
   disputeStore.set(pendingDispute.id, pendingDispute);
+  // ── DB: Seed disputes to Supabase ──
+  for (const d of [resolvedDispute, pendingDispute]) {
+    db.saveDispute({
+      id: d.id,
+      asset_id: d.assetId,
+      original_verdict: d.originalVerdict,
+      challenger_key: d.challengerKey,
+      stake_cspr: d.stakeCSPR,
+      reason: d.reason,
+      created_at: d.createdAt,
+      status: d.status,
+      retrial: d.retrial,
+      outcome: d.outcome,
+      resolved_at: d.resolvedAt,
+      stake_distribution: d.stakeDistribution,
+    }).catch(err => console.warn(`  [DB] ⚠️ Failed to seed dispute: ${err.message}`));
+  }
   console.log(`  ⚖️  DisputeEngine: seeded 2 demo disputes (1 resolved/overturned, 1 pending)`);
 }
 
@@ -640,6 +709,19 @@ export function createDispute(
   };
 
   disputeStore.set(dispute.id, dispute);
+  // ── DB: Persist dispute to Supabase ──
+  db.saveDispute({
+    id: dispute.id,
+    asset_id: dispute.assetId,
+    original_verdict: dispute.originalVerdict,
+    challenger_key: dispute.challengerKey,
+    stake_cspr: dispute.stakeCSPR,
+    reason: dispute.reason,
+    created_at: dispute.createdAt,
+    status: dispute.status,
+    payment_tx_hash: dispute.paymentTxHash,
+    payment_payer: dispute.paymentPayer,
+  }).catch(err => console.warn(`  [DB] ⚠️ Failed to save dispute: ${err.message}`));
   console.log(`  ⚖️  DisputeEngine: created dispute ${dispute.id} against ${assetId} (stake: ${stakeCSPR} CSPR)`);
   return dispute;
 }
@@ -647,24 +729,68 @@ export function createDispute(
 /**
  * Get a dispute by ID.
  */
-export function getDispute(disputeId: string): Dispute | undefined {
-  return disputeStore.get(disputeId);
+export async function getDispute(disputeId: string): Promise<Dispute | undefined> {
+  const inMemory = disputeStore.get(disputeId);
+  if (inMemory) return inMemory;
+  // Supabase fallback
+  const row = await db.getDispute(disputeId);
+  if (!row) return undefined;
+  return {
+    id: row.id,
+    assetId: row.asset_id,
+    originalVerdict: row.original_verdict,
+    challengerKey: row.challenger_key,
+    stakeCSPR: row.stake_cspr,
+    reason: row.reason,
+    createdAt: row.created_at,
+    status: row.status as any,
+    retrial: row.retrial,
+    outcome: row.outcome as any,
+    resolvedAt: row.resolved_at,
+    stakeDistribution: row.stake_distribution,
+    paymentTxHash: row.payment_tx_hash,
+    paymentPayer: row.payment_payer,
+  };
 }
 
 /**
  * Get all disputes, newest first.
  */
-export function getAllDisputes(): Dispute[] {
-  return Array.from(disputeStore.values()).sort((a, b) => b.createdAt - a.createdAt);
+export async function getAllDisputes(): Promise<Dispute[]> {
+  const inMemory = Array.from(disputeStore.values()).sort((a, b) => b.createdAt - a.createdAt);
+  if (inMemory.length > 0) return inMemory;
+  // Supabase fallback
+  const rows = await db.getAllDisputes();
+  if (!rows || rows.length === 0) return [];
+  return rows.map(row => ({
+    id: row.id,
+    assetId: row.asset_id,
+    originalVerdict: row.original_verdict,
+    challengerKey: row.challenger_key,
+    stakeCSPR: row.stake_cspr,
+    reason: row.reason,
+    createdAt: row.created_at,
+    status: row.status as any,
+    retrial: row.retrial,
+    outcome: row.outcome as any,
+    resolvedAt: row.resolved_at,
+    stakeDistribution: row.stake_distribution,
+    paymentTxHash: row.payment_tx_hash,
+    paymentPayer: row.payment_payer,
+  }));
 }
 
 /**
  * Get disputes for a specific asset.
  */
-export function getDisputesForAsset(assetId: string): Dispute[] {
-  return Array.from(disputeStore.values())
+export async function getDisputesForAsset(assetId: string): Promise<Dispute[]> {
+  const inMemory = Array.from(disputeStore.values())
     .filter(d => d.assetId === assetId)
     .sort((a, b) => b.createdAt - a.createdAt);
+  if (inMemory.length > 0) return inMemory;
+  // Supabase fallback — getAllDisputes filters by asset
+  const all = await getAllDisputes();
+  return all.filter(d => d.assetId === assetId);
 }
 
 /**
@@ -683,6 +809,19 @@ export async function runRetrial(disputeId: string): Promise<Dispute | { error: 
 
   dispute.status = 'under_retrial';
   disputeStore.set(disputeId, dispute);
+  // ── DB: Update dispute status in Supabase ──
+  db.saveDispute({
+    id: dispute.id,
+    asset_id: dispute.assetId,
+    original_verdict: dispute.originalVerdict,
+    challenger_key: dispute.challengerKey,
+    stake_cspr: dispute.stakeCSPR,
+    reason: dispute.reason,
+    created_at: dispute.createdAt,
+    status: 'under_retrial',
+    payment_tx_hash: dispute.paymentTxHash,
+    payment_payer: dispute.paymentPayer,
+  }).catch(err => console.warn(`  [DB] ⚠️ Failed to update dispute status: ${err.message}`));
 
   const assetId = dispute.assetId;
   const original = dispute.originalVerdict;
@@ -816,6 +955,23 @@ export async function runRetrial(disputeId: string): Promise<Dispute | { error: 
   }
 
   disputeStore.set(disputeId, dispute);
+  // ── DB: Persist resolved dispute to Supabase ──
+  db.saveDispute({
+    id: dispute.id,
+    asset_id: dispute.assetId,
+    original_verdict: dispute.originalVerdict,
+    challenger_key: dispute.challengerKey,
+    stake_cspr: dispute.stakeCSPR,
+    reason: dispute.reason,
+    created_at: dispute.createdAt,
+    status: 'resolved',
+    retrial: dispute.retrial,
+    outcome: dispute.outcome,
+    resolved_at: dispute.resolvedAt,
+    stake_distribution: dispute.stakeDistribution,
+    payment_tx_hash: dispute.paymentTxHash,
+    payment_payer: dispute.paymentPayer,
+  }).catch(err => console.warn(`  [DB] ⚠️ Failed to save resolved dispute: ${err.message}`));
 
   // Update the oracle verdict if overturned
   if (overturned) {

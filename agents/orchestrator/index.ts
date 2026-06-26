@@ -55,6 +55,7 @@ import { saveTransaction, createTransactionEntry, loadTransactions } from '../sh
 import { runDualValuation, type ValuationRequest } from '../shared/agent-engine.js';
 import { fetchAssetData, type AssetData } from '../shared/data-sources.js';
 import { casperX402Middleware } from '../shared/x402-middleware.js';
+import * as db from '../shared/db.js';
 import type { AssetType } from '../shared/types.js';
 
 // ─── Named constants ─────────────────────────────────────────────────────────
@@ -197,14 +198,22 @@ async function executeCasperTransfer(targetPublicKeyHex: string, amountMotes: nu
     return fakeHash;
   }
 
-  const deployerKeyPath = process.env.DEPLOYER_PRIVATE_KEY;
-  if (!deployerKeyPath || !CSPR_CLOUD_KEY) {
+  const deployerKey = process.env.DEPLOYER_PRIVATE_KEY;
+  if (!deployerKey || !CSPR_CLOUD_KEY) {
     throw new Error('DEPLOYER_PRIVATE_KEY or CSPRCLOUD_API_KEY missing in .env');
   }
 
-  const absoluteKeyPath = path.resolve(process.cwd(), '..', deployerKeyPath);
-  if (!fs.existsSync(absoluteKeyPath)) {
-    throw new Error(`Key file not found: ${absoluteKeyPath}`);
+  // Support both file path and inline key (base64 or hex)
+  let absoluteKeyPath: string;
+  const resolvedPath = path.resolve(process.cwd(), '..', deployerKey);
+  if (fs.existsSync(resolvedPath)) {
+    absoluteKeyPath = resolvedPath;
+  } else if (fs.existsSync(deployerKey)) {
+    absoluteKeyPath = deployerKey;
+  } else {
+    // Treat as inline key — write to temp file for casper-client
+    absoluteKeyPath = path.resolve(process.cwd(), `deployer-key-${transferId}.pem`);
+    fs.writeFileSync(absoluteKeyPath, deployerKey.includes('-----') ? deployerKey : Buffer.from(deployerKey, 'base64').toString('utf-8'));
   }
   const networkName = process.env.CASPER_CHAIN_NAME || 'casper-test';
   const tempFile = path.resolve(process.cwd(), `deploy-${transferId}.json`);
@@ -611,6 +620,13 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
   // Persist receipt chain for later API verification
   if (receiptChain.length > 0) {
     receiptChainStore.set(assessmentId, receiptChain);
+    // ── DB: Persist receipt chain to Supabase ──
+    db.saveAssessment({
+      assessment_id: assessmentId,
+      asset_id: assetId,
+      receipt_chain: receiptChain,
+      created_at: Date.now(),
+    }).catch(err => console.warn(`  [DB] ⚠️ Failed to save assessment: ${err.message}`));
   }
 
   if (isChainValid) {
@@ -1552,8 +1568,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   app.get('/api/oracle/verdicts', async (_, res) => {
     try {
       const { getAllVerdicts, getOracleStats } = await import('../shared/casper-contracts.js');
-      const verdicts = getAllVerdicts();
-      const stats = getOracleStats();
+      const verdicts = await getAllVerdicts();
+      const stats = await getOracleStats();
       res.json({ success: true, verdicts, stats });
     } catch (err: any) {
       console.error('[Oracle] Error:', err.message);
@@ -1843,7 +1859,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   app.get('/api/oracle/disputes', async (_, res) => {
     try {
       const { getAllDisputes } = await import('../shared/casper-contracts.js');
-      const disputes = getAllDisputes();
+      const disputes = await getAllDisputes();
       res.json({ success: true, disputes });
     } catch (err: any) {
       console.error('[Disputes] Error:', err.message);
@@ -1858,7 +1874,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   app.get('/api/oracle/disputes/:disputeId', async (req, res) => {
     try {
       const { getDispute } = await import('../shared/casper-contracts.js');
-      const dispute = getDispute(req.params.disputeId);
+      const dispute = await getDispute(req.params.disputeId);
       if (!dispute) {
         return res.status(404).json({ success: false, error: 'Dispute not found' });
       }
@@ -2472,6 +2488,30 @@ Respond in JSON format:
       };
       loanStore.set(loanId, loan);
 
+      // ── DB: Persist loan to Supabase ──
+      db.saveLoan({
+        loan_id: loanId,
+        borrower_public_key: borrowerPublicKey,
+        asset_id: assetId,
+        asset_type: assetType,
+        asset_name: assetName,
+        assessed_value: assessedValue,
+        ltv_ratio: ltv,
+        loan_amount_cspr: loanAmount,
+        collateral_assessment_id: assessmentId || assetId,
+        status: 'active',
+        health_ratio: 100,
+        created_at: Date.now(),
+        last_revalued_at: Date.now(),
+        repaid_amount_cspr: 0,
+        repayment_history: [],
+        disbursement_tx_hash: disbursementHash,
+        platform_fee_cspr: platformFee,
+        trust_breakdown: trustBreakdown,
+        escrow_lock_tx_hash: escrowLockHash,
+        revaluation_history: [],
+      }).catch(err => console.warn(`  [DB] ⚠️ Failed to save loan: ${err.message}`));
+
       // Log disbursement as transaction
       const disbTx = createTransactionEntry(
         'Native Transfer',
@@ -2515,11 +2555,39 @@ Respond in JSON format:
    * GET /api/loans
    * List all active loans. Optionally filter by borrower public key.
    */
-  app.get('/api/loans', (req, res) => {
+  app.get('/api/loans', async (req, res) => {
     try {
       const borrower = req.query.borrower as string | undefined;
       let loans = Array.from(loanStore.values());
-      if (borrower) {
+      // Supabase fallback if in-memory is empty (after restart)
+      if (loans.length === 0) {
+        const rows = borrower
+          ? await db.getLoansByBorrower(borrower)
+          : await db.getAllLoans();
+        loans = rows.map(r => ({
+          loanId: r.loan_id,
+          borrowerPublicKey: r.borrower_public_key,
+          assetId: r.asset_id,
+          assetType: r.asset_type as AssetType,
+          assetName: r.asset_name,
+          assessedValue: r.assessed_value,
+          ltvRatio: r.ltv_ratio,
+          loanAmountCSPR: r.loan_amount_cspr,
+          collateralAssessmentId: r.collateral_assessment_id,
+          status: r.status as Loan['status'],
+          healthRatio: r.health_ratio,
+          createdAt: r.created_at,
+          lastRevaluedAt: r.last_revalued_at,
+          repaidAmountCSPR: r.repaid_amount_cspr,
+          repaymentHistory: r.repayment_history,
+          disbursementTxHash: r.disbursement_tx_hash,
+          platformFeeCSPR: r.platform_fee_cspr,
+          trustBreakdown: r.trust_breakdown,
+          escrowLockTxHash: r.escrow_lock_tx_hash,
+          escrowReleaseTxHash: r.escrow_release_tx_hash,
+          revaluationHistory: r.revaluation_history,
+        }));
+      } else if (borrower) {
         loans = loans.filter(l => l.borrowerPublicKey === borrower);
       }
       // Return summary (don't expose internal fields)
@@ -2552,10 +2620,35 @@ Respond in JSON format:
    * GET /api/loans/:loanId
    * Get full details for a single loan.
    */
-  app.get('/api/loans/:loanId', (req, res) => {
-    const loan = loanStore.get(req.params.loanId);
+  app.get('/api/loans/:loanId', async (req, res) => {
+    let loan = loanStore.get(req.params.loanId);
     if (!loan) {
-      return res.status(404).json({ success: false, error: 'Loan not found' });
+      // Supabase fallback
+      const row = await db.getLoan(req.params.loanId);
+      if (!row) return res.status(404).json({ success: false, error: 'Loan not found' });
+      loan = {
+        loanId: row.loan_id,
+        borrowerPublicKey: row.borrower_public_key,
+        assetId: row.asset_id,
+        assetType: row.asset_type,
+        assetName: row.asset_name,
+        assessedValue: row.assessed_value,
+        ltvRatio: row.ltv_ratio,
+        loanAmountCSPR: row.loan_amount_cspr,
+        collateralAssessmentId: row.collateral_assessment_id,
+        status: row.status,
+        healthRatio: row.health_ratio,
+        createdAt: row.created_at,
+        lastRevaluedAt: row.last_revalued_at,
+        repaidAmountCSPR: row.repaid_amount_cspr,
+        repaymentHistory: row.repayment_history,
+        disbursementTxHash: row.disbursement_tx_hash,
+        platformFeeCSPR: row.platform_fee_cspr,
+        trustBreakdown: row.trust_breakdown,
+        escrowLockTxHash: row.escrow_lock_tx_hash,
+        escrowReleaseTxHash: row.escrow_release_tx_hash,
+        revaluationHistory: row.revaluation_history,
+      } as any;
     }
     res.json({ success: true, loan });
   });
@@ -3089,6 +3182,27 @@ Respond in JSON format:
       };
       insuranceStore.set(policyId, policy);
 
+      // ── DB: Persist insurance policy to Supabase ──
+      db.saveInsurance({
+        policy_id: policyId,
+        owner_public_key: ownerPublicKey,
+        asset_id: assetId,
+        asset_type: assetType,
+        asset_name: assetName,
+        assessed_value: assessedValue,
+        coverage_amount: coverageAmount,
+        premium_cspr: premiumCSPR,
+        deductible_percent: deductible,
+        status: 'active',
+        risk_score: riskScore,
+        risk_factors: riskFactors,
+        tier,
+        platform_fee_cspr: platformFee,
+        expires_at: now + 365 * 24 * 60 * 60 * 1000,
+        created_at: now,
+        claim_history: [],
+      }).catch(err => console.warn(`  [DB] ⚠️ Failed to save insurance: ${err.message}`));
+
       // Log as transaction
       const insTx = createTransactionEntry(
         'x402 Payment',
@@ -3134,11 +3248,35 @@ Respond in JSON format:
    * GET /api/insurance
    * List all insurance policies. Optionally filter by owner public key.
    */
-  app.get('/api/insurance', (req, res) => {
+  app.get('/api/insurance', async (req, res) => {
     try {
       const owner = req.query.owner as string | undefined;
       let policies = Array.from(insuranceStore.values());
-      if (owner) {
+      // Supabase fallback if in-memory is empty (after restart)
+      if (policies.length === 0) {
+        const rows = owner
+          ? await db.getInsuranceByOwner(owner)
+          : await db.getAllInsurance();
+        policies = rows.map(r => ({
+          policyId: r.policy_id,
+          ownerPublicKey: r.owner_public_key,
+          assetId: r.asset_id,
+          assetType: r.asset_type as AssetType,
+          assetName: r.asset_name,
+          assessedValue: r.assessed_value,
+          coverageAmount: r.coverage_amount,
+          premiumCSPR: r.premium_cspr,
+          deductiblePercent: r.deductible_percent,
+          status: r.status as InsurancePolicy['status'],
+          riskScore: r.risk_score,
+          riskFactors: r.risk_factors,
+          tier: r.tier,
+          platformFeeCSPR: r.platform_fee_cspr,
+          expiresAt: r.expires_at,
+          createdAt: r.created_at,
+          claimHistory: r.claim_history,
+        }));
+      } else if (owner) {
         policies = policies.filter(p => p.ownerPublicKey === owner);
       }
       const summaries = policies.map(p => ({
@@ -3167,10 +3305,31 @@ Respond in JSON format:
    * GET /api/insurance/:policyId
    * Get full details for a single insurance policy.
    */
-  app.get('/api/insurance/:policyId', (req, res) => {
-    const policy = insuranceStore.get(req.params.policyId);
+  app.get('/api/insurance/:policyId', async (req, res) => {
+    let policy = insuranceStore.get(req.params.policyId);
     if (!policy) {
-      return res.status(404).json({ success: false, error: 'Insurance policy not found' });
+      // Supabase fallback
+      const row = await db.getInsurance(req.params.policyId);
+      if (!row) return res.status(404).json({ success: false, error: 'Insurance policy not found' });
+      policy = {
+        policyId: row.policy_id,
+        ownerPublicKey: row.owner_public_key,
+        assetId: row.asset_id,
+        assetType: row.asset_type,
+        assetName: row.asset_name,
+        assessedValue: row.assessed_value,
+        coverageAmount: row.coverage_amount,
+        premiumCSPR: row.premium_cspr,
+        deductiblePercent: row.deductible_percent,
+        status: row.status,
+        riskScore: row.risk_score,
+        riskFactors: row.risk_factors,
+        tier: row.tier,
+        platformFeeCSPR: row.platform_fee_cspr,
+        expiresAt: row.expires_at,
+        createdAt: row.created_at,
+        claimHistory: row.claim_history,
+      } as any;
     }
     res.json({ success: true, policy });
   });

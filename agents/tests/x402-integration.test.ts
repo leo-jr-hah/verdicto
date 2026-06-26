@@ -32,12 +32,16 @@ vi.mock('axios', async () => {
         if (url.includes('/deploys/')) {
           const hash = url.split('/deploys/')[1];
           // Valid hashes (64 hex chars) return confirmed
+          // Middleware checks res.data?.data?.status === 'processed'
           if (/^[0-9a-f]{64}$/i.test(hash)) {
             return Promise.resolve({
               data: {
-                execution_results: [{ result: 'Success' }],
-                deploy_hash: hash,
-                block_hash: 'a'.repeat(64),
+                data: {
+                  status: 'processed',
+                  deploy_hash: hash,
+                  block_hash: 'a'.repeat(64),
+                  execution_results: [{ result: 'Success' }],
+                },
               },
             });
           }
