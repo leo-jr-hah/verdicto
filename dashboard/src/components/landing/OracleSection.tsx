@@ -6,13 +6,13 @@ const FEATURES = [
   {
     icon: <Radio size={22} />,
     title: 'Cross-Contract Composable',
-    desc: 'Any Casper smart contract can query the Verdict Oracle via cross-contract call. No off-chain API, no middleware, no trust assumptions beyond the blockchain itself.',
+    desc: 'Any Casper smart contract can query the Verdict Oracle via cross-contract call. Fully on-chain, no external dependencies.',
     color: '#8B5CF6',
   },
   {
     icon: <Zap size={22} />,
     title: '0.1 CSPR Per Query',
-    desc: 'Agent-to-agent micropayment. No API keys, no subscriptions, no rate limits. Pay per query, on-chain, verifiable.',
+    desc: 'Micropayment per query, signed by the user wallet. Pay per query, on-chain, verifiable.',
     color: '#F59E0B',
   },
   {
@@ -69,8 +69,8 @@ export const OracleSection: React.FC = () => {
         <h2 className="landing-section__title">The Oracle for Real-World Assets</h2>
         <p className="landing-section__subtitle">
           Verdict Oracle stores multi-agent consensus valuations on-chain.
-          We built it and are our own first integrator, powering Borrow and Insure.
-          Any future dApp can compose with the same data.
+          Verdicto powers its own Borrow and Insure products using the same data.
+          Any Casper dApp can query the Oracle directly.
         </p>
       </motion.div>
 

@@ -156,7 +156,7 @@ export const HowItWorks: React.FC = () => {
           </div>
           <h2 className="landing-section__title">From wallet to verdict</h2>
           <p className="landing-section__subtitle">
-            Connect your wallet, pick a product, and let five AI agents produce a cryptographically signed, on-chain result.
+            Connect your wallet, pick a product, and let multiple AI agents produce a cryptographically signed, on-chain result.
           </p>
         </div>
 

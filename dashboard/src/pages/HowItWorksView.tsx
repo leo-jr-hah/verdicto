@@ -94,7 +94,7 @@ const FLOWS = [
     steps: [
       { label: 'Submit Asset', detail: 'Select asset type, provide details, connect wallet' },
       { label: 'Micropayment', detail: 'Small CSPR fee signed directly by your wallet' },
-      { label: 'Parallel Analysis', detail: 'Five AI agents independently evaluate the asset' },
+      { label: 'Parallel Analysis', detail: 'Multiple AI agents independently evaluate the asset' },
       { label: 'Juror Review', detail: 'If valuations diverge, jury deliberates with peer review' },
       { label: 'Consensus', detail: 'Reputation-weighted valuation with confidence score' },
       { label: 'On-Chain Record', detail: 'Result immutably committed to Casper blockchain' },
@@ -383,7 +383,7 @@ export const HowItWorksView: React.FC = () => {
           }}>
             Multiple independent AI analysts evaluate every asset. Juror agents
             deliberate when valuations disagree. Results are settled on-chain with
-            cryptographic receipts. No black boxes.
+            cryptographic receipts. Full transparency at every step.
           </p>
         </div>
       </Reveal>

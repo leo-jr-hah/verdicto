@@ -66,7 +66,7 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
   {
     id: 'p4',
     title: 'Confidence: Multi-Agent Confidence Scoring',
-    description: 'Ask real-world outcome questions. 5 AI agents independently estimate probabilities and produce a weighted confidence score.',
+    description: 'Ask real-world outcome questions. Multiple AI agents independently estimate probabilities and produce a weighted confidence score.',
     category: 'economic',
     status: 'live',
     icon: <TrendingUp size={18} />,
@@ -74,7 +74,7 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
   {
     id: 'v1',
     title: 'Multi-Agent Deliberation',
-    description: '5 independent AI agents with autonomous methodology selection. Each queries real market data, selects its approach at runtime, and documents reasoning.',
+    description: 'Multiple independent AI agents with autonomous methodology selection. Each queries real market data, selects its approach at runtime, and documents reasoning.',
     category: 'verifiable',
     status: 'live',
     icon: <Cpu size={18} />,

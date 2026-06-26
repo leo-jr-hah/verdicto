@@ -45,22 +45,7 @@ export const Footer: React.FC = () => {
                 <a href="https://github.com/leo-jr-hah/verdicto" target="_blank" rel="noopener noreferrer" className="footer-link">GitHub</a>
               </div>
             </div>
-
-            {/* Social */}
-            <div className="landing-footer-full__column">
-              <h4>Social</h4>
-              <div className="landing-footer-full__links">
-                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="footer-link">Twitter / X</a>
-                <a href="https://discord.gg" target="_blank" rel="noopener noreferrer" className="footer-link">Discord</a>
-              </div>
-            </div>
           </div>
-        </div>
-
-        {/* Bottom row */}
-        <div className="landing-footer-full__bottom">
-          <span className="landing-footer-full__copyright">© 2026 Verdicto. Built on Casper.</span>
-          <span>Testnet only - not financial advice</span>
         </div>
       </div>
     </footer>

@@ -287,8 +287,8 @@ export const HeroSection: React.FC = () => {
           }}
         >
           Multi-agent AI consensus valuations, stored on-chain as a composable
-          primitive. We are our own first integrator, using it to power Borrow and Insure.
-          Any Casper dApp can compose with the same data. No API key. Agent-to-agent.
+          primitive. Verdicto powers its own Borrow and Insure products using the same data.
+          Any Casper dApp can query the Oracle directly.
         </motion.p>
 
         {/* CTAs */}

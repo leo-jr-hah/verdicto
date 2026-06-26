@@ -64,7 +64,7 @@ export const TestnetProof: React.FC = () => {
                   <div className="testnet-terminal__dot" style={{ background: 'var(--warning)' }} />
                   <div className="testnet-terminal__dot" style={{ background: 'var(--success)' }} />
                 </div>
-                <div className="testnet-terminal__label">cspr-testnet / node-4</div>
+                <div className="testnet-terminal__label">cspr-testnet</div>
               </div>
 
               {/* Terminal Body */}
