@@ -262,6 +262,33 @@ export const Layout: React.FC = () => {
 
       {/* Interactive Story Modal Overlay */}
       <InteractiveStory isOpen={isStoryOpen} onClose={() => setIsStoryOpen(false)} />
+
+      {/* Enterprise Mobile Bottom Navigation */}
+      <nav className="mobile-bottom-nav">
+        <Link to="/dashboard" className={`bottom-nav-item ${isActive('/dashboard') ? 'active' : ''}`}>
+          <LayoutDashboard size={20} />
+          <span>Dashboard</span>
+        </Link>
+        <Link to="/assess" className={`bottom-nav-item ${isActive('/assess') ? 'active' : ''}`}>
+          <Scale size={20} />
+          <span>Value</span>
+        </Link>
+        <Link to="/borrow" className={`bottom-nav-item ${isActive('/borrow') ? 'active' : ''}`}>
+          <Landmark size={20} />
+          <span>Borrow</span>
+        </Link>
+        <Link to="/disputes" className={`bottom-nav-item ${isActive('/disputes') ? 'active' : ''}`}>
+          <Gavel size={20} />
+          <span>Disputes</span>
+        </Link>
+        <button 
+          className={`bottom-nav-item ${mobileMenuOpen ? 'active' : ''}`}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          <Menu size={20} />
+          <span>More</span>
+        </button>
+      </nav>
     </div>
   );
 };
