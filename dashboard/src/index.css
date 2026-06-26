@@ -539,6 +539,10 @@ button {
 
 /* Mobile (<768px) */
 @media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+
   .sidebar {
     display: none;
   }
