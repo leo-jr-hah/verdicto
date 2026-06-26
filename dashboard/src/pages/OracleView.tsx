@@ -341,30 +341,36 @@ export const OracleView: React.FC = () => {
                     onMouseLeave={(e) => { if (!isExpanded) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                   >
                     <span style={{ fontWeight: 500, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-                      {v.assetId.length > 24 ? v.assetId.slice(0, 24) + '…' : v.assetId}
+                      <div>{v.assetId.length > 24 ? v.assetId.slice(0, 24) + '…' : v.assetId}</div>
                     </span>
                     <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-                      ${v.value.toLocaleString()}
+                      <div>${v.value.toLocaleString()}</div>
                     </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{
-                        width: '8px', height: '8px', borderRadius: '50%',
-                        background: confidenceColor(v.confidence),
-                      }} />
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{v.confidence}%</span>
+                    <span className="oracle-cell" style={{ display: 'flex', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{
+                          width: '8px', height: '8px', borderRadius: '50%',
+                          background: confidenceColor(v.confidence),
+                        }} />
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{v.confidence}%</span>
+                      </div>
                     </span>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{v.jurorCount}</span>
-                    <span style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '4px',
-                      padding: '3px 10px', borderRadius: '12px',
-                      background: badge.bg, color: badge.color,
-                      fontSize: '0.75rem', fontWeight: 600, width: 'fit-content',
-                    }}>
-                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: badge.color }} />
-                      {badge.label} · {formatExpiry(v.expiry)}
+                    <span className="oracle-cell" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                      <div>{v.jurorCount}</div>
+                    </span>
+                    <span className="oracle-cell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                      <div style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '4px',
+                        padding: '3px 10px', borderRadius: '12px',
+                        background: badge.bg, color: badge.color,
+                        fontSize: '0.75rem', fontWeight: 600,
+                      }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: badge.color }} />
+                        {badge.label} · {formatExpiry(v.expiry)}
+                      </div>
                     </span>
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
-                      {formatTime(v.timestamp)}
+                      <div>{formatTime(v.timestamp)}</div>
                     </span>
                   </motion.div>
 
