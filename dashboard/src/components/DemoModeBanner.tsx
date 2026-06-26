@@ -28,7 +28,7 @@ export const DemoModeBanner: React.FC = () => {
       }}
     >
       <Beaker size={16} />
-      <span>DEMO MODE — All data is simulated. No real payments or blockchain transactions.</span>
+      <span>DEMO MODE - All data is simulated. No real payments or blockchain transactions.</span>
       <a
         href="https://testnet.cspr.live/tools/faucet"
         target="_blank"

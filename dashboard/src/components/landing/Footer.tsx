@@ -60,7 +60,7 @@ export const Footer: React.FC = () => {
         {/* Bottom row */}
         <div className="landing-footer-full__bottom">
           <span className="landing-footer-full__copyright">© 2026 Verdicto. Built on Casper.</span>
-          <span>Testnet only — not financial advice</span>
+          <span>Testnet only - not financial advice</span>
         </div>
       </div>
     </footer>
