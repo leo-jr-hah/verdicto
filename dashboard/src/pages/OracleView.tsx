@@ -110,7 +110,7 @@ export const OracleView: React.FC = () => {
               </h1>
             </div>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.95rem' }}>
-              On-chain RWA price feed - first-party composable oracle
+              On-chain RWA price feed — shared data layer for all Verdicto products
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -154,22 +154,23 @@ export const OracleView: React.FC = () => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               style={{
-                padding: '20px', borderRadius: '12px',
-                background: 'var(--bg-primary)', border: '1px solid var(--border-color)',
-                display: 'flex', alignItems: 'center', gap: '14px',
+                padding: '16px 18px', borderRadius: '12px',
+                background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
+                display: 'flex', alignItems: 'center', gap: '12px',
               }}
             >
               <div style={{
-                width: '44px', height: '44px', borderRadius: '10px',
-                background: `${stat.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: '40px', height: '40px', borderRadius: '10px',
+                background: `${stat.color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
               }}>
-                <Icon size={20} style={{ color: stat.color }} />
+                <Icon size={18} style={{ color: stat.color }} />
               </div>
-              <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2, fontVariantNumeric: 'tabular-nums' }}>
                   {stat.value}
                 </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{stat.label}</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', fontWeight: 500, letterSpacing: '0.02em' }}>{stat.label}</div>
               </div>
             </motion.div>
           );
@@ -201,10 +202,10 @@ export const OracleView: React.FC = () => {
               The GPS for Asset Prices
             </h3>
             <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              Verdict Oracle stores multi-agent consensus valuations on-chain as a composable primitive.
-              We are our own first integrator, using it to power Borrow and Insure.
-              Any future Casper dApp can compose with the same data via cross-contract call.
-              0.1 CSPR micropayment per query. Agent-to-agent.
+              Verdict Oracle stores multi-agent consensus valuations on-chain as a shared data layer.
+              Borrow and Insure query it for collateral valuations and risk scores.
+              Any Casper dApp can integrate the same data via cross-contract call.
+              0.1 CSPR per query, settled on-chain.
             </p>
           </div>
         </div>
@@ -302,19 +303,18 @@ export const OracleView: React.FC = () => {
         </div>
 
         {verdicts.length === 0 ? (
-          <div style={{
-            padding: '60px 20px', textAlign: 'center',
-            color: 'var(--text-secondary)',
-          }}>
-            <Radio size={40} style={{ color: 'var(--text-tertiary)', marginBottom: '12px', opacity: 0.5 }} />
-            <p style={{ margin: '0 0 4px', fontWeight: 500 }}>No verdicts stored yet</p>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
-              Verdicts appear here automatically after each asset assessment
+          <div className="oracle-empty-state">
+            <div className="oracle-empty-icon">
+              <Radio size={24} style={{ color: 'var(--text-tertiary)', opacity: 0.5 }} />
+            </div>
+            <p style={{ margin: '0 0 6px', fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>No verdicts yet</p>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-tertiary)', maxWidth: 320, marginLeft: 'auto', marginRight: 'auto' }}>
+              Verdicts appear here automatically after each asset assessment completes
             </p>
           </div>
         ) : (
           <div>
-            {/* Table Header */}
+            {/* Table Header (desktop only, hidden on mobile via CSS) */}
             <div className="oracle-table-header">
               <span>Asset</span>
               <span>Value</span>
@@ -324,75 +324,99 @@ export const OracleView: React.FC = () => {
               <span>Time</span>
             </div>
 
-            {/* Rows */}
+            {/* Verdict Rows */}
             {verdicts.map((v, i) => {
               const badge = freshnessBadge(v.expiry);
               const isExpanded = expandedVerdict === v.assetId;
+              const confColor = confidenceColor(v.confidence);
               return (
                 <React.Fragment key={v.assetId}>
                   <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.03 }}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
                     onClick={() => setExpandedVerdict(isExpanded ? null : v.assetId)}
-                    className="oracle-table-row"
-                    style={{ background: isExpanded ? 'var(--bg-secondary)' : 'transparent' }}
-                    onMouseEnter={(e) => { if (!isExpanded) (e.currentTarget as HTMLElement).style.background = 'var(--bg-secondary)'; }}
-                    onMouseLeave={(e) => { if (!isExpanded) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                    className={`oracle-table-row${isExpanded ? ' expanded' : ''}`}
                   >
-                    <span style={{ fontWeight: 500, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-                      <div>{v.assetId.length > 24 ? v.assetId.slice(0, 24) + '…' : v.assetId}</div>
+                    {/* Asset ID */}
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.88rem' }}>
+                      <div>{v.assetId.length > 28 ? v.assetId.slice(0, 28) + '…' : v.assetId}</div>
                     </span>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+
+                    {/* Value */}
+                    <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.92rem', fontVariantNumeric: 'tabular-nums' }}>
                       <div>${v.value.toLocaleString()}</div>
                     </span>
-                    <span className="oracle-cell" style={{ display: 'flex', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{
-                          width: '8px', height: '8px', borderRadius: '50%',
-                          background: confidenceColor(v.confidence),
-                        }} />
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{v.confidence}%</span>
+
+                    {/* Confidence with bar */}
+                    <span className="oracle-cell">
+                      <div className="oracle-confidence-bar">
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: confColor, flexShrink: 0 }} />
+                        <div className="oracle-confidence-track">
+                          <div className="oracle-confidence-fill" style={{ width: `${v.confidence}%`, background: confColor }} />
+                        </div>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', minWidth: 32, textAlign: 'right' }}>
+                          {v.confidence}%
+                        </span>
                       </div>
                     </span>
-                    <span className="oracle-cell" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+
+                    {/* Jurors */}
+                    <span className="oracle-cell" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
                       <div>{v.jurorCount}</div>
                     </span>
-                    <span className="oracle-cell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                      <div style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '4px',
-                        padding: '3px 10px', borderRadius: '12px',
-                        background: badge.bg, color: badge.color,
-                        fontSize: '0.75rem', fontWeight: 600,
-                      }}>
-                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: badge.color }} />
+
+                    {/* Freshness Badge */}
+                    <span className="oracle-cell">
+                      <div className="oracle-freshness-badge" style={{ background: badge.bg, color: badge.color }}>
+                        <span className="oracle-freshness-dot" style={{ background: badge.color }} />
                         {badge.label} · {formatExpiry(v.expiry)}
                       </div>
                     </span>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
+
+                    {/* Time */}
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums' }}>
                       <div>{formatTime(v.timestamp)}</div>
                     </span>
                   </motion.div>
 
-                  {/* Expanded Detail */}
+                  {/* Expanded Detail Panel */}
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        style={{ overflow: 'hidden', background: 'var(--bg-secondary)' }}
+                        transition={{ duration: 0.2 }}
+                        style={{ overflow: 'hidden' }}
                       >
                         <div className="oracle-expanded-grid">
+                          {/* Decision */}
                           <div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Decision</div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 500 }}>{v.decision}</div>
+                            <div className="oracle-detail-label">Decision</div>
+                            <div className="oracle-detail-value">{v.decision}</div>
                           </div>
-                          <div style={{ gridColumn: 'span 2' }}>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                              Agent Reputation Breakdown
+
+                          {/* Receipt Hash */}
+                          <div>
+                            <div className="oracle-detail-label">Receipt Hash</div>
+                            <div className="oracle-detail-mono">
+                              {v.receiptHash ? v.receiptHash.slice(0, 40) + '…' : 'None'}
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          </div>
+
+                          {/* Expires */}
+                          <div>
+                            <div className="oracle-detail-label">Expires</div>
+                            <div className="oracle-detail-value">
+                              {new Date(v.expiry).toLocaleString()}
+                            </div>
+                          </div>
+
+                          {/* Agent Reputation Breakdown — full width */}
+                          <div style={{ gridColumn: '1 / -1' }}>
+                            <div className="oracle-detail-label">Agent Reputation Breakdown</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
                               {(v.agentWeights || '').split(',').filter(Boolean).map((pair) => {
                                 const [agent, scoreStr] = pair.split(':');
                                 const score = parseInt(scoreStr, 10);
@@ -403,56 +427,34 @@ export const OracleView: React.FC = () => {
                                 };
                                 const color = agentColors[agent?.trim()] || '#8B5CF6';
                                 return (
-                                  <div key={agent} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', width: 100, fontFamily: 'monospace' }}>
-                                      {agent?.trim()}
-                                    </span>
-                                    <div style={{ flex: 1, height: 8, background: 'var(--border-color)', borderRadius: 4, overflow: 'hidden' }}>
-                                      <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 4, transition: 'width 0.3s' }} />
+                                  <div key={agent} className="oracle-agent-bar-row">
+                                    <span className="oracle-agent-name">{agent?.trim()}</span>
+                                    <div className="oracle-agent-track">
+                                      <div className="oracle-agent-fill" style={{ width: `${pct}%`, background: color }} />
                                     </div>
-                                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', width: 40, textAlign: 'right' }}>
-                                      {score}
-                                    </span>
+                                    <span className="oracle-agent-score">{score}</span>
                                   </div>
                                 );
                               })}
                             </div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: '6px' }}>
-                              Scores are reputation-weighted (0-1000 scale). Higher = more influence on consensus.
-                            </div>
-                          </div>
-                          <div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Receipt Hash</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                              {v.receiptHash ? v.receiptHash.slice(0, 40) + '…' : 'None'}
-                            </div>
-                          </div>
-                          <div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Expires</div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                              {new Date(v.expiry).toLocaleString()}
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: '8px' }}>
+                              Reputation-weighted (0–1000 scale). Higher score = more influence on consensus.
                             </div>
                           </div>
                         </div>
 
-                        {/* Challenge Button */}
-                        <div style={{ padding: '0 20px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {/* Challenge Action */}
+                        <div style={{ padding: '12px 24px 20px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                           <Link
                             to="/disputes"
                             onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                            style={{
-                              display: 'flex', alignItems: 'center', gap: '6px',
-                              padding: '8px 16px', borderRadius: '8px',
-                              border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)',
-                              color: '#EF4444', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
-                              textDecoration: 'none',
-                            }}
+                            className="oracle-challenge-btn"
                           >
                             <Swords size={14} />
-                            Challenge Verdict
+                            Challenge This Verdict
                           </Link>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                            Stake 5 CSPR to trigger an independent re-trial
+                            5 CSPR stake required · Rewards for strong evidence
                           </span>
                         </div>
                       </motion.div>

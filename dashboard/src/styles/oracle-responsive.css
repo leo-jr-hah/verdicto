@@ -1,42 +1,249 @@
-/* Oracle View Responsive Grid Classes */
+/* Oracle View — Responsive Grid & Verdict Cards */
 
+/* ── Stats Grid ─────────────────────────────────────────────── */
 .oracle-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-bottom: 32px;
 }
 
+/* ── Verdict Table (Desktop) ────────────────────────────────── */
 .oracle-table-header {
   display: grid;
-  grid-template-columns: 1fr 120px 100px 80px 120px 100px;
-  padding: 10px 20px;
+  grid-template-columns: 2fr 1.2fr 1fr 0.8fr 1.2fr 1fr;
+  padding: 12px 24px;
   border-bottom: 1px solid var(--border-color);
-  background: var(--bg-secondary);
-  font-size: 0.75rem;
+  background: var(--bg-surface-alt);
+  font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .oracle-table-row {
   display: grid;
-  grid-template-columns: 1fr 120px 100px 80px 120px 100px;
-  padding: 14px 20px;
+  grid-template-columns: 2fr 1.2fr 1fr 0.8fr 1.2fr 1fr;
+  padding: 16px 24px;
   border-bottom: 1px solid var(--border-color);
   cursor: pointer;
   align-items: center;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
+.oracle-table-row:last-child {
+  border-bottom: none;
+}
+
+.oracle-table-row:hover {
+  background: var(--bg-surface);
+}
+
+.oracle-table-row.expanded {
+  background: var(--bg-surface);
+  box-shadow: inset 0 2px 0 0 rgba(139, 92, 246, 0.3);
+}
+
+/* ── Confidence Bar (inline) ────────────────────────────────── */
+.oracle-cell {
+  display: flex;
+  align-items: center;
+}
+
+.oracle-confidence-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.oracle-confidence-track {
+  flex: 1;
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 48px;
+  max-width: 80px;
+}
+
+.oracle-confidence-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+/* ── Freshness Badge ────────────────────────────────────────── */
+.oracle-freshness-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.oracle-freshness-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Expanded Detail Panel ──────────────────────────────────── */
 .oracle-expanded-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  padding: 16px 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 20px 24px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-surface);
 }
 
+.oracle-detail-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.oracle-detail-value {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.oracle-detail-mono {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+/* ── Agent Weight Bars ──────────────────────────────────────── */
+.oracle-agent-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.oracle-agent-name {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  width: 90px;
+  flex-shrink: 0;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.oracle-agent-track {
+  flex: 1;
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.oracle-agent-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.oracle-agent-score {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── Challenge Button ───────────────────────────────────────── */
+.oracle-challenge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.06);
+  color: #EF4444;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.oracle-challenge-btn:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* ── Empty State ────────────────────────────────────────────── */
+.oracle-empty-state {
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.oracle-empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--bg-surface-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — Tablet (≤1024px)
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .oracle-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .oracle-table-header {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    padding: 12px 20px;
+  }
+
+  .oracle-table-header > span:nth-child(4),
+  .oracle-table-header > span:nth-child(6) {
+    display: none;
+  }
+
+  .oracle-table-row {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    padding: 14px 20px;
+  }
+
+  .oracle-table-row > span:nth-child(4),
+  .oracle-table-row > span:nth-child(6) {
+    display: none;
+  }
+
+  .oracle-expanded-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 16px 20px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — Mobile (≤768px)
+   ══════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
   .oracle-stats-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -44,42 +251,102 @@
     margin-bottom: 24px;
   }
 
-  .oracle-table-header { display: none; }
-  
+  /* Hide desktop table header on mobile */
+  .oracle-table-header {
+    display: none;
+  }
+
+  /* Mobile verdict cards */
   .oracle-table-row {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .oracle-table-row > span { 
-    display: flex !important; 
-    width: 100%; 
-    justify-content: space-between; 
-    align-items: center;
-  }
-  
-  .oracle-table-row > span:nth-child(1)::before { content: 'Asset'; color: var(--text-tertiary); font-size: 0.8rem; }
-  .oracle-table-row > span:nth-child(2)::before { content: 'Value'; color: var(--text-tertiary); font-size: 0.8rem; }
-  .oracle-table-row > span:nth-child(3)::before { content: 'Confidence'; color: var(--text-tertiary); font-size: 0.8rem; }
-  .oracle-table-row > span:nth-child(4)::before { content: 'Jurors'; color: var(--text-tertiary); font-size: 0.8rem; }
-  .oracle-table-row > span:nth-child(5)::before { content: 'Status'; color: var(--text-tertiary); font-size: 0.8rem; }
-  .oracle-table-row > span:nth-child(6)::before { content: 'Time'; color: var(--text-tertiary); font-size: 0.8rem; }
-
-  .oracle-expanded-grid {
-    grid-template-columns: 1fr;
     gap: 12px;
     padding: 16px;
-    background: var(--bg-surface-alt);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 12px;
+    background: var(--bg-elevated);
+  }
+
+  .oracle-table-row:hover {
+    background: var(--bg-elevated);
+  }
+
+  .oracle-table-row.expanded {
+    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.3);
+  }
+
+  /* Mobile card rows — each span becomes a labeled row */
+  .oracle-table-row > span {
+    display: flex !important;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+  }
+
+  .oracle-table-row > span::before {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    flex-shrink: 0;
+  }
+
+  .oracle-table-row > span:nth-child(1)::before { content: 'Asset'; }
+  .oracle-table-row > span:nth-child(2)::before { content: 'Value'; }
+  .oracle-table-row > span:nth-child(3)::before { content: 'Confidence'; }
+  .oracle-table-row > span:nth-child(4)::before { content: 'Jurors'; }
+  .oracle-table-row > span:nth-child(5)::before { content: 'Status'; }
+  .oracle-table-row > span:nth-child(6)::before { content: 'Time'; }
+
+  /* Hide jurors + time on mobile (less critical) */
+  .oracle-table-row > span:nth-child(4),
+  .oracle-table-row > span:nth-child(6) {
+    display: none !important;
+  }
+
+  /* Confidence bar full width on mobile */
+  .oracle-confidence-bar {
+    width: 100%;
+  }
+
+  .oracle-confidence-track {
+    max-width: none;
+    flex: 1;
+  }
+
+  /* Expanded detail — single column */
+  .oracle-expanded-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
     border-top: 1px dashed var(--border-color);
+    background: var(--bg-surface);
+    border-radius: 0 0 12px 12px;
+    margin: -12px -16px -16px;
+    padding: 16px;
+  }
+
+  /* Agent bars on mobile */
+  .oracle-agent-name {
+    width: 72px;
+    font-size: 0.72rem;
   }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — Small Mobile (≤480px)
+   ══════════════════════════════════════════════════════════════ */
 @media (max-width: 480px) {
   .oracle-stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .oracle-table-row {
+    padding: 14px;
+    gap: 10px;
   }
 }

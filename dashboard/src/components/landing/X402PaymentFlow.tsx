@@ -99,7 +99,7 @@ export const X402PaymentFlow: React.FC = () => {
               Real CSPR.<br/>Real Agents.<br/>Real Payments.
             </h2>
             <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '24px' }}>
-              The Orchestrator creates native CSPR transfer deploys for every agent request. Each agent validates the cryptographic proof before responding. No credits. No promises. On-chain settlement for every API call.
+              The Orchestrator creates native CSPR transfer deploys for every agent request. Each agent validates the cryptographic proof before responding. On-chain settlement for every API call.
             </p>
             <div className="x402-check-list">
               {[

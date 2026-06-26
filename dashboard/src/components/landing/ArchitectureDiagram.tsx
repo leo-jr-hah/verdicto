@@ -61,7 +61,7 @@ const NODES: FlowNode[] = [
   // Row 4: Settlement
   { id: 'trust', label: 'Trust Framework', sublabel: 'Reputation scoring', icon: <Scale size={18} />, accentColor: '#F59E0B', row: 4, col: 0 },
   { id: 'hmac', label: 'HMAC Receipt Chain', sublabel: 'Tamper-proof audit trail', icon: <FileCheck size={18} />, accentColor: '#F59E0B', row: 4, col: 1 },
-  { id: 'verdict', label: 'Verdict Oracle', sublabel: 'On-chain composable primitive', icon: <Gavel size={18} />, accentColor: '#8B5CF6', row: 4, col: 2 },
+  { id: 'verdict', label: 'Verdict Oracle', sublabel: 'On-chain dispute resolution', icon: <Gavel size={18} />, accentColor: '#8B5CF6', row: 4, col: 2 },
 
   // Row 5: On-chain
   { id: 'blockchain', label: 'Casper Blockchain', sublabel: 'Immutable on-chain record', icon: <Link2 size={18} />, accentColor: '#3B82F6', row: 5, col: 1 },

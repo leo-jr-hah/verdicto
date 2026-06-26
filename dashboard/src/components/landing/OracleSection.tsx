@@ -5,8 +5,8 @@ import { Radio, Zap, Shield, Globe, Code, TrendingUp } from 'lucide-react';
 const FEATURES = [
   {
     icon: <Radio size={22} />,
-    title: 'Cross-Contract Composable',
-    desc: 'Any Casper smart contract can query the Verdict Oracle via cross-contract call. Fully on-chain, no external dependencies.',
+    title: 'Shared Data Layer',
+    desc: 'Any Casper smart contract can query the Verdict Oracle directly. Fully on-chain, no external dependencies.',
     color: '#8B5CF6',
   },
   {

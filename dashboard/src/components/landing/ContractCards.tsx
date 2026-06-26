@@ -7,7 +7,7 @@ const CONTRACTS = [
   {
     name: 'VerdictOracle',
     hash: 'pending',
-    description: "Stores multi-agent consensus valuations on-chain. Other CASPER products query verdicts directly - first-party composable primitive.",
+    description: "Stores multi-agent consensus valuations on-chain. Other Verdicto products query verdicts directly from this shared data layer.",
     highlight: true,
   },
   {

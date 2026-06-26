@@ -37,7 +37,7 @@ export const CTASection: React.FC = () => {
           
           <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '40px' }}>
             Connect your Casper wallet, submit an asset, and get an AI-powered valuation in under 2 minutes.
-            Then borrow against it or protect it with insurance. No banks, no paperwork, just on-chain trust.
+            Then borrow against it or protect it with insurance. Fully on-chain, fully verifiable.
           </p>
 
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>

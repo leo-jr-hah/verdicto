@@ -145,7 +145,7 @@ const TIERS = [
 
 const WHY_VERDICT = [
   { icon: <Zap size={18} />, title: '60-Second Valuations', desc: 'What takes traditional appraisers 2 to 4 weeks, Verdicto delivers in under a minute with full methodology transparency.' },
-  { icon: <Users size={18} />, title: 'Multi-Agent Deliberation', desc: 'No single AI model decides. Multiple independent agents analyze, jurors review, and consensus is weighted by proven accuracy.' },
+  { icon: <Users size={18} />, title: 'Multi-Agent Deliberation', desc: 'Multiple independent agents analyze each asset, jurors review the results, and consensus is weighted by proven accuracy.' },
   { icon: <Shield size={18} />, title: 'On-Chain Verifiability', desc: 'Every verdict, vote, and payment is recorded on the Casper blockchain. Results are tamper-proof and publicly auditable.' },
   { icon: <TrendingUp size={18} />, title: 'Self-Improving Accuracy', desc: 'Agents earn reputation through retroactive settlement. When reality proves one analysis closer than others, scores adjust. The system gets smarter over time.' },
 ];
