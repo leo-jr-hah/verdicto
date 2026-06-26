@@ -102,7 +102,7 @@ export function casperX402Middleware(config: { recipientAddress: string; amountC
       }
 
       const parsed = JSON.parse(decoded);
-      const deployHash = parsed.deployHash || parsed.txHash;
+      const deployHash = parsed.deployHash || parsed.txHash || parsed.payload?.deployHash;
 
       if (!deployHash || typeof deployHash !== 'string') {
         return res.status(402).json({ error: 'Payment proof missing deploy hash' });
@@ -114,11 +114,13 @@ export function casperX402Middleware(config: { recipientAddress: string; amountC
       }
 
       // Validate payment amount - prevent zero-value or micro-payment exploits
-      if (!validatePaymentAmount(parsed.amount, config.amountCSPR)) {
+      // Handle both flat (parsed.amount) and nested (parsed.payload.amount) proof formats
+      const proofAmount = parsed.amount || parsed.payload?.amount;
+      if (!validatePaymentAmount(proofAmount?.toString(), config.amountCSPR)) {
         return res.status(402).json({
           error: 'Insufficient payment amount',
           required: config.amountCSPR,
-          received: parsed.amount || 'none',
+          received: proofAmount || 'none',
         });
       }
 
