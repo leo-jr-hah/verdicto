@@ -1134,7 +1134,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
           // Support both flat { payer, txHash, amount } and nested { payload: { payer, amount }, deployHash }
           const payer = decoded.payer || decoded.payload?.payer;
-          const txHash = decoded.txHash || decoded.deployHash;
+          const txHash = decoded.txHash || decoded.deployHash || decoded.payload?.deployHash;
           const amount = decoded.amount || decoded.payload?.amount;
 
           if (!payer || !txHash || !amount) {
@@ -1613,7 +1613,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       try {
         const decoded = JSON.parse(Buffer.from(paymentProof, 'base64').toString('utf-8'));
         const payer = decoded.payer || decoded.payload?.payer;
-        const txHash = decoded.txHash || decoded.deployHash;
+        const txHash = decoded.txHash || decoded.deployHash || decoded.payload?.deployHash;
         const amount = decoded.amount || decoded.payload?.amount;
 
         if (!payer || !txHash || !amount) {
@@ -1758,7 +1758,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
           // Support both flat { payer, txHash, amount } and nested { payload: { payer, amount }, deployHash }
           proofPayer = decoded.payer || decoded.payload?.payer;
-          proofTxHash = decoded.txHash || decoded.deployHash;
+          proofTxHash = decoded.txHash || decoded.deployHash || decoded.payload?.deployHash;
           const amount = decoded.amount || decoded.payload?.amount;
 
           if (!proofPayer || !proofTxHash || !amount) {
@@ -1929,7 +1929,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         try {
           const decoded = JSON.parse(Buffer.from(paymentProof, 'base64').toString('utf-8'));
           const payer = decoded.payer || decoded.payload?.payer;
-          const txHash = decoded.txHash || decoded.deployHash;
+          const txHash = decoded.txHash || decoded.deployHash || decoded.payload?.deployHash;
           const amount = decoded.amount || decoded.payload?.amount;
 
           if (!payer || !txHash || !amount) {
@@ -2374,7 +2374,7 @@ Respond in JSON format:
 
           // Support both flat { payer, txHash, amount } and nested { payload: { payer, amount }, deployHash }
           const payer = decoded.payer || decoded.payload?.payer;
-          const txHash = decoded.txHash || decoded.deployHash;
+          const txHash = decoded.txHash || decoded.deployHash || decoded.payload?.deployHash;
           const amount = decoded.amount || decoded.payload?.amount;
 
           if (!payer || !txHash || !amount) {
@@ -2707,7 +2707,7 @@ Respond in JSON format:
         try {
           const decoded = JSON.parse(Buffer.from(paymentProof, 'base64').toString('utf-8'));
           const payer = decoded.payer || decoded.payload?.payer;
-          const proofTxHash = decoded.txHash || decoded.deployHash;
+          const proofTxHash = decoded.txHash || decoded.deployHash || decoded.payload?.deployHash;
           const proofAmount = decoded.amount || decoded.payload?.amount;
 
           if (!payer || !proofTxHash || !proofAmount) {
