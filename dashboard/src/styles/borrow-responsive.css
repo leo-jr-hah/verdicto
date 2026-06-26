@@ -442,16 +442,39 @@
     gap: 0.75rem;
   }
 
-  /* Assessment summary: 1 column */
+  /* Assessment summary: 2 columns */
   .borrow-assess-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .borrow-assess-grid > div:last-child {
+    grid-column: 1 / -1;
+  }
+
+  /* Loan offer: 2 columns */
+  .borrow-offer-grid {
+    grid-template-columns: 1fr 1fr;
     gap: 0.75rem;
   }
 
-  /* Loan offer: 1 column */
-  .borrow-offer-grid {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
+  /* Large touch targets for forms */
+  input[type="range"] {
+    height: 48px;
+    width: 100%;
+  }
+
+  /* Sticky CTA */
+  .mobile-sticky-cta {
+    position: fixed;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    left: 16px;
+    right: 16px;
+    width: calc(100% - 32px) !important;
+    z-index: 40;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    padding: 1rem !important;
+    border-radius: 100px !important;
+    font-size: 1.1rem !important;
   }
 
   /* Loan card stats: 1 column */

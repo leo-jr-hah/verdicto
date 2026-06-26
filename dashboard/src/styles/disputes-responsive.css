@@ -127,10 +127,16 @@
 
   .disputes-filters .btn { white-space: nowrap; flex-shrink: 0; }
 
-  .disputes-list-item { padding: 0.75rem 1rem; }
+  .disputes-list-item { 
+    padding: 1rem;
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin: 0.75rem;
+  }
 
   .disputes-list-item__header {
-    flex-direction: column; align-items: flex-start; gap: 0.5rem;
+    flex-direction: column; align-items: flex-start; gap: 0.75rem;
   }
 
   .disputes-list-item__right { width: 100%; justify-content: flex-end; }

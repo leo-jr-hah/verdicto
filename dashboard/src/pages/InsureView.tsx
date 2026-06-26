@@ -681,6 +681,7 @@ export const InsureView: React.FC = () => {
               <button
                 onClick={handleSubmitAsset}
                 disabled={!assetName || !assetValue || assessmentLoading}
+                className="mobile-sticky-cta"
                 style={{
                   ...btnPrimary,
                   flex: 2,

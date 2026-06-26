@@ -814,7 +814,7 @@ export const AssessView: React.FC = () => {
 
             {/* Form */}
             <form onSubmit={handleSubmit}>
-              <div style={{
+              <div className="edge-to-edge-mobile" style={{
                 background: 'var(--bg-surface)',
                 borderRadius: '12px',
                 border: '1px solid var(--border-color)',
@@ -928,6 +928,7 @@ export const AssessView: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
+                className="mobile-sticky-cta"
                 style={{
                   width: '100%',
                   display: 'flex',
@@ -962,7 +963,7 @@ export const AssessView: React.FC = () => {
               </div>
 
               {/* Right: Guidance Panel */}
-              <div style={{
+              <div className="edge-to-edge-mobile" style={{
                 background: 'var(--bg-surface)',
                 borderRadius: '12px',
                 border: '1px solid var(--border-color)',

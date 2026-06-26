@@ -237,7 +237,7 @@ const FlowDiagram: React.FC<{ flow: typeof FLOWS[0]; index: number }> = ({ flow,
       }}>
         {flow.title}
       </div>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-2)', overflowX: 'auto', paddingBottom: 'var(--sp-2)' }}>
+      <div className="flow-diagram-container" style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-2)', overflowX: 'auto', paddingBottom: 'var(--sp-2)' }}>
         {flow.steps.map((step, i) => (
           <React.Fragment key={step.label}>
             <div style={{ flex: 1, minWidth: 120, textAlign: 'center' }}>
@@ -257,7 +257,7 @@ const FlowDiagram: React.FC<{ flow: typeof FLOWS[0]; index: number }> = ({ flow,
               </div>
             </div>
             {i < flow.steps.length - 1 && (
-              <ArrowRight size={14} style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginTop: 6 }} />
+              <ArrowRight size={14} className="desktop-table-view" style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginTop: 6 }} />
             )}
           </React.Fragment>
         ))}
@@ -270,7 +270,8 @@ const FlowDiagram: React.FC<{ flow: typeof FLOWS[0]; index: number }> = ({ flow,
 
 const AgentTable: React.FC = () => (
   <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-    <div style={{ overflowX: 'auto' }}>
+    {/* Desktop View */}
+    <div className="desktop-table-view" style={{ overflowX: 'auto' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
         <thead>
           <tr>
@@ -312,6 +313,31 @@ const AgentTable: React.FC = () => (
           ))}
         </tbody>
       </table>
+    </div>
+
+    {/* Mobile Card View */}
+    <div className="mobile-card-view" style={{ padding: '1rem' }}>
+      {AGENTS.map(agent => (
+        <div key={agent.name} style={{ background: 'var(--bg-surface-alt)', padding: '1rem', borderRadius: 12, border: '1px solid var(--border-color)' }}>
+          <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>{agent.name}</div>
+          <div style={{ marginBottom: 12 }}>
+            <span style={{
+              display: 'inline-block', padding: '2px 8px', borderRadius: 6,
+              fontSize: 11, fontWeight: 500,
+              background: agent.role === 'Primary Valuator' ? 'rgba(59,130,246,0.1)' : 'rgba(139,92,246,0.1)',
+              color: agent.role === 'Primary Valuator' ? '#60A5FA' : '#A78BFA',
+            }}>
+              {agent.role}
+            </span>
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8, lineHeight: 1.4 }}>
+             <strong style={{ color: 'var(--text-primary)' }}>Methodology:</strong> {agent.method}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+             <strong style={{ color: 'var(--text-primary)' }}>Data Sources:</strong> {agent.data}
+          </div>
+        </div>
+      ))}
     </div>
   </div>
 );
