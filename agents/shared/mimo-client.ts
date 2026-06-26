@@ -348,7 +348,7 @@ export async function askJuror(systemPrompt: string, userPrompt: string): Promis
     console.log(`[LLM] ✅ Groq responded (${result.tokensUsed} tokens)`);
 
     try {
-      return { result: JSON.parse(result.content), provider: 'groq', fallbackTriggered: true };
+      return { result: JSON.parse(result.content), provider: 'groq', fallbackTriggered: false };
     } catch {
       console.warn(`[LLM] ⚠️  Groq returned non-JSON, using fallback`);
       return { result: buildFallbackResponse(userPrompt), provider: 'heuristic', fallbackTriggered: true };

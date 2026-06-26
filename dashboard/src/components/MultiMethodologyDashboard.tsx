@@ -244,18 +244,38 @@ const AgentCard: React.FC<{
   </motion.div>
 );
 
-/** Divergence range bar visualization */
+/** Valuation Range - horizontal bar chart with axis, labels, and consensus band */
 const DivergenceBar: React.FC<{
   values: number[];
   askingPrice: number;
   assessedValue: number;
   colors: string[];
 }> = ({ values, askingPrice, assessedValue, colors }) => {
-  const min = Math.min(...values, askingPrice);
-  const max = Math.max(...values, askingPrice);
+  // Compute range with padding
+  const allValues = [...values, askingPrice, assessedValue];
+  const dataMin = Math.min(...allValues);
+  const dataMax = Math.max(...allValues);
+  const padding = (dataMax - dataMin) * 0.15 || dataMax * 0.05;
+  const min = Math.max(0, dataMin - padding);
+  const max = dataMax + padding;
   const range = max - min || 1;
 
-  const toPercent = (v: number) => ((v - min) / range) * 100;
+  const toPercent = (v: number) => Math.max(0, Math.min(100, ((v - min) / range) * 100));
+
+  // Compute consensus band (min to max of agent values)
+  const agentMin = Math.min(...values);
+  const agentMax = Math.max(...values);
+  const bandLeft = toPercent(agentMin);
+  const bandWidth = toPercent(agentMax) - bandLeft;
+
+  // Generate axis ticks (5 evenly spaced)
+  const tickCount = 5;
+  const ticks = Array.from({ length: tickCount }, (_, i) => min + (range * i) / (tickCount - 1));
+
+  // Divergence percentage
+  const avg = values.reduce((a, b) => a + b, 0) / values.length;
+  const stdDev = Math.sqrt(values.reduce((s, v) => s + Math.pow(v - avg, 2), 0) / values.length);
+  const divergencePct = avg > 0 ? (stdDev / avg) * 100 : 0;
 
   return (
     <div style={{
@@ -264,112 +284,218 @@ const DivergenceBar: React.FC<{
       border: '1px solid var(--border-color)',
       padding: '1.5rem',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-        <Scale size={16} color="var(--primary)" />
-        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-          Valuation Range
-        </span>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Scale size={16} color="var(--primary)" />
+          <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+            Valuation Range
+          </span>
+        </div>
+        <div style={{
+          fontSize: '0.75rem',
+          padding: '0.25rem 0.6rem',
+          borderRadius: '6px',
+          background: divergencePct < 10 ? 'rgba(16, 185, 129, 0.1)' : divergencePct < 20 ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+          color: divergencePct < 10 ? '#10b981' : divergencePct < 20 ? '#f59e0b' : '#ef4444',
+          fontWeight: 600,
+        }}>
+          {divergencePct < 10 ? 'Tight' : divergencePct < 20 ? 'Moderate' : 'Wide'} spread ({divergencePct.toFixed(1)}%)
+        </div>
       </div>
 
-      {/* Range bar */}
-      <div style={{ position: 'relative', height: '60px', marginBottom: '1rem' }}>
-        {/* Background track */}
+      {/* Chart area */}
+      <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
+        {/* Consensus band (shaded region between lowest and highest agent value) */}
         <div style={{
           position: 'absolute',
-          top: '20px',
-          left: 0,
-          right: 0,
-          height: '8px',
+          top: 0,
+          bottom: 0,
+          left: `${bandLeft}%`,
+          width: `${bandWidth}%`,
+          background: 'rgba(139, 92, 246, 0.06)',
+          borderLeft: '1px dashed rgba(139, 92, 246, 0.3)',
+          borderRight: '1px dashed rgba(139, 92, 246, 0.3)',
           borderRadius: '4px',
-          background: 'var(--border-color)',
+          zIndex: 0,
         }} />
 
-        {/* Asking price marker */}
+        {/* Agent value rows */}
+        {AGENTS.slice(0, values.length).map((agent, i) => {
+          const pct = toPercent(values[i]);
+          return (
+            <div key={agent.id} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.4rem 0',
+              position: 'relative',
+              zIndex: 1,
+            }}>
+              {/* Agent label */}
+              <div style={{
+                width: '100px',
+                flexShrink: 0,
+                textAlign: 'right',
+              }}>
+                <div style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  color: colors[i],
+                  lineHeight: 1.2,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>
+                  {agent.name.replace('Valuation Agent ', 'Agent ')}
+                </div>
+                <div style={{
+                  fontSize: '0.6rem',
+                  color: 'var(--text-tertiary)',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {agent.role}
+                </div>
+              </div>
+
+              {/* Bar track */}
+              <div style={{
+                flex: 1,
+                position: 'relative',
+                height: '24px',
+                background: 'var(--bg-surface-alt, rgba(255,255,255,0.03))',
+                borderRadius: '4px',
+                overflow: 'visible',
+              }}>
+                {/* Filled bar */}
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeOut' }}
+                  style={{
+                    position: 'absolute',
+                    top: '4px',
+                    left: 0,
+                    height: '16px',
+                    borderRadius: '4px',
+                    background: `linear-gradient(90deg, ${colors[i]}40, ${colors[i]}90)`,
+                    border: `1px solid ${colors[i]}60`,
+                  }}
+                />
+                {/* Value label at end of bar */}
+                <div style={{
+                  position: 'absolute',
+                  left: `${pct}%`,
+                  top: '50%',
+                  transform: 'translate(6px, -50%)',
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  color: colors[i],
+                  whiteSpace: 'nowrap',
+                }}>
+                  {formatCurrency(values[i])}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Asking price reference line */}
         <div style={{
           position: 'absolute',
           left: `${toPercent(askingPrice)}%`,
-          top: '12px',
-          transform: 'translateX(-50%)',
+          top: '-4px',
+          bottom: '-4px',
+          width: '2px',
+          background: 'var(--text-tertiary)',
+          zIndex: 2,
         }}>
           <div style={{
-            width: '2px',
-            height: '24px',
-            background: 'var(--text-tertiary)',
-            margin: '0 auto',
-          }} />
-          <div style={{
-            fontSize: '0.65rem',
+            position: 'absolute',
+            top: '-18px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: '0.6rem',
             color: 'var(--text-tertiary)',
-            textAlign: 'center',
-            marginTop: '2px',
             whiteSpace: 'nowrap',
+            fontWeight: 600,
           }}>
-            Asking: {formatCurrency(askingPrice)}
+            Asking
           </div>
         </div>
 
-        {/* Agent value markers */}
-        {values.map((v, i) => (
-          <div key={i} style={{
-            position: 'absolute',
-            left: `${toPercent(v)}%`,
-            top: '8px',
-            transform: 'translateX(-50%)',
-          }}>
-            <div style={{
-              width: '12px',
-              height: '12px',
-              borderRadius: '50%',
-              background: colors[i],
-              border: '2px solid var(--bg-surface)',
-              boxShadow: `0 0 0 2px ${colors[i]}40`,
-            }} />
-          </div>
-        ))}
-
-        {/* Assessed value marker */}
+        {/* Consensus value marker */}
         <div style={{
           position: 'absolute',
           left: `${toPercent(assessedValue)}%`,
-          top: '4px',
-          transform: 'translateX(-50%)',
+          top: '-4px',
+          bottom: '-4px',
+          width: '2px',
+          background: 'var(--primary)',
+          zIndex: 2,
+          boxShadow: '0 0 6px rgba(139, 92, 246, 0.4)',
         }}>
           <div style={{
-            width: '16px',
-            height: '16px',
-            borderRadius: '50%',
-            background: 'var(--primary)',
-            border: '3px solid var(--bg-surface)',
-            boxShadow: '0 0 0 2px var(--primary)',
-          }} />
-          <div style={{
-            fontSize: '0.65rem',
+            position: 'absolute',
+            bottom: '-18px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: '0.6rem',
             color: 'var(--primary)',
-            fontWeight: 700,
-            textAlign: 'center',
-            marginTop: '2px',
             whiteSpace: 'nowrap',
+            fontWeight: 700,
           }}>
-            Consensus: {formatCurrency(assessedValue)}
+            Consensus
           </div>
         </div>
       </div>
 
-      {/* Legend */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1.5rem' }}>
-        {AGENTS.slice(0, values.length).map((agent, i) => (
-          <div key={agent.id} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <div style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              background: colors[i],
-            }} />
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
-              {agent.name}: {formatCurrency(values[i])}
-            </span>
+      {/* Axis */}
+      <div style={{
+        position: 'relative',
+        height: '20px',
+        marginTop: '1.5rem',
+        borderTop: '1px solid var(--border-color)',
+        paddingTop: '0.4rem',
+      }}>
+        {ticks.map((tick, i) => (
+          <div key={i} style={{
+            position: 'absolute',
+            left: `${toPercent(tick)}%`,
+            transform: 'translateX(-50%)',
+            fontSize: '0.6rem',
+            color: 'var(--text-tertiary)',
+            whiteSpace: 'nowrap',
+          }}>
+            {formatCurrency(tick)}
           </div>
         ))}
+      </div>
+
+      {/* Summary row */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: '1rem',
+        padding: '0.6rem 0.8rem',
+        background: 'var(--bg-surface-alt, rgba(255,255,255,0.03))',
+        borderRadius: '8px',
+        fontSize: '0.75rem',
+      }}>
+        <div style={{ color: 'var(--text-secondary)' }}>
+          Agent range: <strong>{formatCurrency(agentMin)}</strong> to <strong>{formatCurrency(agentMax)}</strong>
+        </div>
+        <div style={{ color: 'var(--text-secondary)' }}>
+          Spread: <strong>{formatCurrency(agentMax - agentMin)}</strong>
+        </div>
+        <div style={{ color: 'var(--text-secondary)' }}>
+          vs. Asking: <strong style={{
+            color: assessedValue >= askingPrice ? '#10b981' : '#ef4444',
+          }}>
+            {assessedValue >= askingPrice ? '+' : ''}{formatPercent(((assessedValue - askingPrice) / askingPrice) * 100)}
+          </strong>
+        </div>
       </div>
     </div>
   );
