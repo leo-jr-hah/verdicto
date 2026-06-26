@@ -495,49 +495,6 @@ button {
   border-left: 3px solid var(--primary);
 }
 
-/* ── Mobile Appearance Toggle ─────────────────────────────────────────────── */
-
-.mobile-menu-appearance {
-  margin-top: 8px;
-  padding: 0 20px 12px;
-}
-
-.mobile-theme-segmented {
-  display: flex;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 3px;
-  gap: 3px;
-}
-
-.mobile-theme-option {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 0;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-tertiary);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.mobile-theme-option.active {
-  background: var(--bg-main);
-  color: var(--text-primary);
-  box-shadow: var(--shadow-xs);
-}
-
-.mobile-theme-option:not(.active):hover {
-  color: var(--text-secondary);
-}
-
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 
 /* Touch-friendly tap targets */

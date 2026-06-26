@@ -239,27 +239,6 @@ export const Layout: React.FC = () => {
                   })}
                 </div>
               ))}
-
-              {/* Appearance toggle — thumb-friendly in mobile menu */}
-              <div className="mobile-menu-appearance">
-                <div className="sidebar-section-title mobile-section-title">APPEARANCE</div>
-                <div className="mobile-theme-segmented">
-                  <button
-                    className={`mobile-theme-option ${theme === 'light' ? 'active' : ''}`}
-                    onClick={() => setTheme('light')}
-                  >
-                    <Sun size={16} />
-                    <span>Light</span>
-                  </button>
-                  <button
-                    className={`mobile-theme-option ${theme === 'dark' ? 'active' : ''}`}
-                    onClick={() => setTheme('dark')}
-                  >
-                    <Moon size={16} />
-                    <span>Dark</span>
-                  </button>
-                </div>
-              </div>
             </motion.div>
           </motion.div>
         )}
