@@ -202,7 +202,7 @@ const PolicyCard: React.FC<{
         </span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
+      <div className="insure-coverage-grid">
         <div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.2rem' }}>Coverage</div>
           <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{formatCurrency(policy.coverageAmount)}</div>
@@ -500,7 +500,7 @@ export const InsureView: React.FC = () => {
           <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>
             What type of asset do you want to insure?
           </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div className="insure-asset-type-grid">
             {ASSET_TYPES.map((type) => {
               const isActive = assetType === type.id;
               return (
@@ -586,7 +586,7 @@ export const InsureView: React.FC = () => {
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
+          <div className="insure-coverage-period-grid">
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
                 Estimated Value (USD) <span style={{ color: 'var(--primary)' }}>*</span>
@@ -720,7 +720,7 @@ export const InsureView: React.FC = () => {
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Assessment Complete</h3>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div className="insure-estimate-grid">
                 <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Your Estimate</div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(assessmentResult.askingPrice)}</div>
@@ -769,7 +769,7 @@ export const InsureView: React.FC = () => {
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Insurance Policy Created</h3>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div className="insure-claim-info-grid">
             <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Coverage Amount</div>
               <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#10b981' }}>
@@ -989,7 +989,7 @@ export const InsureView: React.FC = () => {
                   </div>
 
                   {claimResult.revaluation && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+                    <div className="insure-revaluation-grid">
                       <div style={{ padding: '0.75rem', background: 'var(--bg-main)', borderRadius: '8px', textAlign: 'center' }}>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Previous Value</div>
                         <div style={{ fontWeight: 600 }}>{formatCurrency(claimResult.revaluation.previousValue)}</div>

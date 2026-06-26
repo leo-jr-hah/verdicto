@@ -1,0 +1,40 @@
+/* Reputation View Responsive Grid Classes */
+
+.reputation-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.reputation-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.reputation-agents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .reputation-content-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .reputation-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .reputation-agents-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .reputation-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}

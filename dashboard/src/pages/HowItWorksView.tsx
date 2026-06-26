@@ -365,7 +365,7 @@ export const HowItWorksView: React.FC = () => {
       {/* ── Why Verdicto ──────────────────────────────────────────── */}
       <Reveal delay={0.05}>
         <section style={{ marginBottom: 'var(--sp-12)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--sp-3)' }}>
+          <div className="why-verdict-grid">
             {WHY_VERDICT.map((item, i) => (
               <motion.div
                 key={item.title}
@@ -455,7 +455,7 @@ export const HowItWorksView: React.FC = () => {
           />
 
           {/* Tier cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--sp-3)', marginBottom: 'var(--sp-4)' }}>
+          <div className="tier-grid" style={{ marginBottom: 'var(--sp-4)' }}>
             {TIERS.map(tier => (
               <div key={tier.name} className="card" style={{ textAlign: 'center', padding: 'var(--sp-4)' }}>
                 <span style={{
@@ -506,7 +506,7 @@ export const HowItWorksView: React.FC = () => {
             title="On-Chain Settlement"
             subtitle="Three smart contracts deployed on the Casper blockchain. Every verdict, reputation update, and escrow action is publicly verifiable."
           />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--sp-3)' }}>
+          <div className="agent-result-grid">
             {[
               { name: 'Verdicto Registry', desc: 'Records every assessment outcome with the full voting record, including agent identities, confidence levels, and weighted consensus. Once committed, results are immutable.', hash: 'f00cbb8f…' },
               { name: 'Reputation Ledger', desc: 'Stores agent trust scores with complete history. Score changes are transparent and auditable. Tier assignments are determined by verifiable accuracy metrics.', hash: '30da84e6…' },
@@ -593,7 +593,7 @@ export const HowItWorksView: React.FC = () => {
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-3)', fontFamily: 'var(--font-display)' }}>
               Fee Structure
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--sp-3)' }}>
+            <div className="why-verdict-grid">
               {[
                 { product: 'Assessment', fee: '2.5 CSPR' },
                 { product: 'Confidence Analysis', fee: '1 CSPR' },
@@ -618,7 +618,7 @@ export const HowItWorksView: React.FC = () => {
             title="Transparency"
             subtitle="We believe in being upfront about what's production-ready and what's still evolving."
           />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-3)' }}>
+          <div className="limitations-grid">
             {/* What's Real */}
             <div className="card" style={{ padding: 'var(--sp-5)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', marginBottom: 'var(--sp-4)' }}>

@@ -138,7 +138,7 @@ export const OracleView: React.FC = () => {
       </div>
 
       {/* ── Stats Cards ───────────────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+      <div className="oracle-stats-grid">
         {[
           { label: 'Total Verdicts', value: stats.totalVerdicts, icon: Database, color: '#8B5CF6' },
           { label: 'Fresh (Active)', value: stats.freshVerdicts, icon: Zap, color: '#10B981' },
@@ -315,13 +315,7 @@ export const OracleView: React.FC = () => {
         ) : (
           <div>
             {/* Table Header */}
-            <div style={{
-              display: 'grid', gridTemplateColumns: '1fr 120px 100px 80px 120px 100px',
-              padding: '10px 20px', borderBottom: '1px solid var(--border-color)',
-              background: 'var(--bg-secondary)', fontSize: '0.75rem',
-              fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-            }}>
+            <div className="oracle-table-header">
               <span>Asset</span>
               <span>Value</span>
               <span>Confidence</span>
@@ -341,13 +335,8 @@ export const OracleView: React.FC = () => {
                     animate={{ opacity: 1 }}
                     transition={{ delay: i * 0.03 }}
                     onClick={() => setExpandedVerdict(isExpanded ? null : v.assetId)}
-                    style={{
-                      display: 'grid', gridTemplateColumns: '1fr 120px 100px 80px 120px 100px',
-                      padding: '14px 20px', borderBottom: '1px solid var(--border-color)',
-                      cursor: 'pointer', alignItems: 'center',
-                      background: isExpanded ? 'var(--bg-secondary)' : 'transparent',
-                      transition: 'background 0.15s ease',
-                    }}
+                    className="oracle-table-row"
+                    style={{ background: isExpanded ? 'var(--bg-secondary)' : 'transparent' }}
                     onMouseEnter={(e) => { if (!isExpanded) (e.currentTarget as HTMLElement).style.background = 'var(--bg-secondary)'; }}
                     onMouseLeave={(e) => { if (!isExpanded) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                   >
@@ -388,7 +377,7 @@ export const OracleView: React.FC = () => {
                         exit={{ height: 0, opacity: 0 }}
                         style={{ overflow: 'hidden', background: 'var(--bg-secondary)' }}
                       >
-                        <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                        <div className="oracle-expanded-grid">
                           <div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Decision</div>
                             <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 500 }}>{v.decision}</div>

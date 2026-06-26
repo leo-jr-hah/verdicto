@@ -168,7 +168,7 @@ export const DisputesView: React.FC = () => {
       </div>
 
       {/* ── Stats Cards ───────────────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+      <div className="disputes-stats-grid">
         {[
           { label: 'Total Disputes', value: stats.total, icon: Gavel, color: '#8B5CF6' },
           { label: 'Pending', value: stats.pending, icon: AlertTriangle, color: '#F59E0B' },
@@ -486,7 +486,7 @@ export const DisputesView: React.FC = () => {
                               </div>
 
                               {/* Value comparison */}
-                              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
+                              <div className="disputes-retrial-grid" style={{ marginBottom: '10px' }}>
                                 <div style={{ textAlign: 'center' }}>
                                   <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', marginBottom: '2px' }}>Original</div>
                                   <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>

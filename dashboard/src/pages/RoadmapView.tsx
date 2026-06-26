@@ -366,12 +366,8 @@ export const RoadmapView: React.FC = () => {
       </div>
 
       {/* Summary stats */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '1rem',
-        marginBottom: '2rem',
-      }}>
+      <div className="roadmap-summary-grid"
+        style={{ gap: '1rem', marginBottom: '2rem' }}>
         {sections.map((section) => (
           <div key={section.title} style={{
             background: 'var(--bg-surface)',
@@ -419,11 +415,8 @@ export const RoadmapView: React.FC = () => {
             </span>
           </div>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: '1rem',
-          }}>
+          <div className="roadmap-items-grid"
+            style={{ gap: '1rem' }}>
             {section.items.map((item, i) => (
               <RoadmapCard key={item.id} item={item} index={i} />
             ))}

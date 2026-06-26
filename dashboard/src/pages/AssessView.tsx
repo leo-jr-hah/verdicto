@@ -86,7 +86,7 @@ const AssetTypeSelector: React.FC<{
   selected: AssetType;
   onSelect: (type: AssetType) => void;
 }> = ({ selected, onSelect }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+  <div className="borrow-asset-grid">
     {ASSET_TYPES.map((type) => {
       const isActive = selected === type.id;
       return (
@@ -422,7 +422,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
         </div>
 
         {/* Value comparison */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '1.5rem', alignItems: 'center' }}>
+        <div className="disputes-retrial-grid">
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Asking Price</p>
             <p style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)' }}>
@@ -737,7 +737,7 @@ export const AssessView: React.FC = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '2rem', alignItems: 'start' }}>
+            <div className="assess-form-grid" style={{ gridTemplateColumns: '1fr 340px' }}>
               <div style={{ maxWidth: '700px' }}>
             {/* Asset Type Selector */}
             <div style={{ marginBottom: '2rem' }}>
@@ -1031,13 +1031,7 @@ export const AssessView: React.FC = () => {
             exit={{ opacity: 0 }}
           >
             {/* Split pane: form summary + live log */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '1.5rem',
-              marginBottom: '2rem',
-              alignItems: 'stretch',
-            }}>
+            <div className="assess-bottom-row" style={{ marginBottom: '2rem', alignItems: 'stretch' }}>
               {/* Left: Asset summary card */}
               <div style={{
                 background: 'var(--bg-surface)',

@@ -288,7 +288,7 @@ const AgentDetailPanel: React.FC<{ agent: AgentData }> = ({ agent }) => {
       </div>
 
       {/* Content Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <div className="reputation-content-grid">
         {/* Description */}
         <div>
           <div style={labelStyle}>ROLE</div>
@@ -450,11 +450,8 @@ export const ReputationView: React.FC = () => {
       </div>
 
       {/* Aggregate Metrics */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: 16, marginBottom: 32,
-      }}>
+      <div className="reputation-metrics-grid"
+        style={{ gap: 16, marginBottom: 32 }}>
         {[
           { label: 'Total Agents', value: metrics.totalAgents, icon: <Shield size={18} />, color: 'var(--primary)' },
           { label: 'Avg Score', value: metrics.avgScore, icon: <TrendingUp size={18} />, color: 'var(--success)' },
@@ -485,11 +482,8 @@ export const ReputationView: React.FC = () => {
       </div>
 
       {/* Agent Cards Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: 12,
-      }}>
+      <div className="reputation-agents-grid"
+        style={{ gap: 12 }}>
         {agents.map((agent, index) => (
           <AgentCard
             key={agent.id}

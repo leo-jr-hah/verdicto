@@ -522,11 +522,7 @@ export const PredictionView: React.FC = () => {
                     transition={{ duration: 0.2 }}
                     style={{ overflow: 'hidden' }}
                   >
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                      gap: 10, marginTop: 12,
-                    }}>
+                    <div className="prediction-demo-grid">
                       {DEMO_QUESTIONS.map((demo, i) => (
                         <motion.button
                           key={i}
@@ -698,16 +694,15 @@ export const PredictionView: React.FC = () => {
             </div>
 
             {/* Hero: Probability Ring + Stats */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'auto 1fr',
-              gap: 32, alignItems: 'center',
-              background: 'var(--bg-elevated)',
-              border: `1px solid ${probabilityColor(result.probability)}30`,
-              borderRadius: 'var(--card-radius)',
-              padding: '32px 36px',
-              marginBottom: 24,
-            }}>
+            <div className="prediction-hero-grid"
+              style={{
+                gap: 32, alignItems: 'center',
+                background: 'var(--bg-elevated)',
+                border: `1px solid ${probabilityColor(result.probability)}30`,
+                borderRadius: 'var(--card-radius)',
+                padding: '32px 36px',
+                marginBottom: 24,
+              }}>
               <ProbabilityRing value={result.probability} size={160} />
 
               <div>
@@ -718,11 +713,10 @@ export const PredictionView: React.FC = () => {
                   Confidence Assessment
                 </div>
 
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: 16,
-                }}>
+                <div className="prediction-stats-grid"
+                  style={{
+                    gap: 16,
+                  }}>
                   {[
                     { label: 'Confidence', value: formatPercent(result.confidence), icon: <TrendingUp size={14} /> },
                     { label: 'Timeframe', value: result.timeframe, icon: <Clock size={14} /> },

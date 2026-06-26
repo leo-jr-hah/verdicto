@@ -1,0 +1,29 @@
+/* Roadmap View Responsive Grid Classes */
+
+.roadmap-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.roadmap-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .roadmap-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .roadmap-items-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .roadmap-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

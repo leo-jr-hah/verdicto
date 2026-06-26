@@ -566,18 +566,11 @@ export const BorrowView: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{
-            ...cardStyle,
-            marginBottom: '1rem',
-            borderColor: '#ef4444',
-            background: 'rgba(239,68,68,0.05)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-          }}
+          className="borrow-error-banner card"
+          style={{ borderColor: '#ef4444', background: 'rgba(239,68,68,0.05)' }}
         >
           <AlertCircle size={18} color="#ef4444" />
-          <span style={{ flex: 1, fontSize: '0.85rem', color: '#ef4444' }}>
+          <span className="borrow-error-banner__msg">
             {loanError || signError}
           </span>
           <button onClick={() => { clearError(); setSignError(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
@@ -588,34 +581,22 @@ export const BorrowView: React.FC = () => {
 
       {/* ─── Step 0: Asset Type ─────────────────────────────────────────── */}
       {step === 0 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={cardStyle}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
           <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>
             What type of asset will you use as collateral?
           </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div className="borrow-asset-grid">
             {ASSET_TYPES.map((type) => {
               const isActive = assetType === type.id;
               return (
                 <button
                   key={type.id}
                   onClick={() => setAssetType(type.id)}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '1.25rem 1rem',
-                    borderRadius: '8px',
-                    border: `2px solid ${isActive ? 'var(--primary)' : 'var(--border-color)'}`,
-                    background: isActive ? 'rgba(255, 59, 59, 0.04)' : 'var(--bg-surface)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                    color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
-                  }}
+                  className={`borrow-asset-btn ${isActive ? 'borrow-asset-btn--active' : ''}`}
                 >
                   {type.icon}
-                  <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{type.label}</span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                  <span className="borrow-asset-btn__label">{type.label}</span>
+                  <span className="borrow-asset-btn__ltv">
                     <LTVTooltip>LTV: {LTV_TIERS[type.id]}</LTVTooltip>
                   </span>
                 </button>
@@ -635,10 +616,10 @@ export const BorrowView: React.FC = () => {
                 if (demo.weightOz) setWeightOz(String(demo.weightOz));
               }
               setStep(1);
-            }} style={{ ...btnSecondary, flex: 1, fontSize: '0.85rem' }}>
+            }} className="btn" style={{ flex: 1, fontSize: '0.85rem' }}>
               Try Demo
             </button>
-            <button onClick={() => setStep(1)} style={{ ...btnPrimary, flex: 2 }}>
+            <button onClick={() => setStep(1)} className="btn btn-primary" style={{ flex: 2 }}>
               Continue <ArrowRight size={16} />
             </button>
           </div>
@@ -647,7 +628,7 @@ export const BorrowView: React.FC = () => {
 
       {/* ─── Step 1: Asset Details ──────────────────────────────────────── */}
       {step === 1 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={cardStyle}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
           <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>
             Describe your collateral
           </h3>
@@ -670,7 +651,8 @@ export const BorrowView: React.FC = () => {
               </span>
               <button
                 onClick={() => wallet.connect()}
-                style={{ ...btnPrimary, fontSize: '0.8rem', padding: '0.5rem 1rem', whiteSpace: 'nowrap' }}
+                className="btn btn-primary"
+                style={{ fontSize: '0.8rem', padding: '0.5rem 1rem', whiteSpace: 'nowrap' }}
               >
                 Connect Wallet
               </button>
@@ -685,7 +667,7 @@ export const BorrowView: React.FC = () => {
               value={assetName}
               onChange={(e) => setAssetName(e.target.value)}
               placeholder="e.g. Downtown Office Building"
-              style={inputStyle}
+              className="input"
             />
           </div>
 
@@ -698,11 +680,12 @@ export const BorrowView: React.FC = () => {
               onChange={(e) => setAssetDescription(e.target.value)}
               placeholder="Key details about the asset..."
               rows={3}
-              style={{ ...inputStyle, resize: 'vertical' }}
+              style={{ resize: 'vertical' }}
+              className="input"
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div className="borrow-form-grid">
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
                 Estimated Value (USD) <span style={{ color: 'var(--primary)' }}>*</span>
@@ -712,7 +695,7 @@ export const BorrowView: React.FC = () => {
                 value={assetValue}
                 onChange={(e) => setAssetValue(e.target.value)}
                 placeholder="500000"
-                style={inputStyle}
+                className="input"
               />
             </div>
             <div>
@@ -726,7 +709,7 @@ export const BorrowView: React.FC = () => {
                 placeholder={`e.g. ${LTV_TIERS[assetType].split('-')[0]}`}
                 min={10}
                 max={90}
-                style={inputStyle}
+                className="input"
               />
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
                 Typical range: {LTV_TIERS[assetType]}
@@ -744,7 +727,7 @@ export const BorrowView: React.FC = () => {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="e.g. Austin, TX"
-                style={inputStyle}
+                className="input"
               />
             </div>
           )}
@@ -758,7 +741,7 @@ export const BorrowView: React.FC = () => {
                 value={artistOrMedium}
                 onChange={(e) => setArtistOrMedium(e.target.value)}
                 placeholder="e.g. Basquiat, Acrylic and oilstick on canvas"
-                style={inputStyle}
+                className="input"
               />
             </div>
           )}
@@ -775,19 +758,20 @@ export const BorrowView: React.FC = () => {
                 placeholder="e.g. 400"
                 min={0.01}
                 step={0.01}
-                style={inputStyle}
+                className="input"
               />
             </div>
           )}
 
           <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button onClick={() => setStep(0)} style={{ ...btnSecondary, flex: 1 }}>
+            <button onClick={() => setStep(0)} className="btn" style={{ flex: 1 }}>
               <ArrowLeft size={16} /> Back
             </button>
             {!connected ? (
               <button
                 onClick={() => wallet.connect()}
-                style={{ ...btnPrimary, flex: 2 }}
+                className="btn btn-primary"
+                style={{ flex: 2 }}
               >
                 Connect Wallet to Continue <ArrowRight size={16} />
               </button>
@@ -795,8 +779,8 @@ export const BorrowView: React.FC = () => {
               <button
                 onClick={handleSubmitAsset}
                 disabled={!assetName || !assetValue || assessmentLoading}
+                className="btn btn-primary"
                 style={{
-                  ...btnPrimary,
                   flex: 2,
                   opacity: !assetName || !assetValue || assessmentLoading ? 0.5 : 1,
                 }}
@@ -814,7 +798,7 @@ export const BorrowView: React.FC = () => {
 
       {/* ─── Step 2: Assessment Running ─────────────────────────────────── */}
       {step === 2 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={cardStyle}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
           {assessmentLoading ? (
             <div style={{ textAlign: 'center', padding: '2rem' }}>
               <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)', marginBottom: '1rem' }} />
@@ -832,7 +816,7 @@ export const BorrowView: React.FC = () => {
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Assessment Complete</h3>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div className="borrow-assess-grid">
                 <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Your Estimate</div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(assessmentResult.askingPrice)}</div>
@@ -861,10 +845,10 @@ export const BorrowView: React.FC = () => {
               )}
 
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                <button onClick={handleStartNew} style={{ ...btnSecondary, flex: 1 }}>
+                <button onClick={handleStartNew} className="btn" style={{ flex: 1 }}>
                   <RotateCcw size={16} /> Start Over
                 </button>
-                <button onClick={handleRequestLoan} style={{ ...btnPrimary, flex: 2 }}>
+                <button onClick={handleRequestLoan} className="btn btn-primary" style={{ flex: 2 }}>
                   <Landmark size={16} /> Request Loan
                 </button>
               </div>
@@ -876,7 +860,7 @@ export const BorrowView: React.FC = () => {
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
                 {assessmentError || 'The AI agents couldn\'t complete the assessment. Please try again.'}
               </p>
-              <button onClick={handleStartNew} style={btnPrimary}>
+              <button onClick={handleStartNew} className="btn btn-primary">
                 <RotateCcw size={16} /> Try Again
               </button>
             </div>
@@ -886,7 +870,7 @@ export const BorrowView: React.FC = () => {
 
       {/* ─── Step 3: Loan Offer / Confirmation ──────────────────────────── */}
       {step === 3 && currentLoan && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={cardStyle}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
             <CheckCircle2 size={20} color="#10b981" />
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Loan Created</h3>
@@ -993,10 +977,10 @@ export const BorrowView: React.FC = () => {
           )}
 
           <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button onClick={handleStartNew} style={{ ...btnSecondary, flex: 1 }}>
+            <button onClick={handleStartNew} className="btn" style={{ flex: 1 }}>
               <RotateCcw size={16} /> New Loan
             </button>
-            <button onClick={() => setStep(4)} style={{ ...btnPrimary, flex: 1 }}>
+            <button onClick={() => setStep(4)} className="btn btn-primary" style={{ flex: 1 }}>
               <FileText size={16} /> View My Loans
             </button>
           </div>
@@ -1009,10 +993,10 @@ export const BorrowView: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>My Loans</h3>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button onClick={handleStartNew} style={{ ...btnSecondary, fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
+              <button onClick={handleStartNew} className="btn" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
                 <Landmark size={14} /> New Loan
               </button>
-              <button onClick={() => publicKey && loadLoans(publicKey)} style={{ ...btnSecondary, fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
+              <button onClick={() => publicKey && loadLoans(publicKey)} className="btn" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
                 <RefreshCw size={14} /> Refresh
               </button>
             </div>
@@ -1023,7 +1007,7 @@ export const BorrowView: React.FC = () => {
               <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)' }} />
             </div>
           ) : loans.length === 0 ? (
-            <div style={{ ...cardStyle, textAlign: 'center', padding: '3rem' }}>
+            <div className="card borrow-empty-state">
               <Landmark size={32} style={{ color: 'var(--text-tertiary)', marginBottom: '0.75rem' }} />
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                 No loans yet. Submit an asset to get started.
@@ -1046,19 +1030,13 @@ export const BorrowView: React.FC = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              style={{
-                position: 'fixed', inset: 0,
-                background: 'rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(4px)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                zIndex: 1000,
-              }}
+              className="borrow-repay-overlay"
               onClick={() => setRepayLoanId(null)}
             >
               <motion.div
                 initial={{ scale: 0.95 }}
                 animate={{ scale: 1 }}
-                style={{ ...cardStyle, maxWidth: 400, width: '90%' }}
+                className="borrow-repay-modal"
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Repay Loan</h3>
@@ -1071,17 +1049,18 @@ export const BorrowView: React.FC = () => {
                     value={repayAmount}
                     onChange={(e) => setRepayAmount(e.target.value)}
                     placeholder="Enter amount"
-                    style={inputStyle}
+                    className="input"
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  <button onClick={() => setRepayLoanId(null)} style={{ ...btnSecondary, flex: 1 }}>
+                  <button onClick={() => setRepayLoanId(null)} className="btn" style={{ flex: 1 }}>
                     Cancel
                   </button>
                   <button
                     onClick={handleConfirmRepay}
                     disabled={!repayAmount || loanLoading}
-                    style={{ ...btnPrimary, flex: 1, opacity: !repayAmount || loanLoading ? 0.5 : 1 }}
+                    className="btn btn-primary"
+                    style={{ flex: 1, opacity: !repayAmount || loanLoading ? 0.5 : 1 }}
                   >
                     {loanLoading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <DollarSign size={16} />}
                     Confirm Repay

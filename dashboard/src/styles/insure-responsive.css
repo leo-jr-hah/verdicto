@@ -145,6 +145,49 @@
 
 .insure-claim-modal__actions { display: flex; gap: 0.75rem; }
 
+/* Coverage / asset-type / period / estimate / claim / revaluation grids */
+.insure-coverage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.insure-asset-type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.insure-coverage-period-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.insure-estimate-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.insure-claim-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.insure-revaluation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    MOBILE (<768px)
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -204,4 +247,18 @@
   .insure-my-policies-actions .btn { flex: 1; }
 
   .insure-claim-modal { max-width: 100%; }
+
+  .insure-coverage-grid,
+  .insure-asset-type-grid,
+  .insure-estimate-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .insure-coverage-period-grid,
+  .insure-claim-info-grid,
+  .insure-revaluation-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
 }
