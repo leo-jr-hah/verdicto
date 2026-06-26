@@ -40,13 +40,16 @@ const NAV_SECTIONS = [
 
 export const Layout: React.FC = () => {
   const location = useLocation();
-  const [theme, setTheme] = React.useState('light');
+  const [theme, setTheme] = React.useState(() => {
+    return localStorage.getItem('verdicto-theme') || 'light';
+  });
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [isStoryOpen, setIsStoryOpen] = React.useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('verdicto-theme', theme);
   }, [theme]);
 
   // Lock body scroll when mobile menu is open
