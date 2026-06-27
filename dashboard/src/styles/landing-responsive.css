@@ -43,10 +43,45 @@
 
   .hero-headline {
     font-size: clamp(1.75rem, 7vw, 2.5rem) !important;
+    max-width: 100%;
   }
 
-  .hero-subheadline {
-    font-size: 1rem !important;
+  .hero-rotating-word {
+    min-width: 180px;
+  }
+
+  .hero-tagline {
+    font-size: 0.95rem !important;
+    max-width: 100%;
+    min-height: auto;
+  }
+
+  .hero-cta-row {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-cta-row .btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .hero-stats-row {
+    gap: 1rem;
+  }
+
+  .hero-stat__value {
+    font-size: var(--text-lg);
+  }
+
+  .hero-grid-lines {
+    background-size: 50px 50px;
+  }
+
+  .hero-grid-glow {
+    width: 300px;
+    height: 300px;
   }
 
   /* Oracle */
