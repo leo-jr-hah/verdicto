@@ -1017,9 +1017,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
    * Returns real-time platform stats derived from in-memory stores.
    * Used by the dashboard LiveContractPanel to show actual data.
    */
-  app.get('/api/contract-state', (_, res) => {
+  app.get('/api/contract-state', async (_, res) => {
     try {
-      const transactions = loadTransactions();
+      const transactions = await loadTransactions();
 
       // Count assessments from receipt chains
       const assessmentIds = Array.from(receiptChainStore.keys());
