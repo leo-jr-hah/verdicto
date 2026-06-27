@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   HOW-IT-WORKS VIEW — Responsive Styles
+   HOW-IT-WORKS VIEW — Responsive Styles (Neumorphic)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .why-verdict-grid {
@@ -31,8 +31,8 @@
    MOBILE (<768px)
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .why-verdict-grid { grid-template-columns: 1fr; border-bottom: 1px solid var(--border-color); }
-  .why-verdict-grid > div { border-bottom: 1px solid var(--border-color); border-radius: 0; box-shadow: none; margin-bottom: -1px; }
+  .why-verdict-grid { grid-template-columns: 1fr; }
+  .why-verdict-grid > div { border-radius: var(--radius-lg); margin-bottom: 0.5rem; }
 
   .tier-grid { grid-template-columns: repeat(2, 1fr); }
   .limitations-grid { grid-template-columns: 1fr; }
@@ -56,9 +56,10 @@
   
   .flow-diagram-container > div {
     scroll-snap-align: center;
-    flex: 0 0 85% !important; /* Peek at the next card */
-    background: var(--bg-surface-alt);
+    flex: 0 0 85% !important;
+    background: var(--nm-base);
+    box-shadow: var(--shadow-extruded);
     padding: 1rem;
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
   }
 }

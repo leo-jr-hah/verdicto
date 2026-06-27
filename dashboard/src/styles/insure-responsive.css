@@ -11,8 +11,8 @@
   margin-bottom: 1.5rem;
 }
 
-.insure-header__title { font-size: 1.5rem; font-weight: 700; margin: 0; }
-.insure-header__subtitle { color: var(--text-secondary); font-size: 0.85rem; margin: 0.25rem 0 0; }
+.insure-header__title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; margin: 0; }
+.insure-header__subtitle { color: var(--nm-text-secondary); font-size: 0.85rem; margin: 0.25rem 0 0; }
 
 /* Step indicator */
 .insure-steps {
@@ -33,6 +33,8 @@
   width: 24px; height: 24px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 0.75rem; font-weight: 700;
+  background: var(--nm-base);
+  box-shadow: var(--shadow-extruded-small);
 }
 
 .insure-step__line { flex: 1; height: 2px; }
@@ -47,13 +49,19 @@
 
 .insure-asset-btn {
   display: flex; flex-direction: column; align-items: center;
-  gap: 0.5rem; padding: 1.25rem 1rem; border-radius: 8px;
-  border: 2px solid var(--border-color); background: var(--bg-surface);
-  cursor: pointer; transition: all 0.15s ease; color: var(--text-secondary);
+  gap: 0.5rem; padding: 1.25rem 1rem; border-radius: var(--radius-lg);
+  border: none; background: var(--nm-base);
+  box-shadow: var(--shadow-extruded-small);
+  cursor: pointer; transition: all var(--duration-standard) var(--ease-out); color: var(--nm-text-secondary);
+}
+
+.insure-asset-btn:hover {
+  box-shadow: var(--shadow-extruded-small-hover);
+  transform: translateY(-2px);
 }
 
 .insure-asset-btn--active {
-  border-color: var(--primary); background: rgba(255, 59, 59, 0.04); color: var(--primary);
+  box-shadow: var(--shadow-inset); color: var(--nm-accent);
 }
 
 /* Form */
@@ -84,19 +92,27 @@
 }
 
 .insure-premium-card {
-  padding: 1rem; background: var(--bg-main); border-radius: 8px; text-align: center;
+  padding: 1rem; background: var(--nm-base); border-radius: var(--radius-lg);
+  text-align: center; box-shadow: var(--shadow-inset);
 }
 
 .insure-premium-card__label {
-  font-size: 0.75rem; color: var(--text-tertiary); margin-bottom: 0.25rem;
+  font-size: 0.75rem; color: var(--nm-text-muted); margin-bottom: 0.25rem;
 }
 
-.insure-premium-card__value { font-size: 1.1rem; font-weight: 700; }
+.insure-premium-card__value { font-size: 1.1rem; font-weight: 700; color: var(--nm-text-primary); }
 
 /* Policy card */
 .insure-policy-card {
-  background: var(--bg-surface); border: 1px solid var(--border-color);
-  border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;
+  background: var(--nm-base); border: none;
+  border-radius: var(--radius-xl); padding: 1.5rem; margin-bottom: 1rem;
+  box-shadow: var(--shadow-extruded);
+  transition: transform var(--duration-standard) var(--ease-out), box-shadow var(--duration-standard) var(--ease-out);
+}
+
+.insure-policy-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-extruded-hover);
 }
 
 .insure-policy-card__header {
@@ -108,13 +124,14 @@
 }
 
 .insure-policy-card__stat-label {
-  font-size: 0.75rem; color: var(--text-tertiary); margin-bottom: 0.2rem;
+  font-size: 0.75rem; color: var(--nm-text-muted); margin-bottom: 0.2rem;
 }
 
-.insure-policy-card__stat-value { font-size: 0.9rem; font-weight: 600; }
+.insure-policy-card__stat-value { font-size: 0.9rem; font-weight: 600; color: var(--nm-text-primary); }
 
 .insure-policy-card__info-box {
-  padding: 0.75rem 1rem; background: var(--bg-main); border-radius: 8px;
+  padding: 0.75rem 1rem; background: var(--nm-base); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-inset);
   margin-bottom: 1rem; font-size: 0.8rem;
 }
 
@@ -135,130 +152,48 @@
 }
 
 .insure-claim-modal {
-  background: var(--bg-surface); border: 1px solid var(--border-color);
-  border-radius: 12px; padding: 1.5rem; width: 100%; max-width: 400px;
+  background: var(--nm-base); border: none;
+  border-radius: var(--radius-xl); padding: 1.5rem; width: 100%; max-width: 480px;
+  box-shadow: var(--shadow-extruded);
 }
 
 .insure-claim-modal__title {
-  font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;
 }
 
-.insure-claim-modal__actions { display: flex; gap: 0.75rem; }
+.insure-claim-modal__actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
 
-/* Coverage / asset-type / period / estimate / claim / revaluation grids */
-.insure-coverage-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 1rem;
+/* Empty state */
+.insure-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: var(--nm-base);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-inset);
 }
 
-.insure-asset-type-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+.insure-empty__icon {
+  width: 56px; height: 56px; margin: 0 auto 1rem;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--nm-base); border-radius: var(--radius-full);
+  box-shadow: var(--shadow-inset); color: var(--nm-text-muted);
 }
 
-.insure-coverage-period-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.insure-estimate-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.insure-claim-info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.insure-revaluation-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
+.insure-empty__text { color: var(--nm-text-secondary); font-size: 0.9rem; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MOBILE (<768px)
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .insure-page { max-width: 100%; }
+  .insure-asset-grid { grid-template-columns: repeat(2, 1fr); }
+  .insure-form-grid { grid-template-columns: 1fr; }
+  .insure-premium-grid { grid-template-columns: repeat(2, 1fr); }
+  .insure-policy-card__stats { grid-template-columns: repeat(2, 1fr); }
+  .insure-risk-display { flex-direction: column; align-items: flex-start; }
+}
 
-  .insure-header {
-    flex-direction: column; align-items: flex-start; gap: 0.75rem;
-  }
-
-  .insure-header__title { font-size: 1.25rem; }
-
-  .insure-steps {
-    overflow-x: auto; -webkit-overflow-scrolling: touch;
-    padding-bottom: 0.5rem; gap: 0.35rem;
-  }
-
-  .insure-step span { display: none; }
-
-  .insure-asset-grid {
-    grid-template-columns: 1fr; gap: 0.75rem;
-  }
-
-  .insure-asset-btn {
-    flex-direction: row; padding: 1rem; gap: 0.75rem;
-  }
-
-  .insure-form-grid {
-    grid-template-columns: 1fr; gap: 0.75rem;
-  }
-
-  .insure-risk-display {
-    flex-direction: column; gap: 1rem; align-items: center;
-  }
-
-  .insure-premium-grid {
-    grid-template-columns: 1fr; gap: 0.75rem;
-  }
-
-  .insure-policy-card { padding: 1rem; }
-
-  .insure-policy-card__stats {
-    grid-template-columns: 1fr; gap: 0.5rem;
-  }
-
-  .insure-policy-card__actions {
-    flex-direction: column;
-  }
-
-  .insure-policy-card__actions .btn { width: 100%; }
-
-  .insure-my-policies-header {
-    flex-direction: column; align-items: flex-start; gap: 0.75rem;
-  }
-
-  .insure-my-policies-actions { width: 100%; }
-  .insure-my-policies-actions .btn { flex: 1; }
-
-  .insure-claim-modal { max-width: 100%; }
-
-  .insure-coverage-grid,
-  .insure-asset-type-grid,
-  .insure-estimate-grid {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
-
-  .insure-coverage-period-grid,
-  .insure-claim-info-grid,
-  .insure-revaluation-grid {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
+@media (max-width: 480px) {
+  .insure-asset-grid { grid-template-columns: 1fr; }
+  .insure-premium-grid { grid-template-columns: 1fr; }
 }
