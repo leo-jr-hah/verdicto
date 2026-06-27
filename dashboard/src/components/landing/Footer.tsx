@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'motion/react';
-import { useRef } from 'react';
 import verdictLogo from '../../assets/newlogo.png';
 
 const XIcon: React.FC<{ size?: number }> = ({ size = 16 }) => (
@@ -23,69 +22,69 @@ export const Footer: React.FC = () => {
   return (
     <motion.footer
       ref={ref}
-      className="landing-footer-terminal"
+      className="rb-footer"
       initial={{ opacity: 0 }}
       animate={inView ? { opacity: 1 } : {}}
       transition={{ duration: 0.6 }}
     >
-      <div className="landing-footer-terminal__inner">
-        {/* Grid: brand + 3 link columns */}
-        <div className="landing-footer-terminal__grid">
+      <div className="rb-footer__inner">
+        <div className="rb-footer__grid">
           {/* Brand */}
-          <div className="landing-footer-terminal__brand">
-            <div className="landing-footer-terminal__brand-name">
-              <img src={verdictLogo} alt="Verdicto" style={{ height: 24, width: 'auto' }} />
+          <div>
+            <div className="rb-footer__brand-name">
+              <img src={verdictLogo} alt="Verdicto" />
               Verdicto
             </div>
-            <p className="landing-footer-terminal__brand-desc">
-              AI-powered RWA oracle on Casper blockchain. Multi-agent valuations, cryptographic receipts, on-chain settlement.
+            <p className="rb-footer__brand-desc">
+              AI-powered RWA oracle on Casper blockchain. Multi-agent valuations,
+              cryptographic receipts, on-chain settlement.
             </p>
           </div>
 
           {/* Product */}
           <div>
-            <div className="landing-footer-terminal__col-title">Product</div>
-            <div className="landing-footer-terminal__links">
-              <Link to="/assess" className="landing-footer-terminal__link">Value Asset</Link>
-              <Link to="/oracle" className="landing-footer-terminal__link">Oracle</Link>
-              <Link to="/borrow" className="landing-footer-terminal__link">Borrow</Link>
-              <Link to="/insure" className="landing-footer-terminal__link">Insure</Link>
-              <Link to="/confidence" className="landing-footer-terminal__link">Confidence</Link>
+            <div className="rb-footer__col-title">Product</div>
+            <div className="rb-footer__links">
+              <Link to="/assess" className="rb-footer__link">Value Asset</Link>
+              <Link to="/oracle" className="rb-footer__link">Oracle</Link>
+              <Link to="/borrow" className="rb-footer__link">Borrow</Link>
+              <Link to="/insure" className="rb-footer__link">Insure</Link>
+              <Link to="/confidence" className="rb-footer__link">Confidence</Link>
             </div>
           </div>
 
           {/* Resources */}
           <div>
-            <div className="landing-footer-terminal__col-title">Resources</div>
-            <div className="landing-footer-terminal__links">
-              <Link to="/architecture" className="landing-footer-terminal__link">Architecture</Link>
-              <Link to="/roadmap" className="landing-footer-terminal__link">Roadmap</Link>
-              <a href="https://docs.casper.network" target="_blank" rel="noopener noreferrer" className="landing-footer-terminal__link">Casper Docs</a>
-              <a href="https://testnet.cspr.live" target="_blank" rel="noopener noreferrer" className="landing-footer-terminal__link">Block Explorer</a>
+            <div className="rb-footer__col-title">Resources</div>
+            <div className="rb-footer__links">
+              <Link to="/architecture" className="rb-footer__link">Architecture</Link>
+              <Link to="/roadmap" className="rb-footer__link">Roadmap</Link>
+              <a href="https://docs.casper.network" target="_blank" rel="noopener noreferrer" className="rb-footer__link">Casper Docs</a>
+              <a href="https://testnet.cspr.live" target="_blank" rel="noopener noreferrer" className="rb-footer__link">Block Explorer</a>
             </div>
           </div>
 
           {/* Network */}
           <div>
-            <div className="landing-footer-terminal__col-title">Network</div>
-            <div className="landing-footer-terminal__links">
-              <span className="landing-footer-terminal__link" style={{ cursor: 'default' }}>Casper Testnet</span>
-              <span className="landing-footer-terminal__link" style={{ cursor: 'default' }}>4 Smart Contracts</span>
-              <span className="landing-footer-terminal__link" style={{ cursor: 'default' }}>x402 Micropayments</span>
+            <div className="rb-footer__col-title">Network</div>
+            <div className="rb-footer__links">
+              <span className="rb-footer__link" style={{ cursor: 'default' }}>Casper Testnet</span>
+              <span className="rb-footer__link" style={{ cursor: 'default' }}>4 Smart Contracts</span>
+              <span className="rb-footer__link" style={{ cursor: 'default' }}>x402 Micropayments</span>
             </div>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="landing-footer-terminal__bottom">
-          <span className="landing-footer-terminal__copy">
+        <div className="rb-footer__bottom">
+          <span className="rb-footer__copy">
             {new Date().getFullYear()} Verdicto. Cryptographically verifiable.
           </span>
-          <div className="landing-footer-terminal__socials">
-            <a href="https://x.com/Verdictoxyz" target="_blank" rel="noopener noreferrer" className="landing-footer-terminal__social" aria-label="Follow on X">
+          <div className="rb-footer__socials">
+            <a href="https://x.com/Verdictoxyz" target="_blank" rel="noopener noreferrer" className="rb-footer__social" aria-label="Follow on X">
               <XIcon size={14} />
             </a>
-            <a href="https://github.com/leo-jr-hah/verdicto" target="_blank" rel="noopener noreferrer" className="landing-footer-terminal__social" aria-label="View on GitHub">
+            <a href="https://github.com/leo-jr-hah/verdicto" target="_blank" rel="noopener noreferrer" className="rb-footer__social" aria-label="View on GitHub">
               <GitHubIcon size={14} />
             </a>
           </div>

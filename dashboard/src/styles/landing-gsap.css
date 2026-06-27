@@ -3,21 +3,9 @@
    Navy Geometric / Technical Brutalism Design System
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Blueprint Grid System ─────────────────────────────────────────────── */
+/* Blueprint grid — REMOVED (flat dark background, no texture) */
 .landing-blueprint {
   position: relative;
-}
-
-.landing-blueprint::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none;
-  z-index: 0;
 }
 
 /* ── Section Dividers (1px hard borders) ───────────────────────────────── */
@@ -600,116 +588,4 @@
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   TESTNET PROOF — Dark Terminal
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.testnet-dark {
-  display: flex;
-  gap: var(--space-12);
-  align-items: center;
-}
-
-.testnet-dark__text {
-  flex: 1 1 400px;
-}
-
-.testnet-dark__terminal {
-  flex: 1 1 400px;
-}
-
-.testnet-dark__terminal-box {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(1, 5, 8, 0.8);
-  overflow: hidden;
-}
-
-.testnet-dark__terminal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.testnet-dark__terminal-dots {
-  display: flex;
-  gap: 6px;
-}
-
-.testnet-dark__terminal-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.testnet-dark__terminal-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.testnet-dark__terminal-body {
-  padding: var(--space-6);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
-  line-height: 1.8;
-}
-
-.testnet-dark__terminal-row {
-  display: flex;
-  justify-content: space-between;
-  padding: var(--space-1) 0;
-}
-
-.testnet-dark__terminal-label-col {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-.testnet-dark__terminal-value {
-  color: var(--accent);
-}
-
-/* Capabilities grid */
-.testnet-dark__caps {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-  margin-top: var(--space-6);
-}
-
-.testnet-dark__cap {
-  padding: var(--space-4);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(4, 20, 34, 0.4);
-}
-
-.testnet-dark__cap-title {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 600;
-  color: #FFFFFF;
-  margin-bottom: var(--space-2);
-}
-
-.testnet-dark__cap-desc {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1.5;
-  margin: 0;
-}
-
-@media (max-width: 768px) {
-  .testnet-dark {
-    flex-direction: column;
-    gap: var(--space-8);
-  }
-
-  .testnet-dark__caps {
-    grid-template-columns: 1fr;
-  }
-}
+/* Testnet dark classes removed — rebuilt in landing-rebuild.css */
