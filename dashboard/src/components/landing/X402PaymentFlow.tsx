@@ -96,16 +96,18 @@ export const X402PaymentFlow: React.FC = () => {
               x402 Protocol
             </div>
             <h2 className="landing-section__title" style={{ textAlign: 'left', marginBottom: '20px' }}>
-              Real CSPR.<br/>Real Agents.<br/>Real Payments.
+              On-Chain Micropayments<br/>Per Agent Request
             </h2>
             <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '24px' }}>
-              The Orchestrator creates native CSPR transfer deploys for every agent request. Each agent validates the cryptographic proof before responding. On-chain settlement for every API call.
+              Every agent request is gated by a native CSPR transfer signed by the user's wallet.
+              The orchestrator verifies the cryptographic payment proof before dispatching to any agent.
+              No API keys. No subscription tiers. Pay per query, settled on-chain.
             </p>
             <div className="x402-check-list">
               {[
-                '2.5 CSPR per assessment',
-                'HMAC-signed receipt chain',
-                'Verifiable on testnet.cspr.live'
+                '2.5 CSPR per assessment on testnet',
+                'HMAC-signed receipt chain for auditability',
+                'All deploys verifiable on cspr.live'
               ].map((text, i) => (
                 <div key={i} className="x402-check-item">
                   <CheckCircle2 size={18} color="var(--accent)" />

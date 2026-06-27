@@ -763,7 +763,7 @@ export const AssessView: React.FC = () => {
                   }}
                 >
                   <Search size={14} />
-                  Try a demo asset
+                  Try a sample asset
                   <ChevronDown
                     size={14}
                     style={{

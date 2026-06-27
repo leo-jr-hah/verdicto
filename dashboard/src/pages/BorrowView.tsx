@@ -30,6 +30,7 @@ import {
 import { PLATFORM_WALLET, LOAN_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
 import { AgentExplainer } from '../components/AgentExplainer';
 import PaymentModal from '../components/PaymentModal';
+import { AppModal, AppModalActions } from '../components/AppModal';
 import { usePaymentFlow } from '../hooks/usePaymentFlow';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -626,7 +627,7 @@ export const BorrowView: React.FC = () => {
               }
               setStep(1);
             }} className="btn" style={{ flex: 1, fontSize: '0.85rem' }}>
-              Try Demo
+              Try Sample
             </button>
             <button onClick={() => setStep(1)} className="btn btn-primary" style={{ flex: 2 }}>
               Continue <ArrowRight size={16} />
@@ -882,7 +883,7 @@ export const BorrowView: React.FC = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
             <CheckCircle2 size={20} color="var(--text-secondary)" />
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Loan Created (Demo)</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Loan Created</h3>
           </div>
 
           <div className="borrow-offer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -965,7 +966,7 @@ export const BorrowView: React.FC = () => {
             color: 'var(--text-secondary)',
           }}>
             <Info size={14} style={{ verticalAlign: 'middle', marginRight: '0.4rem', color: 'var(--text-secondary)' }} />
-            <strong>Demo Mode</strong>  - Simulated loan disbursed to your wallet. In production, real CSPR would be transferred on-chain. Monitor your health ratio to avoid liquidation.
+            <strong>Testnet Mode</strong> — Loan disbursed via testnet CSPR. On mainnet, real CSPR would transfer on-chain. Monitor your health ratio to avoid liquidation.
             {currentLoan.disbursementTxHash && (
               <> Tx: <code style={{ fontSize: '0.75rem' }}>{currentLoan.disbursementTxHash.slice(0, 16)}...</code></>
             )}
@@ -1035,49 +1036,29 @@ export const BorrowView: React.FC = () => {
           )}
 
           {/* Repay modal */}
-          {repayLoanId && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="borrow-repay-overlay"
-              onClick={() => setRepayLoanId(null)}
-            >
-              <motion.div
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                className="borrow-repay-modal"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Repay Loan</h3>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                    Amount (CSPR)
-                  </label>
-                  <input
-                    type="number"
-                    value={repayAmount}
-                    onChange={(e) => setRepayAmount(e.target.value)}
-                    placeholder="Enter amount"
-                    className="input"
-                  />
-                </div>
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  <button onClick={() => setRepayLoanId(null)} className="btn" style={{ flex: 1 }}>
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleConfirmRepay}
-                    disabled={!repayAmount || loanLoading}
-                    className="btn btn-primary"
-                    style={{ flex: 1, opacity: !repayAmount || loanLoading ? 0.5 : 1 }}
-                  >
-                    {loanLoading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <DollarSign size={16} />}
-                    Confirm Repay
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
+          <AppModal open={!!repayLoanId} onClose={() => setRepayLoanId(null)}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Repay Loan</h3>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
+                Amount (CSPR)
+              </label>
+              <input
+                type="number"
+                value={repayAmount}
+                onChange={(e) => setRepayAmount(e.target.value)}
+                placeholder="Enter amount"
+                className="input"
+              />
+            </div>
+            <AppModalActions
+              onCancel={() => setRepayLoanId(null)}
+              onConfirm={handleConfirmRepay}
+              confirmLabel="Confirm Repay"
+              confirmDisabled={!repayAmount || loanLoading}
+              confirmLoading={loanLoading}
+              confirmIcon={<DollarSign size={16} />}
+            />
+          </AppModal>
         </motion.div>
       )}
 

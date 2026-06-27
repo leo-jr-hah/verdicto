@@ -134,6 +134,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   padding: '0.75rem',
                   cursor: signing ? 'not-allowed' : 'pointer',
                   opacity: signing ? 0.5 : 1,
+                  background: 'var(--bg-sunken)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border-strong)',
                 }}
               >
                 Cancel
@@ -145,9 +148,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 style={{
                   flex: 2,
                   padding: '0.75rem',
-                  background: signing ? 'var(--red-700)' : 'var(--red-600)',
-                  color: 'white',
+                  background: signing ? '#9A3E24' : '#B7410E',
+                  color: '#FFFFFF',
                   cursor: signing ? 'wait' : 'pointer',
+                  border: 'none',
+                  fontWeight: 600,
                 }}
               >
                 {signing ? (

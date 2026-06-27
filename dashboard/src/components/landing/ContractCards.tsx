@@ -62,7 +62,7 @@ export const ContractCards: React.FC = () => {
             >
               {contract.hash === 'pending' ? 'Deploying to Testnet' : (
                 <>
-                  View on Explorer <ExternalLink size={16} />
+                  View Deploy <ExternalLink size={16} />
                 </>
               )}
             </motion.a>

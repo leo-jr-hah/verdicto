@@ -369,8 +369,22 @@ const FlipButton: React.FC<{
         boxShadow: '0 0 16px var(--accent-glow)',
       };
 
-  const Tag = to ? Link : 'button';
-  const tagProps = to ? { to } : { onClick };
+  const isHashLink = to?.startsWith('/#');
+
+  const handleClick = () => {
+    if (isHashLink) {
+      const id = to!.replace('/#', '');
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+    }
+    onClick?.();
+  };
+
+  const Tag = to && !isHashLink ? Link : 'button';
+  const tagProps = to && !isHashLink ? { to } : { onClick: handleClick };
 
   return (
     // @ts-expect-error polymorphic tag

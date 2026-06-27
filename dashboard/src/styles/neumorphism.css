@@ -843,62 +843,32 @@
    DISPUTE VIEW — BUTTONS
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-/* ── Challenge Button (Uiverse.io by cssbuttons-io) ─────────────────────────
-   Expanding circle fill on hover. Uses --nm-accent (red brand).
-   The ::before pseudo-element is a circle that scales up from bottom-right
-   to fill the entire button on hover.
-────────────────────────────────────────────────────────────────────────────── */
+/* ── Challenge Button ───────────────────────────────────────────────────── */
 .dispute-challenge-btn {
-  --color: var(--nm-accent);
-  font-family: inherit;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 18px;
-  position: relative;
+  padding: 8px 20px;
   cursor: pointer;
-  overflow: hidden;
-  border: 2px solid var(--color);
-  transition: color 0.5s ease;
-  z-index: 1;
-  font-size: 0.82rem;
+  border: 2px solid var(--accent);
   border-radius: 8px;
+  font-size: 0.82rem;
   font-weight: 600;
-  color: var(--color);
-  background: transparent;
-}
-
-.dispute-challenge-btn::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  background: var(--color);
-  height: 150px;
-  width: 200px;
-  border-radius: 50%;
-  top: 100%;
-  left: 100%;
-  transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  color: white;
+  background: var(--accent);
+  transition: all 180ms ease-out;
 }
 
 .dispute-challenge-btn:hover {
-  color: var(--text-inverse);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 20px var(--nm-accent-glow);
-}
-
-.dispute-challenge-btn:hover::before {
-  top: -30px;
-  left: -30px;
+  box-shadow: 0 4px 16px var(--accent-glow);
 }
 
 .dispute-challenge-btn:active {
   transform: translateY(0) scale(0.97);
-}
-
-.dispute-challenge-btn:active::before {
-  background: var(--nm-accent-hover);
-  transition: background 0s;
 }
 
 /* ── Refresh Button (neumorphic) ──────────────────────────────────────────── */

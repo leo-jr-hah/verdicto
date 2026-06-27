@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Shield,
   ArrowRight,
@@ -29,6 +29,7 @@ import {
 import { PLATFORM_WALLET, INSURANCE_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
 import { AgentExplainer } from '../components/AgentExplainer';
 import PaymentModal from '../components/PaymentModal';
+import { AppModal, AppModalActions } from '../components/AppModal';
 import { usePaymentFlow } from '../hooks/usePaymentFlow';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -553,7 +554,7 @@ export const InsureView: React.FC = () => {
               }
               setStep(1);
             }} style={{ ...btnSecondary, flex: 1, fontSize: '0.85rem' }}>
-              Try Demo
+              Try Sample
             </button>
             <button onClick={() => setStep(1)} style={{ ...btnPrimary, flex: 2 }}>
               Continue <ArrowRight size={16} />
@@ -776,7 +777,7 @@ export const InsureView: React.FC = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={cardStyle}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
             <CheckCircle2 size={20} color="var(--text-secondary)" />
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Insurance Policy Created (Demo)</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Insurance Policy Created</h3>
           </div>
 
           <div className="insure-claim-info-grid">
@@ -899,134 +900,88 @@ export const InsureView: React.FC = () => {
           )}
 
           {/* Claim modal */}
-          {claimPolicyId && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              style={{
-                position: 'fixed', inset: 0,
-                background: 'rgba(0,0,0,0.7)',
-                backdropFilter: 'blur(4px)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                zIndex: 1000,
-              }}
-              onClick={() => setClaimPolicyId(null)}
-            >
-              <motion.div
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                style={{ ...cardStyle, maxWidth: 400, width: '90%' }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.75rem' }}>
-                  File Insurance Claim
-                </h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-                  Describe the loss or damage to your asset. The AI will revalue the asset and determine your payout.
-                </p>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                    Reason for Claim <span style={{ color: 'var(--accent)' }}>*</span>
-                  </label>
-                  <textarea
-                    value={claimReason}
-                    onChange={(e) => setClaimReason(e.target.value)}
-                    placeholder="e.g. Property value dropped 30% due to market crash..."
-                    rows={3}
-                    style={{ ...inputStyle, resize: 'vertical' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  <button onClick={() => setClaimPolicyId(null)} style={{ ...btnSecondary, flex: 1 }}>
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleConfirmClaim}
-                    disabled={!claimReason || insLoading}
-                    style={{ ...btnPrimary, flex: 1, opacity: !claimReason || insLoading ? 0.5 : 1 }}
-                  >
-                    {insLoading ? (
-                      <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Processing...</>
-                    ) : (
-                      <>File Claim</>
-                    )}
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
+          <AppModal open={!!claimPolicyId} onClose={() => setClaimPolicyId(null)}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.75rem' }}>
+              File Insurance Claim
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+              Describe the loss or damage to your asset. The AI will revalue the asset and determine your payout.
+            </p>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
+                Reason for Claim <span style={{ color: 'var(--accent)' }}>*</span>
+              </label>
+              <textarea
+                value={claimReason}
+                onChange={(e) => setClaimReason(e.target.value)}
+                placeholder="e.g. Property value dropped 30% due to market crash..."
+                rows={3}
+                style={{ ...inputStyle, resize: 'vertical' }}
+              />
+            </div>
+            <AppModalActions
+              onCancel={() => setClaimPolicyId(null)}
+              onConfirm={handleConfirmClaim}
+              confirmLabel="File Claim"
+              confirmDisabled={!claimReason || insLoading}
+              confirmLoading={insLoading}
+            />
+          </AppModal>
 
           {/* Claim result modal */}
-          <AnimatePresence>
-            {claimResult && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                style={{
-                  position: 'fixed', inset: 0,
-                  background: 'rgba(0,0,0,0.7)',
-                  backdropFilter: 'blur(4px)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  zIndex: 1001,
-                }}
-                onClick={() => {}} // Don't close on backdrop click
-              >
-                <motion.div
-                  initial={{ scale: 0.95 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0.95 }}
-                  style={{ ...cardStyle, maxWidth: 400, width: '90%' }}
-                >
-                  <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                    {claimResult.status === 'paid' ? (
-                      <>
-                        <CheckCircle2 size={48} color="var(--text-secondary)" style={{ marginBottom: '0.5rem' }} />
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Claim Approved! (Demo)</h3>
-                        <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-secondary)', margin: '0.5rem 0' }}>
-                          ${claimResult.amount.toLocaleString()}
-                        </p>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', margin: 0 }}>
-                          Simulated payout - no real funds transferred
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <XCircle size={48} color="var(--error)" style={{ marginBottom: '0.5rem' }} />
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Claim Denied (Demo)</h3>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.5rem 0' }}>
-                          Loss did not exceed the deductible threshold.
-                        </p>
-                      </>
-                    )}
-                  </div>
+          <AppModal
+            open={!!claimResult}
+            onClose={() => {
+              if (publicKey) loadPolicies(publicKey);
+            }}
+            maxWidth={400}
+          >
+            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+              {claimResult?.status === 'paid' ? (
+                <>
+                  <CheckCircle2 size={48} color="var(--text-secondary)" style={{ marginBottom: '0.5rem' }} />
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Claim Approved</h3>
+                  <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-secondary)', margin: '0.5rem 0' }}>
+                    ${claimResult.amount.toLocaleString()}
+                  </p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', margin: 0 }}>
+                    Payout processed on testnet
+                  </p>
+                </>
+              ) : (
+                <>
+                  <XCircle size={48} color="var(--error)" style={{ marginBottom: '0.5rem' }} />
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Claim Denied</h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.5rem 0' }}>
+                    Loss did not exceed the deductible threshold.
+                  </p>
+                </>
+              )}
+            </div>
 
-                  {claimResult.revaluation && (
-                    <div className="insure-revaluation-grid">
-                      <div style={{ padding: '0.75rem', background: 'var(--bg-base)', borderRadius: '8px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Previous Value</div>
-                        <div style={{ fontWeight: 600 }}>{formatCurrency(claimResult.revaluation.previousValue)}</div>
-                      </div>
-                      <div style={{ padding: '0.75rem', background: 'var(--bg-base)', borderRadius: '8px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Current Value</div>
-                        <div style={{ fontWeight: 600, color: 'var(--error)' }}>{formatCurrency(claimResult.revaluation.newValue)}</div>
-                      </div>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={() => {
-                      // Clear claim result and refresh
-                      if (publicKey) loadPolicies(publicKey);
-                    }}
-                    style={{ ...btnPrimary, width: '100%' }}
-                  >
-                    Done
-                  </button>
-                </motion.div>
-              </motion.div>
+            {claimResult?.revaluation && (
+              <div className="insure-revaluation-grid">
+                <div style={{ padding: '0.75rem', background: 'var(--bg-base)', borderRadius: '8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Previous Value</div>
+                  <div style={{ fontWeight: 600 }}>{formatCurrency(claimResult.revaluation.previousValue)}</div>
+                </div>
+                <div style={{ padding: '0.75rem', background: 'var(--bg-base)', borderRadius: '8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Current Value</div>
+                  <div style={{ fontWeight: 600, color: 'var(--error)' }}>{formatCurrency(claimResult.revaluation.newValue)}</div>
+                </div>
+              </div>
             )}
-          </AnimatePresence>
+
+            <button
+              onClick={() => {
+                if (publicKey) loadPolicies(publicKey);
+              }}
+              className="btn"
+              style={{ width: '100%', padding: '0.75rem', background: 'var(--red-600)', color: 'white', marginTop: '1.5rem' }}
+            >
+              Done
+            </button>
+          </AppModal>
         </motion.div>
       )}
     </div>

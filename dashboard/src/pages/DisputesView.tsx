@@ -6,6 +6,7 @@ import { fetchOracleVerdicts, fetchDisputes, fileDispute, triggerRetrial, type O
 import { useWallet } from '../contexts/CSPRClickContext';
 import { DISPUTE_FEE_CSPR } from '../config/casper';
 import PaymentModal from '../components/PaymentModal';
+import { AppModal, AppModalActions } from '../components/AppModal';
 import { usePaymentFlow } from '../hooks/usePaymentFlow';
 
 function formatTime(ts: number): string {
@@ -413,8 +414,8 @@ export const DisputesView: React.FC = () => {
                         color: d.outcome === 'overturned' ? 'var(--red-600)' : 'var(--text-secondary)',
                       }}>
                         {d.outcome === 'overturned'
-                          ? 'Re-trial found the original verdict incorrect. Decision has been reversed. (Demo - simulated re-trial)'
-                          : 'Re-trial confirmed the original verdict. Challenge was unsuccessful. (Demo - simulated re-trial)'}
+                          ? 'Re-trial found the original verdict incorrect. Decision has been reversed.'
+                          : 'Re-trial confirmed the original verdict. Challenge was unsuccessful.'}
                       </div>
                     )}
                   </div>
@@ -612,155 +613,109 @@ export const DisputesView: React.FC = () => {
         )}
       </motion.div>
 
-      {/* ── Step 1: Reason Form Modal (matches PaymentModal design) ─── */}
-      <AnimatePresence>
-        {showReasonModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+      {/* ── Step 1: Reason Form Modal (shared AppModal) ─── */}
+      <AppModal open={!!showReasonModal} onClose={handleReasonCancel}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: '50%',
+            background: 'var(--error-bg)',
+            border: '2px solid var(--error-border)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 1rem',
+          }}>
+            <Swords size={24} color="var(--error)" />
+          </div>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+            Challenge Verdict
+          </h3>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+            Stake {DISPUTE_FEE_CSPR} CSPR and explain why this verdict is wrong.
+          </p>
+        </div>
+
+        {/* Wallet status */}
+        <div style={{
+          padding: '10px 14px', borderRadius: '8px', marginBottom: '16px',
+          background: wallet.connected ? 'var(--success-bg)' : 'var(--error-bg)',
+          border: `1px solid ${wallet.connected ? 'var(--success-border)' : 'var(--error-border)'}`,
+          display: 'flex', alignItems: 'center', gap: '8px',
+        }}>
+          <span style={{ fontSize: '0.8rem', color: wallet.connected ? 'var(--text-secondary)' : 'var(--red-600)', fontWeight: 500 }}>
+            {wallet.connected
+              ? `Wallet connected: ${wallet.publicKey?.slice(0, 8)}...${wallet.publicKey?.slice(-6)}`
+              : 'Wallet not connected. Please connect first.'}
+          </span>
+        </div>
+
+        {/* Target asset */}
+        <div style={{
+          background: 'var(--bg-sunken)',
+          borderRadius: '10px', padding: '1rem 1.25rem', marginBottom: '16px',
+        }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Target Asset
+          </div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+            {showReasonModal}
+          </div>
+        </div>
+
+        {/* Reason textarea */}
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Why is this verdict wrong?
+          </div>
+          <textarea
+            value={disputeReason}
+            onChange={(e) => setDisputeReason(e.target.value)}
+            placeholder="e.g. Comparable sales data is 18 days stale. Market moved 15% since last data pull..."
+            rows={4}
             style={{
-              position: 'fixed', inset: 0, zIndex: 1000,
-              background: 'var(--overlay-bg)',
-              backdropFilter: 'blur(4px)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: '100%', padding: '10px 12px', borderRadius: '8px',
+              border: '1px solid var(--border)', background: 'var(--bg-primary)',
+              color: 'var(--text-primary)', fontSize: '0.9rem', lineHeight: 1.5,
+              resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box',
             }}
-            onClick={handleReasonCancel}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                background: 'var(--bg-elevated)',
-                border: '1px solid var(--border)',
-                borderRadius: '16px',
-                padding: '2rem',
-                maxWidth: '480px',
-                width: '90%',
-                boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
-              }}
-            >
-              {/* Header */}
-              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                <div style={{
-                  width: 56, height: 56, borderRadius: '50%',
-                  background: 'var(--error-bg)',
-                  border: '2px solid var(--error-border)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 1rem',
-                }}>
-                  <Swords size={24} color="var(--error)" />
-                </div>
-                <h3 style={{
-                  fontSize: '1.2rem', fontWeight: 700,
-                  color: 'var(--text-primary)', marginBottom: '0.5rem',
-                }}>
-                  Challenge Verdict
-                </h3>
-                <p style={{
-                  fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0,
-                }}>
-                  Stake {DISPUTE_FEE_CSPR} CSPR and explain why this verdict is wrong.
-                </p>
-              </div>
+          />
+        </div>
 
-              {/* Wallet status */}
-              <div style={{
-                padding: '10px 14px', borderRadius: '8px', marginBottom: '16px',
-                background: wallet.connected ? 'var(--success-bg)' : 'var(--error-bg)',
-                border: `1px solid ${wallet.connected ? 'var(--success-border)' : 'var(--error-border)'}`,
-                display: 'flex', alignItems: 'center', gap: '8px',
-              }}>
-                <span style={{ fontSize: '0.8rem', color: wallet.connected ? 'var(--text-secondary)' : 'var(--red-600)', fontWeight: 500 }}>
-                  {wallet.connected
-                    ? `Wallet connected: ${wallet.publicKey?.slice(0, 8)}...${wallet.publicKey?.slice(-6)}`
-                    : 'Wallet not connected. Please connect first.'}
-                </span>
-              </div>
+        {/* Stake info */}
+        <div style={{
+          padding: '12px', borderRadius: '8px',
+          background: 'var(--warning-bg)', border: '1px solid var(--warning-border)',
+          marginBottom: '16px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+            <AlertTriangle size={14} style={{ color: 'var(--text-tertiary)' }} />
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-tertiary)' }}>Stake Required: {DISPUTE_FEE_CSPR} CSPR</span>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+            If the re-trial overturns the verdict, you get your stake back. If upheld, the stake goes to the original jurors.
+          </p>
+        </div>
 
-              {/* Target asset */}
-              <div style={{
-                background: 'var(--bg-sunken)',
-                borderRadius: '10px', padding: '1rem 1.25rem', marginBottom: '16px',
-              }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Target Asset
-                </div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                  {showReasonModal}
-                </div>
-              </div>
-
-              {/* Reason textarea */}
-              <div style={{ marginBottom: '16px' }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Why is this verdict wrong?
-                </div>
-                <textarea
-                  value={disputeReason}
-                  onChange={(e) => setDisputeReason(e.target.value)}
-                  placeholder="e.g. Comparable sales data is 18 days stale. Market moved 15% since last data pull..."
-                  rows={4}
-                  style={{
-                    width: '100%', padding: '10px 12px', borderRadius: '8px',
-                    border: '1px solid var(--border)', background: 'var(--bg-primary)',
-                    color: 'var(--text-primary)', fontSize: '0.9rem', lineHeight: 1.5,
-                    resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-
-              {/* Stake info */}
-              <div style={{
-                padding: '12px', borderRadius: '8px',
-                background: 'var(--warning-bg)', border: '1px solid var(--warning-border)',
-                marginBottom: '16px',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                  <AlertTriangle size={14} style={{ color: 'var(--text-tertiary)' }} />
-                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-tertiary)' }}>Stake Required: {DISPUTE_FEE_CSPR} CSPR</span>
-                </div>
-                <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                  If the re-trial overturns the verdict, you get your stake back. If upheld, the stake goes to the original jurors.
-                </p>
-              </div>
-
-              {/* Error */}
-              {reasonError && (
-                <div style={{
-                  background: 'var(--error-bg)',
-                  border: '1px solid var(--error-border)',
-                  borderRadius: '8px', padding: '0.75rem', marginBottom: '1rem',
-                  fontSize: '0.8rem', color: 'var(--error)',
-                }}>
-                  {reasonError}
-                </div>
-              )}
-
-              {/* Buttons */}
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <button
-                  onClick={handleReasonCancel}
-                  className="dispute-modal-cancel-btn"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleReasonSubmit}
-                  disabled={!disputeReason.trim() || !wallet.connected}
-                  className="dispute-modal-submit-btn"
-                >
-                  <Swords size={16} />
-                  Continue to Payment
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+        {/* Error */}
+        {reasonError && (
+          <div style={{
+            background: 'var(--error-bg)',
+            border: '1px solid var(--error-border)',
+            borderRadius: '8px', padding: '0.75rem', marginBottom: '1rem',
+            fontSize: '0.8rem', color: 'var(--error)',
+          }}>
+            {reasonError}
+          </div>
         )}
-      </AnimatePresence>
+
+        {/* Buttons — using AppModalActions pattern */}
+        <AppModalActions
+          onCancel={handleReasonCancel}
+          onConfirm={handleReasonSubmit}
+          confirmLabel="Continue to Payment"
+          confirmDisabled={!disputeReason.trim() || !wallet.connected}
+          confirmIcon={<Swords size={16} />}
+        />
+      </AppModal>
 
       {/* ── Step 2: Payment Confirmation Modal (shared component) ── */}
       <PaymentModal
