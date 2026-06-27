@@ -947,7 +947,19 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 
   app.get('/health', (_, res) => {
-    res.json({ status: 'ok', service: 'orchestrator', demoMode: DEMO_MODE, timestamp: new Date().toISOString() });
+    res.json({
+      status: 'ok',
+      service: 'orchestrator',
+      demoMode: DEMO_MODE,
+      version: '2.0.0',
+      uptime: Math.round(process.uptime()),
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  // Railway healthcheck endpoint
+  app.get('/', (_, res) => {
+    res.json({ status: 'ok', service: 'verdicto-orchestrator' });
   });
 
   app.get('/api/transactions', (_, res) => {

@@ -1,0 +1,866 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ENTERPRISE WIZARD — Shared layout for Borrow, Insure, Predict
+   Consistent structure, mobile-first, professional
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Page Container ──────────────────────────────────────────────────────── */
+.wizard-page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* ── Page Header ─────────────────────────────────────────────────────────── */
+.wizard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.wizard-header__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.wizard-header__title {
+  font-family: var(--font-sans);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.wizard-header__subtitle {
+  color: var(--text-tertiary);
+  font-size: 0.9rem;
+  margin: 0.35rem 0 0;
+  line-height: 1.5;
+  max-width: 520px;
+}
+
+.wizard-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* ── Step Progress Bar ───────────────────────────────────────────────────── */
+.wizard-progress {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 2rem;
+  padding: 0;
+}
+
+.wizard-progress__step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.wizard-progress__step--active {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.wizard-progress__step--done {
+  color: var(--text-secondary);
+}
+
+.wizard-progress__dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--bg-sunken);
+  color: var(--text-tertiary);
+  border: 2px solid var(--border);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.wizard-progress__step--active .wizard-progress__dot {
+  background: var(--accent);
+  color: var(--text-inverse);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.wizard-progress__step--done .wizard-progress__dot {
+  background: var(--text-secondary);
+  color: var(--text-inverse);
+  border-color: var(--text-secondary);
+}
+
+.wizard-progress__line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  margin: 0 0.5rem;
+  min-width: 20px;
+  transition: background 0.2s ease;
+}
+
+.wizard-progress__line--done {
+  background: var(--text-secondary);
+}
+
+/* ── Wizard Card ─────────────────────────────────────────────────────────── */
+.wizard-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.wizard-card__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.35rem;
+}
+
+.wizard-card__desc {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+/* ── Asset Type Selector ─────────────────────────────────────────────────── */
+.wizard-asset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.wizard-asset-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 1rem;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--bg-elevated);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.wizard-asset-btn:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-sunken);
+}
+
+.wizard-asset-btn--active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.wizard-asset-btn__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--bg-sunken);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+}
+
+.wizard-asset-btn--active .wizard-asset-btn__icon {
+  background: var(--accent);
+  color: var(--text-inverse);
+}
+
+.wizard-asset-btn__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.wizard-asset-btn__sub {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+}
+
+/* ── Form Fields ─────────────────────────────────────────────────────────── */
+.wizard-field {
+  margin-bottom: 1.25rem;
+}
+
+.wizard-field__label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.01em;
+}
+
+.wizard-field__label--required::after {
+  content: ' *';
+  color: var(--accent);
+}
+
+.wizard-field__input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.wizard-field__input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.wizard-field__input::placeholder {
+  color: var(--text-quaternary);
+}
+
+textarea.wizard-field__input {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.wizard-field__hint {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-top: 0.3rem;
+}
+
+.wizard-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* ── Metric Cards (assessment results, loan offers) ──────────────────────── */
+.wizard-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.wizard-metric {
+  text-align: center;
+  padding: 1rem;
+  background: var(--bg-sunken);
+  border-radius: 10px;
+  border: 1px solid var(--border-weak);
+}
+
+.wizard-metric__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+}
+
+.wizard-metric__value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.wizard-metric__value--accent {
+  color: var(--accent);
+}
+
+.wizard-metric__value--secondary {
+  color: var(--text-secondary);
+}
+
+/* ── Info Panel (trust breakdown, escrow, etc.) ──────────────────────────── */
+.wizard-info-panel {
+  padding: 1rem 1.25rem;
+  background: var(--bg-sunken);
+  border-radius: 10px;
+  border: 1px solid var(--border-weak);
+  margin-bottom: 1rem;
+}
+
+.wizard-info-panel__title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.wizard-info-panel__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.wizard-info-panel__row strong {
+  color: var(--text-primary);
+}
+
+/* ── Status Badge ────────────────────────────────────────────────────────── */
+.wizard-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.wizard-status--active {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.wizard-status--warning {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.wizard-status--danger {
+  background: var(--error-soft);
+  color: var(--error);
+}
+
+.wizard-status--neutral {
+  background: var(--bg-sunken);
+  color: var(--text-secondary);
+}
+
+/* ── Action Buttons ──────────────────────────────────────────────────────── */
+.wizard-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.wizard-actions .btn {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+.wizard-actions .btn-primary {
+  flex: 2;
+}
+
+/* ── Error Banner ────────────────────────────────────────────────────────── */
+.wizard-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--error-soft);
+  border: 1px solid var(--error);
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.wizard-error__msg {
+  font-size: 0.85rem;
+  color: var(--error);
+  font-weight: 500;
+  flex: 1;
+}
+
+.wizard-error__hint {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+/* ── Loading State ───────────────────────────────────────────────────────── */
+.wizard-loading {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.wizard-loading__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: wizard-spin 0.8s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.wizard-loading__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
+}
+
+.wizard-loading__desc {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+}
+
+@keyframes wizard-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Result Card (loan created, policy created, prediction result) ───────── */
+.wizard-result-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.wizard-result-header__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--success-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--success);
+}
+
+.wizard-result-header__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ── Policy / Loan Card (in list view) ───────────────────────────────────── */
+.wizard-list-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.15s ease;
+}
+
+.wizard-list-card:hover {
+  border-color: var(--border-strong);
+}
+
+.wizard-list-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.wizard-list-card__id {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--text-tertiary);
+  margin-bottom: 0.15rem;
+}
+
+.wizard-list-card__amount {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.wizard-list-card__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border-weak);
+  border-bottom: 1px solid var(--border-weak);
+  margin-bottom: 0.75rem;
+}
+
+.wizard-list-card__stat-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.15rem;
+}
+
+.wizard-list-card__stat-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ── Health Bar ──────────────────────────────────────────────────────────── */
+.wizard-health-bar {
+  height: 6px;
+  background: var(--bg-sunken);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.wizard-health-bar__fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* ── Empty State ─────────────────────────────────────────────────────────── */
+.wizard-empty {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-tertiary);
+}
+
+.wizard-empty__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--bg-sunken);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: var(--text-tertiary);
+}
+
+.wizard-empty__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.35rem;
+}
+
+.wizard-empty__text {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  max-width: 320px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* ── Wallet Connect Prompt ───────────────────────────────────────────────── */
+.wizard-wallet-prompt {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  margin-bottom: 1.25rem;
+}
+
+.wizard-wallet-prompt__text {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ── Prediction Specific ─────────────────────────────────────────────────── */
+.wizard-question-input {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  font-size: 1rem;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.wizard-question-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.wizard-question-input::placeholder {
+  color: var(--text-quaternary);
+}
+
+.wizard-demo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.wizard-demo-chip {
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.wizard-demo-chip:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.wizard-timeframe-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.wizard-timeframe-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.wizard-timeframe-btn:hover {
+  border-color: var(--border-strong);
+}
+
+.wizard-timeframe-btn--active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Probability Ring ────────────────────────────────────────────────────── */
+.wizard-prob-ring {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+
+.wizard-prob-ring__label {
+  position: absolute;
+  text-align: center;
+}
+
+.wizard-prob-ring__value {
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.wizard-prob-ring__desc {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* ── Agent Row (prediction agents) ───────────────────────────────────────── */
+.wizard-agent-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-weak);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.wizard-agent-row:last-child {
+  border-bottom: none;
+}
+
+.wizard-agent-row:hover {
+  background: var(--bg-sunken);
+}
+
+.wizard-agent-row__dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wizard-agent-row__name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.wizard-agent-row__role {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+}
+
+.wizard-agent-row__bar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-sunken);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0 0.75rem;
+}
+
+.wizard-agent-row__bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+
+.wizard-agent-row__prob {
+  font-size: 0.9rem;
+  font-weight: 700;
+  min-width: 50px;
+  text-align: right;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .wizard-page {
+    padding: 0;
+  }
+
+  .wizard-header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .wizard-header__actions {
+    width: 100%;
+  }
+
+  .wizard-card {
+    padding: 1.25rem;
+    border-radius: 10px;
+  }
+
+  .wizard-asset-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .wizard-asset-btn {
+    flex-direction: row;
+    padding: 1rem;
+    text-align: left;
+  }
+
+  .wizard-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .wizard-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .wizard-actions {
+    flex-direction: column;
+  }
+
+  .wizard-actions .btn {
+    flex: none;
+  }
+
+  .wizard-actions .btn-primary {
+    flex: none;
+  }
+
+  .wizard-list-card__stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .wizard-progress__step span {
+    display: none;
+  }
+
+  .wizard-progress__dot {
+    width: 32px;
+    height: 32px;
+  }
+
+  .wizard-header__title {
+    font-size: 1.4rem;
+  }
+
+  .wizard-demo-chips {
+    flex-direction: column;
+  }
+
+  .wizard-timeframe-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wizard-agent-row__bar {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .wizard-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .wizard-list-card__stats {
+    grid-template-columns: 1fr;
+  }
+
+  .wizard-header__title {
+    font-size: 1.25rem;
+  }
+}

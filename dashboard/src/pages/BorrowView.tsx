@@ -38,6 +38,7 @@ import { usePaymentFlow } from '../hooks/usePaymentFlow';
 const ASSET_TYPES: Array<{
   id: AssetType;
   label: string;
+  sub: string;
   icon: React.ReactNode;
   demo: {
     name: string;
@@ -52,6 +53,7 @@ const ASSET_TYPES: Array<{
   {
     id: 'real-estate',
     label: 'Real Estate',
+    sub: '60–75% LTV',
     icon: <Building2 size={20} />,
     demo: {
       name: 'Downtown Austin Office Tower',
@@ -64,6 +66,7 @@ const ASSET_TYPES: Array<{
   {
     id: 'art',
     label: 'Fine Art',
+    sub: '30–50% LTV',
     icon: <Palette size={20} />,
     demo: {
       name: 'Basquiat Untitled (Skull), 1981',
@@ -76,6 +79,7 @@ const ASSET_TYPES: Array<{
   {
     id: 'commodity',
     label: 'Commodity',
+    sub: '70–85% LTV',
     icon: <Gem size={20} />,
     demo: {
       name: 'LBMA Gold Bar - 400 oz',
@@ -87,11 +91,7 @@ const ASSET_TYPES: Array<{
   },
 ];
 
-const LTV_TIERS: Record<AssetType, string> = {
-  'real-estate': '60-75%',
-  'art': '30-50%',
-  'commodity': '70-85%',
-};
+const STEPS = ['Asset Type', 'Details', 'Assessment', 'Loan Offer'];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -105,9 +105,9 @@ function formatCurrency(value: number): string {
 }
 
 function healthColor(ratio: number): string {
-  if (ratio >= 1.5) return 'var(--text-secondary)';
-  if (ratio >= 1.2) return 'var(--text-tertiary)';
-  return 'var(--red-600)';
+  if (ratio >= 1.5) return 'var(--success)';
+  if (ratio >= 1.2) return 'var(--warning)';
+  return 'var(--error)';
 }
 
 function healthLabel(ratio: number): string {
@@ -116,227 +116,40 @@ function healthLabel(ratio: number): string {
   return 'Liquidation Risk';
 }
 
-function statusColor(status: string): string {
+function statusVariant(status: string): string {
   switch (status) {
-    case 'active': case 'healthy': return 'var(--text-secondary)';
-    case 'warning': return 'var(--text-tertiary)';
-    case 'repaid': return 'var(--red-600)';
-    case 'liquidated': return 'var(--red-600)';
-    default: return 'var(--text-tertiary)';
+    case 'active': case 'healthy': return 'active';
+    case 'warning': return 'warning';
+    case 'repaid': case 'liquidated': return 'danger';
+    default: return 'neutral';
   }
 }
-
-// ─── Styles ──────────────────────────────────────────────────────────────────
-
-// CSS classes are now in styles/borrow-responsive.css
-// Only dynamic/computed styles remain as JS objects
 
 // ─── LTV Tooltip ─────────────────────────────────────────────────────────────
 
 const LTVTooltip: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [show, setShow] = useState(false);
   return (
-    <span
-      className="borrow-tooltip"
-      onMouseEnter={() => setShow(true)}
-      onMouseLeave={() => setShow(false)}
-    >
+    <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', cursor: 'help' }}
+      onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
       {children}
-      <Info size={14} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
+      <Info size={13} style={{ color: 'var(--text-tertiary)' }} />
       {show && (
-        <span className="borrow-tooltip__popup">
-          <strong>Loan-to-Value (LTV) Ratio</strong>
+        <span style={{
+          position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)',
+          background: 'var(--text-primary)', color: 'var(--text-inverse)',
+          padding: '0.6rem 0.8rem', borderRadius: '8px', fontSize: '0.75rem',
+          lineHeight: 1.5, width: '260px', zIndex: 50, marginBottom: '6px',
+          boxShadow: 'var(--shadow-lg)',
+        }}>
+          <strong>Loan-to-Value (LTV) Ratio</strong><br />
           LTV measures the loan amount as a percentage of the asset's appraised value.
-          For example, a 65% LTV on a $1M asset means you can borrow up to $650K.
+          A 65% LTV on a $1M asset means you can borrow up to $650K.
           <br /><br />
-          <strong>Lower LTV = safer loan</strong> - you keep more equity,
-          and lenders offer better rates. Higher LTV means more leverage but higher liquidation risk.
+          <strong>Lower LTV = safer loan</strong> — more equity, better rates.
         </span>
       )}
     </span>
-  );
-};
-
-// ─── Step Indicator ──────────────────────────────────────────────────────────
-
-const StepIndicator: React.FC<{ current: number; steps: string[] }> = ({ current, steps }) => (
-  <div className="borrow-steps">
-    {steps.map((label, i) => (
-      <React.Fragment key={i}>
-        <div className="borrow-step" style={{
-          color: i <= current ? 'var(--accent)' : 'var(--text-tertiary)',
-          fontWeight: i === current ? 700 : 500,
-        }}>
-          <div className="borrow-step__dot" style={{
-            background: i < current ? 'var(--accent)' : i === current ? 'rgba(255,59,59,0.1)' : 'var(--bg-base)',
-            color: i < current ? 'var(--text-inverse)' : i === current ? 'var(--accent)' : 'var(--text-tertiary)',
-          }}>
-            {i < current ? <CheckCircle2 size={14} /> : i + 1}
-          </div>
-          <span>{label}</span>
-        </div>
-        {i < steps.length - 1 && (
-          <div className="borrow-step__line" style={{
-            background: i < current ? 'var(--accent)' : 'var(--border)',
-          }} />
-        )}
-      </React.Fragment>
-    ))}
-  </div>
-);
-
-// ─── Loan Card ───────────────────────────────────────────────────────────────
-
-const LoanCard: React.FC<{
-  loan: Loan;
-  onRepay: (loanId: string) => void;
-  onRevalue: (loanId: string) => void;
-  loading: boolean;
-}> = ({ loan, onRepay, onRevalue, loading }) => {
-  const health = loan.healthRatio ?? 1.5;
-  const ltv = loan.ltvRatio;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="borrow-loan-card"
-    >
-      <div className="borrow-loan-card__header">
-        <div>
-          <div className="borrow-loan-card__id">
-            Loan #{loan.loanId.slice(0, 8)}
-          </div>
-          <div className="borrow-loan-card__amount">
-            ${loan.loanAmountCSPR.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-          </div>
-        </div>
-        <span className="borrow-loan-card__status" style={{
-          background: `${statusColor(loan.status)}15`,
-          color: statusColor(loan.status),
-        }}>
-          {loan.status}
-        </span>
-      </div>
-
-      <div className="borrow-loan-card__stats">
-        <div>
-          <div className="borrow-loan-card__stat-label">Collateral</div>
-          <div className="borrow-loan-card__stat-value">{formatCurrency(loan.assessedValue)}</div>
-        </div>
-        <div>
-          <div className="borrow-loan-card__stat-label"><LTVTooltip>LTV</LTVTooltip></div>
-          <div className="borrow-loan-card__stat-value">{(ltv * 100).toFixed(0)}%</div>
-        </div>
-        <div>
-          <div className="borrow-loan-card__stat-label">Health</div>
-          <div className="borrow-loan-card__stat-value" style={{ color: healthColor(health) }}>
-            {health.toFixed(2)}x - {healthLabel(health)}
-          </div>
-        </div>
-      </div>
-
-      {/* Verdicto Point 1: Trust breakdown - shows why LTV is what it is */}
-      {loan.trustBreakdown && (
-        <div className="borrow-loan-card__info-box">
-          <div className="borrow-loan-card__info-title">
-            Trust-Score LTV Breakdown
-          </div>
-          <div className="borrow-loan-card__info-row">
-            <span>Confidence: <strong>{(loan.trustBreakdown.confidence * 100).toFixed(0)}%</strong></span>
-            <span>Value Ratio: <strong>{(loan.trustBreakdown.valueRatio * 100).toFixed(0)}%</strong></span>
-            <span>LTV Range: <strong>{loan.trustBreakdown.ltvRange}</strong></span>
-          </div>
-        </div>
-      )}
-
-      {/* Verdicto Point 2: Escrow tx hashes - visible on-chain proof */}
-      {(loan.escrowLockTxHash || loan.escrowReleaseTxHash) && (
-        <div className="borrow-loan-card__info-box">
-          <div className="borrow-loan-card__info-title">
-            Escrow Transactions
-          </div>
-          {loan.escrowLockTxHash && (
-            <div style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-              🔒 Lock: <code style={{ fontSize: '0.75rem', background: 'var(--bg-elevated)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
-                {loan.escrowLockTxHash.slice(0, 16)}...
-              </code>
-            </div>
-          )}
-          {loan.escrowReleaseTxHash && (
-            <div style={{ color: 'var(--text-secondary)' }}>
-              🔓 Release: <code style={{ fontSize: '0.75rem', background: 'var(--bg-elevated)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
-                {loan.escrowReleaseTxHash.slice(0, 16)}...
-              </code>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Verdicto Point 3: Revaluation history - shows juror deliberation */}
-      {loan.revaluationHistory && loan.revaluationHistory.length > 0 && (
-        <div className="borrow-loan-card__info-box">
-          <div className="borrow-loan-card__info-title">
-            Revaluation History ({loan.revaluationHistory.length})
-          </div>
-          {loan.revaluationHistory.slice(-3).map((rev, i) => (
-            <div key={i} className="borrow-loan-card__reval-item" style={{
-              borderLeft: `3px solid ${rev.status === 'warning' || rev.status === 'liquidated' ? 'var(--red-600)' : 'var(--border)'}`,
-            }}>
-              <div className="borrow-loan-card__reval-header">
-                <span style={{ color: 'var(--text-secondary)' }}>
-                  {new Date(rev.timestamp).toLocaleString()}
-                </span>
-                <span style={{ color: rev.previousValue <= rev.newValue ? 'var(--text-secondary)' : 'var(--red-600)', fontWeight: 600 }}>
-                  {rev.previousValue <= rev.newValue ? '+' : ''}{((rev.newValue - rev.previousValue) / rev.previousValue * 100).toFixed(1)}%
-                </span>
-              </div>
-              <div className="borrow-loan-card__reval-detail">
-                Agent A ({rev.valuationA.method}): ${rev.valuationA.value.toLocaleString()} | 
-                Agent B ({rev.valuationB.method}): ${rev.valuationB.value.toLocaleString()}
-              </div>
-              {rev.deliberationReceiptHash && (
-                <div style={{ color: 'var(--text-tertiary)', fontSize: '0.7rem', marginTop: '0.25rem' }}>
-                  📜 Receipt: {rev.deliberationReceiptHash.slice(0, 16)}...
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Health bar */}
-      <div className="borrow-loan-card__health-bar">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.min((health / 2) * 100, 100)}%` }}
-          transition={{ duration: 0.5 }}
-          className="borrow-loan-card__health-fill"
-          style={{ background: healthColor(health) }}
-        />
-      </div>
-
-      {loan.status === 'active' && (
-        <div className="borrow-loan-card__actions">
-          <button
-            onClick={() => onRepay(loan.loanId)}
-            disabled={loading}
-            className="btn btn-primary"
-            style={{ flex: 1, fontSize: '0.85rem', padding: '0.6rem' }}
-          >
-            <DollarSign size={14} /> Repay
-          </button>
-          <button
-            onClick={() => onRevalue(loan.loanId)}
-            disabled={loading}
-            className="btn"
-            style={{ flex: 1, fontSize: '0.85rem', padding: '0.6rem' }}
-          >
-            <RefreshCw size={14} /> Revalue
-          </button>
-        </div>
-      )}
-    </motion.div>
   );
 };
 
@@ -383,7 +196,7 @@ export const BorrowView: React.FC = () => {
   const [repayAmount, setRepayAmount] = useState('');
   const [repayLoanId, setRepayLoanId] = useState<string | null>(null);
 
-  // Assessment payment flow (shared hook)
+  // Assessment payment flow
   const pendingAssessRequest = useRef<AssessmentRequest | null>(null);
   const assessPayment = usePaymentFlow(signPayment, ASSESSMENT_FEE_CSPR, async (paymentProof) => {
     const request = pendingAssessRequest.current;
@@ -393,30 +206,17 @@ export const BorrowView: React.FC = () => {
 
   // Load existing loans on mount
   useEffect(() => {
-    if (connected && publicKey) {
-      loadLoans(publicKey);
-    }
+    if (connected && publicKey) loadLoans(publicKey);
   }, [connected, publicKey, loadLoans]);
 
-  // Advance to step 2 when assessment starts loading
-  useEffect(() => {
-    if (assessmentLoading) {
-      setStep(2);
-    }
-  }, [assessmentLoading]);
-
-  // Advance to step 2 when assessment completes (success or error)
-  useEffect(() => {
-    if (assessmentResult || assessmentError) {
-      setStep(2);
-    }
-  }, [assessmentResult, assessmentError]);
+  // Auto-advance steps based on assessment state
+  useEffect(() => { if (assessmentLoading) setStep(2); }, [assessmentLoading]);
+  useEffect(() => { if (assessmentResult || assessmentError) setStep(2); }, [assessmentResult, assessmentError]);
 
   // ─── Handlers ────────────────────────────────────────────────────────────
 
   const handleSubmitAsset = useCallback(() => {
     if (!assetName || !assetValue) return;
-
     pendingAssessRequest.current = {
       assetType,
       name: assetName,
@@ -431,7 +231,6 @@ export const BorrowView: React.FC = () => {
 
   const handleRequestLoan = useCallback(async () => {
     if (!assessmentResult || !publicKey) return;
-
     const request: LoanCreateRequest = {
       borrowerPublicKey: publicKey,
       assetId: assessmentResult.assetId,
@@ -442,7 +241,6 @@ export const BorrowView: React.FC = () => {
       confidence: Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence),
       assessmentId: assessmentResult.assetId,
     };
-
     await submitLoan(request);
   }, [assessmentResult, publicKey, submitLoan]);
 
@@ -451,30 +249,22 @@ export const BorrowView: React.FC = () => {
     if (paymentRequired && signPayment && !signing) {
       setSigning(true);
       setSignError(null);
-
       signPayment(PLATFORM_WALLET, LOAN_FEE_CSPR)
         .then(({ paymentProof }) => {
           if (!assessmentResult || !publicKey) return;
-          submitLoanWithProof(
-            {
-              borrowerPublicKey: publicKey,
-              assetId: assessmentResult.assetId,
-              assetType: assessmentResult.assetType,
-              assetName: assessmentResult.name,
-              assessedValue: assessmentResult.assessedValue,
-              askingPrice: assessmentResult.askingPrice,
-              confidence: Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence),
-              assessmentId: assessmentResult.assetId,
-            },
-            paymentProof,
-          );
+          submitLoanWithProof({
+            borrowerPublicKey: publicKey,
+            assetId: assessmentResult.assetId,
+            assetType: assessmentResult.assetType,
+            assetName: assessmentResult.name,
+            assessedValue: assessmentResult.assessedValue,
+            askingPrice: assessmentResult.askingPrice,
+            confidence: Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence),
+            assessmentId: assessmentResult.assetId,
+          }, paymentProof);
         })
-        .catch((err) => {
-          setSignError(err.message || 'Payment signing failed');
-        })
-        .finally(() => {
-          setSigning(false);
-        });
+        .catch((err) => setSignError(err.message || 'Payment signing failed'))
+        .finally(() => setSigning(false));
     }
   }, [paymentRequired, signPayment, signing, submitLoanWithProof, assessmentResult, publicKey]);
 
@@ -494,11 +284,7 @@ export const BorrowView: React.FC = () => {
   const handleConfirmRepay = useCallback(async () => {
     if (!repayLoanId || !repayAmount) return;
     const success = await repay(repayLoanId, parseFloat(repayAmount));
-    if (success) {
-      setRepayLoanId(null);
-      setRepayAmount('');
-      if (publicKey) loadLoans(publicKey);
-    }
+    if (success) { setRepayLoanId(null); setRepayAmount(''); if (publicKey) loadLoans(publicKey); }
   }, [repayLoanId, repayAmount, repay, publicKey, loadLoans]);
 
   const handleRevalue = useCallback(async (loanId: string) => {
@@ -515,10 +301,26 @@ export const BorrowView: React.FC = () => {
     setRequestedLtv('');
   }, [reset]);
 
+  const loadDemo = useCallback(() => {
+    const demo = ASSET_TYPES.find(t => t.id === assetType)?.demo;
+    if (demo) {
+      setAssetName(demo.name);
+      setAssetDescription(demo.description);
+      setAssetValue(demo.value);
+      setRequestedLtv(demo.ltv);
+      if (demo.location) setLocation(demo.location);
+      if (demo.artistOrMedium) setArtistOrMedium(demo.artistOrMedium);
+      if (demo.weightOz) setWeightOz(String(demo.weightOz));
+    }
+    setStep(1);
+  }, [assetType]);
+
+  const displayStep = step === 4 ? -1 : step;
+
   // ─── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="borrow-page">
+    <div className="wizard-page">
       {/* Assessment Payment Modal */}
       <PaymentModal
         open={assessPayment.showModal}
@@ -538,95 +340,83 @@ export const BorrowView: React.FC = () => {
         onCancel={assessPayment.cancel}
       />
 
-      {/* Header */}
-      <div className="borrow-header">
-        <div>
-          <h1 className="borrow-header__title">
-            <Landmark size={24} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-            Borrow
-          </h1>
-          <p className="borrow-header__subtitle">
-            Get instant liquidity against your RWA collateral
-          </p>
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <div className="wizard-header">
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+          <div className="wizard-header__icon">
+            <Landmark size={24} />
+          </div>
+          <div>
+            <h1 className="wizard-header__title">Borrow</h1>
+            <p className="wizard-header__subtitle">
+              Get instant liquidity against your real-world asset collateral. AI-powered valuation determines your loan terms.
+            </p>
+          </div>
         </div>
-        {step < 3 && (
-          <button onClick={() => setStep(4)} className="btn" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
-            <FileText size={14} /> My Loans ({loans.length})
-          </button>
-        )}
+        <div className="wizard-header__actions">
+          {step < 4 && (
+            <button onClick={() => setStep(4)} className="btn" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}>
+              <FileText size={14} /> My Loans ({loans.length})
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Step indicator */}
-      {step < 4 && (
-        <StepIndicator
-          current={step}
-          steps={['Asset Type', 'Details', 'Assessment', 'Loan Offer']}
-        />
+      {/* ── Step Progress ────────────────────────────────────────────────── */}
+      {displayStep >= 0 && (
+        <div className="wizard-progress">
+          {STEPS.map((label, i) => (
+            <React.Fragment key={i}>
+              <div className={`wizard-progress__step ${i < displayStep ? 'wizard-progress__step--done' : i === displayStep ? 'wizard-progress__step--active' : ''}`}>
+                <div className="wizard-progress__dot">
+                  {i < displayStep ? <CheckCircle2 size={14} /> : i + 1}
+                </div>
+                <span>{label}</span>
+              </div>
+              {i < STEPS.length - 1 && (
+                <div className={`wizard-progress__line ${i < displayStep ? 'wizard-progress__line--done' : ''}`} />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
       )}
 
-      {/* Error banner */}
+      {/* ── Error Banner ─────────────────────────────────────────────────── */}
       {(loanError || signError) && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="borrow-error-banner card"
-          style={{ borderColor: 'var(--error)', background: 'rgba(239,68,68,0.05)' }}
-        >
-          <AlertCircle size={18} color="var(--error)" />
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="wizard-error">
+          <AlertCircle size={18} color="var(--error)" style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ flex: 1 }}>
-            <span className="borrow-error-banner__msg">
-              {loanError || signError}
-            </span>
-            {loanErrorHint && (
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                💡 {loanErrorHint}
-              </div>
-            )}
+            <div className="wizard-error__msg">{loanError || signError}</div>
+            {loanErrorHint && <div className="wizard-error__hint">💡 {loanErrorHint}</div>}
           </div>
-          <button onClick={() => { clearError(); setSignError(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)' }}>
+          <button onClick={() => { clearError(); setSignError(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: 4 }}>
             <XCircle size={16} />
           </button>
         </motion.div>
       )}
 
-      {/* ─── Step 0: Asset Type ─────────────────────────────────────────── */}
+      {/* ═══ Step 0: Asset Type ═══════════════════════════════════════════ */}
       {step === 0 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>
-            What type of asset will you use as collateral?
-          </h3>
-          <div className="borrow-asset-grid">
-            {ASSET_TYPES.map((type) => {
-              const isActive = assetType === type.id;
-              return (
-                <button
-                  key={type.id}
-                  onClick={() => setAssetType(type.id)}
-                  className={`borrow-asset-btn ${isActive ? 'borrow-asset-btn--active' : ''}`}
-                >
-                  {type.icon}
-                  <span className="borrow-asset-btn__label">{type.label}</span>
-                  <span className="borrow-asset-btn__ltv">
-                    <LTVTooltip>LTV: {LTV_TIERS[type.id]}</LTVTooltip>
-                  </span>
-                </button>
-              );
-            })}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="wizard-card">
+          <h3 className="wizard-card__title">Select Collateral Type</h3>
+          <p className="wizard-card__desc">Choose the asset class you want to use as collateral for your loan.</p>
+
+          <div className="wizard-asset-grid">
+            {ASSET_TYPES.map((type) => (
+              <button
+                key={type.id}
+                onClick={() => setAssetType(type.id)}
+                className={`wizard-asset-btn ${assetType === type.id ? 'wizard-asset-btn--active' : ''}`}
+              >
+                <div className="wizard-asset-btn__icon">{type.icon}</div>
+                <div className="wizard-asset-btn__label">{type.label}</div>
+                <div className="wizard-asset-btn__sub">{type.sub}</div>
+              </button>
+            ))}
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button onClick={() => {
-              const demo = ASSET_TYPES.find(t => t.id === assetType)?.demo;
-              if (demo) {
-                setAssetName(demo.name);
-                setAssetDescription(demo.description);
-                setAssetValue(demo.value);
-                setRequestedLtv(demo.ltv);
-                if (demo.location) setLocation(demo.location);
-                if (demo.artistOrMedium) setArtistOrMedium(demo.artistOrMedium);
-                if (demo.weightOz) setWeightOz(String(demo.weightOz));
-              }
-              setStep(1);
-            }} className="btn" style={{ flex: 1, fontSize: '0.85rem' }}>
+
+          <div className="wizard-actions">
+            <button onClick={loadDemo} className="btn" style={{ flex: 1 }}>
               Try Sample
             </button>
             <button onClick={() => setStep(1)} className="btn btn-primary" style={{ flex: 2 }}>
@@ -636,240 +426,140 @@ export const BorrowView: React.FC = () => {
         </motion.div>
       )}
 
-      {/* ─── Step 1: Asset Details ──────────────────────────────────────── */}
+      {/* ═══ Step 1: Asset Details ════════════════════════════════════════ */}
       {step === 1 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>
-            Describe your collateral
-          </h3>
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="wizard-card">
+          <h3 className="wizard-card__title">Describe Your Collateral</h3>
+          <p className="wizard-card__desc">Provide details about the asset. Our AI agents will independently evaluate it.</p>
 
-          {/* Wallet connect prompt - shown inline when not connected */}
           {!connected && (
-            <div style={{
-              padding: '1rem',
-              marginBottom: '1.25rem',
-              borderRadius: '8px',
-              border: '1px solid var(--accent)',
-              background: 'var(--accent-soft)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-            }}>
-              <AlertCircle size={18} color="var(--accent)" />
-              <span style={{ flex: 1, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            <div className="wizard-wallet-prompt">
+              <AlertCircle size={18} color="var(--accent)" style={{ flexShrink: 0 }} />
+              <span className="wizard-wallet-prompt__text">
                 Connect your Casper wallet to run the assessment and receive a loan offer.
               </span>
-              <button
-                onClick={() => wallet.connect()}
-                className="btn btn-primary"
-                style={{ fontSize: '0.8rem', padding: '0.5rem 1rem', whiteSpace: 'nowrap' }}
-              >
+              <button onClick={() => wallet.connect()} className="btn btn-primary" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem', whiteSpace: 'nowrap' }}>
                 Connect Wallet
               </button>
             </div>
           )}
 
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-              Asset Name <span style={{ color: 'var(--accent)' }}>*</span>
-            </label>
-            <input
-              value={assetName}
-              onChange={(e) => setAssetName(e.target.value)}
-              placeholder="e.g. Downtown Office Building"
-              className="input"
-            />
+          <div className="wizard-field">
+            <label className="wizard-field__label wizard-field__label--required">Asset Name</label>
+            <input value={assetName} onChange={(e) => setAssetName(e.target.value)} placeholder="e.g. Downtown Office Building" className="wizard-field__input" />
           </div>
 
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-              Description
-            </label>
-            <textarea
-              value={assetDescription}
-              onChange={(e) => setAssetDescription(e.target.value)}
-              placeholder="Key details about the asset..."
-              rows={3}
-              style={{ resize: 'vertical' }}
-              className="input"
-            />
+          <div className="wizard-field">
+            <label className="wizard-field__label">Description</label>
+            <textarea value={assetDescription} onChange={(e) => setAssetDescription(e.target.value)} placeholder="Key details about the asset — condition, location, income, provenance..." rows={3} className="wizard-field__input" />
           </div>
 
-          <div className="borrow-form-grid">
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                Estimated Value (USD) <span style={{ color: 'var(--accent)' }}>*</span>
-              </label>
-              <input
-                type="number"
-                value={assetValue}
-                onChange={(e) => setAssetValue(e.target.value)}
-                placeholder="500000"
-                className="input"
-              />
+          <div className="wizard-form-row">
+            <div className="wizard-field">
+              <label className="wizard-field__label wizard-field__label--required">Estimated Value (USD)</label>
+              <input type="number" value={assetValue} onChange={(e) => setAssetValue(e.target.value)} placeholder="e.g. 1,420,000" className="wizard-field__input" />
             </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                <LTVTooltip>Requested LTV (%)</LTVTooltip>
-              </label>
-              <input
-                type="number"
-                value={requestedLtv}
-                onChange={(e) => setRequestedLtv(e.target.value)}
-                placeholder={`e.g. ${LTV_TIERS[assetType].split('-')[0]}`}
-                min={10}
-                max={90}
-                className="input"
-              />
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
-                Typical range: {LTV_TIERS[assetType]}
+            <div className="wizard-field">
+              <label className="wizard-field__label">Target LTV (%)</label>
+              <input type="number" value={requestedLtv} onChange={(e) => setRequestedLtv(e.target.value)} placeholder="e.g. 65" className="wizard-field__input" />
+              <div className="wizard-field__hint">
+                Typical range: {assetType === 'real-estate' ? '60–75%' : assetType === 'art' ? '30–50%' : '70–85%'}
               </div>
             </div>
           </div>
 
-          {/* Asset-specific fields */}
           {assetType === 'real-estate' && (
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                Location <span style={{ color: 'var(--accent)' }}>*</span>
-              </label>
-              <input
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g. Austin, TX"
-                className="input"
-              />
+            <div className="wizard-field">
+              <label className="wizard-field__label">Location</label>
+              <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Austin, TX" className="wizard-field__input" />
             </div>
           )}
-
           {assetType === 'art' && (
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                Artist & Medium <span style={{ color: 'var(--accent)' }}>*</span>
-              </label>
-              <input
-                value={artistOrMedium}
-                onChange={(e) => setArtistOrMedium(e.target.value)}
-                placeholder="e.g. Basquiat, Acrylic and oilstick on canvas"
-                className="input"
-              />
+            <div className="wizard-field">
+              <label className="wizard-field__label">Artist / Medium</label>
+              <input value={artistOrMedium} onChange={(e) => setArtistOrMedium(e.target.value)} placeholder="e.g. Basquiat, Acrylic on canvas" className="wizard-field__input" />
             </div>
           )}
-
           {assetType === 'commodity' && (
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                Weight (oz) <span style={{ color: 'var(--accent)' }}>*</span>
-              </label>
-              <input
-                type="number"
-                value={weightOz}
-                onChange={(e) => setWeightOz(e.target.value)}
-                placeholder="e.g. 400"
-                min={0.01}
-                step={0.01}
-                className="input"
-              />
+            <div className="wizard-field">
+              <label className="wizard-field__label">Weight (oz)</label>
+              <input type="number" value={weightOz} onChange={(e) => setWeightOz(e.target.value)} placeholder="e.g. 400" className="wizard-field__input" />
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button onClick={() => setStep(0)} className="btn" style={{ flex: 1 }}>
+          <div className="wizard-actions">
+            <button onClick={() => setStep(0)} className="btn">
               <ArrowLeft size={16} /> Back
             </button>
-            {!connected ? (
-              <button
-                onClick={() => wallet.connect()}
-                className="btn btn-primary"
-                style={{ flex: 2 }}
-              >
-                Connect Wallet to Continue <ArrowRight size={16} />
-              </button>
-            ) : (
-              <button
-                onClick={handleSubmitAsset}
-                disabled={!assetName || !assetValue || assessmentLoading}
-                className="btn btn-primary"
-                style={{
-                  flex: 2,
-                  opacity: !assetName || !assetValue || assessmentLoading ? 0.5 : 1,
-                }}
-              >
-                {assessmentLoading ? (
-                  <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Running Assessment...</>
-                ) : (
-                  <>Run Assessment <ArrowRight size={16} /></>
-                )}
-              </button>
-            )}
+            <button
+              onClick={handleSubmitAsset}
+              disabled={!assetName || !assetValue || assessPayment.signing}
+              className="btn btn-primary"
+              style={{ opacity: !assetName || !assetValue ? 0.5 : 1 }}
+            >
+              {assessPayment.signing ? (
+                <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Signing...</>
+              ) : (
+                <>Run Assessment <ArrowRight size={16} /></>
+              )}
+            </button>
           </div>
         </motion.div>
       )}
 
-      {/* ─── Step 2: Assessment Running ─────────────────────────────────── */}
+      {/* ═══ Step 2: Assessment ═══════════════════════════════════════════ */}
       {step === 2 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="wizard-card">
           {assessmentLoading ? (
-            <div style={{ textAlign: 'center', padding: '2rem' }}>
-              <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', color: 'var(--accent)', marginBottom: '1rem' }} />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-                AI Agents Are Assessing Your Asset
-              </h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                3 independent analysts are evaluating your collateral...
-              </p>
+            <div className="wizard-loading">
+              <div className="wizard-loading__spinner" />
+              <div className="wizard-loading__title">AI Agents Are Assessing Your Asset</div>
+              <div className="wizard-loading__desc">3 independent analysts are evaluating your collateral...</div>
             </div>
           ) : assessmentResult ? (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <CheckCircle2 size={20} color="var(--text-secondary)" />
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Assessment Complete</h3>
+              <div className="wizard-result-header">
+                <div className="wizard-result-header__icon">
+                  <CheckCircle2 size={20} />
+                </div>
+                <div className="wizard-result-header__title">Assessment Complete</div>
               </div>
 
-          <div className="borrow-assess-grid">
-                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Your Estimate</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(assessmentResult.askingPrice)}</div>
+              <div className="wizard-metrics">
+                <div className="wizard-metric">
+                  <div className="wizard-metric__label">Your Estimate</div>
+                  <div className="wizard-metric__value">{formatCurrency(assessmentResult.askingPrice)}</div>
                 </div>
-                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>AI Valuation</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent)' }}>
-                    {formatCurrency(assessmentResult.assessedValue)}
-                  </div>
+                <div className="wizard-metric">
+                  <div className="wizard-metric__label">AI Valuation</div>
+                  <div className="wizard-metric__value wizard-metric__value--accent">{formatCurrency(assessmentResult.assessedValue)}</div>
                 </div>
-                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>
-                    <LTVTooltip>Max Loan (75% LTV)</LTVTooltip>
-                  </div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                    {formatCurrency(assessmentResult.assessedValue * 0.75)}
-                  </div>
+                <div className="wizard-metric">
+                  <div className="wizard-metric__label"><LTVTooltip>Max Loan (75% LTV)</LTVTooltip></div>
+                  <div className="wizard-metric__value wizard-metric__value--secondary">{formatCurrency(assessmentResult.assessedValue * 0.75)}</div>
                 </div>
               </div>
 
-              {/* Agent explanation for assessment */}
-              {assessmentResult && (
-                <div style={{ marginTop: '1.5rem' }}>
-                  <AgentExplainer assessment={assessmentResult} />
-                </div>
-              )}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <AgentExplainer assessment={assessmentResult} />
+              </div>
 
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                <button onClick={handleStartNew} className="btn" style={{ flex: 1 }}>
+              <div className="wizard-actions">
+                <button onClick={handleStartNew} className="btn">
                   <RotateCcw size={16} /> Start Over
                 </button>
-                <button onClick={handleRequestLoan} className="btn btn-primary" style={{ flex: 2 }}>
+                <button onClick={handleRequestLoan} className="btn btn-primary">
                   <Landmark size={16} /> Request Loan
                 </button>
               </div>
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <div className="wizard-loading">
               <AlertTriangle size={32} color="var(--text-tertiary)" style={{ marginBottom: '1rem' }} />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Assessment Failed</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+              <div className="wizard-loading__title">Assessment Failed</div>
+              <div className="wizard-loading__desc" style={{ marginBottom: '1.5rem' }}>
                 {assessmentError || 'The AI agents couldn\'t complete the assessment. Please try again.'}
-              </p>
+              </div>
               <button onClick={handleStartNew} className="btn btn-primary">
                 <RotateCcw size={16} /> Try Again
               </button>
@@ -878,56 +568,43 @@ export const BorrowView: React.FC = () => {
         </motion.div>
       )}
 
-      {/* ─── Step 3: Loan Offer / Confirmation ──────────────────────────── */}
+      {/* ═══ Step 3: Loan Created ═════════════════════════════════════════ */}
       {step === 3 && currentLoan && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <CheckCircle2 size={20} color="var(--text-secondary)" />
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Loan Created</h3>
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="wizard-card">
+          <div className="wizard-result-header">
+            <div className="wizard-result-header__icon">
+              <CheckCircle2 size={20} />
+            </div>
+            <div className="wizard-result-header__title">Loan Created</div>
           </div>
 
-          <div className="borrow-offer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div style={{ padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Loan Amount</div>
-              <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+          <div className="wizard-metrics" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+            <div className="wizard-metric">
+              <div className="wizard-metric__label">Loan Amount</div>
+              <div className="wizard-metric__value wizard-metric__value--secondary">
                 ${currentLoan.loanAmountCSPR.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </div>
             </div>
-            <div style={{ padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Collateral Value</div>
-              <div style={{ fontSize: '1.3rem', fontWeight: 700 }}>
-                {formatCurrency(currentLoan.assessedValue)}
-              </div>
+            <div className="wizard-metric">
+              <div className="wizard-metric__label">Collateral Value</div>
+              <div className="wizard-metric__value">{formatCurrency(currentLoan.assessedValue)}</div>
             </div>
-            <div style={{ padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>
-                <LTVTooltip>LTV Ratio</LTVTooltip>
-              </div>
-              <div style={{ fontSize: '1.3rem', fontWeight: 700 }}>
-                {currentLoan.ltvRatio.toFixed(0)}%
-              </div>
+            <div className="wizard-metric">
+              <div className="wizard-metric__label"><LTVTooltip>LTV Ratio</LTVTooltip></div>
+              <div className="wizard-metric__value">{currentLoan.ltvRatio.toFixed(0)}%</div>
             </div>
-            <div style={{ padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Platform Fee</div>
-              <div style={{ fontSize: '1.3rem', fontWeight: 700 }}>
-                {currentLoan.platformFeeCSPR} CSPR
-              </div>
+            <div className="wizard-metric">
+              <div className="wizard-metric__label">Platform Fee</div>
+              <div className="wizard-metric__value">{currentLoan.platformFeeCSPR} CSPR</div>
             </div>
           </div>
 
-          {/* Verdicto Point 1: Trust breakdown - why this LTV */}
           {currentLoan.trustBreakdown && (
-            <div style={{
-              padding: '0.75rem 1rem',
-              background: 'var(--bg-base)',
-              borderRadius: '8px',
-              marginBottom: '1rem',
-              fontSize: '0.8rem',
-            }}>
-              <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-                Trust-Score LTV Breakdown
+            <div className="wizard-info-panel">
+              <div className="wizard-info-panel__title">
+                <Info size={14} /> Trust-Score LTV Breakdown
               </div>
-              <div style={{ display: 'flex', gap: '1.5rem', color: 'var(--text-secondary)' }}>
+              <div className="wizard-info-panel__row">
                 <span>Confidence: <strong>{(currentLoan.trustBreakdown.confidence * 100).toFixed(0)}%</strong></span>
                 <span>Value Ratio: <strong>{(currentLoan.trustBreakdown.valueRatio * 100).toFixed(0)}%</strong></span>
                 <span>LTV Range: <strong>{currentLoan.trustBreakdown.ltvRange}</strong></span>
@@ -935,78 +612,67 @@ export const BorrowView: React.FC = () => {
             </div>
           )}
 
-          {/* Verdicto Point 2: Escrow lock tx hash */}
-          {currentLoan.escrowLockTxHash && (
-            <div style={{
-              padding: '0.75rem 1rem',
-              background: 'var(--success-soft)',
-              border: '1px solid var(--success)',
-              borderRadius: '8px',
-              marginBottom: '1rem',
-              fontSize: '0.8rem',
-            }}>
-              <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
-                🔒 Escrow Lock
-              </div>
-              <div style={{ color: 'var(--text-secondary)' }}>
-                Collateral locked on-chain: <code style={{ fontSize: '0.75rem', background: 'var(--bg-elevated)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
-                  {currentLoan.escrowLockTxHash.slice(0, 20)}...
-                </code>
-              </div>
+          {(currentLoan.escrowLockTxHash || currentLoan.escrowReleaseTxHash) && (
+            <div className="wizard-info-panel">
+              <div className="wizard-info-panel__title">Escrow Transactions</div>
+              {currentLoan.escrowLockTxHash && (
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                  🔒 Lock: <code style={{ fontSize: '0.75rem', background: 'var(--bg-elevated)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
+                    {currentLoan.escrowLockTxHash.slice(0, 16)}...
+                  </code>
+                </div>
+              )}
+              {currentLoan.escrowReleaseTxHash && (
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  🔓 Release: <code style={{ fontSize: '0.75rem', background: 'var(--bg-elevated)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
+                    {currentLoan.escrowReleaseTxHash.slice(0, 16)}...
+                  </code>
+                </div>
+              )}
             </div>
           )}
 
-          <div style={{
-            padding: '1rem',
-            background: 'var(--success-soft)',
-            border: '1px solid var(--success)',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            fontSize: '0.85rem',
-            color: 'var(--text-secondary)',
-          }}>
-            <Info size={14} style={{ verticalAlign: 'middle', marginRight: '0.4rem', color: 'var(--text-secondary)' }} />
-            <strong>Testnet Mode</strong> — Loan disbursed via testnet CSPR. On mainnet, real CSPR would transfer on-chain. Monitor your health ratio to avoid liquidation.
-            {currentLoan.disbursementTxHash && (
-              <> Tx: <code style={{ fontSize: '0.75rem' }}>{currentLoan.disbursementTxHash.slice(0, 16)}...</code></>
-            )}
+          <div className="wizard-info-panel" style={{ background: 'var(--success-soft)', border: '1px solid var(--success)' }}>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              <Info size={14} style={{ verticalAlign: 'middle', marginRight: '0.4rem' }} />
+              <strong>Testnet Mode</strong> — Loan disbursed via testnet CSPR. Monitor your health ratio to avoid liquidation.
+              {currentLoan.disbursementTxHash && (
+                <> Tx: <code style={{ fontSize: '0.75rem' }}>{currentLoan.disbursementTxHash.slice(0, 16)}...</code></>
+              )}
+            </div>
           </div>
 
-          {/* Agent explanation with loan context */}
           {assessmentResult && (
             <div style={{ marginBottom: '1.5rem' }}>
-              <AgentExplainer
-                assessment={assessmentResult}
-                loan={{
-                  ltvRatio: currentLoan.ltvRatio,
-                  loanAmountCSPR: currentLoan.loanAmountCSPR,
-                  trustBreakdown: currentLoan.trustBreakdown,
-                }}
-              />
+              <AgentExplainer assessment={assessmentResult} loan={{
+                ltvRatio: currentLoan.ltvRatio,
+                loanAmountCSPR: currentLoan.loanAmountCSPR,
+                trustBreakdown: currentLoan.trustBreakdown,
+              }} />
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button onClick={handleStartNew} className="btn" style={{ flex: 1 }}>
+          <div className="wizard-actions">
+            <button onClick={handleStartNew} className="btn">
               <RotateCcw size={16} /> New Loan
             </button>
-            <button onClick={() => setStep(4)} className="btn btn-primary" style={{ flex: 1 }}>
+            <button onClick={() => setStep(4)} className="btn btn-primary">
               <FileText size={16} /> View My Loans
             </button>
           </div>
         </motion.div>
       )}
 
-      {/* ─── Step 4: My Loans ───────────────────────────────────────────── */}
+      {/* ═══ Step 4: My Loans ═════════════════════════════════════════════ */}
       {step === 4 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>My Loans</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>My Loans</h3>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button onClick={handleStartNew} className="btn" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
+              <button onClick={handleStartNew} className="btn" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}>
                 <Landmark size={14} /> New Loan
               </button>
-              <button onClick={() => publicKey && loadLoans(publicKey)} className="btn" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
+              <button onClick={() => publicKey && loadLoans(publicKey)} className="btn" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}>
                 <RefreshCw size={14} /> Refresh
               </button>
             </div>
@@ -1017,38 +683,74 @@ export const BorrowView: React.FC = () => {
               <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--accent)' }} />
             </div>
           ) : loans.length === 0 ? (
-            <div className="card borrow-empty-state">
-              <Landmark size={32} style={{ color: 'var(--text-tertiary)', marginBottom: '0.75rem' }} />
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                No loans yet. Submit an asset to get started.
-              </p>
+            <div className="wizard-empty">
+              <div className="wizard-empty__icon"><Landmark size={24} /></div>
+              <div className="wizard-empty__title">No loans yet</div>
+              <div className="wizard-empty__text">Submit an asset for assessment to receive a loan offer.</div>
             </div>
           ) : (
-            loans.map((loan) => (
-              <LoanCard
-                key={loan.loanId}
-                loan={loan}
-                onRepay={handleRepay}
-                onRevalue={handleRevalue}
-                loading={loanLoading}
-              />
-            ))
+            loans.map((loan) => {
+              const health = loan.healthRatio ?? 1.5;
+              return (
+                <div key={loan.loanId} className="wizard-list-card">
+                  <div className="wizard-list-card__header">
+                    <div>
+                      <div className="wizard-list-card__id">Loan #{loan.loanId.slice(0, 8)}</div>
+                      <div className="wizard-list-card__amount">
+                        ${loan.loanAmountCSPR.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                      </div>
+                    </div>
+                    <span className={`wizard-status wizard-status--${statusVariant(loan.status)}`}>{loan.status}</span>
+                  </div>
+
+                  <div className="wizard-list-card__stats">
+                    <div>
+                      <div className="wizard-list-card__stat-label">Collateral</div>
+                      <div className="wizard-list-card__stat-value">{formatCurrency(loan.assessedValue)}</div>
+                    </div>
+                    <div>
+                      <div className="wizard-list-card__stat-label"><LTVTooltip>LTV</LTVTooltip></div>
+                      <div className="wizard-list-card__stat-value">{(loan.ltvRatio * 100).toFixed(0)}%</div>
+                    </div>
+                    <div>
+                      <div className="wizard-list-card__stat-label">Health</div>
+                      <div className="wizard-list-card__stat-value" style={{ color: healthColor(health) }}>
+                        {health.toFixed(2)}x
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="wizard-health-bar">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min((health / 2) * 100, 100)}%` }}
+                      transition={{ duration: 0.5 }}
+                      className="wizard-health-bar__fill"
+                      style={{ background: healthColor(health) }}
+                    />
+                  </div>
+
+                  {loan.status === 'active' && (
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button onClick={() => handleRepay(loan.loanId)} disabled={loanLoading} className="btn" style={{ flex: 1, fontSize: '0.8rem', padding: '0.5rem' }}>
+                        <DollarSign size={14} /> Repay
+                      </button>
+                      <button onClick={() => handleRevalue(loan.loanId)} disabled={loanLoading} className="btn" style={{ flex: 1, fontSize: '0.8rem', padding: '0.5rem' }}>
+                        <RefreshCw size={14} /> Revalue
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })
           )}
 
           {/* Repay modal */}
           <AppModal open={!!repayLoanId} onClose={() => setRepayLoanId(null)}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Repay Loan</h3>
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                Amount (CSPR)
-              </label>
-              <input
-                type="number"
-                value={repayAmount}
-                onChange={(e) => setRepayAmount(e.target.value)}
-                placeholder="Enter amount"
-                className="input"
-              />
+            <div className="wizard-field">
+              <label className="wizard-field__label">Amount (CSPR)</label>
+              <input type="number" value={repayAmount} onChange={(e) => setRepayAmount(e.target.value)} placeholder="Enter amount" className="wizard-field__input" />
             </div>
             <AppModalActions
               onCancel={() => setRepayLoanId(null)}
@@ -1062,12 +764,7 @@ export const BorrowView: React.FC = () => {
         </motion.div>
       )}
 
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };
