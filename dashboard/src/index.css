@@ -3018,6 +3018,8 @@ a:focus-visible {
   width: 100%;
   padding: 0;
   margin: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .primitive-row {
@@ -3028,12 +3030,21 @@ a:focus-visible {
 
 .primitive-panel {
   padding: clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem);
-  border: 1px solid var(--border-dark);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   min-height: 380px;
   justify-content: flex-start;
+  background: #041422;
+}
+
+.primitive-row:first-child .primitive-panel:nth-child(2) {
+  background: #061a2e;
+}
+
+.primitive-row:last-child .primitive-panel:nth-child(1) {
+  background: #061a2e;
 }
 
 .primitive-panel__title {
