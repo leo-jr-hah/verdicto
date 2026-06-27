@@ -201,12 +201,12 @@ const DemoAssetCard: React.FC<{
 // ─── Live Log Panel ──────────────────────────────────────────────────────────
 
 const logIconMap = {
-  info: <Info size={12} color="#6366f1" />,
-  success: <CheckCircle2 size={12} color="#10b981" />,
-  warning: <AlertCircle size={12} color="#f59e0b" />,
-  error: <XCircle size={12} color="#ef4444" />,
-  data: <Database size={12} color="#06b6d4" />,
-  agent: <Zap size={12} color="#8b5cf6" />,
+  info: <Info size={12} color="var(--text-secondary)" />,
+  success: <CheckCircle2 size={12} color="var(--success)" />,
+  warning: <AlertCircle size={12} color="var(--warning)" />,
+  error: <XCircle size={12} color="var(--error)" />,
+  data: <Database size={12} color="var(--text-secondary)" />,
+  agent: <Zap size={12} color="var(--text-accent)" />,
 };
 
 const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, loading }) => {
@@ -220,9 +220,9 @@ const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, 
 
   return (
     <div style={{
-      background: '#0d1117',
+      background: 'var(--bg-primary)',
       borderRadius: '10px',
-      border: '1px solid #21262d',
+      border: '1px solid var(--border-primary)',
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
@@ -235,10 +235,10 @@ const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, 
         alignItems: 'center',
         gap: '0.5rem',
         padding: '0.6rem 1rem',
-        background: '#161b22',
-        borderBottom: '1px solid #21262d',
+        background: 'var(--bg-secondary)',
+        borderBottom: '1px solid var(--border-primary)',
         fontSize: '0.75rem',
-        color: '#8b949e',
+        color: 'var(--text-tertiary)',
       }}>
         <Terminal size={13} />
         <span style={{ fontWeight: 600 }}>Under the Hood</span>
@@ -247,14 +247,14 @@ const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, 
             <>
               <span style={{
                 width: '6px', height: '6px', borderRadius: '50%',
-                background: '#10b981',
+                background: 'var(--success)',
                 animation: 'pulse-dot 1.5s infinite',
               }} />
-              <span style={{ color: '#10b981' }}>Live</span>
+              <span style={{ color: 'var(--success)' }}>Live</span>
             </>
           )}
           {!loading && logs.length > 0 && (
-            <span style={{ color: '#8b949e' }}>Done. {logs.length} events logged.</span>
+            <span style={{ color: 'var(--text-tertiary)' }}>Done. {logs.length} events logged.</span>
           )}
         </span>
       </div>
@@ -269,7 +269,7 @@ const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, 
         lineHeight: 1.7,
       }}>
         {logs.length === 0 && !loading && (
-          <div style={{ color: '#484f58', textAlign: 'center', marginTop: '3rem' }}>
+          <div style={{ color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '3rem' }}>
             Run an assessment to see the analysis pipeline in real time.
           </div>
         )}
@@ -282,22 +282,22 @@ const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, 
             style={{ marginBottom: '0.15rem' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-              <span style={{ color: '#484f58', flexShrink: 0, marginTop: '2px' }}>
+              <span style={{ color: 'var(--text-tertiary)', flexShrink: 0, marginTop: '2px' }}>
                 {new Date(log.timestamp).toISOString().substr(11, 8)}
               </span>
               <span style={{ flexShrink: 0, marginTop: '2px' }}>
                 {logIconMap[log.icon]}
               </span>
-              <span style={{ color: '#c9d1d9' }}>{log.message}</span>
+              <span style={{ color: 'var(--text-primary)' }}>{log.message}</span>
             </div>
             {log.detail && (
-              <div style={{ marginLeft: '5.5rem', color: '#8b949e', fontSize: '0.68rem', marginTop: '0.1rem' }}>
+              <div style={{ marginLeft: '5.5rem', color: 'var(--text-tertiary)', fontSize: '0.68rem', marginTop: '0.1rem' }}>
                 {log.detail.startsWith('Verify:') ? (
                   <a
                     href={log.detail.replace('Verify: ', '')}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ color: '#58a6ff', textDecoration: 'underline' }}
+                    style={{ color: 'var(--text-accent)', textDecoration: 'underline' }}
                   >
                     {log.detail}
                   </a>
@@ -309,7 +309,7 @@ const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, 
           </motion.div>
         ))}
         {loading && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#10b981' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--success)' }}>
             <Loader2 size={10} style={{ animation: 'spin 1s linear infinite' }} />
             <span>Processing...</span>
           </div>
@@ -351,7 +351,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
             ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.02))'
             : 'linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.02))',
         borderRadius: '12px',
-        border: `2px solid ${isAboveAsking ? '#10b981' : isBelowAsking ? '#ef4444' : '#6366f1'}`,
+        border: `2px solid ${isAboveAsking ? 'var(--success)' : isBelowAsking ? 'var(--error)' : 'var(--text-accent)'}`,
         padding: '2rem',
         marginBottom: '1.5rem',
         textAlign: 'center',
@@ -444,9 +444,9 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
                 : 'var(--bg-surface-alt)',
           }}>
             {isAboveAsking
-              ? <TrendingUp size={22} color="#10b981" />
+              ? <TrendingUp size={22} color="var(--success)" />
               : isBelowAsking
-                ? <TrendingDown size={22} color="#ef4444" />
+                ? <TrendingDown size={22} color="var(--error)" />
                 : <Minus size={22} color="var(--text-tertiary)" />}
           </div>
 
@@ -532,7 +532,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
                 <span style={{
                   width: '6px', height: '6px', borderRadius: '50%',
-                  background: src.status === 'live' ? '#10b981' : src.status === 'mock' ? '#f59e0b' : '#ef4444',
+                  background: src.status === 'live' ? 'var(--success)' : src.status === 'mock' ? 'var(--warning)' : 'var(--error)',
                   flexShrink: 0,
                 }} />
                 <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{src.name}</span>
@@ -915,7 +915,7 @@ export const AssessView: React.FC = () => {
                   borderRadius: '8px',
                   background: 'rgba(239, 68, 68, 0.06)',
                   border: '1px solid rgba(239, 68, 68, 0.2)',
-                  color: '#ef4444',
+                  color: 'var(--error)',
                   fontSize: '0.85rem',
                   marginBottom: '1.5rem',
                 }}>
@@ -1088,7 +1088,7 @@ export const AssessView: React.FC = () => {
                     borderRadius: '8px',
                     background: 'rgba(239, 68, 68, 0.06)',
                     border: '1px solid rgba(239, 68, 68, 0.2)',
-                    color: '#ef4444',
+                    color: 'var(--error)',
                     fontSize: '0.85rem',
                     marginTop: '1rem',
                   }}>

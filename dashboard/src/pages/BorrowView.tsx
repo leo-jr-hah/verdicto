@@ -104,9 +104,9 @@ function formatCurrency(value: number): string {
 }
 
 function healthColor(ratio: number): string {
-  if (ratio >= 1.5) return '#10b981';
-  if (ratio >= 1.2) return '#f59e0b';
-  return '#ef4444';
+  if (ratio >= 1.5) return 'var(--success)';
+  if (ratio >= 1.2) return 'var(--warning)';
+  return 'var(--error)';
 }
 
 function healthLabel(ratio: number): string {
@@ -117,11 +117,11 @@ function healthLabel(ratio: number): string {
 
 function statusColor(status: string): string {
   switch (status) {
-    case 'active': case 'healthy': return '#10b981';
-    case 'warning': return '#f59e0b';
-    case 'repaid': return '#3b82f6';
-    case 'liquidated': return '#ef4444';
-    default: return '#8b949e';
+    case 'active': case 'healthy': return 'var(--success)';
+    case 'warning': return 'var(--warning)';
+    case 'repaid': return 'var(--text-accent)';
+    case 'liquidated': return 'var(--error)';
+    default: return 'var(--text-tertiary)';
   }
 }
 
@@ -280,13 +280,13 @@ const LoanCard: React.FC<{
           </div>
           {loan.revaluationHistory.slice(-3).map((rev, i) => (
             <div key={i} className="borrow-loan-card__reval-item" style={{
-              borderLeft: `3px solid ${rev.status === 'warning' ? '#f59e0b' : rev.status === 'liquidated' ? '#ef4444' : '#10b981'}`,
+              borderLeft: `3px solid ${rev.status === 'warning' ? 'var(--warning)' : rev.status === 'liquidated' ? 'var(--error)' : 'var(--success)'}`,
             }}>
               <div className="borrow-loan-card__reval-header">
                 <span style={{ color: 'var(--text-secondary)' }}>
                   {new Date(rev.timestamp).toLocaleString()}
                 </span>
-                <span style={{ color: rev.previousValue <= rev.newValue ? '#10b981' : '#ef4444', fontWeight: 600 }}>
+                <span style={{ color: rev.previousValue <= rev.newValue ? 'var(--success)' : 'var(--error)', fontWeight: 600 }}>
                   {rev.previousValue <= rev.newValue ? '+' : ''}{((rev.newValue - rev.previousValue) / rev.previousValue * 100).toFixed(1)}%
                 </span>
               </div>
@@ -567,13 +567,13 @@ export const BorrowView: React.FC = () => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="borrow-error-banner card"
-          style={{ borderColor: '#ef4444', background: 'rgba(239,68,68,0.05)' }}
+          style={{ borderColor: 'var(--error)', background: 'rgba(239,68,68,0.05)' }}
         >
-          <AlertCircle size={18} color="#ef4444" />
+          <AlertCircle size={18} color="var(--error)" />
           <span className="borrow-error-banner__msg">
             {loanError || signError}
           </span>
-          <button onClick={() => { clearError(); setSignError(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
+          <button onClick={() => { clearError(); setSignError(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)' }}>
             <XCircle size={16} />
           </button>
         </motion.div>
@@ -812,7 +812,7 @@ export const BorrowView: React.FC = () => {
           ) : assessmentResult ? (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <CheckCircle2 size={20} color="#10b981" />
+                <CheckCircle2 size={20} color="var(--success)" />
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Assessment Complete</h3>
               </div>
 
@@ -831,7 +831,7 @@ export const BorrowView: React.FC = () => {
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>
                     <LTVTooltip>Max Loan (75% LTV)</LTVTooltip>
                   </div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#10b981' }}>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--success)' }}>
                     {formatCurrency(assessmentResult.assessedValue * 0.75)}
                   </div>
                 </div>
@@ -855,7 +855,7 @@ export const BorrowView: React.FC = () => {
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '2rem' }}>
-              <AlertTriangle size={32} color="#f59e0b" style={{ marginBottom: '1rem' }} />
+              <AlertTriangle size={32} color="var(--warning)" style={{ marginBottom: '1rem' }} />
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Assessment Failed</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
                 {assessmentError || 'The AI agents couldn\'t complete the assessment. Please try again.'}
@@ -872,14 +872,14 @@ export const BorrowView: React.FC = () => {
       {step === 3 && currentLoan && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <CheckCircle2 size={20} color="#10b981" />
+            <CheckCircle2 size={20} color="var(--success)" />
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Loan Created</h3>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
             <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Loan Amount</div>
-              <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#10b981' }}>
+              <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--success)' }}>
                 ${currentLoan.loanAmountCSPR.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </div>
             </div>
@@ -955,7 +955,7 @@ export const BorrowView: React.FC = () => {
             fontSize: '0.85rem',
             color: 'var(--text-secondary)',
           }}>
-            <Info size={14} style={{ verticalAlign: 'middle', marginRight: '0.4rem', color: '#10b981' }} />
+            <Info size={14} style={{ verticalAlign: 'middle', marginRight: '0.4rem', color: 'var(--success)' }} />
             Funds disbursed to your wallet. Monitor your health ratio to avoid liquidation.
             {currentLoan.disbursementTxHash && (
               <> Tx: <code style={{ fontSize: '0.75rem' }}>{currentLoan.disbursementTxHash.slice(0, 16)}...</code></>

@@ -15,7 +15,7 @@ const LAYERS = [
     title: 'Client Interface',
     subtitle: 'Secure wallet-connected dashboard for asset owners and institutional users',
     icon: <Globe size={20} />,
-    color: '#3B82F6',
+    color: 'var(--text-secondary)',
     stats: ['Wallet-native auth', 'Real-time streaming', 'Mobile-ready'],
     items: [
       {
@@ -41,7 +41,7 @@ const LAYERS = [
     title: 'AI Agent Network',
     subtitle: 'Multiple independent analysts with autonomous methodology selection and juror deliberation',
     icon: <Server size={20} />,
-    color: '#8B5CF6',
+    color: 'var(--text-accent)',
     stats: ['Multiple independent agents', 'Autonomous reasoning', 'Juror peer review'],
     items: [
       {
@@ -67,7 +67,7 @@ const LAYERS = [
     title: 'On-Chain Settlement',
     subtitle: 'Three smart contracts on Casper blockchain ensuring verifiable, tamper-proof records',
     icon: <FileCode size={20} />,
-    color: '#F59E0B',
+    color: 'var(--warning)',
     stats: ['3 deployed contracts', 'Casper Testnet', 'Publicly verifiable'],
     items: [
       {
@@ -90,7 +90,7 @@ const FLOWS = [
   {
     id: 'assessment',
     title: 'Asset Assessment',
-    color: '#3B82F6',
+    color: 'var(--text-secondary)',
     steps: [
       { label: 'Submit Asset', detail: 'Select asset type, provide details, connect wallet' },
       { label: 'Micropayment', detail: 'Small CSPR fee signed directly by your wallet' },
@@ -103,7 +103,7 @@ const FLOWS = [
   {
     id: 'borrow',
     title: 'Collateralized Lending',
-    color: '#10B981',
+    color: 'var(--success)',
     steps: [
       { label: 'Select Assessment', detail: 'Use an existing valuation as collateral' },
       { label: 'AI Risk Pricing', detail: 'Loan-to-value ratio calculated by asset class and confidence' },
@@ -116,7 +116,7 @@ const FLOWS = [
   {
     id: 'insurance',
     title: 'Asset Insurance',
-    color: '#EC4899',
+    color: 'var(--error)',
     steps: [
       { label: 'Select Assessment', detail: 'Use an existing valuation as the insured value' },
       { label: 'Risk Assessment', detail: 'AI evaluates volatility, liquidity, and market stability' },
@@ -137,10 +137,10 @@ const AGENTS = [
 ];
 
 const TIERS = [
-  { name: 'Platinum', threshold: '900+', color: '#E5E7EB', desc: 'Highest accuracy' },
-  { name: 'Gold', threshold: '750+', color: '#F59E0B', desc: 'Consistently reliable' },
-  { name: 'Silver', threshold: '600+', color: '#9CA3AF', desc: 'Proven track record' },
-  { name: 'Bronze', threshold: 'Below 600', color: '#D97706', desc: 'Building reputation' },
+  { name: 'Platinum', threshold: '900+', color: 'var(--text-primary)', desc: 'Highest accuracy' },
+  { name: 'Gold', threshold: '750+', color: 'var(--warning)', desc: 'Consistently reliable' },
+  { name: 'Silver', threshold: '600+', color: 'var(--text-tertiary)', desc: 'Proven track record' },
+  { name: 'Bronze', threshold: 'Below 600', color: 'var(--text-secondary)', desc: 'Building reputation' },
 ];
 
 const WHY_VERDICT = [
@@ -297,8 +297,8 @@ const AgentTable: React.FC = () => (
                 <span style={{
                   display: 'inline-block', padding: '2px 8px', borderRadius: 6,
                   fontSize: 11, fontWeight: 500,
-                  background: agent.role === 'Primary Valuator' ? 'rgba(59,130,246,0.1)' : 'rgba(139,92,246,0.1)',
-                  color: agent.role === 'Primary Valuator' ? '#60A5FA' : '#A78BFA',
+                  background: agent.role === 'Primary Valuator' ? 'var(--bg-surface)' : 'var(--bg-elevated)',
+                  color: agent.role === 'Primary Valuator' ? 'var(--text-secondary)' : 'var(--text-accent)',
                 }}>
                   {agent.role}
                 </span>
@@ -324,8 +324,8 @@ const AgentTable: React.FC = () => (
             <span style={{
               display: 'inline-block', padding: '2px 8px', borderRadius: 6,
               fontSize: 11, fontWeight: 500,
-              background: agent.role === 'Primary Valuator' ? 'rgba(59,130,246,0.1)' : 'rgba(139,92,246,0.1)',
-              color: agent.role === 'Primary Valuator' ? '#60A5FA' : '#A78BFA',
+              background: agent.role === 'Primary Valuator' ? 'var(--bg-surface)' : 'var(--bg-elevated)',
+              color: agent.role === 'Primary Valuator' ? 'var(--text-secondary)' : 'var(--text-accent)',
             }}>
               {agent.role}
             </span>
@@ -486,7 +486,7 @@ export const HowItWorksView: React.FC = () => {
               <div key={tier.name} className="card" style={{ textAlign: 'center', padding: 'var(--sp-4)' }}>
                 <span style={{
                   display: 'inline-block', padding: '4px 12px', borderRadius: 8,
-                  fontSize: 12, fontWeight: 700, color: '#000', background: tier.color,
+                  fontSize: 12, fontWeight: 700, color: 'var(--bg-primary)', background: tier.color,
                   marginBottom: 'var(--sp-2)',
                 }}>
                   {tier.name}
@@ -594,7 +594,7 @@ export const HowItWorksView: React.FC = () => {
                 <div style={{ flex: 1, minWidth: 110, textAlign: 'center' }}>
                   <div style={{
                     width: 24, height: 24, borderRadius: '50%', margin: '0 auto 6px',
-                    background: 'rgba(245,158,11,0.15)', color: '#F59E0B',
+                    background: 'var(--warning-bg)', color: 'var(--warning)',
                     fontSize: 11, fontWeight: 700,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
@@ -628,7 +628,7 @@ export const HowItWorksView: React.FC = () => {
               ].map(item => (
                 <div key={item.product} style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 2 }}>{item.product}</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: '#F59E0B' }}>{item.fee}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--warning)' }}>{item.fee}</div>
                 </div>
               ))}
             </div>
@@ -648,7 +648,7 @@ export const HowItWorksView: React.FC = () => {
             {/* What's Real */}
             <div className="card" style={{ padding: 'var(--sp-5)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', marginBottom: 'var(--sp-4)' }}>
-                <Shield size={16} style={{ color: '#10B981' }} />
+                <Shield size={16} style={{ color: 'var(--success)' }} />
                 <span style={{ fontSize: 14, fontWeight: 600, color: '#10B981', fontFamily: 'var(--font-display)' }}>Production-Ready</span>
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
@@ -665,7 +665,7 @@ export const HowItWorksView: React.FC = () => {
                     fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6,
                     paddingLeft: 'var(--sp-4)', position: 'relative',
                   }}>
-                    <span style={{ position: 'absolute', left: 0, color: '#10B981', fontWeight: 700 }}>✓</span>
+                    <span style={{ position: 'absolute', left: 0, color: 'var(--success)', fontWeight: 700 }}>✓</span>
                     {item}
                   </li>
                 ))}
@@ -675,7 +675,7 @@ export const HowItWorksView: React.FC = () => {
             {/* What's Simplified */}
             <div className="card" style={{ padding: 'var(--sp-5)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', marginBottom: 'var(--sp-4)' }}>
-                <Eye size={16} style={{ color: '#F59E0B' }} />
+                <Eye size={16} style={{ color: 'var(--warning)' }} />
                 <span style={{ fontSize: 14, fontWeight: 600, color: '#F59E0B', fontFamily: 'var(--font-display)' }}>Currently Simplified</span>
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
@@ -689,7 +689,7 @@ export const HowItWorksView: React.FC = () => {
                     fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6,
                     paddingLeft: 'var(--sp-4)', position: 'relative',
                   }}>
-                    <span style={{ position: 'absolute', left: 0, color: '#F59E0B', fontWeight: 700 }}>⚠</span>
+                    <span style={{ position: 'absolute', left: 0, color: 'var(--warning)', fontWeight: 700 }}>⚠</span>
                     {item}
                   </li>
                 ))}

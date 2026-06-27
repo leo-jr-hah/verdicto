@@ -19,9 +19,9 @@ export const BlockchainRecord: React.FC = () => {
         <motion.div
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
-          style={{ width: 10, height: 10, borderRadius: '50%', background: '#10B981' }}
+          style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--success)' }}
         />
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10B981', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--success)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           Casper Testnet, Block Confirmed
         </span>
       </div>
@@ -63,7 +63,7 @@ export const BlockchainRecord: React.FC = () => {
             borderRadius: 8,
           }}
         >
-          <div style={{ fontSize: '0.6rem', color: '#10B981', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem', fontFamily: 'var(--font-sans)' }}>
+          <div style={{ fontSize: '0.6rem', color: 'var(--success)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem', fontFamily: 'var(--font-sans)' }}>
             Transaction Hash
           </div>
           <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>

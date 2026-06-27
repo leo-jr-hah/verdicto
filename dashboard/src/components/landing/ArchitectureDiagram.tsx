@@ -383,10 +383,10 @@ export const ArchitectureDiagram: React.FC = () => {
           }}
         >
           {[
-            { color: '#10B981', label: 'AI Agents' },
-            { color: '#EC4899', label: 'Jurors' },
-            { color: '#F59E0B', label: 'Trust & Payment' },
-            { color: '#3B82F6', label: 'Blockchain' },
+            { color: 'var(--success)', label: 'AI Agents' },
+            { color: 'var(--pink)', label: 'Jurors' },
+            { color: 'var(--warning)', label: 'Trust & Payment' },
+            { color: 'var(--text-accent)', label: 'Blockchain' },
           ].map((item) => (
             <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{

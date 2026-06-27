@@ -25,13 +25,13 @@ function truncateHash(hash: string): string {
 
 function typeColor(type: string): string {
   switch (type) {
-    case 'ZK-Lite Commitment': return '#8B5CF6';
-    case 'HMAC Receipt Chain': return '#3B82F6';
-    case 'Native Transfer': return '#10B981';
-    case 'x402 Payment': return '#F59E0B';
-    case 'ExecuteVerdict': return '#EF4444';
-    case 'UpdateReputation': return '#06B6D4';
-    case 'SubmitAssessment': return '#F97316';
+    case 'ZK-Lite Commitment': return 'var(--purple)';
+    case 'HMAC Receipt Chain': return 'var(--text-accent)';
+    case 'Native Transfer': return 'var(--success)';
+    case 'x402 Payment': return 'var(--warning)';
+    case 'ExecuteVerdict': return 'var(--error)';
+    case 'UpdateReputation': return 'var(--text-secondary)';
+    case 'SubmitAssessment': return 'var(--primary)';
     default: return 'var(--text-secondary)';
   }
 }
@@ -52,10 +52,10 @@ function matchesFilter(type: string, filter: string): boolean {
 
 const STATS = [
   { key: 'total' as const, label: 'Total', color: 'var(--text-primary)', icon: BarChart3 },
-  { key: 'zkLite' as const, label: 'ZK-Lite', color: '#8B5CF6', icon: Shield },
-  { key: 'hmac' as const, label: 'HMAC', color: '#3B82F6', icon: Hash },
-  { key: 'payments' as const, label: 'Payments', color: '#F59E0B', icon: TrendingUp },
-  { key: 'verdicts' as const, label: 'Verdicto', color: '#10B981', icon: Clock },
+  { key: 'zkLite' as const, label: 'ZK-Lite', color: 'var(--purple)', icon: Shield },
+  { key: 'hmac' as const, label: 'HMAC', color: 'var(--text-accent)', icon: Hash },
+  { key: 'payments' as const, label: 'Payments', color: 'var(--warning)', icon: TrendingUp },
+  { key: 'verdicts' as const, label: 'Verdicto', color: 'var(--success)', icon: Clock },
 ];
 
 export const TransactionsView: React.FC = () => {
@@ -356,7 +356,7 @@ export const TransactionsView: React.FC = () => {
                   </div>
                   <div>
                     <div className="tx-detail-label">Location</div>
-                    <div className="tx-detail-value" style={{ color: selectedTx.onChain ? '#10B981' : '#F59E0B' }}>
+                    <div className="tx-detail-value" style={{ color: selectedTx.onChain ? 'var(--success)' : 'var(--warning)' }}>
                       {selectedTx.onChain ? '⛓️ On-chain' : '📋 Off-chain'}
                     </div>
                   </div>
@@ -372,7 +372,7 @@ export const TransactionsView: React.FC = () => {
                     View on cspr.live <ExternalLink size={14} />
                   </a>
                 ) : (
-                  <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', fontSize: '0.85rem', color: '#F59E0B' }}>
+                  <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', fontSize: '0.85rem', color: 'var(--warning)' }}>
                     ℹ️ This is an off-chain logical event. No on-chain deploy hash to view on cspr.live.
                   </div>
                 )}

@@ -134,7 +134,7 @@ export const DisputesView: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
-              <Gavel size={28} style={{ color: '#EF4444' }} />
+              <Gavel size={28} style={{ color: 'var(--error)' }} />
               <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
                 Disputes & Re-trials
               </h1>
@@ -170,12 +170,12 @@ export const DisputesView: React.FC = () => {
       {/* ── Stats Cards ───────────────────────────────────────────── */}
       <div className="disputes-stats-grid">
         {[
-          { label: 'Total Disputes', value: stats.total, icon: Gavel, color: '#8B5CF6' },
-          { label: 'Pending', value: stats.pending, icon: AlertTriangle, color: '#F59E0B' },
-          { label: 'Under Re-trial', value: stats.underRetrial, icon: Swords, color: '#8B5CF6' },
-          { label: 'Resolved', value: stats.resolved, icon: Scale, color: '#06B6D4' },
-          { label: 'Overturned', value: stats.overturned, icon: Shield, color: '#EF4444' },
-          { label: 'Upheld', value: stats.upheld, icon: Activity, color: '#10B981' },
+          { label: 'Total Disputes', value: stats.total, icon: Gavel, color: 'var(--text-primary)' },
+          { label: 'Pending', value: stats.pending, icon: AlertTriangle, color: 'var(--warning)' },
+          { label: 'Under Re-trial', value: stats.underRetrial, icon: Swords, color: 'var(--text-accent)' },
+          { label: 'Resolved', value: stats.resolved, icon: Scale, color: 'var(--text-secondary)' },
+          { label: 'Overturned', value: stats.overturned, icon: Shield, color: 'var(--error)' },
+          { label: 'Upheld', value: stats.upheld, icon: Activity, color: 'var(--success)' },
         ].map((stat) => {
           const Icon = stat.icon;
           return (
@@ -213,18 +213,18 @@ export const DisputesView: React.FC = () => {
         transition={{ delay: 0.1 }}
         style={{
           padding: '24px', borderRadius: '12px',
-          background: 'linear-gradient(135deg, rgba(239,68,68,0.06) 0%, rgba(139,92,246,0.06) 100%)',
-          border: '1px solid rgba(239,68,68,0.15)',
+          background: 'var(--bg-elevated)',
+          border: '1px solid var(--border-color)',
           marginBottom: '32px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
           <div style={{
             width: '48px', height: '48px', borderRadius: '12px',
-            background: 'rgba(239,68,68,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'var(--error-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
           }}>
-            <Swords size={24} style={{ color: '#EF4444' }} />
+            <Swords size={24} style={{ color: 'var(--error)' }} />
           </div>
           <div>
             <h3 style={{ margin: '0 0 8px', fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -238,7 +238,7 @@ export const DisputesView: React.FC = () => {
               <strong>3. Resolution:</strong> If 2+ agents vote to overturn, the verdict is corrected. If upheld, the original becomes stronger.
               <br />
               <br />
-              <Link to="/oracle" style={{ color: '#8B5CF6', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
+              <Link to="/oracle" style={{ color: 'var(--text-accent)', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
                 <ArrowLeft size={14} /> View all verdicts
               </Link>
             </p>
@@ -261,13 +261,13 @@ export const DisputesView: React.FC = () => {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Scale size={16} style={{ color: '#8B5CF6' }} />
+            <Scale size={16} style={{ color: 'var(--text-accent)' }} />
             <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
               Verdicts Available for Challenge
             </span>
             <span style={{
               fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px',
-              background: 'rgba(139,92,246,0.1)', color: '#8B5CF6', fontWeight: 600,
+              background: 'var(--bg-elevated)', color: 'var(--text-accent)', fontWeight: 600,
             }}>
               {verdicts.length}
             </span>
@@ -304,8 +304,8 @@ export const DisputesView: React.FC = () => {
                   <div style={{
                     display: 'flex', alignItems: 'center', gap: '6px',
                     padding: '8px 16px', borderRadius: '8px',
-                    border: '1px solid rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.08)',
-                    color: '#F59E0B', fontSize: '0.82rem', fontWeight: 600,
+                    border: '1px solid var(--warning-border)', background: 'var(--warning-bg)',
+                    color: 'var(--warning)', fontSize: '0.82rem', fontWeight: 600,
                   }}>
                     <AlertTriangle size={14} />
                     Dispute Active
@@ -321,8 +321,8 @@ export const DisputesView: React.FC = () => {
                     style={{
                       display: 'flex', alignItems: 'center', gap: '6px',
                       padding: '8px 16px', borderRadius: '8px',
-                      border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)',
-                      color: '#EF4444', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
+                      border: '1px solid var(--error-border)', background: 'var(--error-bg)',
+                      color: 'var(--error)', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
                     }}
                   >
                     <Swords size={14} />
@@ -350,7 +350,7 @@ export const DisputesView: React.FC = () => {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Gavel size={16} style={{ color: '#EF4444' }} />
+            <Gavel size={16} style={{ color: 'var(--error)' }} />
             <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
               Active Disputes
             </span>
@@ -364,7 +364,7 @@ export const DisputesView: React.FC = () => {
                   padding: '4px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 500,
                   border: '1px solid', cursor: 'pointer',
                   ...(filter === f
-                    ? { background: 'rgba(139,92,246,0.15)', borderColor: 'rgba(139,92,246,0.3)', color: '#8B5CF6' }
+                    ? { background: 'var(--bg-elevated)', borderColor: 'var(--border-color)', color: 'var(--text-accent)' }
                     : { background: 'transparent', borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }),
                 }}
               >
@@ -398,10 +398,10 @@ export const DisputesView: React.FC = () => {
                       <span style={{
                         fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 600,
                         ...(d.status === 'pending'
-                          ? { background: 'rgba(245,158,11,0.12)', color: '#F59E0B' }
+                          ? { background: 'rgba(245,158,11,0.12)', color: 'var(--warning)' }
                           : d.status === 'under_retrial'
-                          ? { background: 'rgba(139,92,246,0.12)', color: '#8B5CF6' }
-                          : { background: 'rgba(16,185,129,0.12)', color: '#10B981' }),
+                          ? { background: 'var(--bg-elevated)', color: 'var(--text-accent)' }
+                          : { background: 'rgba(16,185,129,0.12)', color: 'var(--success)' }),
                       }}>
                         {d.status === 'under_retrial' ? 'Re-trial' : d.status.charAt(0).toUpperCase() + d.status.slice(1)}
                       </span>
@@ -409,8 +409,8 @@ export const DisputesView: React.FC = () => {
                         <span style={{
                           fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 600,
                           ...(d.outcome === 'overturned'
-                            ? { background: 'rgba(239,68,68,0.12)', color: '#EF4444' }
-                            : { background: 'rgba(16,185,129,0.12)', color: '#10B981' }),
+                            ? { background: 'rgba(239,68,68,0.12)', color: 'var(--error)' }
+                            : { background: 'rgba(16,185,129,0.12)', color: 'var(--success)' }),
                         }}>
                           {d.outcome === 'overturned' ? 'Overturned' : 'Upheld'}
                         </span>
@@ -425,7 +425,7 @@ export const DisputesView: React.FC = () => {
                     {d.outcome && (
                       <div style={{
                         fontSize: '0.75rem', marginTop: '4px', lineHeight: 1.4,
-                        color: d.outcome === 'overturned' ? 'rgba(239,68,68,0.7)' : 'rgba(16,185,129,0.7)',
+                        color: d.outcome === 'overturned' ? 'var(--error)' : 'var(--success)',
                       }}>
                         {d.outcome === 'overturned'
                           ? 'Re-trial found the original verdict incorrect. Decision has been reversed.'
@@ -467,8 +467,8 @@ export const DisputesView: React.FC = () => {
                             <div style={{
                               padding: '14px 16px', borderRadius: '10px',
                               background: d.outcome === 'overturned'
-                                ? 'rgba(239,68,68,0.06)' : 'rgba(16,185,129,0.06)',
-                              border: `1px solid ${d.outcome === 'overturned' ? 'rgba(239,68,68,0.15)' : 'rgba(16,185,129,0.15)'}`,
+                                ? 'var(--error-bg)' : 'var(--success-bg)',
+                              border: `1px solid ${d.outcome === 'overturned' ? 'var(--error-border)' : 'var(--success-border)'}`,
                               marginBottom: '12px',
                             }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
@@ -478,8 +478,8 @@ export const DisputesView: React.FC = () => {
                                 <span style={{
                                   fontSize: '0.7rem', padding: '3px 10px', borderRadius: '10px', fontWeight: 700,
                                   ...(d.outcome === 'overturned'
-                                    ? { background: 'rgba(239,68,68,0.15)', color: '#EF4444' }
-                                    : { background: 'rgba(16,185,129,0.15)', color: '#10B981' }),
+                                    ? { background: 'rgba(239,68,68,0.15)', color: 'var(--error)' }
+                                    : { background: 'rgba(16,185,129,0.15)', color: 'var(--success)' }),
                                 }}>
                                   {d.outcome === 'overturned' ? '⚡ Overturned' : '✅ Upheld'}
                                 </span>
@@ -515,14 +515,14 @@ export const DisputesView: React.FC = () => {
                               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                                 <span style={{
                                   fontSize: '0.75rem', padding: '2px 8px', borderRadius: '6px',
-                                  background: d.retrial.valueDelta < 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
+                                  background: d.retrial.valueDelta < 0 ? 'var(--error-bg)' : 'var(--success-bg)',
                                   color: d.retrial.valueDelta < 0 ? '#EF4444' : '#10B981', fontWeight: 600,
                                 }}>
                                   Value: {d.retrial.valueDelta > 0 ? '+' : ''}{d.retrial.valueDelta.toFixed(1)}%
                                 </span>
                                 <span style={{
                                   fontSize: '0.75rem', padding: '2px 8px', borderRadius: '6px',
-                                  background: d.retrial.confidenceDelta < 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
+                                  background: d.retrial.confidenceDelta < 0 ? 'var(--error-bg)' : 'var(--success-bg)',
                                   color: d.retrial.confidenceDelta < 0 ? '#EF4444' : '#10B981', fontWeight: 600,
                                 }}>
                                   Confidence: {d.retrial.confidenceDelta > 0 ? '+' : ''}{d.retrial.confidenceDelta}
@@ -543,7 +543,7 @@ export const DisputesView: React.FC = () => {
                                 }}>
                                   <div style={{
                                     width: '28px', height: '28px', borderRadius: '6px', flexShrink: 0,
-                                    background: juror.vote === 'A' ? 'rgba(16,185,129,0.12)' : juror.vote === 'B' ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
+                                    background: juror.vote === 'A' ? 'var(--success-bg)' : juror.vote === 'B' ? 'var(--error-bg)' : 'var(--warning-bg)',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     fontSize: '0.7rem', fontWeight: 700,
                                     color: juror.vote === 'A' ? '#10B981' : juror.vote === 'B' ? '#EF4444' : '#F59E0B',
@@ -571,9 +571,9 @@ export const DisputesView: React.FC = () => {
                             {d.retrial.reasoning && (
                               <div style={{
                                 padding: '12px 14px', borderRadius: '8px',
-                                background: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.12)',
+                                background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
                               }}>
-                                <div style={{ fontSize: '0.7rem', color: '#8B5CF6', marginBottom: '4px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-accent)', marginBottom: '4px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                   Panel Summary
                                 </div>
                                 <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
@@ -593,8 +593,8 @@ export const DisputesView: React.FC = () => {
                                 style={{
                                   display: 'inline-flex', alignItems: 'center', gap: '6px',
                                   marginTop: '12px', padding: '8px 14px', borderRadius: '8px',
-                                  background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)',
-                                  color: '#8B5CF6', fontSize: '0.78rem', fontWeight: 500,
+                                  background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
+                                  color: 'var(--text-accent)', fontSize: '0.78rem', fontWeight: 500,
                                   textDecoration: 'none',
                                 }}
                               >
@@ -608,11 +608,11 @@ export const DisputesView: React.FC = () => {
                         {d.status === 'pending' && (
                           <div style={{
                             marginTop: '12px', padding: '10px 14px', borderRadius: '8px',
-                            background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)',
+                            background: 'var(--warning-bg)', border: '1px solid var(--warning-border)',
                             display: 'flex', alignItems: 'center', gap: '8px',
                           }}>
-                            <Loader2 size={14} style={{ color: '#F59E0B', animation: 'spin 1s linear infinite' }} />
-                            <span style={{ fontSize: '0.82rem', color: '#F59E0B', fontWeight: 500 }}>
+                            <Loader2 size={14} style={{ color: 'var(--warning)', animation: 'spin 1s linear infinite' }} />
+                            <span style={{ fontSize: '0.82rem', color: 'var(--warning)', fontWeight: 500 }}>
                               Re-trial pending. Will start automatically
                             </span>
                           </div>
@@ -636,7 +636,7 @@ export const DisputesView: React.FC = () => {
             exit={{ opacity: 0 }}
             style={{
               position: 'fixed', inset: 0, zIndex: 1000,
-              background: 'rgba(0,0,0,0.6)',
+              background: 'var(--overlay-bg)',
               backdropFilter: 'blur(4px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
@@ -662,8 +662,8 @@ export const DisputesView: React.FC = () => {
               <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
                 <div style={{
                   width: 56, height: 56, borderRadius: '50%',
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '2px solid rgba(239, 68, 68, 0.3)',
+                  background: 'var(--error-bg)',
+                  border: '2px solid var(--error-border)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   margin: '0 auto 1rem',
                 }}>
@@ -685,8 +685,8 @@ export const DisputesView: React.FC = () => {
               {/* Wallet status */}
               <div style={{
                 padding: '10px 14px', borderRadius: '8px', marginBottom: '16px',
-                background: wallet.connected ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
-                border: `1px solid ${wallet.connected ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                background: wallet.connected ? 'var(--success-bg)' : 'var(--error-bg)',
+                border: `1px solid ${wallet.connected ? 'var(--success-border)' : 'var(--error-border)'}`,
                 display: 'flex', alignItems: 'center', gap: '8px',
               }}>
                 <span style={{ fontSize: '0.8rem', color: wallet.connected ? '#10B981' : '#EF4444', fontWeight: 500 }}>
@@ -731,12 +731,12 @@ export const DisputesView: React.FC = () => {
               {/* Stake info */}
               <div style={{
                 padding: '12px', borderRadius: '8px',
-                background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)',
+                background: 'var(--warning-bg)', border: '1px solid var(--warning-border)',
                 marginBottom: '16px',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                  <AlertTriangle size={14} style={{ color: '#F59E0B' }} />
-                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#F59E0B' }}>Stake Required: {DISPUTE_FEE_CSPR} CSPR</span>
+                  <AlertTriangle size={14} style={{ color: 'var(--warning)' }} />
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--warning)' }}>Stake Required: {DISPUTE_FEE_CSPR} CSPR</span>
                 </div>
                 <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
                   If the re-trial overturns the verdict, you get your stake back. If upheld, the stake goes to the original jurors.
@@ -746,10 +746,10 @@ export const DisputesView: React.FC = () => {
               {/* Error */}
               {reasonError && (
                 <div style={{
-                  background: 'rgba(239, 68, 68, 0.08)',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  background: 'var(--error-bg)',
+                  border: '1px solid var(--error-border)',
                   borderRadius: '8px', padding: '0.75rem', marginBottom: '1rem',
-                  fontSize: '0.8rem', color: '#EF4444',
+                  fontSize: '0.8rem', color: 'var(--error)',
                 }}>
                   {reasonError}
                 </div>

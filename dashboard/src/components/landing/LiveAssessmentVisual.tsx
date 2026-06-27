@@ -33,10 +33,10 @@ export const LiveAssessmentVisual: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
-            background: 'linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)',
+            background: 'linear-gradient(135deg, var(--text-accent) 0%, var(--text-secondary) 100%)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <Globe size={16} color="#fff" />
+            <Globe size={16} color="var(--text-inverse)" />
           </div>
           <div>
             <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
@@ -58,7 +58,7 @@ export const LiveAssessmentVisual: React.FC = () => {
             animate={{ opacity: phase >= 1 ? 1 : 0 }}
             style={{
               fontSize: '0.65rem', fontWeight: 700,
-              color: '#10B981', background: 'rgba(16,185,129,0.1)',
+              color: 'var(--success)', background: 'rgba(16,185,129,0.1)',
               padding: '0.25rem 0.6rem', borderRadius: 6,
               display: 'flex', alignItems: 'center', gap: '0.3rem',
             }}
@@ -77,10 +77,10 @@ export const LiveAssessmentVisual: React.FC = () => {
       {/* Agent analysis cards, appear one by one */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.75rem' }}>
         {[
-          { label: 'Comparable Sales', value: '$1,280,000', confidence: 87, color: '#F59E0B', delay: 1.2 },
-          { label: 'DCF Analysis', value: '$1,195,000', confidence: 74, color: '#10B981', delay: 1.6 },
-          { label: 'Market Context', value: '↑ Trending', confidence: 91, color: '#06B6D4', delay: 2.0 },
-          { label: 'Data Validation', value: '3 Sources ✓', confidence: 95, color: '#3B82F6', delay: 2.4 },
+          { label: 'Comparable Sales', value: '$1,280,000', confidence: 87, color: 'var(--warning)', delay: 1.2 },
+          { label: 'DCF Analysis', value: '$1,195,000', confidence: 74, color: 'var(--success)', delay: 1.6 },
+          { label: 'Market Context', value: '↑ Trending', confidence: 91, color: 'var(--text-secondary)', delay: 2.0 },
+          { label: 'Data Validation', value: '3 Sources ✓', confidence: 95, color: 'var(--text-accent)', delay: 2.4 },
         ].map((item) => (
           <motion.div
             key={item.label}
@@ -130,9 +130,9 @@ export const LiveAssessmentVisual: React.FC = () => {
           display: 'flex', alignItems: 'center', gap: '0.75rem',
         }}
       >
-        <CheckCircle2 size={18} color="#10B981" />
+        <CheckCircle2 size={18} color="var(--success)" />
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#10B981', letterSpacing: '0.04em' }}>
+          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--success)', letterSpacing: '0.04em' }}>
             ASSESSMENT COMPLETE
           </div>
           <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', marginTop: '0.1rem' }}>
@@ -140,7 +140,7 @@ export const LiveAssessmentVisual: React.FC = () => {
           </div>
         </div>
         <div style={{
-          fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: '#10B981',
+          fontSize: '0.6rem', fontFamily: 'var(--font-mono)', color: 'var(--success)',
           background: 'rgba(16,185,129,0.1)', padding: '0.2rem 0.5rem', borderRadius: 4,
         }}>
           0x3bc2…89b7

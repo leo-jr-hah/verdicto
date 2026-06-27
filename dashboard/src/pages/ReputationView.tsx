@@ -38,7 +38,7 @@ const AGENT_META: AgentMeta[] = [
     methodology: 'RentCast API comparable sales analysis with ML-powered adjustments',
     strengths: ['Sales comparisons', 'Market listings', 'Value estimation', 'Property adjustments'],
     icon: <Search size={20} />,
-    accentColor: '#10B981',
+    accentColor: 'var(--text-primary)',
   },
   {
     id: 'valuation-agent-b',
@@ -47,7 +47,7 @@ const AGENT_META: AgentMeta[] = [
     methodology: 'FRED API + Discounted Cash Flow with Monte Carlo simulation',
     strengths: ['Cash flow projection', 'DCF analysis', 'Risk assessment', 'Economic indicators'],
     icon: <TrendingUp size={20} />,
-    accentColor: '#10B981',
+    accentColor: 'var(--text-primary)',
   },
   {
     id: 'evidence-analyst',
@@ -56,7 +56,7 @@ const AGENT_META: AgentMeta[] = [
     methodology: 'MiMo LLM-powered evidence validation with confidence scoring',
     strengths: ['Data validation', 'Source cross-referencing', 'Outlier detection', 'Consistency checks'],
     icon: <Shield size={20} />,
-    accentColor: '#EC4899',
+    accentColor: 'var(--text-secondary)',
   },
   {
     id: 'market-data-interpreter',
@@ -65,7 +65,7 @@ const AGENT_META: AgentMeta[] = [
     methodology: 'MiMo LLM + time-series analysis with macro-economic indicators',
     strengths: ['Market trends', 'Economic indicators', 'Price forecasting', 'Timing analysis'],
     icon: <BarChart3 size={20} />,
-    accentColor: '#EC4899',
+    accentColor: 'var(--text-secondary)',
   },
   {
     id: 'precedent-researcher',
@@ -74,7 +74,7 @@ const AGENT_META: AgentMeta[] = [
     methodology: 'RAG with vector similarity search across historical assessments',
     strengths: ['Case law research', 'Historical comparisons', 'Vector search', 'Pattern recognition'],
     icon: <BookOpen size={20} />,
-    accentColor: '#EC4899',
+    accentColor: 'var(--text-secondary)',
   },
 ];
 
@@ -124,7 +124,7 @@ const MiniSparkline: React.FC<{
   color?: string;
   height?: number;
   id?: string;
-}> = ({ data, color = '#10B981', height = 48, id = 'sp' }) => {
+}> = ({ data, color = 'var(--text-primary)', height = 48, id = 'sp' }) => {
   if (data.length < 2) return null;
   const w = 280;
   const min = Math.min(...data);
@@ -221,7 +221,7 @@ const AgentCard: React.FC<{
           </div>
           <div style={{
             padding: '4px 10px', borderRadius: 8,
-            background: agent.successRate >= 90 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+            background: agent.successRate >= 90 ? 'var(--success-bg)' : 'var(--warning-bg)',
             color: agent.successRate >= 90 ? 'var(--success)' : 'var(--warning)',
             fontSize: '0.8rem', fontWeight: 600,
           }}>
@@ -441,8 +441,8 @@ export const ReputationView: React.FC = () => {
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             marginTop: 8, padding: '4px 10px', borderRadius: 6,
-            background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.2)',
-            fontSize: '0.75rem', color: '#10b981', fontWeight: 600,
+            background: 'var(--success-bg)', border: '1px solid var(--success-border)',
+            fontSize: '0.75rem', color: 'var(--success)', fontWeight: 600,
           }}>
             <CheckCircle2 size={14} /> Live on-chain data from ReputationRegistry
           </span>

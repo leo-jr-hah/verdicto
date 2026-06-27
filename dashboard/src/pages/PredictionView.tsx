@@ -36,9 +36,9 @@ function formatPercent(value: number): string {
 }
 
 function probabilityColor(p: number): string {
-  if (p >= 0.7) return '#10b981';
-  if (p >= 0.4) return '#f59e0b';
-  return '#ef4444';
+  if (p >= 0.7) return 'var(--success)';
+  if (p >= 0.4) return 'var(--warning)';
+  return 'var(--error)';
 }
 
 function probabilityLabel(p: number): string {
@@ -451,7 +451,7 @@ export const PredictionView: React.FC = () => {
                     background: question.trim()
                       ? 'linear-gradient(135deg, var(--primary), var(--primary-dark, #cc2222))'
                       : 'var(--border-color)',
-                    color: '#fff', fontSize: '0.95rem', fontWeight: 700,
+                    color: 'var(--text-inverse)', fontSize: '0.95rem', fontWeight: 700,
                     cursor: question.trim() ? 'pointer' : 'not-allowed',
                     transition: 'all 0.2s ease',
                     boxShadow: question.trim() ? '0 2px 8px rgba(255, 59, 59, 0.25)' : 'none',
@@ -470,7 +470,7 @@ export const PredictionView: React.FC = () => {
                     <>
                       <div style={{
                         width: 8, height: 8, borderRadius: '50%',
-                        background: '#10b981',
+                        background: 'var(--success)',
                       }} />
                       {walletDisplay}
                     </>
@@ -635,7 +635,7 @@ export const PredictionView: React.FC = () => {
               maxWidth: 500, margin: '0 auto',
             }}
           >
-            <AlertTriangle size={48} color="#ef4444" style={{ marginBottom: 20 }} />
+            <AlertTriangle size={48} color="var(--error)" style={{ marginBottom: 20 }} />
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>
               Analysis Failed
             </h3>
@@ -754,7 +754,7 @@ export const PredictionView: React.FC = () => {
                     border: '1px solid rgba(16, 185, 129, 0.15)',
                     fontSize: '0.78rem', color: 'var(--text-tertiary)',
                   }}>
-                    <CheckCircle2 size={14} color="#10b981" />
+                    <CheckCircle2 size={14} color="var(--success)" />
                     <span>Paid {PREDICTION_FEE_CSPR} CSPR</span>
                     <a
                       href={`https://testnet.cspr.live/deploy/${lastDeployHash}`}
@@ -812,7 +812,7 @@ export const PredictionView: React.FC = () => {
                 display: 'flex', alignItems: 'center', gap: 8,
                 marginBottom: 12,
               }}>
-                <AlertTriangle size={16} color="#f59e0b" />
+                <AlertTriangle size={16} color="var(--warning)" />
                 <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                   Risk Factors
                 </span>

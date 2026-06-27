@@ -30,17 +30,17 @@ function formatExpiry(ts: number): string {
 }
 
 function confidenceColor(c: number): string {
-  if (c >= 85) return '#10B981';
-  if (c >= 70) return '#F59E0B';
-  return '#EF4444';
+  if (c >= 85) return 'var(--success)';
+  if (c >= 70) return 'var(--warning)';
+  return 'var(--error)';
 }
 
 function freshnessBadge(expiry: number): { label: string; color: string; bg: string } {
   const now = Date.now();
   const remaining = expiry - now;
-  if (remaining <= 0) return { label: 'Expired', color: '#EF4444', bg: 'rgba(239,68,68,0.1)' };
-  if (remaining < 3_600_000) return { label: 'Expiring Soon', color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' };
-  return { label: 'Fresh', color: '#10B981', bg: 'rgba(16,185,129,0.1)' };
+  if (remaining <= 0) return { label: 'Expired', color: 'var(--error)', bg: 'var(--error-bg)' };
+  if (remaining < 3_600_000) return { label: 'Expiring Soon', color: 'var(--warning)', bg: 'var(--warning-bg)' };
+  return { label: 'Fresh', color: 'var(--success)', bg: 'var(--success-bg)' };
 }
 
 const INTEGRATION_SNIPPET = `// Cross-contract call from any Casper dApp
@@ -104,7 +104,7 @@ export const OracleView: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
-              <Radio size={28} style={{ color: '#8B5CF6' }} />
+              <Radio size={28} style={{ color: 'var(--text-accent)' }} />
               <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
                 Verdict Oracle
               </h1>
@@ -140,12 +140,12 @@ export const OracleView: React.FC = () => {
       {/* ── Stats Cards ───────────────────────────────────────────── */}
       <div className="oracle-stats-grid">
         {[
-          { label: 'Total Verdicts', value: stats.totalVerdicts, icon: Database, color: '#8B5CF6' },
-          { label: 'Fresh (Active)', value: stats.freshVerdicts, icon: Zap, color: '#10B981' },
-          { label: 'Avg Confidence', value: `${stats.avgConfidence}%`, icon: Shield, color: '#F59E0B' },
-          { label: 'Active Disputes', value: stats.activeDisputes, icon: AlertTriangle, color: '#EF4444' },
-          { label: 'Overturned', value: stats.overturnedVerdicts, icon: Gavel, color: '#F97316' },
-          { label: 'Query Fee', value: '0.1 CSPR', icon: Activity, color: '#06B6D4' },
+          { label: 'Total Verdicts', value: stats.totalVerdicts, icon: Database, color: 'var(--text-primary)' },
+          { label: 'Fresh (Active)', value: stats.freshVerdicts, icon: Zap, color: 'var(--success)' },
+          { label: 'Avg Confidence', value: `${stats.avgConfidence}%`, icon: Shield, color: 'var(--warning)' },
+          { label: 'Active Disputes', value: stats.activeDisputes, icon: AlertTriangle, color: 'var(--error)' },
+          { label: 'Overturned', value: stats.overturnedVerdicts, icon: Gavel, color: 'var(--error)' },
+          { label: 'Query Fee', value: '0.1 CSPR', icon: Activity, color: 'var(--text-secondary)' },
         ].map((stat) => {
           const Icon = stat.icon;
           return (
@@ -184,18 +184,18 @@ export const OracleView: React.FC = () => {
         transition={{ delay: 0.1 }}
         style={{
           padding: '24px', borderRadius: '12px',
-          background: 'linear-gradient(135deg, rgba(139,92,246,0.06) 0%, rgba(6,182,212,0.06) 100%)',
-          border: '1px solid rgba(139,92,246,0.15)',
+          background: 'var(--bg-elevated)',
+          border: '1px solid var(--border-color)',
           marginBottom: '32px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
           <div style={{
             width: '48px', height: '48px', borderRadius: '12px',
-            background: 'rgba(139,92,246,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
           }}>
-            <Radio size={24} style={{ color: '#8B5CF6' }} />
+            <Radio size={24} style={{ color: 'var(--text-accent)' }} />
           </div>
           <div>
             <h3 style={{ margin: '0 0 8px', fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -230,7 +230,7 @@ export const OracleView: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Code size={18} style={{ color: '#8B5CF6' }} />
+            <Code size={18} style={{ color: 'var(--text-accent)' }} />
             <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>Integration Code: How to Query the Oracle</span>
           </div>
           {showCode ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
@@ -285,19 +285,19 @@ export const OracleView: React.FC = () => {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Database size={16} style={{ color: '#8B5CF6' }} />
+            <Database size={16} style={{ color: 'var(--text-accent)' }} />
             <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
               Stored Verdicts
             </span>
             <span style={{
               fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px',
-              background: 'rgba(139,92,246,0.1)', color: '#8B5CF6', fontWeight: 600,
+              background: 'var(--bg-elevated)', color: 'var(--text-accent)', fontWeight: 600,
             }}>
               {verdicts.length}
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Wifi size={12} style={{ color: '#10B981' }} />
+            <Wifi size={12} style={{ color: 'var(--success)' }} />
             <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Live</span>
           </div>
         </div>
@@ -422,10 +422,10 @@ export const OracleView: React.FC = () => {
                                 const score = parseInt(scoreStr, 10);
                                 const pct = Math.min(score / 1000 * 100, 100);
                                 const agentColors: Record<string, string> = {
-                                  evidence: '#10B981', 'valuation-a': '#06B6D4', 'valuation-b': '#8B5CF6',
-                                  market: '#F59E0B', precedent: '#EF4444',
+                                  evidence: 'var(--success)', 'valuation-a': 'var(--text-secondary)', 'valuation-b': 'var(--text-accent)',
+                                  market: 'var(--warning)', precedent: 'var(--error)',
                                 };
-                                const color = agentColors[agent?.trim()] || '#8B5CF6';
+                                const color = agentColors[agent?.trim()] || 'var(--text-accent)';
                                 return (
                                   <div key={agent} className="oracle-agent-bar-row">
                                     <span className="oracle-agent-name">{agent?.trim()}</span>

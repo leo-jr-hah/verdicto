@@ -13,8 +13,8 @@ export const DemoModeBanner: React.FC = () => {
   return (
     <div
       style={{
-        background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
-        color: '#fff',
+        background: 'linear-gradient(135deg, var(--purple) 0%, var(--text-accent) 100%)',
+        color: 'var(--text-inverse)',
         padding: '0.5rem 1rem',
         display: 'flex',
         alignItems: 'center',
@@ -34,7 +34,7 @@ export const DemoModeBanner: React.FC = () => {
         target="_blank"
         rel="noopener noreferrer"
         style={{
-          color: '#fff',
+          color: 'var(--text-inverse)',
           textDecoration: 'underline',
           display: 'inline-flex',
           alignItems: 'center',

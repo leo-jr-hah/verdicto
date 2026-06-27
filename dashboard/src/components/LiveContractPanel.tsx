@@ -104,7 +104,7 @@ const AgentRow: React.FC<{
       alignItems: 'center',
       justifyContent: 'center',
     }}>
-      <Users size={16} color="#6366f1" />
+      <Users size={16} color="var(--text-accent)" />
     </div>
     <div style={{ flex: 1 }}>
       <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
@@ -122,7 +122,7 @@ const AgentRow: React.FC<{
         : agent.reputation >= 600
           ? 'rgba(245, 158, 11, 0.15)'
           : 'rgba(239, 68, 68, 0.15)',
-      color: agent.reputation >= 800 ? '#10b981' : agent.reputation >= 600 ? '#f59e0b' : '#ef4444',
+      color: agent.reputation >= 800 ? 'var(--success)' : agent.reputation >= 600 ? 'var(--warning)' : 'var(--error)',
       fontSize: '0.85rem',
       fontWeight: 700,
     }}>
@@ -199,7 +199,7 @@ export const LiveContractPanel: React.FC = () => {
         padding: '2rem',
         textAlign: 'center',
       }}>
-        <AlertCircle size={24} color="#ef4444" style={{ marginBottom: '0.5rem' }} />
+        <AlertCircle size={24} color="var(--error)" style={{ marginBottom: '0.5rem' }} />
         <p style={{ color: 'var(--text-secondary)' }}>{error}</p>
         <button onClick={loadState} style={{
           marginTop: '1rem', padding: '0.5rem 1rem', borderRadius: '6px',
@@ -227,7 +227,7 @@ export const LiveContractPanel: React.FC = () => {
             display: 'flex', alignItems: 'center', gap: '0.3rem',
             padding: '0.2rem 0.6rem', borderRadius: '4px',
             background: connected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)',
-            color: connected ? '#10b981' : '#6b7280',
+            color: connected ? 'var(--success)' : 'var(--text-tertiary)',
             fontSize: '0.7rem', fontWeight: 600,
           }}>
             {connected ? <Wifi size={12} /> : <WifiOff size={12} />}
@@ -262,7 +262,7 @@ export const LiveContractPanel: React.FC = () => {
           icon={<Scale size={16} />}
           label="Total Assessments"
           value={state.assessments.total}
-          color="#6366f1"
+          color="var(--text-accent)"
           subtext={`${state.assessments.pending} pending • ${state.assessments.resolved} resolved`}
           index={0}
         />
@@ -270,7 +270,7 @@ export const LiveContractPanel: React.FC = () => {
           icon={<Shield size={16} />}
           label="Records"
           value={state.receipts.total}
-          color="#10b981"
+          color="var(--success)"
           subtext={`${state.receipts.verified} verified • ${state.receipts.pending} pending`}
           index={1}
         />
@@ -278,7 +278,7 @@ export const LiveContractPanel: React.FC = () => {
           icon={<TrendingUp size={16} />}
           label="Total Collected"
           value={formatCSPR(state.payments.totalCollected)}
-          color="#f59e0b"
+          color="var(--warning)"
           subtext={`${formatCSPR(state.payments.totalProcessed)} processed`}
           index={2}
         />
@@ -286,7 +286,7 @@ export const LiveContractPanel: React.FC = () => {
           icon={<Activity size={16} />}
           label="In Progress"
           value={state.assessments.deliberating + state.assessments.voting}
-          color="#ef4444"
+          color="var(--error)"
           subtext={`${state.assessments.deliberating} in review • ${state.assessments.voting} finalizing`}
           index={3}
         />

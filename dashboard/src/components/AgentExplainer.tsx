@@ -78,6 +78,7 @@ const AgentCard: React.FC<{
   index: number;
 }> = ({ label, method, value, confidence, source, reasoning, fallbackTriggered, fallbackProvider, index }) => {
   const [expanded, setExpanded] = useState(false);
+  const color = 'var(--text-accent)';
 
   return (
     <motion.div
@@ -219,8 +220,8 @@ const ConsensusCard: React.FC<{
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.1 }}
       style={{
-        background: 'linear-gradient(135deg, rgba(139,92,246,0.04), rgba(59,130,246,0.04))',
-        border: '1px solid rgba(139,92,246,0.2)',
+        background: 'var(--bg-elevated)',
+        border: '1px solid var(--border-color)',
         borderRadius: 12,
         overflow: 'hidden',
       }}
@@ -235,7 +236,7 @@ const ConsensusCard: React.FC<{
       >
         <div style={{
           width: 38, height: 38, borderRadius: 10,
-          background: 'rgba(139,92,246,0.08)',
+          background: 'var(--bg-surface)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
         }}>
@@ -553,7 +554,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
               border: '1px solid rgba(245,158,11,0.15)',
             }}>
               <div style={{
-                fontSize: '0.72rem', fontWeight: 600, color: '#f59e0b',
+                fontSize: '0.72rem', fontWeight: 600, color: 'var(--warning)',
                 marginBottom: 6,
               }}>
                 RISK FACTORS IDENTIFIED
@@ -564,7 +565,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
                   fontSize: '0.78rem', color: 'var(--text-secondary, #6b7280)',
                   marginBottom: 4,
                 }}>
-                  <AlertTriangle size={12} color="#f59e0b" />
+                  <AlertTriangle size={12} color="var(--warning)" />
                   {f}
                 </div>
               ))}
@@ -666,7 +667,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
             marginTop: 12, padding: '8px 10px',
             background: 'rgba(245,158,11,0.06)',
             borderRadius: 6,
-            fontSize: '0.72rem', color: '#f59e0b',
+            fontSize: '0.72rem', color: 'var(--warning)',
           }}>
             <AlertTriangle size={13} />
             A Borrow Keeper monitors collateral value every 30 minutes. If LTV exceeds 80%, a margin call is issued. At 90%, automatic liquidation triggers.

@@ -246,17 +246,17 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG = {
-  live: { label: 'Live', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
-  building: { label: 'Building', color: '#6366f1', bg: 'rgba(99, 102, 241, 0.1)' },
-  planned: { label: 'Planned', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
+  live: { label: 'Live', color: 'var(--success)', bg: 'rgba(16, 185, 129, 0.1)' },
+  building: { label: 'Building', color: 'var(--text-accent)', bg: 'rgba(99, 102, 241, 0.1)' },
+  planned: { label: 'Planned', color: 'var(--warning)', bg: 'rgba(245, 158, 11, 0.1)' },
   future: { label: 'Future', color: 'var(--text-tertiary)', bg: 'var(--bg-surface-alt)' },
 };
 
 const CATEGORY_CONFIG = {
-  verifiable: { label: 'Verifiable Value', color: '#6366f1', description: 'Outputs traditional AI cannot produce' },
-  economic: { label: 'Economic Value', color: '#10b981', description: 'Direct revenue or cost savings' },
-  network: { label: 'Network Effects', color: '#f59e0b', description: 'More users = more value' },
-  enhancement: { label: 'Enhancement', color: '#8b5cf6', description: 'Improvements to existing system' },
+  verifiable: { label: 'Verifiable Value', color: 'var(--text-accent)', description: 'Outputs traditional AI cannot produce' },
+  economic: { label: 'Economic Value', color: 'var(--success)', description: 'Direct revenue or cost savings' },
+  network: { label: 'Network Effects', color: 'var(--warning)', description: 'More users = more value' },
+  enhancement: { label: 'Enhancement', color: 'var(--purple)', description: 'Improvements to existing system' },
 };
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -350,8 +350,8 @@ export const RoadmapView: React.FC = () => {
   const future = ROADMAP_ITEMS.filter(i => i.status === 'future');
 
   const sections = [
-    { title: 'Live & Deployed', items: live, icon: <CheckCircle2 size={18} color="#10b981" />, color: '#10b981' },
-    { title: 'Planned', items: planned, icon: <ArrowRight size={18} color="#f59e0b" />, color: '#f59e0b' },
+    { title: 'Live & Deployed', items: live, icon: <CheckCircle2 size={18} color="var(--success)" />, color: 'var(--success)' },
+    { title: 'Planned', items: planned, icon: <ArrowRight size={18} color="var(--warning)" />, color: 'var(--warning)' },
     { title: 'Future Vision', items: future, icon: <ArrowRight size={18} color="var(--text-tertiary)" />, color: 'var(--text-tertiary)' },
   ];
 

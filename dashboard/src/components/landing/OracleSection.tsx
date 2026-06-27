@@ -7,25 +7,25 @@ const FEATURES = [
     icon: <Radio size={22} />,
     title: 'Shared Data Layer',
     desc: 'Any Casper smart contract can query the Verdict Oracle directly. Fully on-chain, no external dependencies.',
-    color: '#8B5CF6',
+    color: 'var(--purple)',
   },
   {
     icon: <Zap size={22} />,
     title: '0.1 CSPR Per Query',
     desc: 'Micropayment per query, signed by the user wallet. Pay per query, on-chain, verifiable.',
-    color: '#F59E0B',
+    color: 'var(--warning)',
   },
   {
     icon: <Shield size={22} />,
     title: 'Multi-Agent Consensus',
     desc: 'Each verdict is the output of multiple independent AI agents: valuation specialists and jurors, with cryptographic receipt chains proving nothing was altered.',
-    color: '#10B981',
+    color: 'var(--success)',
   },
   {
     icon: <Globe size={22} />,
     title: '24h Freshness Guarantee',
     desc: 'Every verdict has an expiry timestamp. Smart contracts can check `is_expired()` before using a price. Stale data is automatically rejected.',
-    color: '#06B6D4',
+    color: 'var(--text-secondary)',
   },
 ];
 
@@ -63,7 +63,7 @@ export const OracleSection: React.FC = () => {
         className="landing-section__header"
       >
         <div className="landing-badge landing-badge--purple">
-          <Radio size={14} style={{ color: '#8B5CF6' }} />
+          <Radio size={14} style={{ color: 'var(--purple)' }} />
           <span>Composable Primitive</span>
         </div>
         <h2 className="landing-section__title">The Oracle for Real-World Assets</h2>
@@ -103,7 +103,7 @@ export const OracleSection: React.FC = () => {
         {/* Code Snippet */}
         <div className="card" style={{ padding: '1.5rem', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <Code size={16} style={{ color: '#8B5CF6' }} />
+            <Code size={16} style={{ color: 'var(--purple)' }} />
             <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
               Query the Oracle
             </span>
@@ -116,7 +116,7 @@ export const OracleSection: React.FC = () => {
         {/* Use Cases */}
         <div className="card" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <Globe size={16} style={{ color: '#06B6D4' }} />
+            <Globe size={16} style={{ color: 'var(--text-secondary)' }} />
             <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
               Use Cases
             </span>

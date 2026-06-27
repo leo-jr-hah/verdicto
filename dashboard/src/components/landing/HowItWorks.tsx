@@ -6,7 +6,7 @@ const STEPS = [
   {
     num: '01',
     title: 'Connect Your Wallet',
-    color: '#FF3B3B',
+    color: 'var(--primary)',
     icon: Upload,
     description: 'Connect your Casper Wallet in one click. Your wallet handles all payments and receives all disbursements. No account creation needed.',
     detail: 'Casper Wallet via CSPRClick SDK',
@@ -14,7 +14,7 @@ const STEPS = [
   {
     num: '02',
     title: 'Choose Your Product',
-    color: '#3B82F6',
+    color: 'var(--text-accent)',
     icon: BarChart3,
     description: 'Pick what you need: Assess an asset for its market value, Borrow against it, Insure it against loss, or run a Confidence Analysis. Each product uses the same multi-agent AI engine.',
     detail: 'Assess, Borrow, Insure, or Predict',
@@ -22,7 +22,7 @@ const STEPS = [
   {
     num: '03',
     title: 'AI Agents Analyze',
-    color: '#8B5CF6',
+    color: 'var(--purple)',
     icon: Users,
     description: 'Multiple independent AI agents work in parallel. Each queries real market data, selects its own methodology, and produces a result with full reasoning. If agents disagree, jurors deliberate with peer review.',
     detail: 'Multi-Agent Analysis with Peer Review',
@@ -30,7 +30,7 @@ const STEPS = [
   {
     num: '04',
     title: 'Result On-Chain',
-    color: '#10B981',
+    color: 'var(--success)',
     icon: ShieldCheck,
     description: 'Consensus verdict stored in the Oracle. Borrow, insure, or verify against it. Autonomous keepers monitor collateral health and insurance policies 24/7 with no human in the loop.',
     detail: 'Composable On-Chain Primitive',
