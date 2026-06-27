@@ -36,9 +36,9 @@ function formatPercent(value: number): string {
 }
 
 function probabilityColor(p: number): string {
-  if (p >= 0.7) return 'var(--success)';
-  if (p >= 0.4) return 'var(--warning)';
-  return 'var(--error)';
+  if (p >= 0.7) return 'var(--text-secondary)';
+  if (p >= 0.4) return 'var(--text-tertiary)';
+  return 'var(--red-600)';
 }
 
 function probabilityLabel(p: number): string {
@@ -82,9 +82,9 @@ const DEMO_QUESTIONS = [
 
 const AGENT_PROFILES = [
   { name: 'Valuation Agent A', role: 'Comparable Sales', color: 'var(--text-secondary)' },
-  { name: 'Valuation Agent B', role: 'DCF & Cash Flow', color: 'var(--warning)' },
-  { name: 'Evidence Analyst', role: 'Data Quality Auditor', color: 'var(--success)' },
-  { name: 'Market Interpreter', role: 'Macro & Sentiment', color: 'var(--info)' },
+  { name: 'Valuation Agent B', role: 'DCF & Cash Flow', color: 'var(--text-tertiary)' },
+  { name: 'Evidence Analyst', role: 'Data Quality Auditor', color: 'var(--text-secondary)' },
+  { name: 'Market Interpreter', role: 'Macro & Sentiment', color: 'var(--text-tertiary)' },
   { name: 'Precedent Researcher', role: 'Historical Precedent', color: 'var(--text-secondary)' },
 ];
 
@@ -470,7 +470,7 @@ export const PredictionView: React.FC = () => {
                     <>
                       <div style={{
                         width: 8, height: 8, borderRadius: '50%',
-                        background: 'var(--success)',
+                        background: 'var(--text-secondary)',
                       }} />
                       {walletDisplay}
                     </>
@@ -754,7 +754,7 @@ export const PredictionView: React.FC = () => {
                     border: '1px solid rgba(16,185,129,0.15)',
                     fontSize: '0.78rem', color: 'var(--text-tertiary)',
                   }}>
-                    <CheckCircle2 size={14} color="var(--success)" />
+                    <CheckCircle2 size={14} color="var(--text-secondary)" />
                     <span>Paid {PREDICTION_FEE_CSPR} CSPR</span>
                     <a
                       href={`https://testnet.cspr.live/deploy/${lastDeployHash}`}
@@ -812,7 +812,7 @@ export const PredictionView: React.FC = () => {
                 display: 'flex', alignItems: 'center', gap: 8,
                 marginBottom: 12,
               }}>
-                <AlertTriangle size={16} color="var(--warning)" />
+                <AlertTriangle size={16} color="var(--text-tertiary)" />
                 <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                   Risk Factors
                 </span>
@@ -828,7 +828,7 @@ export const PredictionView: React.FC = () => {
                   }}>
                     <div style={{
                       width: 6, height: 6, borderRadius: '50%',
-                      background: 'var(--warning)', flexShrink: 0,
+                      background: 'var(--text-tertiary)', flexShrink: 0,
                     }} />
                     {factor}
                   </div>

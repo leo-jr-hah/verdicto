@@ -171,11 +171,11 @@ export const DisputesView: React.FC = () => {
       <div className="disputes-stats-grid">
         {[
           { label: 'Total Disputes', value: stats.total, icon: Gavel, color: 'var(--text-primary)' },
-          { label: 'Pending', value: stats.pending, icon: AlertTriangle, color: 'var(--warning)' },
+          { label: 'Pending', value: stats.pending, icon: AlertTriangle, color: 'var(--text-tertiary)' },
           { label: 'Under Re-trial', value: stats.underRetrial, icon: Swords, color: 'var(--red-600)' },
           { label: 'Resolved', value: stats.resolved, icon: Scale, color: 'var(--text-secondary)' },
           { label: 'Overturned', value: stats.overturned, icon: Shield, color: 'var(--error)' },
-          { label: 'Upheld', value: stats.upheld, icon: Activity, color: 'var(--success)' },
+          { label: 'Upheld', value: stats.upheld, icon: Activity, color: 'var(--text-secondary)' },
         ].map((stat) => {
           const Icon = stat.icon;
           return (
@@ -305,7 +305,7 @@ export const DisputesView: React.FC = () => {
                     display: 'flex', alignItems: 'center', gap: '6px',
                     padding: '8px 16px', borderRadius: '8px',
                     border: '1px solid var(--warning-border)', background: 'var(--warning-bg)',
-                    color: 'var(--warning)', fontSize: '0.82rem', fontWeight: 600,
+                    color: 'var(--text-tertiary)', fontSize: '0.82rem', fontWeight: 600,
                   }}>
                     <AlertTriangle size={14} />
                     Dispute Active
@@ -398,10 +398,10 @@ export const DisputesView: React.FC = () => {
                       <span style={{
                         fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 600,
                         ...(d.status === 'pending'
-                          ? { background: 'rgba(245,158,11,0.12)', color: 'var(--warning)' }
+                          ? { background: 'rgba(245,158,11,0.12)', color: 'var(--text-tertiary)' }
                           : d.status === 'under_retrial'
                           ? { background: 'var(--bg-elevated)', color: 'var(--red-600)' }
-                          : { background: 'rgba(16,185,129,0.12)', color: 'var(--success)' }),
+                          : { background: 'rgba(16,185,129,0.12)', color: 'var(--text-secondary)' }),
                       }}>
                         {d.status === 'under_retrial' ? 'Re-trial' : d.status.charAt(0).toUpperCase() + d.status.slice(1)}
                       </span>
@@ -410,7 +410,7 @@ export const DisputesView: React.FC = () => {
                           fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 600,
                           ...(d.outcome === 'overturned'
                             ? { background: 'rgba(239,68,68,0.12)', color: 'var(--error)' }
-                            : { background: 'rgba(16,185,129,0.12)', color: 'var(--success)' }),
+                            : { background: 'rgba(16,185,129,0.12)', color: 'var(--text-secondary)' }),
                         }}>
                           {d.outcome === 'overturned' ? 'Overturned' : 'Upheld'}
                         </span>
@@ -425,7 +425,7 @@ export const DisputesView: React.FC = () => {
                     {d.outcome && (
                       <div style={{
                         fontSize: '0.75rem', marginTop: '4px', lineHeight: 1.4,
-                        color: d.outcome === 'overturned' ? 'var(--error)' : 'var(--success)',
+                        color: d.outcome === 'overturned' ? 'var(--red-600)' : 'var(--text-secondary)',
                       }}>
                         {d.outcome === 'overturned'
                           ? 'Re-trial found the original verdict incorrect. Decision has been reversed.'
@@ -479,7 +479,7 @@ export const DisputesView: React.FC = () => {
                                   fontSize: '0.7rem', padding: '3px 10px', borderRadius: '10px', fontWeight: 700,
                                   ...(d.outcome === 'overturned'
                                     ? { background: 'rgba(239,68,68,0.15)', color: 'var(--error)' }
-                                    : { background: 'rgba(16,185,129,0.15)', color: 'var(--success)' }),
+                                    : { background: 'rgba(16,185,129,0.15)', color: 'var(--text-secondary)' }),
                                 }}>
                                   {d.outcome === 'overturned' ? '⚡ Overturned' : '✅ Upheld'}
                                 </span>
@@ -501,7 +501,7 @@ export const DisputesView: React.FC = () => {
                                   <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', marginBottom: '2px' }}>New Verdict</div>
                                   <div style={{
                                     fontSize: '1.1rem', fontWeight: 700,
-                                    color: d.outcome === 'overturned' ? 'var(--error)' : 'var(--success)',
+                                    color: d.outcome === 'overturned' ? 'var(--red-600)' : 'var(--text-secondary)',
                                   }}>
                                     ${d.retrial.newVerdict.value.toLocaleString()}
                                   </div>
@@ -516,14 +516,14 @@ export const DisputesView: React.FC = () => {
                                 <span style={{
                                   fontSize: '0.75rem', padding: '2px 8px', borderRadius: '6px',
                                   background: d.retrial.valueDelta < 0 ? 'var(--error-bg)' : 'var(--success-bg)',
-                                  color: d.retrial.valueDelta < 0 ? 'var(--error)' : 'var(--success)', fontWeight: 600,
+                                  color: d.retrial.valueDelta < 0 ? 'var(--red-600)' : 'var(--text-secondary)', fontWeight: 600,
                                 }}>
                                   Value: {d.retrial.valueDelta > 0 ? '+' : ''}{d.retrial.valueDelta.toFixed(1)}%
                                 </span>
                                 <span style={{
                                   fontSize: '0.75rem', padding: '2px 8px', borderRadius: '6px',
                                   background: d.retrial.confidenceDelta < 0 ? 'var(--error-bg)' : 'var(--success-bg)',
-                                  color: d.retrial.confidenceDelta < 0 ? 'var(--error)' : 'var(--success)', fontWeight: 600,
+                                  color: d.retrial.confidenceDelta < 0 ? 'var(--red-600)' : 'var(--text-secondary)', fontWeight: 600,
                                 }}>
                                   Confidence: {d.retrial.confidenceDelta > 0 ? '+' : ''}{d.retrial.confidenceDelta}
                                 </span>
@@ -546,7 +546,7 @@ export const DisputesView: React.FC = () => {
                                     background: juror.vote === 'A' ? 'var(--success-bg)' : juror.vote === 'B' ? 'var(--error-bg)' : 'var(--warning-bg)',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     fontSize: '0.7rem', fontWeight: 700,
-                                    color: juror.vote === 'A' ? 'var(--success)' : juror.vote === 'B' ? 'var(--error)' : 'var(--warning)',
+                                    color: juror.vote === 'A' ? 'var(--text-secondary)' : juror.vote === 'B' ? 'var(--red-600)' : 'var(--text-tertiary)',
                                   }}>
                                     {juror.vote}
                                   </div>
@@ -611,8 +611,8 @@ export const DisputesView: React.FC = () => {
                             background: 'var(--warning-bg)', border: '1px solid var(--warning-border)',
                             display: 'flex', alignItems: 'center', gap: '8px',
                           }}>
-                            <Loader2 size={14} style={{ color: 'var(--warning)', animation: 'spin 1s linear infinite' }} />
-                            <span style={{ fontSize: '0.82rem', color: 'var(--warning)', fontWeight: 500 }}>
+                            <Loader2 size={14} style={{ color: 'var(--text-tertiary)', animation: 'spin 1s linear infinite' }} />
+                            <span style={{ fontSize: '0.82rem', color: 'var(--text-tertiary)', fontWeight: 500 }}>
                               Re-trial pending. Will start automatically
                             </span>
                           </div>
@@ -689,7 +689,7 @@ export const DisputesView: React.FC = () => {
                 border: `1px solid ${wallet.connected ? 'var(--success-border)' : 'var(--error-border)'}`,
                 display: 'flex', alignItems: 'center', gap: '8px',
               }}>
-                <span style={{ fontSize: '0.8rem', color: wallet.connected ? 'var(--success)' : 'var(--error)', fontWeight: 500 }}>
+                <span style={{ fontSize: '0.8rem', color: wallet.connected ? 'var(--text-secondary)' : 'var(--red-600)', fontWeight: 500 }}>
                   {wallet.connected
                     ? `Wallet connected: ${wallet.publicKey?.slice(0, 8)}...${wallet.publicKey?.slice(-6)}`
                     : 'Wallet not connected. Please connect first.'}
@@ -735,8 +735,8 @@ export const DisputesView: React.FC = () => {
                 marginBottom: '16px',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                  <AlertTriangle size={14} style={{ color: 'var(--warning)' }} />
-                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--warning)' }}>Stake Required: {DISPUTE_FEE_CSPR} CSPR</span>
+                  <AlertTriangle size={14} style={{ color: 'var(--text-tertiary)' }} />
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-tertiary)' }}>Stake Required: {DISPUTE_FEE_CSPR} CSPR</span>
                 </div>
                 <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
                   If the re-trial overturns the verdict, you get your stake back. If upheld, the stake goes to the original jurors.

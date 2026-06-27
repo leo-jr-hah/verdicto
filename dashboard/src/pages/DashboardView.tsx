@@ -104,7 +104,7 @@ export const DashboardView: React.FC = () => {
             <p className="page-subtitle">Real-time overview of your Verdicto platform activity.</p>
           </div>
           <div className="page-header-actions">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: wsConnected ? 'var(--success)' : 'var(--text-tertiary)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: wsConnected ? 'var(--text-secondary)' : 'var(--text-tertiary)' }}>
               {wsConnected ? <Wifi size={14} /> : <WifiOff size={14} />}
               {wsConnected ? 'Live' : 'Offline'}
             </div>
@@ -117,10 +117,10 @@ export const DashboardView: React.FC = () => {
         <div className="stat-grid">
           {[
             { label: 'Total Cases', value: totalCases, icon: BarChart3, color: 'var(--text-primary)', bg: 'var(--bg-surface-alt)' },
-            { label: 'Verified', value: onChainCount, icon: CheckCircle2, color: 'var(--success)', bg: 'var(--success-soft)' },
+            { label: 'Verified', value: onChainCount, icon: CheckCircle2, color: 'var(--text-secondary)', bg: 'var(--success-soft)' },
             { label: 'Oracle Verdicts', value: oracleStats.totalVerdicts, icon: Radio, color: 'var(--text-secondary)', bg: 'var(--bg-inset)' },
             { label: 'Active Agents', value: 5, icon: Zap, color: 'var(--text-secondary)', bg: 'var(--bg-inset)' },
-            { label: 'Live Feeds', value: 3, icon: TrendingUp, color: 'var(--warning)', bg: 'var(--warning-soft)' },
+            { label: 'Live Feeds', value: 3, icon: TrendingUp, color: 'var(--text-tertiary)', bg: 'var(--warning-soft)' },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -258,7 +258,7 @@ export const DashboardView: React.FC = () => {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
                     {tx.onChain && (
-                      <span style={{ fontSize: '11px', color: 'var(--success)', fontWeight: 500 }}>On-chain</span>
+                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500 }}>On-chain</span>
                     )}
                     <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>
                       {formatTime(tx.timestamp)}

@@ -45,7 +45,7 @@ export const ConnectionStatus: React.FC = () => {
       padding: '0.5rem 1rem',
       fontSize: '0.85rem',
       fontWeight: 600,
-      color: isOnline ? 'var(--success)' : 'var(--text-tertiary)',
+      color: isOnline ? 'var(--text-secondary)' : 'var(--text-tertiary)',
       background: 'var(--bg-surface)',
       border: '1px solid var(--border-color)',
       borderRadius: '999px'

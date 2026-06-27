@@ -64,12 +64,6 @@ function formatPercent(value: number): string {
   return `${value.toFixed(1)}%`;
 }
 
-function divergenceColor(pct: number): string {
-  if (pct <= 10) return 'var(--success, #10b981)';
-  if (pct <= 25) return 'var(--warning, #f59e0b)';
-  return 'var(--error, #ef4444)';
-}
-
 // ─── Live Log Entry ──────────────────────────────────────────────────────────
 
 interface LogEntry {
@@ -201,12 +195,12 @@ const DemoAssetCard: React.FC<{
 // ─── Live Log Panel ──────────────────────────────────────────────────────────
 
 const logIconMap = {
-  info: <Info size={12} color="var(--text-secondary)" />,
-  success: <CheckCircle2 size={12} color="var(--success)" />,
-  warning: <AlertCircle size={12} color="var(--warning)" />,
-  error: <XCircle size={12} color="var(--error)" />,
-  data: <Database size={12} color="var(--text-secondary)" />,
-  agent: <Zap size={12} color="var(--red-600)" />,
+  info: <Info size={12} color="var(--text-tertiary)" />,
+  success: <CheckCircle2 size={12} color="var(--text-secondary)" />,
+  warning: <AlertCircle size={12} color="var(--text-tertiary)" />,
+  error: <XCircle size={12} color="var(--red-600)" />,
+  data: <Database size={12} color="var(--text-tertiary)" />,
+  agent: <Zap size={12} color="var(--text-secondary)" />,
 };
 
 const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, loading }) => {
@@ -247,10 +241,10 @@ const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, 
             <>
               <span style={{
                 width: '6px', height: '6px', borderRadius: '50%',
-                background: 'var(--success)',
+                background: 'var(--text-secondary)',
                 animation: 'pulse-dot 1.5s infinite',
               }} />
-              <span style={{ color: 'var(--success)' }}>Live</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Live</span>
             </>
           )}
           {!loading && logs.length > 0 && (
@@ -309,7 +303,7 @@ const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, 
           </motion.div>
         ))}
         {loading && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--success)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)' }}>
             <Loader2 size={10} style={{ animation: 'spin 1s linear infinite' }} />
             <span>Processing...</span>
           </div>
@@ -345,13 +339,9 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
     >
       {/* Hero Result Banner */}
       <div style={{
-        background: isAboveAsking
-          ? 'linear-gradient(135deg, var(--success-soft), rgba(16, 185, 129, 0.02))'
-          : isBelowAsking
-            ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.02))'
-            : 'linear-gradient(135deg, var(--bg-inset), var(--bg-inset))',
+        background: 'var(--bg-surface)',
         borderRadius: '12px',
-        border: `2px solid ${isAboveAsking ? 'var(--success)' : isBelowAsking ? 'var(--error)' : 'var(--red-600)'}`,
+        border: '1px solid var(--border-color)',
         padding: '2rem',
         marginBottom: '1.5rem',
         textAlign: 'center',
@@ -362,7 +352,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
         <div style={{
           fontSize: '2.8rem',
           fontWeight: 800,
-          color: isAboveAsking ? 'var(--success)' : isBelowAsking ? 'var(--error)' : 'var(--text-primary)',
+          color: 'var(--text-primary)',
           lineHeight: 1.1,
           marginBottom: '0.5rem',
         }}>
@@ -371,7 +361,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
         <div style={{
           fontSize: '1rem',
           fontWeight: 600,
-          color: isAboveAsking ? 'var(--success)' : isBelowAsking ? 'var(--error)' : 'var(--text-tertiary)',
+          color: isBelowAsking ? 'var(--red-600)' : 'var(--text-secondary)',
           marginBottom: '1rem',
         }}>
           {diffPct >= 0 ? '+' : ''}{formatPercent(diffPct)} vs asking price of {formatCurrency(result.askingPrice)}
@@ -382,10 +372,8 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
           gap: '0.4rem',
           padding: '0.4rem 1rem',
           borderRadius: '9999px',
-          background: result.divergence <= 15
-            ? 'rgba(16,185,129,0.15)'
-            : 'rgba(245,158,11,0.15)',
-          color: divergenceColor(result.divergence),
+          background: 'var(--bg-inset)',
+          color: 'var(--text-secondary)',
           fontSize: '0.85rem',
           fontWeight: 600,
         }}>
@@ -437,16 +425,12 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
             width: '48px',
             height: '48px',
             borderRadius: '50%',
-            background: isAboveAsking
-              ? 'var(--success-soft)'
-              : isBelowAsking
-                ? 'var(--error-soft)'
-                : 'var(--bg-surface-alt)',
+            background: 'var(--bg-inset)',
           }}>
             {isAboveAsking
-              ? <TrendingUp size={22} color="var(--success)" />
+              ? <TrendingUp size={22} color="var(--text-secondary)" />
               : isBelowAsking
-                ? <TrendingDown size={22} color="var(--error)" />
+                ? <TrendingDown size={22} color="var(--red-600)" />
                 : <Minus size={22} color="var(--text-tertiary)" />}
           </div>
 
@@ -455,7 +439,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
             <p style={{
               fontSize: '1.6rem',
               fontWeight: 700,
-              color: isAboveAsking ? 'var(--success)' : isBelowAsking ? 'var(--error)' : 'var(--text-primary)',
+              color: 'var(--text-primary)',
             }}>
               {formatCurrency(result.assessedValue)}
             </p>
@@ -532,7 +516,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
                 <span style={{
                   width: '6px', height: '6px', borderRadius: '50%',
-                  background: src.status === 'live' ? 'var(--success)' : src.status === 'mock' ? 'var(--warning)' : 'var(--error)',
+                  background: src.status === 'live' ? 'var(--text-secondary)' : src.status === 'mock' ? 'var(--text-tertiary)' : 'var(--red-600)',
                   flexShrink: 0,
                 }} />
                 <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{src.name}</span>

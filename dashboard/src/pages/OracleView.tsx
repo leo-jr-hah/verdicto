@@ -30,17 +30,17 @@ function formatExpiry(ts: number): string {
 }
 
 function confidenceColor(c: number): string {
-  if (c >= 85) return 'var(--success)';
-  if (c >= 70) return 'var(--warning)';
-  return 'var(--error)';
+  if (c >= 85) return 'var(--text-secondary)';
+  if (c >= 70) return 'var(--text-tertiary)';
+  return 'var(--red-600)';
 }
 
 function freshnessBadge(expiry: number): { label: string; color: string; bg: string } {
   const now = Date.now();
   const remaining = expiry - now;
-  if (remaining <= 0) return { label: 'Expired', color: 'var(--error)', bg: 'var(--error-bg)' };
-  if (remaining < 3_600_000) return { label: 'Expiring Soon', color: 'var(--warning)', bg: 'var(--warning-bg)' };
-  return { label: 'Fresh', color: 'var(--success)', bg: 'var(--success-bg)' };
+  if (remaining <= 0) return { label: 'Expired', color: 'var(--red-600)', bg: 'var(--bg-inset)' };
+  if (remaining < 3_600_000) return { label: 'Expiring Soon', color: 'var(--text-tertiary)', bg: 'var(--bg-inset)' };
+  return { label: 'Fresh', color: 'var(--text-secondary)', bg: 'var(--bg-inset)' };
 }
 
 const INTEGRATION_SNIPPET = `// Cross-contract call from any Casper dApp
@@ -141,8 +141,8 @@ export const OracleView: React.FC = () => {
       <div className="oracle-stats-grid">
         {[
           { label: 'Total Verdicts', value: stats.totalVerdicts, icon: Database, color: 'var(--text-primary)' },
-          { label: 'Fresh (Active)', value: stats.freshVerdicts, icon: Zap, color: 'var(--success)' },
-          { label: 'Avg Confidence', value: `${stats.avgConfidence}%`, icon: Shield, color: 'var(--warning)' },
+          { label: 'Fresh (Active)', value: stats.freshVerdicts, icon: Zap, color: 'var(--text-secondary)' },
+          { label: 'Avg Confidence', value: `${stats.avgConfidence}%`, icon: Shield, color: 'var(--text-tertiary)' },
           { label: 'Active Disputes', value: stats.activeDisputes, icon: AlertTriangle, color: 'var(--error)' },
           { label: 'Overturned', value: stats.overturnedVerdicts, icon: Gavel, color: 'var(--error)' },
           { label: 'Query Fee', value: '0.1 CSPR', icon: Activity, color: 'var(--text-secondary)' },
@@ -297,7 +297,7 @@ export const OracleView: React.FC = () => {
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Wifi size={12} style={{ color: 'var(--success)' }} />
+            <Wifi size={12} style={{ color: 'var(--text-secondary)' }} />
             <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Live</span>
           </div>
         </div>
@@ -422,8 +422,8 @@ export const OracleView: React.FC = () => {
                                 const score = parseInt(scoreStr, 10);
                                 const pct = Math.min(score / 1000 * 100, 100);
                                 const agentColors: Record<string, string> = {
-                                  evidence: 'var(--success)', 'valuation-a': 'var(--text-secondary)', 'valuation-b': 'var(--red-600)',
-                                  market: 'var(--warning)', precedent: 'var(--error)',
+                                  evidence: 'var(--text-secondary)', 'valuation-a': 'var(--text-secondary)', 'valuation-b': 'var(--red-600)',
+                                  market: 'var(--text-tertiary)', precedent: 'var(--red-600)',
                                 };
                                 const color = agentColors[agent?.trim()] || 'var(--red-600)';
                                 return (

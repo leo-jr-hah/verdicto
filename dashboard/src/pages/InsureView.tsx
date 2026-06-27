@@ -103,9 +103,9 @@ function formatCurrency(value: number): string {
 }
 
 function riskColor(score: number): string {
-  if (score <= 30) return 'var(--success)';
-  if (score <= 55) return 'var(--warning)';
-  return 'var(--error)';
+  if (score <= 30) return 'var(--text-secondary)';
+  if (score <= 55) return 'var(--text-tertiary)';
+  return 'var(--red-600)';
 }
 
 function riskLabel(score: number): string {
@@ -116,9 +116,9 @@ function riskLabel(score: number): string {
 
 function statusColor(status: string): string {
   switch (status) {
-    case 'active': return 'var(--success)';
+    case 'active': return 'var(--text-secondary)';
     case 'expired': return 'var(--text-tertiary)';
-    case 'claimed': return 'var(--warning)';
+    case 'claimed': return 'var(--text-tertiary)';
     case 'paid': return 'var(--red-600)';
     default: return 'var(--text-tertiary)';
   }
@@ -238,7 +238,7 @@ const PolicyCard: React.FC<{
         <div style={{ marginBottom: '1rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
           {policy.riskFactors.map((f, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.2rem' }}>
-              <AlertTriangle size={12} color="var(--warning)" />
+              <AlertTriangle size={12} color="var(--text-tertiary)" />
               {f}
             </div>
           ))}
@@ -266,7 +266,7 @@ const PolicyCard: React.FC<{
           {policy.claimHistory.map((c) => (
             <div key={c.claimId} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.2rem' }}>
               <span style={{ color: 'var(--text-secondary)' }}>{c.reason.slice(0, 40)}...</span>
-              <span style={{ fontWeight: 600, color: c.status === 'paid' ? 'var(--success)' : c.status === 'denied' ? 'var(--error)' : 'var(--warning)' }}>
+              <span style={{ fontWeight: 600, color: c.status === 'denied' ? 'var(--red-600)' : 'var(--text-secondary)' }}>
                 {c.status === 'paid' ? `$${c.amount.toLocaleString()}` : c.status}
               </span>
             </div>
@@ -717,7 +717,7 @@ export const InsureView: React.FC = () => {
           ) : assessmentResult ? (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <CheckCircle2 size={20} color="var(--success)" />
+                <CheckCircle2 size={20} color="var(--text-secondary)" />
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Assessment Complete</h3>
               </div>
 
@@ -734,7 +734,7 @@ export const InsureView: React.FC = () => {
                 </div>
                 <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Coverage</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--success)' }}>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                     {coveragePercent ? `${coveragePercent}%` : 'Max'}
                   </div>
                 </div>
@@ -749,7 +749,7 @@ export const InsureView: React.FC = () => {
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '2rem' }}>
-              <AlertTriangle size={32} color="var(--warning)" style={{ marginBottom: '1rem' }} />
+              <AlertTriangle size={32} color="var(--text-tertiary)" style={{ marginBottom: '1rem' }} />
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Assessment Failed</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
                 {assessmentError || insError || 'The AI agents couldn\'t complete the assessment. Please try again.'}
@@ -766,14 +766,14 @@ export const InsureView: React.FC = () => {
       {step === 3 && currentPolicy && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={cardStyle}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <CheckCircle2 size={20} color="var(--success)" />
+            <CheckCircle2 size={20} color="var(--text-secondary)" />
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Insurance Policy Created</h3>
           </div>
 
           <div className="insure-claim-info-grid">
             <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Coverage Amount</div>
-              <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--success)' }}>
+              <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                 {formatCurrency(currentPolicy.coverageAmount)}
               </div>
             </div>
@@ -800,10 +800,10 @@ export const InsureView: React.FC = () => {
           {/* Risk factors */}
           {currentPolicy.riskFactors.length > 0 && (
             <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'rgba(245,158,11,0.05)', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.2)' }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--warning)', marginBottom: '0.4rem' }}>Risk Factors</div>
+              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.4rem' }}>Risk Factors</div>
               {currentPolicy.riskFactors.map((f, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>
-                  <AlertTriangle size={12} color="var(--warning)" />
+                  <AlertTriangle size={12} color="var(--text-tertiary)" />
                   {f}
                 </div>
               ))}
@@ -819,7 +819,7 @@ export const InsureView: React.FC = () => {
             fontSize: '0.85rem',
             color: 'var(--text-secondary)',
           }}>
-            <Shield size={14} style={{ verticalAlign: 'middle', marginRight: '0.4rem', color: 'var(--success)' }} />
+            <Shield size={14} style={{ verticalAlign: 'middle', marginRight: '0.4rem', color: 'var(--text-secondary)' }} />
             Policy active for 365 days. Deductible: {currentPolicy.deductiblePercent}%.
             File a claim anytime if your asset loses value.
           </div>
@@ -972,9 +972,9 @@ export const InsureView: React.FC = () => {
                   <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
                     {claimResult.status === 'paid' ? (
                       <>
-                        <CheckCircle2 size={48} color="var(--success)" style={{ marginBottom: '0.5rem' }} />
+                        <CheckCircle2 size={48} color="var(--text-secondary)" style={{ marginBottom: '0.5rem' }} />
                         <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Claim Approved!</h3>
-                        <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--success)', margin: '0.5rem 0' }}>
+                        <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-secondary)', margin: '0.5rem 0' }}>
                           ${claimResult.amount.toLocaleString()}
                         </p>
                       </>

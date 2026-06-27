@@ -47,20 +47,20 @@ function formatCurrency(value: number): string {
 }
 
 function confidenceColor(c: number): string {
-  if (c >= 0.8) return 'var(--success)';
-  if (c >= 0.6) return 'var(--warning)';
+  if (c >= 0.8) return 'var(--text-secondary)';
+  if (c >= 0.6) return 'var(--text-tertiary)';
   return 'var(--error)';
 }
 
 function riskColor(r: number): string {
-  if (r <= 30) return 'var(--success)';
-  if (r <= 55) return 'var(--warning)';
+  if (r <= 30) return 'var(--text-secondary)';
+  if (r <= 55) return 'var(--text-tertiary)';
   return 'var(--error)';
 }
 
 function divergenceColor(d: number): string {
-  if (d <= 10) return 'var(--success)';
-  if (d <= 20) return 'var(--warning)';
+  if (d <= 10) return 'var(--text-secondary)';
+  if (d <= 20) return 'var(--text-tertiary)';
   return 'var(--error)';
 }
 
@@ -181,7 +181,7 @@ const AgentCard: React.FC<{
                   display: 'flex', alignItems: 'center', gap: 6,
                   padding: '6px 10px', marginBottom: 8,
                   background: 'rgba(245,158,11,0.08)', borderRadius: 6,
-                  fontSize: '0.72rem', color: 'var(--warning)',
+                  fontSize: '0.72rem', color: 'var(--text-tertiary)',
                 }}>
                   <AlertTriangle size={12} />
                   Fallback to {fallbackProvider || 'deterministic'} response (LLM timeout)
@@ -297,14 +297,14 @@ const ConsensusCard: React.FC<{
                 </div>
                 {divergence <= 15 ? (
                   <span>
-                    Both agents <strong style={{ color: 'var(--success)' }}>agreed within 15%</strong>, so the final value is a
+                    Both agents <strong style={{ color: 'var(--text-secondary)' }}>agreed within 15%</strong>, so the final value is a
                     confidence-weighted average. Agent A's valuation ({formatCurrency(assessment.valuationA.value)}) was weighted at{' '}
                     <strong>{(assessment.valuationA.confidence * 100).toFixed(0)}%</strong> confidence, and Agent B's
                     ({formatCurrency(assessment.valuationB.value)}) at <strong>{(assessment.valuationB.confidence * 100).toFixed(0)}%</strong>.
                   </span>
                 ) : (
                   <span>
-                    Agents <strong style={{ color: 'var(--warning)' }}>diverged by {divergence.toFixed(1)}%</strong> - a jury
+                    Agents <strong style={{ color: 'var(--text-tertiary)' }}>diverged by {divergence.toFixed(1)}%</strong> - a jury
                     panel of 3 independent AI jurors deliberated in 2 rounds. In Round 1, each juror independently
                     evaluated both valuations. In Round 2, jurors reviewed each other's reasoning and revised their
                     votes. Final verdict was weighted by each juror's on-chain reputation score.
@@ -485,7 +485,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
                 transition={{ duration: 0.8, ease: 'easeOut', delay: 0.4 }}
                 style={{
                   height: '100%', borderRadius: 4,
-                  background: `linear-gradient(90deg, var(--success), var(--warning), var(--error))`,
+                  background: 'var(--bg-inset)',
                 }}
               />
             </div>
@@ -524,7 +524,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
               border: '1px solid rgba(16,185,129,0.15)',
             }}>
               <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>COVERAGE</div>
-              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--success)' }}>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                 {formatCurrency(insurance.coverageAmount)}
               </div>
               <div style={{ fontSize: '0.68rem', color: 'var(--text-tertiary, #9ca3af)' }}>
@@ -554,7 +554,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
               border: '1px solid rgba(245,158,11,0.15)',
             }}>
               <div style={{
-                fontSize: '0.72rem', fontWeight: 600, color: 'var(--warning)',
+                fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-tertiary)',
                 marginBottom: 6,
               }}>
                 RISK FACTORS IDENTIFIED
@@ -565,7 +565,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
                   fontSize: '0.78rem', color: 'var(--text-secondary, #6b7280)',
                   marginBottom: 4,
                 }}>
-                  <AlertTriangle size={12} color="var(--warning)" />
+                  <AlertTriangle size={12} color="var(--text-tertiary)" />
                   {f}
                 </div>
               ))}
@@ -667,7 +667,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
             marginTop: 12, padding: '8px 10px',
             background: 'rgba(245,158,11,0.06)',
             borderRadius: 6,
-            fontSize: '0.72rem', color: 'var(--warning)',
+            fontSize: '0.72rem', color: 'var(--text-tertiary)',
           }}>
             <AlertTriangle size={13} />
             A Borrow Keeper monitors collateral value every 30 minutes. If LTV exceeds 80%, a margin call is issued. At 90%, automatic liquidation triggers.

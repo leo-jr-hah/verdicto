@@ -819,12 +819,12 @@ button {
 
 .badge-success {
   background: rgba(16, 185, 129, 0.08);
-  color: var(--success);
+  color: var(--text-secondary);
 }
 
 .badge-warning {
   background: rgba(245, 158, 11, 0.08);
-  color: var(--warning);
+  color: var(--text-tertiary);
 }
 
 .badge-neutral {
@@ -932,8 +932,8 @@ button {
   flex-shrink: 0;
 }
 
-.status-dot-online { background: var(--success); }
-.status-dot-thinking { background: var(--warning); }
+.status-dot-online { background: var(--text-secondary); }
+.status-dot-thinking { background: var(--text-tertiary); }
 .status-dot-offline { background: var(--error); }
 .status-dot-idle { background: var(--text-tertiary); }
 
@@ -949,7 +949,7 @@ button {
 
 .health-bar-fill {
   height: 100%;
-  background: var(--success);
+  background: var(--text-secondary);
   transition: width var(--transition-slow);
   border-radius: 3px;
 }
@@ -1174,7 +1174,7 @@ button {
   font-weight: 500;
 }
 
-.tx-ws-status.connected { color: var(--success); }
+.tx-ws-status.connected { color: var(--text-secondary); }
 .tx-ws-status.disconnected { color: var(--text-tertiary); }
 
 .tx-last-update {
@@ -1502,8 +1502,8 @@ button {
 .text-primary { color: var(--text-primary); }
 .text-secondary { color: var(--text-secondary); }
 .text-tertiary { color: var(--text-tertiary); }
-.text-success { color: var(--success); }
-.text-warning { color: var(--warning); }
+.text-success { color: var(--text-secondary); }
+.text-warning { color: var(--text-tertiary); }
 .text-error { color: var(--error); }
 .font-mono { font-family: var(--font-mono); }
 .font-display { font-family: var(--font-display); }
@@ -2027,7 +2027,7 @@ button {
   gap: 0.5rem;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--success);
+  color: var(--text-secondary);
 }
 
 .hiw-verdict-body {
@@ -2072,7 +2072,7 @@ button {
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--success);
+  color: var(--text-secondary);
 }
 
 /* ── Under the Hood ────────────────────────────────────────────────────────── */
@@ -2384,7 +2384,7 @@ a:focus-visible {
   padding: var(--sp-2) var(--sp-3);
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--info);
+  color: var(--text-tertiary);
   background: var(--info-soft);
   border: 1px solid rgba(59,130,246,0.15);
   border-radius: 999px;
@@ -2632,13 +2632,13 @@ a:focus-visible {
 .landing-badge--cyan {
   background: var(--info-soft);
   border: 1px solid rgba(59, 130, 246, 0.15);
-  color: var(--info);
+  color: var(--text-tertiary);
 }
 
 .landing-badge--green {
   background: var(--success-soft);
   border: 1px solid rgba(16, 185, 129, 0.2);
-  color: var(--success);
+  color: var(--text-secondary);
 }
 
 /* ── Hero Social Proof Bar ─────────────────────────────────────────────── */
@@ -2665,7 +2665,7 @@ a:focus-visible {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--success);
+  background: var(--text-secondary);
   animation: pulse-glow 2s infinite;
 }
 
@@ -3264,7 +3264,7 @@ a:focus-visible {
 }
 
 .testnet-terminal__row--status {
-  color: var(--success);
+  color: var(--text-secondary);
 }
 
 .testnet-terminal__divider {
@@ -3280,7 +3280,7 @@ a:focus-visible {
 }
 
 .testnet-terminal__polling {
-  color: var(--success);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -3289,7 +3289,7 @@ a:focus-visible {
 .testnet-terminal__cursor {
   width: 8px;
   height: 16px;
-  background: var(--success);
+  background: var(--text-secondary);
 }
 
 /* ── Landing Footer (full) ─────────────────────────────────────────────── */

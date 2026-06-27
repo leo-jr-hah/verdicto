@@ -171,7 +171,7 @@ const AgentCard: React.FC<{
               : confidence >= 0.6
                 ? 'rgba(245,158,11,0.15)'
                 : 'rgba(239,68,68,0.15)',
-            color: confidence >= 0.8 ? 'var(--success)' : confidence >= 0.6 ? 'var(--warning)' : 'var(--error)',
+            color: confidence >= 0.8 ? 'var(--text-secondary)' : confidence >= 0.6 ? 'var(--text-tertiary)' : 'var(--red-600)',
             fontSize: '0.85rem',
             fontWeight: 700,
           }}>
@@ -284,7 +284,7 @@ const DivergenceBar: React.FC<{
           padding: '0.25rem 0.6rem',
           borderRadius: '6px',
           background: divergencePct < 10 ? 'var(--success-soft)' : divergencePct < 20 ? 'rgba(245, 158, 11, 0.1)' : 'var(--error-soft)',
-          color: divergencePct < 10 ? 'var(--success)' : divergencePct < 20 ? 'var(--warning)' : 'var(--error)',
+          color: divergencePct < 10 ? 'var(--text-secondary)' : divergencePct < 20 ? 'var(--text-tertiary)' : 'var(--red-600)',
           fontWeight: 600,
         }}>
           {divergencePct < 10 ? 'Tight' : divergencePct < 20 ? 'Moderate' : 'Wide'} spread ({divergencePct.toFixed(1)}%)
@@ -478,7 +478,7 @@ const DivergenceBar: React.FC<{
         </div>
         <div style={{ color: 'var(--text-secondary)' }}>
           vs. Asking: <strong style={{
-            color: assessedValue >= askingPrice ? 'var(--success)' : 'var(--error)',
+            color: assessedValue >= askingPrice ? 'var(--text-secondary)' : 'var(--red-600)',
           }}>
             {assessedValue >= askingPrice ? '+' : ''}{formatPercent(((assessedValue - askingPrice) / askingPrice) * 100)}
           </strong>
@@ -531,7 +531,7 @@ const RiskFlags: React.FC<{ result: AssessmentResult }> = ({ result }) => {
     });
   }
 
-  const severityColor = { high: 'var(--error)', medium: 'var(--warning)', low: 'var(--success)' };
+  const severityColor = { high: 'var(--red-600)', medium: 'var(--text-tertiary)', low: 'var(--text-secondary)' };
   const severityBg = { high: 'rgba(239, 68, 68, 0.08)', medium: 'var(--warning-soft)', low: 'var(--success-soft)' };
   const severityIcon = { high: <AlertTriangle size={14} />, medium: <Info size={14} />, low: <CheckCircle2 size={14} /> };
 
@@ -592,7 +592,7 @@ const ConsensusSummary: React.FC<{
   const cv = (stdDev / avg) * 100; // coefficient of variation
 
   const agreementLevel = cv < 10 ? 'Strong' : cv < 20 ? 'Moderate' : 'Weak';
-  const agreementColor = cv < 10 ? 'var(--success)' : cv < 20 ? 'var(--warning)' : 'var(--error)';
+  const agreementColor = cv < 10 ? 'var(--text-secondary)' : cv < 20 ? 'var(--text-tertiary)' : 'var(--red-600)';
 
   return (
     <motion.div
@@ -743,9 +743,9 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
             border: '1px solid rgba(245, 158, 11, 0.25)',
           }}
         >
-          <AlertTriangle size={18} color="var(--warning)" style={{ marginTop: 2, flexShrink: 0 }} />
+          <AlertTriangle size={18} color="var(--text-tertiary)" style={{ marginTop: 2, flexShrink: 0 }} />
           <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--warning)', marginBottom: 4 }}>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-tertiary)', marginBottom: 4 }}>
               LLM Fallback Triggered
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
@@ -755,7 +755,7 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
               }{' '}
               Results are based on {result.fallbackAgents.some(f => f.provider === 'groq') ? 'Groq fallback (reduced reasoning quality)' : 'heuristic formulas (no LLM reasoning)'}.
               {' '}
-              <span style={{ color: 'var(--warning)', fontWeight: 600 }}>
+              <span style={{ color: 'var(--text-tertiary)', fontWeight: 600 }}>
                 These valuations should be treated with lower confidence.
               </span>
             </div>

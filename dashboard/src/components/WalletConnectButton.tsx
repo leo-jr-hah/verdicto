@@ -66,7 +66,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             position: 'relative',
           }}
         >
-          <Wallet size={16} color="var(--success)" />
+          <Wallet size={16} color="var(--text-secondary)" />
           <div style={{
             position: 'absolute',
             top: 2,
@@ -74,7 +74,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             width: 8,
             height: 8,
             borderRadius: '50%',
-            background: 'var(--success)',
+            background: 'var(--text-secondary)',
             border: '2px solid var(--bg-surface, #fff)',
           }} />
         </button>
@@ -133,7 +133,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              {copied ? <Check size={14} color="var(--success)" /> : <Copy size={14} />}
+              {copied ? <Check size={14} color="var(--text-secondary)" /> : <Copy size={14} />}
               {copied ? 'Copied!' : 'Copy Address'}
             </button>
 
@@ -179,7 +179,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             padding: '0.5rem 0.75rem',
             fontSize: '0.8rem',
             fontWeight: 600,
-            color: 'var(--success)',
+            color: 'var(--text-secondary)',
             background: 'var(--success-soft)',
             border: '1px solid rgba(16,185,129,0.2)',
             borderRadius: '999px',
@@ -193,7 +193,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             width: 8,
             height: 8,
             borderRadius: '50%',
-            background: 'var(--success)',
+            background: 'var(--text-secondary)',
             flexShrink: 0,
           }} />
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -260,7 +260,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              {copied ? <Check size={14} color="var(--success)" /> : <Copy size={14} />}
+              {copied ? <Check size={14} color="var(--text-secondary)" /> : <Copy size={14} />}
               {copied ? 'Copied!' : 'Copy Address'}
             </button>
 

@@ -169,7 +169,7 @@ const AgentCard: React.FC<{
   const scoreDelta = agent.history.length >= 2
     ? agent.history[agent.history.length - 1].score - agent.history[0].score
     : 0;
-  const scoreColor = scoreDelta > 0 ? 'var(--success)' : scoreDelta < 0 ? 'var(--error)' : 'var(--text-tertiary)';
+  const scoreColor = scoreDelta > 0 ? 'var(--text-secondary)' : scoreDelta < 0 ? 'var(--red-600)' : 'var(--text-tertiary)';
   const scoreIcon = scoreDelta > 0 ? '▲' : scoreDelta < 0 ? '▼' : '-';
 
   return (
@@ -222,7 +222,7 @@ const AgentCard: React.FC<{
           <div style={{
             padding: '4px 10px', borderRadius: 8,
             background: agent.successRate >= 90 ? 'var(--success-bg)' : 'var(--warning-bg)',
-            color: agent.successRate >= 90 ? 'var(--success)' : 'var(--warning)',
+            color: agent.successRate >= 90 ? 'var(--text-secondary)' : 'var(--text-tertiary)',
             fontSize: '0.8rem', fontWeight: 600,
           }}>
             {agent.successRate}%
@@ -250,7 +250,7 @@ const AgentDetailPanel: React.FC<{ agent: AgentData }> = ({ agent }) => {
   const scoreDelta = agent.history.length >= 2
     ? agent.history[agent.history.length - 1].score - agent.history[0].score
     : 0;
-  const scoreColor = scoreDelta >= 0 ? 'var(--success)' : 'var(--error)';
+  const scoreColor = scoreDelta >= 0 ? 'var(--text-secondary)' : 'var(--red-600)';
 
   return (
     <motion.div
@@ -442,7 +442,7 @@ export const ReputationView: React.FC = () => {
             display: 'inline-flex', alignItems: 'center', gap: 6,
             marginTop: 8, padding: '4px 10px', borderRadius: 6,
             background: 'var(--success-bg)', border: '1px solid var(--success-border)',
-            fontSize: '0.75rem', color: 'var(--success)', fontWeight: 600,
+            fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600,
           }}>
             <CheckCircle2 size={14} /> Live on-chain data from ReputationRegistry
           </span>
@@ -454,8 +454,8 @@ export const ReputationView: React.FC = () => {
         style={{ gap: 16, marginBottom: 32 }}>
         {[
           { label: 'Total Agents', value: metrics.totalAgents, icon: <Shield size={18} />, color: 'var(--primary)' },
-          { label: 'Avg Score', value: metrics.avgScore, icon: <TrendingUp size={18} />, color: 'var(--success)' },
-          { label: 'Avg Success', value: `${metrics.avgSuccess}%`, icon: <CheckCircle2 size={18} />, color: 'var(--info)' },
+          { label: 'Avg Score', value: metrics.avgScore, icon: <TrendingUp size={18} />, color: 'var(--text-secondary)' },
+          { label: 'Avg Success', value: `${metrics.avgSuccess}%`, icon: <CheckCircle2 size={18} />, color: 'var(--text-tertiary)' },
           { label: 'Total Assessments', value: metrics.totalAssessments.toLocaleString(), icon: <Target size={18} />, color: 'var(--text-secondary)' },
         ].map((stat, i) => (
           <div key={i} style={{

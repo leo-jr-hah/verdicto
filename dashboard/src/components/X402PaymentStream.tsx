@@ -44,8 +44,8 @@ const DEMO_PAYMENTS: PaymentEvent[] = [];
 
 const PaymentRow: React.FC<{ payment: PaymentEvent; index: number }> = ({ payment, index }) => {
   const statusColor = {
-    pending: 'var(--warning)',
-    confirmed: 'var(--success)',
+    pending: 'var(--text-tertiary)',
+    confirmed: 'var(--text-secondary)',
     failed: 'var(--error)',
   };
 
@@ -150,7 +150,7 @@ export const X402PaymentStream: React.FC = () => {
             display: 'flex', alignItems: 'center', gap: '0.3rem',
             padding: '0.2rem 0.6rem', borderRadius: '4px',
             background: connected ? 'var(--success-soft)' : 'var(--bg-inset)',
-            color: connected ? 'var(--success)' : 'var(--text-tertiary)',
+            color: connected ? 'var(--text-secondary)' : 'var(--text-tertiary)',
             fontSize: '0.7rem', fontWeight: 600,
           }}>
             {connected ? <Wifi size={12} /> : <WifiOff size={12} />}
@@ -174,7 +174,7 @@ export const X402PaymentStream: React.FC = () => {
           background: 'var(--bg-surface)', borderRadius: '10px', border: '1px solid var(--border-color)',
           padding: '1rem', textAlign: 'center',
         }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--success)' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-secondary)' }}>
             {confirmedCount}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Confirmed</div>
@@ -183,7 +183,7 @@ export const X402PaymentStream: React.FC = () => {
           background: 'var(--bg-surface)', borderRadius: '10px', border: '1px solid var(--border-color)',
           padding: '1rem', textAlign: 'center',
         }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--warning)' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-tertiary)' }}>
             {pendingCount}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Pending</div>

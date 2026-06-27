@@ -122,7 +122,7 @@ const AgentRow: React.FC<{
         : agent.reputation >= 600
           ? 'rgba(245,158,11,0.15)'
           : 'rgba(239,68,68,0.15)',
-      color: agent.reputation >= 800 ? 'var(--success)' : agent.reputation >= 600 ? 'var(--warning)' : 'var(--error)',
+      color: agent.reputation >= 800 ? 'var(--text-secondary)' : agent.reputation >= 600 ? 'var(--text-tertiary)' : 'var(--red-600)',
       fontSize: '0.85rem',
       fontWeight: 700,
     }}>
@@ -227,7 +227,7 @@ export const LiveContractPanel: React.FC = () => {
             display: 'flex', alignItems: 'center', gap: '0.3rem',
             padding: '0.2rem 0.6rem', borderRadius: '4px',
             background: connected ? 'var(--success-soft)' : 'var(--bg-inset)',
-            color: connected ? 'var(--success)' : 'var(--text-tertiary)',
+            color: connected ? 'var(--text-secondary)' : 'var(--text-tertiary)',
             fontSize: '0.7rem', fontWeight: 600,
           }}>
             {connected ? <Wifi size={12} /> : <WifiOff size={12} />}
@@ -270,7 +270,7 @@ export const LiveContractPanel: React.FC = () => {
           icon={<Shield size={16} />}
           label="Records"
           value={state.receipts.total}
-          color="var(--success)"
+          color="var(--text-secondary)"
           subtext={`${state.receipts.verified} verified • ${state.receipts.pending} pending`}
           index={1}
         />
@@ -278,7 +278,7 @@ export const LiveContractPanel: React.FC = () => {
           icon={<TrendingUp size={16} />}
           label="Total Collected"
           value={formatCSPR(state.payments.totalCollected)}
-          color="var(--warning)"
+          color="var(--text-tertiary)"
           subtext={`${formatCSPR(state.payments.totalProcessed)} processed`}
           index={2}
         />

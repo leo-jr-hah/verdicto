@@ -246,16 +246,16 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG = {
-  live: { label: 'Live', color: 'var(--success)', bg: 'var(--success-soft)' },
+  live: { label: 'Live', color: 'var(--text-secondary)', bg: 'var(--success-soft)' },
   building: { label: 'Building', color: 'var(--red-600)', bg: 'var(--primary-bg)' },
-  planned: { label: 'Planned', color: 'var(--warning)', bg: 'rgba(245, 158, 11, 0.1)' },
+  planned: { label: 'Planned', color: 'var(--text-tertiary)', bg: 'rgba(245, 158, 11, 0.1)' },
   future: { label: 'Future', color: 'var(--text-tertiary)', bg: 'var(--bg-surface-alt)' },
 };
 
 const CATEGORY_CONFIG = {
   verifiable: { label: 'Verifiable Value', color: 'var(--red-600)', description: 'Outputs traditional AI cannot produce' },
-  economic: { label: 'Economic Value', color: 'var(--success)', description: 'Direct revenue or cost savings' },
-  network: { label: 'Network Effects', color: 'var(--warning)', description: 'More users = more value' },
+  economic: { label: 'Economic Value', color: 'var(--text-secondary)', description: 'Direct revenue or cost savings' },
+  network: { label: 'Network Effects', color: 'var(--text-tertiary)', description: 'More users = more value' },
   enhancement: { label: 'Enhancement', color: 'var(--text-secondary)', description: 'Improvements to existing system' },
 };
 
@@ -350,8 +350,8 @@ export const RoadmapView: React.FC = () => {
   const future = ROADMAP_ITEMS.filter(i => i.status === 'future');
 
   const sections = [
-    { title: 'Live & Deployed', items: live, icon: <CheckCircle2 size={18} color="var(--success)" />, color: 'var(--success)' },
-    { title: 'Planned', items: planned, icon: <ArrowRight size={18} color="var(--warning)" />, color: 'var(--warning)' },
+    { title: 'Live & Deployed', items: live, icon: <CheckCircle2 size={18} color="var(--text-secondary)" />, color: 'var(--text-secondary)' },
+    { title: 'Planned', items: planned, icon: <ArrowRight size={18} color="var(--text-tertiary)" />, color: 'var(--text-tertiary)' },
     { title: 'Future Vision', items: future, icon: <ArrowRight size={18} color="var(--text-tertiary)" />, color: 'var(--text-tertiary)' },
   ];
 
