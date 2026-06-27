@@ -482,7 +482,7 @@ export const ReputationView: React.FC = () => {
       </div>
 
       {/* Two-column layout: Agent list + Detail panel */}
-      <div style={{
+      <div className="reputation-content-grid" style={{
         display: 'grid',
         gridTemplateColumns: selectedAgent ? '340px 1fr' : '1fr',
         gap: 24,

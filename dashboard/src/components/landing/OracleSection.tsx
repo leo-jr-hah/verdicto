@@ -4,22 +4,22 @@ import { Radio, Zap, Shield, Globe, TrendingUp } from 'lucide-react';
 
 const FEATURES = [
   {
-    icon: <Radio size={22} />,
+    icon: <Radio size={20} />,
     title: 'Shared Data Layer',
     desc: 'Any Casper smart contract can query the Verdict Oracle directly. Fully on-chain, no external dependencies.',
   },
   {
-    icon: <Zap size={22} />,
+    icon: <Zap size={20} />,
     title: '0.1 CSPR Per Query',
     desc: 'Micropayment per query, signed by the user wallet. Pay per query, on-chain, verifiable.',
   },
   {
-    icon: <Shield size={22} />,
+    icon: <Shield size={20} />,
     title: 'Multi-Agent Consensus',
     desc: 'Each verdict is the output of multiple independent AI agents: valuation specialists and jurors, with cryptographic receipt chains proving nothing was altered.',
   },
   {
-    icon: <Globe size={22} />,
+    icon: <Globe size={20} />,
     title: '24h Freshness Guarantee',
     desc: 'Every verdict has an expiry timestamp. Smart contracts can check `is_expired()` before using a price. Stale data is automatically rejected.',
   },
@@ -59,7 +59,7 @@ export const OracleSection: React.FC = () => {
         className="landing-section__header"
       >
         <div className="landing-badge landing-badge--red">
-          <Radio size={14} style={{ color: 'var(--red-600)' }} />
+          <Radio size={16} style={{ color: 'var(--red-600)' }} />
           <span>Composable Primitive</span>
         </div>
         <h2 className="landing-section__title">The Oracle for Real-World Assets</h2>
