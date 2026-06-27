@@ -318,80 +318,34 @@ export interface OracleVerdict {
 const oracleVerdictStore = new Map<string, OracleVerdict>();
 
 /**
- * Seed the in-memory store with demo verdicts so the oracle dashboard
- * shows populated data on first load. These represent real assessment
- * outputs that would have been stored on-chain after deliberation.
- *
- * Called once at startup. Real verdicts from completed assessments
- * will overwrite these if the same asset_id is assessed.
+ * Load real verdicts from Supabase into the in-memory store on startup.
+ * No demo/seed data — only real data from completed assessments.
  */
-export function seedDemoVerdicts(): void {
-  const now = Date.now();
-  const HOUR = 3_600_000;
-  const DAY = 86_400_000;
-
-  const demos: OracleVerdict[] = [
-    {
-      assetId: 'ASSESS-1719220000000',
-      value: 485_000, // $485,000
-      confidence: 87,
-      jurorCount: 3,
-      receiptHash: 'hmac-demo-a1b2c3d4e5f6',
-      timestamp: now - 2 * HOUR,
-      expiry: now + 22 * HOUR,
-      agentWeights: 'evidence:891,market:778,precedent:856',
-      decision: 'AgentAPreferred',
-    },
-    {
-      assetId: 'ASSESS-1719210000000',
-      value: 1_250_000, // $1.25M
-      confidence: 92,
-      jurorCount: 3,
-      receiptHash: 'hmac-demo-f6e5d4c3b2a1',
-      timestamp: now - 6 * HOUR,
-      expiry: now + 18 * HOUR,
-      agentWeights: 'evidence:920,market:845,precedent:880',
-      decision: 'AgentAPreferred',
-    },
-    {
-      assetId: 'ASSESS-1719190000000',
-      value: 72_500, // $72,500
-      confidence: 74,
-      jurorCount: 3,
-      receiptHash: 'hmac-demo-1a2b3c4d5e6f',
-      timestamp: now - 18 * HOUR,
-      expiry: now + 6 * HOUR,
-      agentWeights: 'evidence:780,market:710,precedent:745',
-      decision: 'SplitFifty',
-    },
-    {
-      assetId: 'ASSESS-1719100000000',
-      value: 320_000, // $320,000
-      confidence: 81,
-      jurorCount: 3,
-      receiptHash: 'hmac-demo-6f5e4d3c2b1a',
-      timestamp: now - 26 * HOUR,
-      expiry: now - 2 * HOUR, // EXPIRED
-      agentWeights: 'evidence:830,market:790,precedent:815',
-      decision: 'AgentBPreferred',
-    },
-    {
-      assetId: 'ASSESS-1719000000000',
-      value: 156_000, // $156,000
-      confidence: 68,
-      jurorCount: 3,
-      receiptHash: 'hmac-demo-abc123def456',
-      timestamp: now - 48 * HOUR,
-      expiry: now - 24 * HOUR, // EXPIRED
-      agentWeights: 'evidence:720,market:650,precedent:690',
-      decision: 'AgentAPreferred',
-    },
-  ];
-
-  for (const d of demos) {
-    oracleVerdictStore.set(d.assetId, d);
+export async function loadVerdictsFromDB(): Promise<void> {
+  try {
+    const rows = await db.getAllVerdicts();
+    if (!rows || rows.length === 0) {
+      console.log('  📡 VerdictOracle: no verdicts in DB');
+      return;
+    }
+    for (const r of rows) {
+      oracleVerdictStore.set(r.asset_id, {
+        assetId: r.asset_id,
+        value: r.value,
+        confidence: r.confidence,
+        jurorCount: r.juror_count,
+        receiptHash: r.receipt_hash,
+        timestamp: r.timestamp,
+        expiry: r.expiry,
+        agentWeights: r.agent_weights,
+        decision: r.decision as any,
+      });
+    }
+    const now = Date.now();
+    console.log(`  📡 VerdictOracle: loaded ${rows.length} verdicts from DB (${rows.filter(v => v.expiry > now).length} fresh)`);
+  } catch (err: any) {
+    console.warn(`  ⚠️ VerdictOracle: failed to load from DB: ${err.message}`);
   }
-  console.log(`  📡 VerdictOracle: seeded ${demos.length} demo verdicts (${demos.filter(v => v.expiry > now).length} fresh, ${demos.filter(v => v.expiry <= now).length} expired)`);
 }
 
 /**
@@ -594,85 +548,36 @@ export interface RetrialJuror {
 const disputeStore = new Map<string, Dispute>();
 
 /**
- * Seed one demo dispute so the UI has something to show on first load.
+ * Load real disputes from Supabase into the in-memory store on startup.
+ * No demo/seed data — only real disputes filed by users.
  */
-export function seedDemoDisputes(): void {
-  const now = Date.now();
-  const HOUR = 3_600_000;
-
-  const allVerdicts = Array.from(oracleVerdictStore.values());
-  if (allVerdicts.length === 0) return;
-
-  // Pick the lowest-confidence verdict as the disputed one
-  const sorted = [...allVerdicts].sort((a, b) => a.confidence - b.confidence);
-  const target = sorted[0];
-
-  // A resolved dispute (overturned) from 4h ago
-  const resolvedDispute: Dispute = {
-    id: `DSP-${now - 1000}`,
-    assetId: target.assetId,
-    originalVerdict: target,
-    challengerKey: '0203a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',
-    stakeCSPR: 5.0,
-    reason: 'Market comps are stale; comparable sales moved 18% since last data pull.',
-    createdAt: now - 4 * HOUR,
-    status: 'resolved',
-    outcome: 'overturned',
-    resolvedAt: now - 3.5 * HOUR,
-    retrial: {
-      retrialId: `RTL-${now - 1000}`,
-      startedAt: now - 4 * HOUR + 60_000,
-      completedAt: now - 3.5 * HOUR,
-      panel: [
-        { agentId: 'adversarial-market', name: 'Adversarial Market Analyst', methodology: 'stress_test', reputation: 840, vote: 'B', confidence: 72, reasoning: 'Comparable sales data is 18 days stale. Adjusted comps show 15% decline in subject submarket.' },
-        { agentId: 'deep-value', name: 'Deep Value Auditor', methodology: 'value_at_risk', reputation: 860, vote: 'B', confidence: 68, reasoning: 'DCF with updated cap rate (7.2% vs 6.1% used) yields significantly lower intrinsic value.' },
-        { agentId: 'devils-advocate', name: 'Devil\'s Advocate', methodology: 'contrarian', reputation: 810, vote: 'A', confidence: 45, reasoning: 'Original methodology was sound but inputs were dated. Partial correction warranted.' },
-      ],
-      originalVerdict: { value: target.value, confidence: target.confidence, decision: target.decision },
-      newVerdict: { value: Math.round(target.value * 0.82), confidence: Math.max(target.confidence - 15, 40), decision: 'AgentBPreferred' },
-      valueDelta: -18.0,
-      confidenceDelta: -15,
-      receiptHash: 'hmac-retrial-demo-abc123',
-      reasoning: 'Retrial panel found original verdict relied on stale comparable sales data. Adjusted valuation reflects 18% decline in subject submarket confirmed by 2 of 3 adversarial jurors.',
-    },
-    stakeDistribution: [
-      { recipient: 'challenger', amountCSPR: 5.0 },
-    ],
-  };
-
-  // A pending dispute from 30 min ago
-  const pendingVerdict = sorted.length > 1 ? sorted[1] : sorted[0];
-  const pendingDispute: Dispute = {
-    id: `DSP-${now}`,
-    assetId: pendingVerdict.assetId,
-    originalVerdict: pendingVerdict,
-    challengerKey: '0203b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1',
-    stakeCSPR: 5.0,
-    reason: 'Confidence score appears inflated given thin comparable data in this submarket.',
-    createdAt: now - 30 * 60_000,
-    status: 'pending',
-  };
-
-  disputeStore.set(resolvedDispute.id, resolvedDispute);
-  disputeStore.set(pendingDispute.id, pendingDispute);
-  // ── DB: Seed disputes to Supabase ──
-  for (const d of [resolvedDispute, pendingDispute]) {
-    db.saveDispute({
-      id: d.id,
-      asset_id: d.assetId,
-      original_verdict: d.originalVerdict,
-      challenger_key: d.challengerKey,
-      stake_cspr: d.stakeCSPR,
-      reason: d.reason,
-      created_at: d.createdAt,
-      status: d.status,
-      retrial: d.retrial,
-      outcome: d.outcome,
-      resolved_at: d.resolvedAt,
-      stake_distribution: d.stakeDistribution,
-    }).catch(err => console.warn(`  [DB] ⚠️ Failed to seed dispute: ${err.message}`));
+export async function loadDisputesFromDB(): Promise<void> {
+  try {
+    const rows = await db.getAllDisputes();
+    if (!rows || rows.length === 0) {
+      console.log('  ⚖️  DisputeEngine: no disputes in DB');
+      return;
+    }
+    for (const r of rows) {
+      disputeStore.set(r.id, {
+        id: r.id,
+        assetId: r.asset_id,
+        originalVerdict: r.original_verdict,
+        challengerKey: r.challenger_key,
+        stakeCSPR: r.stake_cspr,
+        reason: r.reason,
+        createdAt: r.created_at,
+        status: r.status as any,
+        retrial: r.retrial,
+        outcome: r.outcome as any,
+        resolvedAt: r.resolved_at,
+        stakeDistribution: r.stake_distribution,
+      });
+    }
+    console.log(`  ⚖️  DisputeEngine: loaded ${rows.length} disputes from DB`);
+  } catch (err: any) {
+    console.warn(`  ⚠️ DisputeEngine: failed to load from DB: ${err.message}`);
   }
-  console.log(`  ⚖️  DisputeEngine: seeded 2 demo disputes (1 resolved/overturned, 1 pending)`);
 }
 
 /**

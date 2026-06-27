@@ -3572,15 +3572,15 @@ Respond in JSON format:
   server.listen(PORT, async () => {
     console.log(`🚀 Orchestrator API running on http://localhost:${PORT}`);
 
-    // ─── Seed demo oracle verdicts ────────────────────────────────────────────
-    // Populates the in-memory oracle store so the dashboard shows live data
-    // on first load. Real assessment verdicts overwrite these by asset_id.
+    // ─── Load real oracle data from DB on startup ──────────────────────────────
+    // Loads existing verdicts and disputes from Supabase into memory.
+    // No demo/seed data — only real on-chain/user-submitted data is shown.
     try {
-      const { seedDemoVerdicts, seedDemoDisputes } = await import('../shared/casper-contracts.js');
-      seedDemoVerdicts();
-      seedDemoDisputes();
+      const { loadVerdictsFromDB, loadDisputesFromDB } = await import('../shared/casper-contracts.js');
+      await loadVerdictsFromDB();
+      await loadDisputesFromDB();
     } catch (err: any) {
-      console.warn(`  ⚠️ Oracle seed failed (non-critical): ${err.message}`);
+      console.warn(`  ⚠️ Oracle DB load failed (non-critical): ${err.message}`);
     }
 
     // ─── Auto-revaluation monitor ───────────────────────────────────────────

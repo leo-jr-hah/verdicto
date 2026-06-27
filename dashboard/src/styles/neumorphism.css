@@ -843,33 +843,45 @@
    DISPUTE VIEW — BUTTONS
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-/* ── Challenge Button ───────────────────────────────────────────────────── */
+/* ── Challenge Button (neumorphic CTA) ────────────────────────────────────── */
 .dispute-challenge-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 14px;
+  gap: 6px;
+  padding: 8px 20px;
   cursor: pointer;
-  border: 1px solid var(--accent);
-  border-radius: 6px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
   font-family: inherit;
   color: white;
-  background: var(--accent);
-  transition: all 150ms ease-out;
+  background: linear-gradient(135deg, #C62828 0%, #B71C1C 100%);
+  box-shadow:
+    3px 3px 8px rgba(0, 0, 0, 0.25),
+    -2px -2px 6px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 180ms ease-out;
   white-space: nowrap;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .dispute-challenge-btn:hover {
-  background: var(--accent-hover, #c0392b);
-  border-color: var(--accent-hover, #c0392b);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  background: linear-gradient(135deg, #D32F2F 0%, #C62828 100%);
+  transform: translateY(-2px);
+  box-shadow:
+    5px 5px 14px rgba(0, 0, 0, 0.3),
+    -3px -3px 8px rgba(255, 255, 255, 0.1),
+    0 0 24px rgba(183, 28, 28, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .dispute-challenge-btn:active {
-  transform: translateY(0) scale(0.97);
+  transform: translateY(0);
+  box-shadow:
+    inset 3px 3px 6px rgba(0, 0, 0, 0.3),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.08);
 }
 
 /* ── Refresh Button (neumorphic) ──────────────────────────────────────────── */
@@ -878,7 +890,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
   background: var(--nm-base);
   color: var(--nm-text-secondary);
@@ -905,33 +917,34 @@
     inset -3px -3px 6px var(--nm-shadow-light);
 }
 
-/* ── Filter Tabs (neumorphic) ─────────────────────────────────────────────── */
+/* ── Filter Tabs (pill-shaped) ────────────────────────────────────────────── */
 .dispute-filter-tab {
-  padding: 5px 14px;
-  border-radius: 8px;
-  font-size: 0.75rem;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.78rem;
   font-weight: 500;
   font-family: inherit;
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 200ms ease-out;
   background: transparent;
   color: var(--nm-text-muted);
-  box-shadow: none;
 }
 
 .dispute-filter-tab:hover {
   color: var(--nm-text-secondary);
-  background: rgba(var(--nm-base-rgb), 0.6);
+  background: var(--nm-base);
+  border-color: var(--nm-border);
 }
 
 .dispute-filter-tab--active {
-  background: var(--nm-base);
-  color: var(--nm-accent);
-  font-weight: 600;
+  background: var(--nm-accent);
+  color: white;
+  font-weight: 700;
+  border-color: var(--nm-accent);
   box-shadow:
-    inset 2px 2px 5px var(--nm-shadow-dark),
-    inset -2px -2px 5px var(--nm-shadow-light);
+    2px 2px 6px rgba(0, 0, 0, 0.2),
+    0 0 12px rgba(198, 40, 40, 0.2);
 }
 
 /* ── Modal Buttons (neumorphic) ───────────────────────────────────────────── */
