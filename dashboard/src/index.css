@@ -2469,13 +2469,14 @@ a:focus-visible {
 
 .hero-section {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: var(--space-12);
+  max-width: 1200px;
+  margin: 0 auto;
   padding: var(--space-16) var(--space-8) var(--space-10);
   position: relative;
-  text-align: left;
   overflow: hidden;
 }
 
@@ -2525,13 +2526,13 @@ a:focus-visible {
 /* ── Headline ──────────────────────────────────────────────────────────── */
 
 .hero-headline {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 800;
-  line-height: 1.08;
-  letter-spacing: -0.04em;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
   color: var(--text-primary);
-  max-width: 800px;
-  margin: 0 0 1.5rem;
+  max-width: 700px;
+  margin: 0 0 var(--space-8);
 }
 
 /* ── Rotating Word ─────────────────────────────────────────────────────── */
@@ -2541,9 +2542,9 @@ a:focus-visible {
   position: relative;
   overflow: hidden;
   vertical-align: bottom;
-  color: var(--accent);
-  min-width: 280px;
-  height: 1.15em;
+  color: var(--accent-strong);
+  min-width: 260px;
+  height: 1.2em;
 }
 
 .hero-rotating-word span {
@@ -2554,10 +2555,10 @@ a:focus-visible {
 /* ── Tagline / Typewriter ──────────────────────────────────────────────── */
 
 .hero-tagline {
-  font-size: clamp(1rem, 1.8vw, 1.2rem);
-  line-height: 1.65;
-  max-width: 560px;
-  margin: 0 0 2.5rem;
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  line-height: 1.7;
+  max-width: 540px;
+  margin: 0 0 var(--space-10);
   color: var(--text-secondary);
   min-height: 3.3em;
 }
@@ -2583,17 +2584,194 @@ a:focus-visible {
 
 .hero-cta-row {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-4);
   flex-wrap: wrap;
-  margin-bottom: 3rem;
+  margin-bottom: var(--space-12);
   pointer-events: auto;
+}
+
+.hero-cta-row .btn {
+  transition: all 180ms ease-out;
+}
+
+.hero-cta-row .btn:hover {
+  transform: translateY(-2px);
+}
+
+.hero-cta-row .btn:active {
+  transform: translateY(0);
 }
 
 /* ── Scroll Cue ────────────────────────────────────────────────────────── */
 
 .hero-scroll-cue {
   position: relative;
-  margin-top: 1rem;
+  margin-top: var(--space-6);
+}
+
+/* ── Right Panel: Agent Terminal ────────────────────────────────────────── */
+
+.hero-right-panel {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-terminal {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.hero-terminal__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-sunken);
+}
+
+.hero-terminal__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.hero-terminal__title {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  margin-left: var(--space-2);
+}
+
+.hero-terminal__body {
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 280px;
+}
+
+.hero-terminal__line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  line-height: 1.6;
+}
+
+.hero-terminal__prompt {
+  color: var(--accent);
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.hero-terminal__text {
+  color: var(--text-secondary);
+}
+
+.hero-terminal__text--dim {
+  color: var(--text-tertiary);
+}
+
+.hero-terminal__text--success {
+  color: var(--success);
+}
+
+.hero-terminal__text--accent {
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.hero-terminal__divider {
+  border: none;
+  border-top: 1px dashed var(--border);
+  margin: var(--space-1) 0;
+}
+
+.hero-terminal__score {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-tint);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-2);
+}
+
+.hero-terminal__score-label {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.hero-terminal__score-value {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+.hero-terminal__score-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.hero-terminal__score-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* ── Stats Strip ───────────────────────────────────────────────────────── */
+
+.hero-stats-strip {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border-strong);
+  background: var(--bg-elevated);
+  margin-top: var(--space-10);
+  grid-column: 1 / -1;
+}
+
+.hero-stats-strip__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+}
+
+.hero-stats-strip__cell + .hero-stats-strip__cell {
+  border-left: 1px solid var(--border);
+}
+
+.hero-stats-strip__value {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: var(--space-1);
+}
+
+.hero-stats-strip__label {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
 }
 
 /* ── Landing Page Wrapper ──────────────────────────────────────────────── */

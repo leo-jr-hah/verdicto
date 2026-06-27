@@ -37,8 +37,9 @@
 @media (max-width: 768px) {
   /* Hero */
   .hero-section {
+    grid-template-columns: 1fr;
     padding: 5rem 1.5rem 3rem !important;
-    min-height: 90vh;
+    min-height: auto;
   }
 
   .hero-headline {
@@ -74,6 +75,23 @@
   .hero-grid-glow {
     width: 300px;
     height: 300px;
+  }
+
+  .hero-right-panel {
+    display: none;
+  }
+
+  .hero-stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hero-stats-strip__cell:nth-child(3) {
+    border-left: none;
+  }
+
+  .hero-stats-strip__cell:nth-child(3),
+  .hero-stats-strip__cell:nth-child(4) {
+    border-top: 1px solid var(--border);
   }
 
   /* Oracle */

@@ -1,6 +1,5 @@
 import React from 'react';
 import { HeroSection } from '../components/landing/HeroSection';
-import { StatsBar } from '../components/landing/StatsBar';
 import { OracleSection } from '../components/landing/OracleSection';
 import { HowItWorks } from '../components/landing/HowItWorks';
 import { AgentGrid } from '../components/landing/AgentGrid';
@@ -14,7 +13,6 @@ export const LandingPage: React.FC = () => {
     <div style={{ position: 'relative', overflowX: 'hidden', background: 'var(--bg-base)' }}>
       <main>
         <HeroSection />
-        <StatsBar />
         <OracleSection />
         <HowItWorks />
         <AgentGrid />

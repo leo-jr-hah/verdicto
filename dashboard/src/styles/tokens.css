@@ -21,7 +21,9 @@
   /* ── Accent: Deep Oxide Terracotta ─────────────────────────────────────── */
   --accent:         #C45C3E;
   --accent-hover:   #A84D32;
-  --accent-light:   #D97A5F;
+  --accent-strong:  #9A3E24;   /* headlines/emphasis — passes 4.5:1 on #F5F5F3 */
+  --accent-light:   #D97A5F;   /* mid-tone — buttons, icons */
+  --accent-tint:    #F2D5CC;   /* light tint — badges, bg fills, hover states only */
   --accent-soft:    rgba(196, 92, 62, 0.08);
   --accent-glow:    rgba(196, 92, 62, 0.20);
 
@@ -145,7 +147,9 @@
 
   --accent:         #D96E4E;
   --accent-hover:   #E07F60;
-  --accent-light:   #E8A08A;
+  --accent-strong:  #F0A088;   /* headlines/emphasis — passes 4.5:1 on #0A0A0B */
+  --accent-light:   #E8A08A;   /* mid-tone — buttons, icons */
+  --accent-tint:    #2A1510;   /* dark tint — badges, bg fills, hover states only */
   --accent-soft:    rgba(217, 110, 78, 0.12);
   --accent-glow:    rgba(217, 110, 78, 0.25);
 
