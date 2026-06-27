@@ -103,19 +103,32 @@
 
 .borrow-form-group label .required { color: var(--primary); }
 
-.borrow-form-group textarea {
+.input {
   width: 100%;
-  padding: 0.7rem 0.9rem;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-main);
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-surface);
   color: var(--text-primary);
   font-size: 0.95rem;
   font-family: var(--font-sans);
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: all 0.15s ease;
+  appearance: none; /* For mobile friendly */
+}
+
+.input:focus {
+  border-color: var(--primary);
+  background: rgba(255, 59, 59, 0.04);
+}
+
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+
+textarea.input {
   resize: vertical;
-  min-height: 80px;
+  min-height: 100px;
 }
 
 .borrow-form-group--full { grid-column: 1 / -1; }
