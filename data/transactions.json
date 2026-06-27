@@ -1,5 +1,60 @@
 [
   {
+    "id": "tx-1782582411045-cfvvla",
+    "type": "ZK-Lite Commitment",
+    "action": "Assessment ASSESS-1782582411039 execution commitment",
+    "hash": "mock_deploy_f7c6fe0f58052c96",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-27T17:46:51.045Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assessmentId": "ASSESS-1782582411039",
+      "executionCommitment": {
+        "commitment": "f7c6fe0f58052c96f1bd03fa2fe3c8f6cc852a02b10a0a204b3723ab1b9a8a52",
+        "agentStateHash": "b1d4d1d2de1895d6a43fe9e8fca76d19239b5feb6b64fc5c806badefa8dd2dcc",
+        "inputHash": "2e747f9778ddfc2f91708ed5a4eec0762a3aa01a8960b5283878cc28123c8db5",
+        "timestamp": 1782582411045,
+        "blockHeight": 0
+      }
+    }
+  },
+  {
+    "id": "tx-1782582411044-hp5pnh",
+    "type": "HMAC Receipt Chain",
+    "action": "Direct consensus receipt for ASSESS-1782582411039",
+    "hash": "a6eff389-b2e2-4f29-9374-db6021d55bbb",
+    "contract": "AuditTrail",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-27T17:46:51.044Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assessmentId": "ASSESS-1782582411039",
+      "receiptCount": 1,
+      "chainValid": true,
+      "directConsensus": true
+    }
+  },
+  {
+    "id": "tx-1782582411039-mkg5rk",
+    "type": "SubmitAssessment",
+    "action": "Assessment: Test Gold Bar (commodity) - 107,406",
+    "hash": "CO-1782582411022-seq0",
+    "contract": "Orchestrator",
+    "blockHeight": "latest",
+    "timestamp": "2026-06-27T17:46:51.039Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assetType": "commodity",
+      "askingPrice": 50000,
+      "assessedValue": 107406,
+      "divergence": 8.963122209360014
+    }
+  },
+  {
     "id": "tx-1782381849969-5dio9u",
     "type": "SubmitAssessment",
     "action": "Assessment: Manhattan Studio Apartment (real-estate) - 1,896,647",

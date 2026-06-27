@@ -77,25 +77,42 @@ function saveTransaction(entry: ReturnType<typeof createTransactionEntry>) {
   }).catch(err => console.warn(`  [DB] ⚠️ Failed to save transaction to Supabase: ${err.message}`));
 }
 
-/** Load transactions from Supabase first; fall back to file-based for local dev */
+/** Load transactions from both Supabase and file, merged and deduplicated by id */
 async function loadTransactions() {
-  const dbTxs = await db.getTransactionsFromDb(200);
-  if (dbTxs.length > 0) {
-    return dbTxs.map(tx => ({
-      id: tx.id,
-      type: tx.type as any,
-      action: tx.action,
-      hash: tx.hash,
-      contract: tx.contract,
-      blockHeight: tx.block_height,
-      timestamp: new Date(tx.timestamp).toISOString(),
-      explorerUrl: tx.explorer_url,
-      onChain: tx.on_chain,
-      metadata: tx.metadata,
-    }));
+  // Load from both sources in parallel
+  const [dbTxs, fileTxs] = await Promise.all([
+    db.getTransactionsFromDb(200).catch(() => []),
+    Promise.resolve(loadTransactionsFile()),
+  ]);
+
+  const dbMapped = dbTxs.map(tx => ({
+    id: tx.id,
+    type: tx.type as any,
+    action: tx.action,
+    hash: tx.hash,
+    contract: tx.contract,
+    blockHeight: tx.block_height,
+    timestamp: new Date(tx.timestamp).toISOString(),
+    explorerUrl: tx.explorer_url,
+    onChain: tx.on_chain,
+    metadata: tx.metadata,
+  }));
+
+  // Merge: start with file txs, then add any DB txs not already present
+  const seen = new Set(fileTxs.map(t => t.id));
+  const merged = [...fileTxs];
+  for (const tx of dbMapped) {
+    if (!seen.has(tx.id)) {
+      merged.push(tx);
+      seen.add(tx.id);
+    }
   }
-  // Fallback to file-based (local dev without Supabase)
-  return loadTransactionsFile();
+
+  // Sort newest-first by timestamp and cap at 200
+  merged.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  if (merged.length > 200) merged.length = 200;
+
+  return merged;
 }
 import type { AssetType } from '../shared/types.js';
 
@@ -1554,6 +1571,78 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       );
       saveTransaction(assessmentTx);
       emitEvent('transaction', assessmentTx);
+
+      // ── HMAC Receipt Chain (audit trail for every assessment) ─────────────
+      try {
+        const { createDeliberationReceipt } = await import('../shared/audit-trail.js');
+        const receiptChain = receiptChainStore.get(assessmentId) || [];
+        if (receiptChain.length > 0) {
+          // Deliberation happened — log the existing receipt chain
+          const hmacTx = createTransactionEntry(
+            'HMAC Receipt Chain',
+            `Deliberation audit trail for ${assessmentId}`,
+            receiptChain[receiptChain.length - 1].receiptId,
+            'AuditTrail',
+            'latest',
+            { assessmentId, receiptCount: receiptChain.length, chainValid: true },
+            false
+          );
+          saveTransaction(hmacTx);
+          emitEvent('transaction', hmacTx);
+        } else {
+          // No deliberation (low divergence) — create a direct consensus receipt
+          const receipt = createDeliberationReceipt(
+            'orchestrator-direct',
+            assessmentId,
+            'direct-consensus',
+            1,
+            JSON.stringify({ assetId, name, assetType, askingPrice }),
+            JSON.stringify({ assessedValue, divergence, valuationA: valuationA.estimated_value, valuationB: valuationB.estimated_value }),
+            `Agents converged within ${divergence.toFixed(1)}% — no deliberation needed. Direct consensus value: ${assessedValue.toLocaleString()}`,
+            'genesis'
+          );
+          receiptChainStore.set(assessmentId, [receipt]);
+          const hmacTx = createTransactionEntry(
+            'HMAC Receipt Chain',
+            `Direct consensus receipt for ${assessmentId}`,
+            receipt.receiptId,
+            'AuditTrail',
+            'latest',
+            { assessmentId, receiptCount: 1, chainValid: true, directConsensus: true },
+            false
+          );
+          saveTransaction(hmacTx);
+          emitEvent('transaction', hmacTx);
+        }
+      } catch (err: any) {
+        console.warn(`  ⚠️ HMAC receipt creation failed: ${err.message}`);
+      }
+
+      // ── ZK-Lite Execution Commitment (for every assessment) ──────────────
+      try {
+        const { createExecutionCommitment, storeCommitmentOnCasper } = await import('../shared/verifiable-execution.js');
+        const reputationHash = process.env.REPUTATION_CONTRACT_HASH;
+        const executionCommitment = createExecutionCommitment(
+          JSON.stringify({ assetId, name, assetType, askingPrice, location }),
+          { assessedValue, divergence, valuationA: valuationA.estimated_value, valuationB: valuationB.estimated_value },
+          'latest'
+        );
+        const commitmentTxHash = await storeCommitmentOnCasper(executionCommitment, reputationHash || '0xmockreputation');
+        const isZkOnChain = !commitmentTxHash.startsWith('mock_deploy_');
+        const zkTx = createTransactionEntry(
+          'ZK-Lite Commitment',
+          `Assessment ${assessmentId} execution commitment`,
+          commitmentTxHash,
+          'ReputationRegistry',
+          'latest',
+          { assessmentId, executionCommitment },
+          isZkOnChain
+        );
+        saveTransaction(zkTx);
+        emitEvent('transaction', zkTx);
+      } catch (err: any) {
+        console.warn(`  ⚠️ ZK-Lite commitment failed: ${err.message}`);
+      }
 
       // ── Store verdict on VerdictOracle ──────────────────────────────────────
       try {
