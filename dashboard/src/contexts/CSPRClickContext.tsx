@@ -110,6 +110,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [walletInstalled, setWalletInstalled] = useState(false);
+  const [userDisconnected, setUserDisconnected] = useState(false);
 
   const providerRef = useRef<CasperWalletProvider | null>(null);
 
@@ -204,8 +205,9 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, [updateFromPublicKey, clearState]);
 
   // Also check if already connected on mount (page refresh while wallet is connected)
+  // Skip if user explicitly disconnected in this session
   useEffect(() => {
-    if (!isCasperWalletInstalled()) return;
+    if (!isCasperWalletInstalled() || userDisconnected) return;
 
     const provider = window.CasperWalletProvider!();
     providerRef.current = provider;
@@ -215,10 +217,11 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
         provider.getActivePublicKey().then(updateFromPublicKey).catch(() => {});
       }
     }).catch(() => {});
-  }, [updateFromPublicKey]);
+  }, [updateFromPublicKey, userDisconnected]);
 
   const connect = useCallback(async () => {
     setError(null);
+    setUserDisconnected(false); // Reset so auto-reconnect works again
 
     // Demo mode: already auto-connected, no-op
     if (DEMO_MODE) {
@@ -272,7 +275,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
   }, [updateFromPublicKey]);
 
-  const disconnect = useCallback(() => {
+  const disconnect = useCallback(async () => {
     // Demo mode: reset to demo state instead of real wallet
     if (DEMO_MODE) {
       setConnected(true);
@@ -284,14 +287,20 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     const provider = providerRef.current;
 
-    if (provider) {
-      provider.disconnect().catch(() => {
-        // ignore errors on disconnect
-      });
-    }
-
+    // Clear local state first so UI updates immediately
+    setUserDisconnected(true);
     clearState();
     providerRef.current = null;
+
+    // Then tell the wallet extension to disconnect (await it so the extension
+    // actually processes the disconnect before the user tries to reconnect)
+    if (provider) {
+      try {
+        await provider.disconnect();
+      } catch {
+        // ignore errors — wallet may already be disconnected
+      }
+    }
   }, [clearState]);
 
   /**
