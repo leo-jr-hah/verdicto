@@ -44,20 +44,20 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
     }
   };
 
-  // ─── Connected + Collapsed sidebar: green dot icon ───────────────────────
+  // ─── Connected + Collapsed sidebar: golden dot icon ──────────────────────
   if (connected && publicKey && collapsed) {
     return (
       <div ref={dropdownRef} className="relative">
         <button
           onClick={() => setDropdownOpen(!dropdownOpen)}
           title={publicKey}
-          className="flex items-center justify-center rounded-full border border-success bg-success-soft cursor-pointer transition-colors"
-          style={{ width: 36, height: 36, padding: 0, position: 'relative' }}
+          className="flex items-center justify-center rounded-full cursor-pointer transition-colors"
+          style={{ width: 36, height: 36, padding: 0, position: 'relative', border: '1.5px solid var(--accent)', background: 'var(--accent-soft)' }}
         >
-          <Wallet size={16} className="text-secondary" />
+          <Wallet size={16} style={{ color: 'var(--accent)' }} />
           <div
-            className="absolute rounded-full bg-secondary"
-            style={{ top: 2, right: 2, width: 8, height: 8, border: '2px solid var(--bg-surface, #fff)' }}
+            className="absolute rounded-full"
+            style={{ top: 2, right: 2, width: 8, height: 8, background: 'var(--accent)', border: '2px solid var(--bg-dark, #020a13)' }}
           />
         </button>
 
@@ -75,8 +75,8 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
           >
             {/* Connected account info */}
             <div className="p-3 border-b mb-1">
-              <div className="mono-xs uppercase text-secondary mb-1">Connected</div>
-              <div className="mono-sm text-primary" style={{ wordBreak: 'break-all', lineHeight: 1.4 }}>
+              <div className="mono-xs uppercase mb-1" style={{ color: 'var(--accent)' }}>Connected</div>
+              <div className="mono-sm" style={{ color: 'var(--accent)', wordBreak: 'break-all', lineHeight: 1.4 }}>
                 {publicKey}
               </div>
             </div>
@@ -84,19 +84,21 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             {/* Copy Address */}
             <button
               onClick={() => { copyKey(); }}
-              className="flex items-center gap-2 w-full p-2 text-sm text-primary bg-transparent border-none rounded-sm cursor-pointer transition-colors"
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover)')}
+              className="flex items-center gap-2 w-full p-2 text-sm bg-transparent border-none rounded-sm cursor-pointer transition-colors"
+              style={{ color: 'var(--accent)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-soft)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              {copied ? <Check size={14} className="text-secondary" /> : <Copy size={14} />}
+              {copied ? <Check size={14} style={{ color: 'var(--accent)' }} /> : <Copy size={14} />}
               {copied ? 'Copied!' : 'Copy Address'}
             </button>
 
             {/* Disconnect */}
             <button
               onClick={() => { disconnect(); setDropdownOpen(false); }}
-              className="flex items-center gap-2 w-full p-2 text-sm text-error bg-transparent border-none rounded-sm cursor-pointer transition-colors"
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--error-soft)')}
+              className="flex items-center gap-2 w-full p-2 text-sm bg-transparent border-none rounded-sm cursor-pointer transition-colors"
+              style={{ color: 'var(--text-dark-secondary)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-soft)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               <LogOut size={14} />
@@ -114,9 +116,10 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
       <div ref={dropdownRef} className="relative">
         <button
           onClick={() => setDropdownOpen(!dropdownOpen)}
-          className="flex items-center gap-2 p-2 text-sm font-semibold text-secondary bg-success-soft border border-success rounded-full cursor-pointer transition-colors w-full justify-center"
+          className="flex items-center gap-2 p-2 text-sm font-semibold rounded-full cursor-pointer transition-colors w-full justify-center"
+          style={{ color: 'var(--accent)', background: 'var(--accent-soft)', border: '1.5px solid var(--accent)' }}
         >
-          <div className="flex-shrink-0 rounded-full bg-secondary" style={{ width: 8, height: 8 }} />
+          <div className="flex-shrink-0 rounded-full" style={{ width: 8, height: 8, background: 'var(--accent)' }} />
           <span className="truncate">{truncateKey(publicKey)}</span>
           <ChevronDown size={14} className="flex-shrink-0" />
         </button>
@@ -132,8 +135,8 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
           >
             {/* Full key */}
             <div className="p-3 border-b mb-1">
-              <div className="mono-xs uppercase text-secondary mb-1">Connected</div>
-              <div className="mono-sm text-primary" style={{ wordBreak: 'break-all', lineHeight: 1.4 }}>
+              <div className="mono-xs uppercase mb-1" style={{ color: 'var(--accent)' }}>Connected</div>
+              <div className="mono-sm" style={{ color: 'var(--accent)', wordBreak: 'break-all', lineHeight: 1.4 }}>
                 {publicKey}
               </div>
             </div>
@@ -141,19 +144,21 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             {/* Copy Address */}
             <button
               onClick={() => { copyKey(); }}
-              className="flex items-center gap-2 w-full p-2 text-sm text-primary bg-transparent border-none rounded-sm cursor-pointer transition-colors"
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover)')}
+              className="flex items-center gap-2 w-full p-2 text-sm bg-transparent border-none rounded-sm cursor-pointer transition-colors"
+              style={{ color: 'var(--accent)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-soft)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              {copied ? <Check size={14} className="text-secondary" /> : <Copy size={14} />}
+              {copied ? <Check size={14} style={{ color: 'var(--accent)' }} /> : <Copy size={14} />}
               {copied ? 'Copied!' : 'Copy Address'}
             </button>
 
             {/* Disconnect */}
             <button
               onClick={() => { disconnect(); setDropdownOpen(false); }}
-              className="flex items-center gap-2 w-full p-2 text-sm text-error bg-transparent border-none rounded-sm cursor-pointer transition-colors"
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--error-soft)')}
+              className="flex items-center gap-2 w-full p-2 text-sm bg-transparent border-none rounded-sm cursor-pointer transition-colors"
+              style={{ color: 'var(--text-dark-secondary)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-soft)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               <LogOut size={14} />
