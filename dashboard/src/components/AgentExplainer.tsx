@@ -305,7 +305,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
     <div className="flex flex-col gap-2">
       {/* Section header */}
       <div className="flex items-center gap-2 mb-1">
-        <Activity size={16} color="var(--primary, #ef4444)" />
+        <Activity size={16} color="var(--primary, var(--navy-500))" />
         <span className="text-sm font-bold text-primary" style={{ letterSpacing: '0.02em' }}>
           How AI Agents Reached This Result
         </span>

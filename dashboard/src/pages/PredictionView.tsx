@@ -417,7 +417,7 @@ export const PredictionView: React.FC = () => {
                         style={{
                           padding: '8px 16px', borderRadius: 8,
                           border: `1.5px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
-                          background: active ? 'rgba(255, 59, 59, 0.06)' : 'var(--bg-elevated)',
+                          background: active ? 'var(--accent-soft)' : 'var(--bg-elevated)',
                           cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
                           color: active ? 'var(--accent)' : 'var(--text-secondary)',
                           transition: 'all 0.15s ease',

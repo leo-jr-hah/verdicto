@@ -100,17 +100,18 @@
   --border-weak:    #E0E3E8;
 
   /* ═══════════════════════════════════════════════════════════════════════
-     SEMANTIC COLORS
+     SEMANTIC COLORS — Navy/Neutral Palette
+     No green, red, or orange. All status uses navy tones + amber accent.
      ═══════════════════════════════════════════════════════════════════════ */
-  --success:        #4ADE80;
-  --success-soft:   rgba(74, 222, 128, 0.15);
-  --warning:        #FBBF24;
-  --warning-soft:   rgba(251, 191, 36, 0.15);
-  --error:          #F87171;
-  --error-soft:     rgba(248, 113, 113, 0.15);
-  --info:           #60A5FA;
-  --info-soft:      rgba(96, 165, 250, 0.15);
-  --red-600:        #F87171;
+  --success:        var(--navy-300);
+  --success-soft:   rgba(14, 61, 92, 0.12);
+  --warning:        var(--accent);
+  --warning-soft:   var(--accent-soft);
+  --error:          var(--navy-600);
+  --error-soft:     rgba(8, 37, 64, 0.12);
+  --info:           var(--navy-400);
+  --info-soft:      rgba(12, 45, 72, 0.12);
+  --red-600:        var(--navy-500);
 
   /* ═══════════════════════════════════════════════════════════════════════
      SHADOWS

@@ -398,8 +398,8 @@ export const DisputesView: React.FC = () => {
                         <span style={{
                           fontSize: '0.7rem', padding: '3px 10px', borderRadius: '6px', fontWeight: 600,
                           ...(d.outcome === 'overturned'
-                            ? { background: 'rgba(239, 68, 68, 0.1)', color: '#DC2626', border: '1px solid rgba(239, 68, 68, 0.2)' }
-                            : { background: 'rgba(16, 185, 129, 0.1)', color: '#059669', border: '1px solid rgba(16, 185, 129, 0.2)' }),
+                            ? { background: 'var(--error-soft)', color: 'var(--error)', border: '1px solid var(--border)' }
+                            : { background: 'var(--success-soft)', color: 'var(--success)', border: '1px solid var(--border)' }),
                         }}>
                           {d.outcome === 'overturned' ? 'Overturned' : 'Upheld'}
                         </span>

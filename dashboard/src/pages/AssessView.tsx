@@ -95,7 +95,7 @@ const AssetTypeSelector: React.FC<{
             padding: '1.25rem 1rem',
             borderRadius: '8px',
             border: `2px solid ${isActive ? 'var(--accent)' : 'var(--border)'}`,
-            background: isActive ? 'rgba(255, 59, 59, 0.04)' : 'var(--bg-elevated)',
+            background: isActive ? 'var(--accent-soft)' : 'var(--bg-elevated)',
             cursor: 'pointer',
             transition: 'all 0.15s ease',
             color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
@@ -129,7 +129,7 @@ const FormField: React.FC<{
     </label>
     {children}
     {error && (
-      <p style={{ fontSize: '0.78rem', color: 'var(--error, #ef4444)', marginTop: '0.3rem' }}>
+      <p style={{ fontSize: '0.78rem', color: 'var(--error)', marginTop: '0.3rem' }}>
         {error}
       </p>
     )}

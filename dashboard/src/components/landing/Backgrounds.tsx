@@ -6,7 +6,7 @@ import { motion } from 'motion/react';
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const GradientOrb: React.FC<{ delay?: number; color1?: string; color2?: string; size?: number; x?: string; y?: string }> = ({
-  delay = 0, color1 = 'rgba(255,59,59,0.12)', color2 = 'rgba(139,92,246,0.08)', size = 500, x = '50%', y = '30%',
+  delay = 0, color1 = 'rgba(14,61,92,0.12)', color2 = 'rgba(201,168,76,0.08)', size = 500, x = '50%', y = '30%',
 }) => (
   <motion.div
     initial={{ scale: 0.8, opacity: 0 }}
