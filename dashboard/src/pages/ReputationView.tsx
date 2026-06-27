@@ -456,7 +456,7 @@ export const ReputationView: React.FC = () => {
           { label: 'Total Agents', value: metrics.totalAgents, icon: <Shield size={18} />, color: 'var(--primary)' },
           { label: 'Avg Score', value: metrics.avgScore, icon: <TrendingUp size={18} />, color: 'var(--success)' },
           { label: 'Avg Success', value: `${metrics.avgSuccess}%`, icon: <CheckCircle2 size={18} />, color: 'var(--info)' },
-          { label: 'Total Assessments', value: metrics.totalAssessments.toLocaleString(), icon: <Target size={18} />, color: 'var(--purple)' },
+          { label: 'Total Assessments', value: metrics.totalAssessments.toLocaleString(), icon: <Target size={18} />, color: 'var(--text-secondary)' },
         ].map((stat, i) => (
           <div key={i} style={{
             background: 'var(--bg-elevated)',

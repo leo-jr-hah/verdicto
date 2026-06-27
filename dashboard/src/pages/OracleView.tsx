@@ -104,7 +104,7 @@ export const OracleView: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
-              <Radio size={28} style={{ color: 'var(--text-accent)' }} />
+              <Radio size={28} style={{ color: 'var(--red-600)' }} />
               <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
                 Verdict Oracle
               </h1>
@@ -195,7 +195,7 @@ export const OracleView: React.FC = () => {
             background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
           }}>
-            <Radio size={24} style={{ color: 'var(--text-accent)' }} />
+            <Radio size={24} style={{ color: 'var(--red-600)' }} />
           </div>
           <div>
             <h3 style={{ margin: '0 0 8px', fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -230,7 +230,7 @@ export const OracleView: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Code size={18} style={{ color: 'var(--text-accent)' }} />
+            <Code size={18} style={{ color: 'var(--red-600)' }} />
             <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>Integration Code: How to Query the Oracle</span>
           </div>
           {showCode ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
@@ -285,13 +285,13 @@ export const OracleView: React.FC = () => {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Database size={16} style={{ color: 'var(--text-accent)' }} />
+            <Database size={16} style={{ color: 'var(--red-600)' }} />
             <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
               Stored Verdicts
             </span>
             <span style={{
               fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px',
-              background: 'var(--bg-elevated)', color: 'var(--text-accent)', fontWeight: 600,
+              background: 'var(--bg-elevated)', color: 'var(--red-600)', fontWeight: 600,
             }}>
               {verdicts.length}
             </span>
@@ -422,10 +422,10 @@ export const OracleView: React.FC = () => {
                                 const score = parseInt(scoreStr, 10);
                                 const pct = Math.min(score / 1000 * 100, 100);
                                 const agentColors: Record<string, string> = {
-                                  evidence: 'var(--success)', 'valuation-a': 'var(--text-secondary)', 'valuation-b': 'var(--text-accent)',
+                                  evidence: 'var(--success)', 'valuation-a': 'var(--text-secondary)', 'valuation-b': 'var(--red-600)',
                                   market: 'var(--warning)', precedent: 'var(--error)',
                                 };
-                                const color = agentColors[agent?.trim()] || 'var(--text-accent)';
+                                const color = agentColors[agent?.trim()] || 'var(--red-600)';
                                 return (
                                   <div key={agent} className="oracle-agent-bar-row">
                                     <span className="oracle-agent-name">{agent?.trim()}</span>

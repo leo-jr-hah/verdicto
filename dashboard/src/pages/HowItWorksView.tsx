@@ -41,7 +41,7 @@ const LAYERS = [
     title: 'AI Agent Network',
     subtitle: 'Multiple independent analysts with autonomous methodology selection and juror deliberation',
     icon: <Server size={20} />,
-    color: 'var(--text-accent)',
+    color: 'var(--red-600)',
     stats: ['Multiple independent agents', 'Autonomous reasoning', 'Juror peer review'],
     items: [
       {
@@ -298,7 +298,7 @@ const AgentTable: React.FC = () => (
                   display: 'inline-block', padding: '2px 8px', borderRadius: 6,
                   fontSize: 11, fontWeight: 500,
                   background: agent.role === 'Primary Valuator' ? 'var(--bg-surface)' : 'var(--bg-elevated)',
-                  color: agent.role === 'Primary Valuator' ? 'var(--text-secondary)' : 'var(--text-accent)',
+                  color: agent.role === 'Primary Valuator' ? 'var(--text-secondary)' : 'var(--red-600)',
                 }}>
                   {agent.role}
                 </span>
@@ -325,7 +325,7 @@ const AgentTable: React.FC = () => (
               display: 'inline-block', padding: '2px 8px', borderRadius: 6,
               fontSize: 11, fontWeight: 500,
               background: agent.role === 'Primary Valuator' ? 'var(--bg-surface)' : 'var(--bg-elevated)',
-              color: agent.role === 'Primary Valuator' ? 'var(--text-secondary)' : 'var(--text-accent)',
+              color: agent.role === 'Primary Valuator' ? 'var(--text-secondary)' : 'var(--red-600)',
             }}>
               {agent.role}
             </span>
@@ -649,7 +649,7 @@ export const HowItWorksView: React.FC = () => {
             <div className="card" style={{ padding: 'var(--sp-5)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', marginBottom: 'var(--sp-4)' }}>
                 <Shield size={16} style={{ color: 'var(--success)' }} />
-                <span style={{ fontSize: 14, fontWeight: 600, color: '#10B981', fontFamily: 'var(--font-display)' }}>Production-Ready</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--success)', fontFamily: 'var(--font-display)' }}>Production-Ready</span>
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
                 {[
@@ -676,7 +676,7 @@ export const HowItWorksView: React.FC = () => {
             <div className="card" style={{ padding: 'var(--sp-5)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', marginBottom: 'var(--sp-4)' }}>
                 <Eye size={16} style={{ color: 'var(--warning)' }} />
-                <span style={{ fontSize: 14, fontWeight: 600, color: '#F59E0B', fontFamily: 'var(--font-display)' }}>Currently Simplified</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--warning)', fontFamily: 'var(--font-display)' }}>Currently Simplified</span>
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
                 {[

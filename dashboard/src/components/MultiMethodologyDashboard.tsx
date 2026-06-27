@@ -167,11 +167,11 @@ const AgentCard: React.FC<{
             padding: '0.3rem 0.7rem',
             borderRadius: '9999px',
             background: confidence >= 0.8
-              ? 'rgba(16, 185, 129, 0.15)'
+              ? 'rgba(16,185,129,0.15)'
               : confidence >= 0.6
-                ? 'rgba(245, 158, 11, 0.15)'
-                : 'rgba(239, 68, 68, 0.15)',
-            color: confidence >= 0.8 ? '#10b981' : confidence >= 0.6 ? '#f59e0b' : '#ef4444',
+                ? 'rgba(245,158,11,0.15)'
+                : 'rgba(239,68,68,0.15)',
+            color: confidence >= 0.8 ? 'var(--success)' : confidence >= 0.6 ? 'var(--warning)' : 'var(--error)',
             fontSize: '0.85rem',
             fontWeight: 700,
           }}>
@@ -283,8 +283,8 @@ const DivergenceBar: React.FC<{
           fontSize: '0.75rem',
           padding: '0.25rem 0.6rem',
           borderRadius: '6px',
-          background: divergencePct < 10 ? 'rgba(16, 185, 129, 0.1)' : divergencePct < 20 ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-          color: divergencePct < 10 ? '#10b981' : divergencePct < 20 ? '#f59e0b' : '#ef4444',
+          background: divergencePct < 10 ? 'var(--success-soft)' : divergencePct < 20 ? 'rgba(245, 158, 11, 0.1)' : 'var(--error-soft)',
+          color: divergencePct < 10 ? 'var(--success)' : divergencePct < 20 ? 'var(--warning)' : 'var(--error)',
           fontWeight: 600,
         }}>
           {divergencePct < 10 ? 'Tight' : divergencePct < 20 ? 'Moderate' : 'Wide'} spread ({divergencePct.toFixed(1)}%)
@@ -300,9 +300,9 @@ const DivergenceBar: React.FC<{
           bottom: 0,
           left: `${bandLeft}%`,
           width: `${bandWidth}%`,
-          background: 'rgba(139, 92, 246, 0.06)',
-          borderLeft: '1px dashed rgba(139, 92, 246, 0.3)',
-          borderRight: '1px dashed rgba(139, 92, 246, 0.3)',
+          background: 'var(--primary-bg)',
+          borderLeft: '1px dashed var(--primary-border)',
+          borderRight: '1px dashed var(--primary-border)',
           borderRadius: '4px',
           zIndex: 0,
         }} />
@@ -420,7 +420,7 @@ const DivergenceBar: React.FC<{
           width: '2px',
           background: 'var(--primary)',
           zIndex: 2,
-          boxShadow: '0 0 6px rgba(139, 92, 246, 0.4)',
+          boxShadow: '0 0 6px var(--primary-border)',
         }}>
           <div style={{
             position: 'absolute',
@@ -478,7 +478,7 @@ const DivergenceBar: React.FC<{
         </div>
         <div style={{ color: 'var(--text-secondary)' }}>
           vs. Asking: <strong style={{
-            color: assessedValue >= askingPrice ? '#10b981' : '#ef4444',
+            color: assessedValue >= askingPrice ? 'var(--success)' : 'var(--error)',
           }}>
             {assessedValue >= askingPrice ? '+' : ''}{formatPercent(((assessedValue - askingPrice) / askingPrice) * 100)}
           </strong>
@@ -531,8 +531,8 @@ const RiskFlags: React.FC<{ result: AssessmentResult }> = ({ result }) => {
     });
   }
 
-  const severityColor = { high: '#ef4444', medium: '#f59e0b', low: '#10b981' };
-  const severityBg = { high: 'rgba(239, 68, 68, 0.08)', medium: 'rgba(245, 158, 11, 0.08)', low: 'rgba(16, 185, 129, 0.08)' };
+  const severityColor = { high: 'var(--error)', medium: 'var(--warning)', low: 'var(--success)' };
+  const severityBg = { high: 'rgba(239, 68, 68, 0.08)', medium: 'var(--warning-soft)', low: 'var(--success-soft)' };
   const severityIcon = { high: <AlertTriangle size={14} />, medium: <Info size={14} />, low: <CheckCircle2 size={14} /> };
 
   return (
@@ -592,7 +592,7 @@ const ConsensusSummary: React.FC<{
   const cv = (stdDev / avg) * 100; // coefficient of variation
 
   const agreementLevel = cv < 10 ? 'Strong' : cv < 20 ? 'Moderate' : 'Weak';
-  const agreementColor = cv < 10 ? '#10b981' : cv < 20 ? '#f59e0b' : '#ef4444';
+  const agreementColor = cv < 10 ? 'var(--success)' : cv < 20 ? 'var(--warning)' : 'var(--error)';
 
   return (
     <motion.div
@@ -719,8 +719,8 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
           fontSize: '0.7rem',
           padding: '0.2rem 0.6rem',
           borderRadius: '4px',
-          background: 'rgba(139, 92, 246, 0.1)',
-          color: '#8b5cf6',
+          background: 'var(--primary-bg)',
+          color: 'var(--text-secondary)',
           fontWeight: 600,
         }}>
           {agentData.length} Agents
@@ -739,13 +739,13 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
             padding: '1rem 1.25rem',
             marginBottom: '1.5rem',
             borderRadius: '10px',
-            background: 'rgba(245, 158, 11, 0.08)',
+            background: 'var(--warning-soft)',
             border: '1px solid rgba(245, 158, 11, 0.25)',
           }}
         >
-          <AlertTriangle size={18} color="#f59e0b" style={{ marginTop: 2, flexShrink: 0 }} />
+          <AlertTriangle size={18} color="var(--warning)" style={{ marginTop: 2, flexShrink: 0 }} />
           <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#f59e0b', marginBottom: 4 }}>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--warning)', marginBottom: 4 }}>
               LLM Fallback Triggered
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
@@ -755,7 +755,7 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
               }{' '}
               Results are based on {result.fallbackAgents.some(f => f.provider === 'groq') ? 'Groq fallback (reduced reasoning quality)' : 'heuristic formulas (no LLM reasoning)'}.
               {' '}
-              <span style={{ color: '#f59e0b', fontWeight: 600 }}>
+              <span style={{ color: 'var(--warning)', fontWeight: 600 }}>
                 These valuations should be treated with lower confidence.
               </span>
             </div>

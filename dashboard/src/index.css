@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist:wght@400;500;600;700&display=swap');
+@import './styles/tokens.css';
+@import './styles/mobile.css';
 @import './styles/landing-responsive.css';
 @import './styles/dashboard-responsive.css';
 @import './styles/assess-responsive.css';
@@ -10,109 +12,10 @@
 
 /* ═══════════════════════════════════════════════════════════════════════════
    VERDICTO: Design System
-   A unified, enterprise-grade design language for every screen.
+   Tokens defined in styles/tokens.css — this file imports them.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-:root {
-  /* ── Brand: Red ─────────────────────────────────────────────────────────── */
-  --primary: #FF3B3B;
-  --primary-hover: #E03333;
-  --primary-light: #FF6B6B;
-  --primary-bg: rgba(255, 59, 59, 0.06);
-  --primary-bg-strong: rgba(255, 59, 59, 0.12);
-  --primary-border: rgba(255, 59, 59, 0.20);
-  --accent: #FF3B3B;
-
-  /* ── RGB values for backdrop-filter rgba() ─────────────────────────────── */
-  --bg-main-rgb: 255, 255, 255;
-
-  /* ── Surfaces ───────────────────────────────────────────────────────────── */
-  --bg-main: #FFFFFF;
-  --bg-surface: #F9FAFB;
-  --bg-surface-alt: #F3F4F6;
-  --bg-elevated: #FFFFFF;
-  --border-color: #E5E7EB;
-  --border-color-subtle: #F3F4F6;
-
-  /* ── Text ───────────────────────────────────────────────────────────────── */
-  --text-primary: #111827;
-  --text-secondary: #4B5563;
-  --text-tertiary: #9CA3AF;
-  --text-inverse: #FFFFFF;
-
-  /* ── Semantic Colors (status only — never decorative) ───────────────────── */
-  --success: #10B981;
-  --success-bg: rgba(16, 185, 129, 0.08);
-  --warning: #F59E0B;
-  --warning-bg: rgba(245, 158, 11, 0.08);
-  --error: #EF4444;
-  --error-bg: rgba(239, 68, 68, 0.08);
-  --info: #6B7280;
-
-  /* ── Typography ─────────────────────────────────────────────────────────── */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Geist', 'Inter', -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
-
-  /* ── Spacing Scale (4px base) ───────────────────────────────────────────── */
-  --sp-1: 4px;
-  --sp-2: 8px;
-  --sp-3: 12px;
-  --sp-4: 16px;
-  --sp-5: 20px;
-  --sp-6: 24px;
-  --sp-8: 32px;
-  --sp-10: 40px;
-  --sp-12: 48px;
-  --sp-16: 64px;
-
-  /* ── Layout ─────────────────────────────────────────────────────────────── */
-  --page-padding-x: 32px;
-  --page-padding-y: 24px;
-  --page-max-width: 1440px;
-  --content-gap: 24px;
-  --section-gap: 32px;
-  --card-padding: 20px;
-  --card-radius: 10px;
-
-  /* ── Shadows ────────────────────────────────────────────────────────────── */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
-
-  /* ── Transitions ────────────────────────────────────────────────────────── */
-  --transition-fast: 0.12s ease;
-  --transition-base: 0.2s ease;
-  --transition-slow: 0.3s ease;
-}
-
-[data-theme="dark"] {
-  --bg-main: #09090B;
-  --bg-main-rgb: 9, 9, 11;
-  --bg-surface: #18181B;
-  --bg-surface-alt: #27272A;
-  --bg-elevated: #18181B;
-  --border-color: #27272A;
-  --border-color-subtle: #1F1F23;
-
-  --text-primary: #FAFAFA;
-  --text-secondary: #A1A1AA;
-  --text-tertiary: #71717A;
-  --text-inverse: #09090B;
-
-  --success-bg: rgba(16, 185, 129, 0.12);
-  --warning-bg: rgba(245, 158, 11, 0.12);
-  --error-bg: rgba(239, 68, 68, 0.12);
-  --primary-bg: rgba(255, 59, 59, 0.08);
-  --primary-bg-strong: rgba(255, 59, 59, 0.16);
-  --primary-border: rgba(255, 59, 59, 0.25);
-
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-}
+/* NOTE: All :root and [data-theme="dark"] variables are now in styles/tokens.css */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    RESET & BASE
@@ -1904,10 +1807,10 @@ button {
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 1.2rem;
-  background: #8B5CF622;
-  border: 1px solid #8B5CF644;
+  background: var(--primary-bg);
+  border: 1px solid var(--primary-border);
   border-radius: 8px;
-  color: #8B5CF6;
+  color: var(--text-secondary);
   font-weight: 600;
   font-size: 0.85rem;
 }
@@ -1920,7 +1823,7 @@ button {
 .hiw-dispatch-arrow {
   width: 2px;
   height: 24px;
-  background: linear-gradient(to bottom, #8B5CF6, transparent);
+  background: linear-gradient(to bottom, var(--text-secondary), transparent);
   border-radius: 1px;
   animation: dispatchPulse 1.5s ease-in-out infinite;
 }
@@ -2124,7 +2027,7 @@ button {
   gap: 0.5rem;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #10B981;
+  color: var(--success);
 }
 
 .hiw-verdict-body {
@@ -2164,12 +2067,12 @@ button {
   justify-content: center;
   gap: 0.4rem;
   padding: 0.5rem;
-  background: #10B98112;
-  border: 1px solid #10B98133;
+  background: var(--success-soft);
+  border: 1px solid rgba(16,185,129,0.2);
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 500;
-  color: #10B981;
+  color: var(--success);
 }
 
 /* ── Under the Hood ────────────────────────────────────────────────────────── */
@@ -2481,17 +2384,17 @@ a:focus-visible {
   padding: var(--sp-2) var(--sp-3);
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--cyan);
-  background: rgba(6, 182, 212, 0.06);
-  border: 1px solid rgba(6, 182, 212, 0.15);
+  color: var(--info);
+  background: var(--info-soft);
+  border: 1px solid rgba(59,130,246,0.15);
   border-radius: 999px;
   transition: all var(--transition-fast);
   text-decoration: none;
 }
 
 .faucet-link:hover {
-  background: rgba(6, 182, 212, 0.12);
-  border-color: rgba(6, 182, 212, 0.3);
+  background: rgba(59,130,246,0.12);
+  border-color: rgba(59,130,246,0.3);
 }
 
 /* ── Hero Section ───────────────────────────────────────────────────────── */
@@ -2721,19 +2624,19 @@ a:focus-visible {
 }
 
 .landing-badge--purple {
-  background: rgba(139, 92, 246, 0.08);
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  color: var(--purple);
+  background: var(--bg-inset);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
 }
 
 .landing-badge--cyan {
-  background: rgba(6, 182, 212, 0.06);
-  border: 1px solid rgba(6, 182, 212, 0.15);
-  color: var(--cyan);
+  background: var(--info-soft);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  color: var(--info);
 }
 
 .landing-badge--green {
-  background: rgba(16, 185, 129, 0.1);
+  background: var(--success-soft);
   border: 1px solid rgba(16, 185, 129, 0.2);
   color: var(--success);
 }
@@ -3253,8 +3156,8 @@ a:focus-visible {
 }
 
 .contract-card--highlight {
-  border: 1.5px solid rgba(139, 92, 246, 0.3);
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.04) 0%, transparent 100%);
+  border: 1.5px solid var(--primary-border);
+  background: linear-gradient(135deg, var(--primary-bg) 0%, transparent 100%);
 }
 
 .contract-card__name {

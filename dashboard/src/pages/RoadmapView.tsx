@@ -246,17 +246,17 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG = {
-  live: { label: 'Live', color: 'var(--success)', bg: 'rgba(16, 185, 129, 0.1)' },
-  building: { label: 'Building', color: 'var(--text-accent)', bg: 'rgba(99, 102, 241, 0.1)' },
+  live: { label: 'Live', color: 'var(--success)', bg: 'var(--success-soft)' },
+  building: { label: 'Building', color: 'var(--red-600)', bg: 'var(--primary-bg)' },
   planned: { label: 'Planned', color: 'var(--warning)', bg: 'rgba(245, 158, 11, 0.1)' },
   future: { label: 'Future', color: 'var(--text-tertiary)', bg: 'var(--bg-surface-alt)' },
 };
 
 const CATEGORY_CONFIG = {
-  verifiable: { label: 'Verifiable Value', color: 'var(--text-accent)', description: 'Outputs traditional AI cannot produce' },
+  verifiable: { label: 'Verifiable Value', color: 'var(--red-600)', description: 'Outputs traditional AI cannot produce' },
   economic: { label: 'Economic Value', color: 'var(--success)', description: 'Direct revenue or cost savings' },
   network: { label: 'Network Effects', color: 'var(--warning)', description: 'More users = more value' },
-  enhancement: { label: 'Enhancement', color: 'var(--purple)', description: 'Improvements to existing system' },
+  enhancement: { label: 'Enhancement', color: 'var(--text-secondary)', description: 'Improvements to existing system' },
 };
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -430,9 +430,9 @@ export const RoadmapView: React.FC = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
         style={{
-          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05))',
+          background: 'linear-gradient(135deg, var(--bg-inset), var(--bg-inset))',
           borderRadius: '12px',
-          border: '1px solid rgba(99, 102, 241, 0.2)',
+          border: '1px solid var(--primary-border)',
           padding: '2rem',
           textAlign: 'center',
           marginTop: '1rem',

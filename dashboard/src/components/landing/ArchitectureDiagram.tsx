@@ -384,9 +384,9 @@ export const ArchitectureDiagram: React.FC = () => {
         >
           {[
             { color: 'var(--success)', label: 'AI Agents' },
-            { color: 'var(--pink)', label: 'Jurors' },
+            { color: 'var(--red-600)', label: 'Jurors' },
             { color: 'var(--warning)', label: 'Trust & Payment' },
-            { color: 'var(--text-accent)', label: 'Blockchain' },
+            { color: 'var(--text-secondary)', label: 'Blockchain' },
           ].map((item) => (
             <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{

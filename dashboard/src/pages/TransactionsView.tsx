@@ -25,8 +25,8 @@ function truncateHash(hash: string): string {
 
 function typeColor(type: string): string {
   switch (type) {
-    case 'ZK-Lite Commitment': return 'var(--purple)';
-    case 'HMAC Receipt Chain': return 'var(--text-accent)';
+    case 'ZK-Lite Commitment': return 'var(--text-secondary)';
+    case 'HMAC Receipt Chain': return 'var(--red-600)';
     case 'Native Transfer': return 'var(--success)';
     case 'x402 Payment': return 'var(--warning)';
     case 'ExecuteVerdict': return 'var(--error)';
@@ -52,8 +52,8 @@ function matchesFilter(type: string, filter: string): boolean {
 
 const STATS = [
   { key: 'total' as const, label: 'Total', color: 'var(--text-primary)', icon: BarChart3 },
-  { key: 'zkLite' as const, label: 'ZK-Lite', color: 'var(--purple)', icon: Shield },
-  { key: 'hmac' as const, label: 'HMAC', color: 'var(--text-accent)', icon: Hash },
+  { key: 'zkLite' as const, label: 'ZK-Lite', color: 'var(--text-secondary)', icon: Shield },
+  { key: 'hmac' as const, label: 'HMAC', color: 'var(--red-600)', icon: Hash },
   { key: 'payments' as const, label: 'Payments', color: 'var(--warning)', icon: TrendingUp },
   { key: 'verdicts' as const, label: 'Verdicto', color: 'var(--success)', icon: Clock },
 ];

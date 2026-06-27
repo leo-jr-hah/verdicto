@@ -91,10 +91,10 @@ const AgentReputationCard: React.FC<{
   const isPositive = scoreChange >= 0;
 
   const getScoreColor = (score: number) => {
-    if (score >= 900) return '#10B981';
-    if (score >= 800) return '#3B82F6';
-    if (score >= 700) return '#F59E0B';
-    return '#EF4444';
+    if (score >= 900) return 'var(--success)';
+    if (score >= 800) return 'var(--info)';
+    if (score >= 700) return 'var(--warning)';
+    return 'var(--error)';
   };
 
   const getRankBadge = (rank: number) => {
@@ -173,7 +173,7 @@ const AgentReputationCard: React.FC<{
             alignItems: 'center', 
             gap: '0.25rem',
             fontSize: '0.75rem',
-            color: isPositive ? '#10B981' : '#EF4444'
+            color: isPositive ? 'var(--success)' : 'var(--error)'
           }}>
             {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
             <span>{isPositive ? '+' : ''}{scoreChange}</span>
@@ -333,7 +333,7 @@ export const ReputationGraph: React.FC<ReputationGraphProps> = ({ agents }) => {
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Total Assessments</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10B981' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--success)' }}>
                 {selectedAgentData.successRate}%
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Success Rate</div>
@@ -369,7 +369,7 @@ export const ReputationGraph: React.FC<ReputationGraphProps> = ({ agents }) => {
                   width: '6px', 
                   height: '6px', 
                   borderRadius: '50%',
-                  background: point.score >= selectedAgentData.currentScore ? '#10B981' : '#EF4444'
+                  background: point.score >= selectedAgentData.currentScore ? 'var(--success)' : 'var(--error)'
                 }} />
                 <div style={{ flexGrow: 1 }}>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>

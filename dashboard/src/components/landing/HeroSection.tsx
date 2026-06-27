@@ -200,12 +200,12 @@ const FlipButton: React.FC<{
   const isPrimary = variant === 'primary';
 
   const normalStyle: React.CSSProperties = isPrimary
-    ? { background: 'var(--primary)', color: '#fff', border: '2px solid var(--primary)' }
+    ? { background: 'var(--primary)', color: 'var(--text-inverse)', border: '2px solid var(--primary)' }
     : { background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '2px solid var(--border-color)' };
 
   const hoveredStyle: React.CSSProperties = isPrimary
-    ? { background: '#fff', color: 'var(--primary)', border: '2px solid var(--primary)', boxShadow: '0 0 24px rgba(255,59,59,0.3)' }
-    : { background: 'var(--primary)', color: '#fff', border: '2px solid var(--primary)', boxShadow: '0 0 24px rgba(255,59,59,0.3)' };
+    ? { background: 'var(--text-inverse)', color: 'var(--primary)', border: '2px solid var(--primary)', boxShadow: '0 0 24px rgba(255,59,59,0.3)' }
+    : { background: 'var(--primary)', color: 'var(--text-inverse)', border: '2px solid var(--primary)', boxShadow: '0 0 24px rgba(255,59,59,0.3)' };
 
   const Tag = to ? Link : 'button';
   const tagProps = to ? { to } : { onClick };

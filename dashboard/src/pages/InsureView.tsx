@@ -119,7 +119,7 @@ function statusColor(status: string): string {
     case 'active': return 'var(--success)';
     case 'expired': return 'var(--text-tertiary)';
     case 'claimed': return 'var(--warning)';
-    case 'paid': return 'var(--text-accent)';
+    case 'paid': return 'var(--red-600)';
     default: return 'var(--text-tertiary)';
   }
 }
@@ -980,7 +980,7 @@ export const InsureView: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <XCircle size={48} color="#ef4444" style={{ marginBottom: '0.5rem' }} />
+                        <XCircle size={48} color="var(--error)" style={{ marginBottom: '0.5rem' }} />
                         <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Claim Denied</h3>
                         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.5rem 0' }}>
                           Loss did not exceed the deductible threshold.
@@ -997,7 +997,7 @@ export const InsureView: React.FC = () => {
                       </div>
                       <div style={{ padding: '0.75rem', background: 'var(--bg-main)', borderRadius: '8px', textAlign: 'center' }}>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Current Value</div>
-                        <div style={{ fontWeight: 600, color: '#ef4444' }}>{formatCurrency(claimResult.revaluation.newValue)}</div>
+                        <div style={{ fontWeight: 600, color: 'var(--error)' }}>{formatCurrency(claimResult.revaluation.newValue)}</div>
                       </div>
                     </div>
                   )}

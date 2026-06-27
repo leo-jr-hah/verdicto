@@ -289,7 +289,7 @@ export const Scene4Consensus: React.FC = () => {
                 initial={{ width: 0 }}
                 animate={{ width: `${agent.score}%` }}
                 transition={{ duration: 1, delay: 0.5 + i * 0.1 }}
-                style={{ height: '100%', background: agent.score > 90 ? '#10B981' : 'var(--primary)' }}
+                style={{ height: '100%', background: agent.score > 90 ? 'var(--success)' : 'var(--primary)' }}
               />
             </div>
             <div style={{ width: '30px', textAlign: 'right', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
@@ -361,7 +361,7 @@ export const Scene5Verdict: React.FC = () => {
           transition={{ delay: 0.8 }}
           style={{ background: 'var(--bg-main)', border: '1px solid var(--border-color)', padding: '0.75rem 1.25rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: 'var(--shadow-sm)', color: 'var(--text-primary)' }}
         >
-          <ShieldCheck size={16} color="#10B981" /> Audit Trail Generated
+          <ShieldCheck size={16} color="var(--success)" /> Audit Trail Generated
         </motion.div>
         
         <motion.div 
@@ -390,7 +390,7 @@ export const Scene5Verdict: React.FC = () => {
           zIndex: 20
         }}
       >
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', padding: '0.4rem 1rem', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 600, marginBottom: '1.5rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'var(--success-soft)', color: 'var(--success)', padding: '0.4rem 1rem', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 600, marginBottom: '1.5rem' }}>
           <CheckCircle2 size={16} /> Final Verdicto
         </div>
         
@@ -454,14 +454,14 @@ export const Scene6OnChain: React.FC = () => {
             gap: '1rem'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10B981', fontSize: '0.85rem', fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--success)', fontSize: '0.85rem', fontWeight: 600 }}>
             <Lock size={16} /> Block #89210
           </div>
           <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--text-tertiary)', wordBreak: 'break-all' }}>
             0x7f8a9e2b1c4d...b34c
           </div>
           <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.1)' }} />
-          <div style={{ fontSize: '0.85rem', color: '#e5e7eb', lineHeight: 1.6 }}>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-inverse)', lineHeight: 1.6 }}>
             <strong>Verdicto:</strong> $2.05M<br/>
             <strong>Confidence:</strong> 91.4%
           </div>

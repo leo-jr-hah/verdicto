@@ -6,7 +6,6 @@ const STEPS = [
   {
     num: '01',
     title: 'Connect Your Wallet',
-    color: 'var(--primary)',
     icon: Upload,
     description: 'Connect your Casper Wallet in one click. Your wallet handles all payments and receives all disbursements. No account creation needed.',
     detail: 'Casper Wallet via CSPRClick SDK',
@@ -14,7 +13,6 @@ const STEPS = [
   {
     num: '02',
     title: 'Choose Your Product',
-    color: 'var(--text-accent)',
     icon: BarChart3,
     description: 'Pick what you need: Assess an asset for its market value, Borrow against it, Insure it against loss, or run a Confidence Analysis. Each product uses the same multi-agent AI engine.',
     detail: 'Assess, Borrow, Insure, or Predict',
@@ -22,7 +20,6 @@ const STEPS = [
   {
     num: '03',
     title: 'AI Agents Analyze',
-    color: 'var(--purple)',
     icon: Users,
     description: 'Multiple independent AI agents work in parallel. Each queries real market data, selects its own methodology, and produces a result with full reasoning. If agents disagree, jurors deliberate with peer review.',
     detail: 'Multi-Agent Analysis with Peer Review',
@@ -30,7 +27,6 @@ const STEPS = [
   {
     num: '04',
     title: 'Result On-Chain',
-    color: 'var(--success)',
     icon: ShieldCheck,
     description: 'Consensus verdict stored in the Oracle. Borrow, insure, or verify against it. Autonomous keepers monitor collateral health and insurance policies 24/7 with no human in the loop.',
     detail: 'Composable On-Chain Primitive',
@@ -59,14 +55,14 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
         style={{ order: isEven ? 0 : 1 }}
         className="hiw-step-text"
       >
-        <div className="hiw-step-num" style={{ color: step.color }}>
+        <div className="hiw-step-num" style={{ color: 'var(--red-600)' }}>
           <motion.span
             className="hiw-step-num__value"
             animate={inView ? {
               textShadow: [
-                `0 0 0px ${step.color}`,
-                `0 0 12px ${step.color}`,
-                `0 0 0px ${step.color}`,
+                '0 0 0px var(--red-600)',
+                '0 0 12px var(--red-600)',
+                '0 0 0px var(--red-600)',
               ],
             } : {}}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
@@ -77,7 +73,7 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
             className="hiw-step-num__line"
             animate={inView ? { width: [0, 40, 40, 0] } : {}}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: index * 0.3 }}
-            style={{ background: step.color }}
+            style={{ background: 'var(--red-600)' }}
           />
         </div>
 
@@ -98,36 +94,36 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
           whileHover={{ y: -4, boxShadow: '0 20px 60px rgba(0,0,0,0.1)' }}
           transition={{ duration: 0.3 }}
         >
-          {/* Animated border glow */}
+          {/* Animated border glow — neutral */}
           <motion.div
             animate={inView ? { opacity: [0.3, 0.7, 0.3] } : {}}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: index * 0.4 }}
             style={{
               position: 'absolute', inset: 0, borderRadius: 'inherit',
-              border: `1.5px solid ${step.color}`,
+              border: '1.5px solid var(--border-default)',
               pointerEvents: 'none',
             }}
           />
 
-          {/* Icon with rotating glow ring */}
+          {/* Icon with rotating glow ring — neutral */}
           <div className="hiw-card__icon-wrap">
             <motion.div
               className="hiw-card__icon-glow"
               animate={inView ? { rotate: 360 } : {}}
               transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-              style={{ border: `2px dashed ${step.color}40` }}
+              style={{ border: '2px dashed var(--border-subtle)' }}
             />
             <motion.div
               className="hiw-card__icon-box"
               animate={inView ? {
                 boxShadow: [
-                  `0 0 0 0px ${step.color}00`,
-                  `0 0 20px 6px ${step.color}30`,
-                  `0 0 0 0px ${step.color}00`,
+                  '0 0 0 0px rgba(230,46,46,0)',
+                  '0 0 20px 6px rgba(230,46,46,0.08)',
+                  '0 0 0 0px rgba(230,46,46,0)',
                 ],
               } : {}}
               transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              style={{ background: `${step.color}12`, color: step.color }}
+              style={{ background: 'var(--primary-bg)', color: 'var(--red-600)' }}
             >
               <motion.div
                 animate={inView ? { y: [0, -3, 0] } : {}}

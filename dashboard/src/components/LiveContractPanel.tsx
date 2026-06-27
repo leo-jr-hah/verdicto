@@ -99,12 +99,12 @@ const AgentRow: React.FC<{
       width: 36,
       height: 36,
       borderRadius: '8px',
-      background: 'rgba(99, 102, 241, 0.1)',
+      background: 'var(--primary-bg)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
     }}>
-      <Users size={16} color="var(--text-accent)" />
+      <Users size={16} color="var(--red-600)" />
     </div>
     <div style={{ flex: 1 }}>
       <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
@@ -118,10 +118,10 @@ const AgentRow: React.FC<{
       padding: '0.3rem 0.7rem',
       borderRadius: '6px',
       background: agent.reputation >= 800
-        ? 'rgba(16, 185, 129, 0.15)'
+        ? 'rgba(16,185,129,0.15)'
         : agent.reputation >= 600
-          ? 'rgba(245, 158, 11, 0.15)'
-          : 'rgba(239, 68, 68, 0.15)',
+          ? 'rgba(245,158,11,0.15)'
+          : 'rgba(239,68,68,0.15)',
       color: agent.reputation >= 800 ? 'var(--success)' : agent.reputation >= 600 ? 'var(--warning)' : 'var(--error)',
       fontSize: '0.85rem',
       fontWeight: 700,
@@ -193,9 +193,9 @@ export const LiveContractPanel: React.FC = () => {
   if (error && !state) {
     return (
       <div style={{
-        background: 'rgba(239, 68, 68, 0.05)',
+        background: 'var(--error-soft)',
         borderRadius: '12px',
-        border: '1px solid rgba(239, 68, 68, 0.2)',
+        border: '1px solid rgba(239,68,68,0.2)',
         padding: '2rem',
         textAlign: 'center',
       }}>
@@ -226,7 +226,7 @@ export const LiveContractPanel: React.FC = () => {
           <div style={{
             display: 'flex', alignItems: 'center', gap: '0.3rem',
             padding: '0.2rem 0.6rem', borderRadius: '4px',
-            background: connected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)',
+            background: connected ? 'var(--success-soft)' : 'var(--bg-inset)',
             color: connected ? 'var(--success)' : 'var(--text-tertiary)',
             fontSize: '0.7rem', fontWeight: 600,
           }}>
@@ -262,7 +262,7 @@ export const LiveContractPanel: React.FC = () => {
           icon={<Scale size={16} />}
           label="Total Assessments"
           value={state.assessments.total}
-          color="var(--text-accent)"
+          color="var(--red-600)"
           subtext={`${state.assessments.pending} pending • ${state.assessments.resolved} resolved`}
           index={0}
         />

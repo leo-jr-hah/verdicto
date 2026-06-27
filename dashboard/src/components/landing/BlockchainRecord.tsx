@@ -58,8 +58,8 @@ export const BlockchainRecord: React.FC = () => {
           transition={{ duration: 0.8, delay: 0.8 }}
           style={{
             padding: '0.75rem',
-            background: 'rgba(16, 185, 129, 0.04)',
-            border: '1px solid rgba(16, 185, 129, 0.2)',
+            background: 'var(--success-soft)',
+            border: '1px solid rgba(16,185,129,0.2)',
             borderRadius: 8,
           }}
         >
@@ -73,7 +73,7 @@ export const BlockchainRecord: React.FC = () => {
                 initial={{ opacity: 0 }}
                 animate={inView ? { opacity: 1 } : {}}
                 transition={{ duration: 0.3, delay: 0.9 + i * 0.1 }}
-                style={{ fontSize: '0.8rem', color: '#10B981' }}
+                style={{ fontSize: '0.8rem', color: 'var(--success)' }}
               >
                 {part}
               </motion.span>

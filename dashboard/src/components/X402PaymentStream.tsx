@@ -44,9 +44,9 @@ const DEMO_PAYMENTS: PaymentEvent[] = [];
 
 const PaymentRow: React.FC<{ payment: PaymentEvent; index: number }> = ({ payment, index }) => {
   const statusColor = {
-    pending: '#f59e0b',
-    confirmed: '#10b981',
-    failed: '#ef4444',
+    pending: 'var(--warning)',
+    confirmed: 'var(--success)',
+    failed: 'var(--error)',
   };
 
   return (
@@ -60,7 +60,7 @@ const PaymentRow: React.FC<{ payment: PaymentEvent; index: number }> = ({ paymen
         gap: '0.75rem',
         padding: '0.75rem 1rem',
         borderBottom: '1px solid var(--border-color)',
-        background: index === 0 ? 'rgba(139, 92, 246, 0.03)' : 'transparent',
+        background: index === 0 ? 'var(--bg-inset)' : 'transparent',
       }}
     >
       {/* Status dot */}
@@ -88,7 +88,7 @@ const PaymentRow: React.FC<{ payment: PaymentEvent; index: number }> = ({ paymen
 
       {/* Amount */}
       <div style={{ textAlign: 'right' }}>
-        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#8b5cf6' }}>
+        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
           {formatCSPR(payment.amount)}
         </div>
         <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
@@ -142,15 +142,15 @@ export const X402PaymentStream: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Zap size={20} color="#8b5cf6" />
+          <Zap size={20} color="var(--text-secondary)" />
           <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)' }}>
             Payment Activity
           </h2>
           <div style={{
             display: 'flex', alignItems: 'center', gap: '0.3rem',
             padding: '0.2rem 0.6rem', borderRadius: '4px',
-            background: connected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)',
-            color: connected ? '#10b981' : '#6b7280',
+            background: connected ? 'var(--success-soft)' : 'var(--bg-inset)',
+            color: connected ? 'var(--success)' : 'var(--text-tertiary)',
             fontSize: '0.7rem', fontWeight: 600,
           }}>
             {connected ? <Wifi size={12} /> : <WifiOff size={12} />}
@@ -165,7 +165,7 @@ export const X402PaymentStream: React.FC = () => {
           background: 'var(--bg-surface)', borderRadius: '10px', border: '1px solid var(--border-color)',
           padding: '1rem', textAlign: 'center',
         }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#8b5cf6' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-secondary)' }}>
             {formatCSPR(totalVolume)}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Total Volume</div>
@@ -174,7 +174,7 @@ export const X402PaymentStream: React.FC = () => {
           background: 'var(--bg-surface)', borderRadius: '10px', border: '1px solid var(--border-color)',
           padding: '1rem', textAlign: 'center',
         }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--success)' }}>
             {confirmedCount}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Confirmed</div>
@@ -183,7 +183,7 @@ export const X402PaymentStream: React.FC = () => {
           background: 'var(--bg-surface)', borderRadius: '10px', border: '1px solid var(--border-color)',
           padding: '1rem', textAlign: 'center',
         }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f59e0b' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--warning)' }}>
             {pendingCount}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Pending</div>
@@ -206,7 +206,7 @@ export const X402PaymentStream: React.FC = () => {
           display: 'flex', alignItems: 'center', gap: '0.5rem',
           padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-color)',
         }}>
-          <Zap size={14} color="#8b5cf6" />
+          <Zap size={14} color="var(--text-secondary)" />
           <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>Recent Payments</span>
           <span style={{
             marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-tertiary)',

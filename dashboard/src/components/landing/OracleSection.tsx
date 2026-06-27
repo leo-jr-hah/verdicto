@@ -1,31 +1,27 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
-import { Radio, Zap, Shield, Globe, Code, TrendingUp } from 'lucide-react';
+import { Radio, Zap, Shield, Globe, TrendingUp } from 'lucide-react';
 
 const FEATURES = [
   {
     icon: <Radio size={22} />,
     title: 'Shared Data Layer',
     desc: 'Any Casper smart contract can query the Verdict Oracle directly. Fully on-chain, no external dependencies.',
-    color: 'var(--purple)',
   },
   {
     icon: <Zap size={22} />,
     title: '0.1 CSPR Per Query',
     desc: 'Micropayment per query, signed by the user wallet. Pay per query, on-chain, verifiable.',
-    color: 'var(--warning)',
   },
   {
     icon: <Shield size={22} />,
     title: 'Multi-Agent Consensus',
     desc: 'Each verdict is the output of multiple independent AI agents: valuation specialists and jurors, with cryptographic receipt chains proving nothing was altered.',
-    color: 'var(--success)',
   },
   {
     icon: <Globe size={22} />,
     title: '24h Freshness Guarantee',
     desc: 'Every verdict has an expiry timestamp. Smart contracts can check `is_expired()` before using a price. Stale data is automatically rejected.',
-    color: 'var(--text-secondary)',
   },
 ];
 
@@ -62,8 +58,8 @@ export const OracleSection: React.FC = () => {
         transition={{ duration: 0.7 }}
         className="landing-section__header"
       >
-        <div className="landing-badge landing-badge--purple">
-          <Radio size={14} style={{ color: 'var(--purple)' }} />
+        <div className="landing-badge landing-badge--red">
+          <Radio size={14} style={{ color: 'var(--red-600)' }} />
           <span>Composable Primitive</span>
         </div>
         <h2 className="landing-section__title">The Oracle for Real-World Assets</h2>
@@ -84,7 +80,7 @@ export const OracleSection: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.1 + i * 0.08 }}
             className="card oracle-feature-card"
           >
-            <div className="oracle-feature-icon" style={{ background: `${f.color}12`, color: f.color }}>
+            <div className="oracle-feature-icon" style={{ background: 'var(--primary-bg)', color: 'var(--red-600)' }}>
               {f.icon}
             </div>
             <h3 className="oracle-feature-title">{f.title}</h3>
@@ -93,46 +89,49 @@ export const OracleSection: React.FC = () => {
         ))}
       </div>
 
-      {/* Code + Use Cases Row */}
+      {/* Use Cases */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, delay: 0.4 }}
-        className="oracle-bottom-grid"
+        className="oracle-use-cases"
       >
-        {/* Code Snippet */}
-        <div className="card" style={{ padding: '1.5rem', overflow: 'hidden' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <Code size={16} style={{ color: 'var(--purple)' }} />
-            <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-              Query the Oracle
-            </span>
-          </div>
-          <pre className="oracle-code-pre">
-            {CODE_SNIPPET}
-          </pre>
-        </div>
-
-        {/* Use Cases */}
-        <div className="card" style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <Globe size={16} style={{ color: 'var(--text-secondary)' }} />
-            <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-              Use Cases
-            </span>
-          </div>
-          <div className="oracle-use-cases">
-            {USE_CASES.map((uc) => (
-              <div key={uc.label} className="oracle-use-case">
-                <div style={{ color: 'var(--text-tertiary)', marginTop: 2 }}>{uc.icon}</div>
-                <div>
-                  <div className="oracle-use-case__label">{uc.label}</div>
-                  <div className="oracle-use-case__desc">{uc.desc}</div>
-                </div>
+        <h3 className="oracle-use-cases__title">Who Uses the Oracle?</h3>
+        <div className="oracle-use-cases__grid">
+          {USE_CASES.map((uc, i) => (
+            <motion.div
+              key={uc.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.4, delay: 0.5 + i * 0.08 }}
+              className="oracle-use-case"
+            >
+              <div className="oracle-use-case__icon">{uc.icon}</div>
+              <div>
+                <div className="oracle-use-case__label">{uc.label}</div>
+                <div className="oracle-use-case__desc">{uc.desc}</div>
               </div>
-            ))}
-          </div>
+            </motion.div>
+          ))}
         </div>
+      </motion.div>
+
+      {/* Code Snippet */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6, delay: 0.6 }}
+        className="oracle-code-card"
+      >
+        <div className="oracle-code-card__header">
+          <span className="oracle-code-card__dot" />
+          <span className="oracle-code-card__dot" />
+          <span className="oracle-code-card__dot" />
+          <span className="oracle-code-card__filename">oracle_query.rs</span>
+        </div>
+        <pre className="oracle-code-card__pre">
+          <code>{CODE_SNIPPET}</code>
+        </pre>
       </motion.div>
     </section>
   );

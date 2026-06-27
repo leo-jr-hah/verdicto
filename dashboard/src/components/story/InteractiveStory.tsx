@@ -279,9 +279,9 @@ export const InteractiveStory: React.FC<InteractiveStoryProps> = ({ isOpen, onCl
                   <p style={{ fontSize: '1.1rem', lineHeight: 1.6, color: 'var(--text-primary)' }}>{learnMoreData[activeTopic].layman}</p>
                 </div>
                 
-                <div style={{ background: '#0a0a0a', padding: '2rem', borderRadius: '16px', border: '1px solid #333' }}>
-                  <div style={{ color: '#10B981', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem' }}>Under The Hood</div>
-                  <p style={{ fontSize: '1rem', lineHeight: 1.6, color: '#e5e5e5', fontFamily: 'monospace' }}>{learnMoreData[activeTopic].tech}</p>
+                <div style={{ background: 'var(--bg-canvas)', padding: '2rem', borderRadius: '16px', border: '1px solid #333' }}>
+                  <div style={{ color: 'var(--success)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem' }}>Under The Hood</div>
+                  <p style={{ fontSize: '1rem', lineHeight: 1.6, color: 'var(--text-inverse)', fontFamily: 'monospace' }}>{learnMoreData[activeTopic].tech}</p>
                 </div>
               </div>
             </motion.div>

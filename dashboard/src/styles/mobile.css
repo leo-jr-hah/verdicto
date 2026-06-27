@@ -1,0 +1,48 @@
+/* ============================================
+   VERDICTO MOBILE — Touch targets, iOS zoom, responsive overrides
+   ============================================ */
+
+/* ── Focus ring — accessible, consistent ─────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Tap targets on touch devices ────────────────────────────────────────── */
+@media (pointer: coarse) {
+  button, a, input, select, textarea, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  input, select, textarea {
+    font-size: 16px !important;
+    padding: 12px 16px;
+  }
+}
+
+/* ── Mobile spacing overrides ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page-container {
+    padding-left: var(--page-padding-x);
+    padding-right: var(--page-padding-x);
+  }
+
+  /* Stack all grids to single column on mobile */
+  .grid-2-col,
+  .grid-3-col,
+  .grid-4-col {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Stack flex rows */
+  .flex-row-mobile-stack {
+    flex-direction: column !important;
+  }
+
+  /* Full width buttons on mobile */
+  .btn-mobile-full {
+    width: 100%;
+  }
+}

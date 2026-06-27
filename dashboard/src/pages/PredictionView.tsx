@@ -81,11 +81,11 @@ const DEMO_QUESTIONS = [
 ];
 
 const AGENT_PROFILES = [
-  { name: 'Valuation Agent A', role: 'Comparable Sales', color: '#EC4899' },
-  { name: 'Valuation Agent B', role: 'DCF & Cash Flow', color: '#F97316' },
-  { name: 'Evidence Analyst', role: 'Data Quality Auditor', color: '#10B981' },
-  { name: 'Market Interpreter', role: 'Macro & Sentiment', color: '#06B6D4' },
-  { name: 'Precedent Researcher', role: 'Historical Precedent', color: '#8B5CF6' },
+  { name: 'Valuation Agent A', role: 'Comparable Sales', color: 'var(--text-secondary)' },
+  { name: 'Valuation Agent B', role: 'DCF & Cash Flow', color: 'var(--warning)' },
+  { name: 'Evidence Analyst', role: 'Data Quality Auditor', color: 'var(--success)' },
+  { name: 'Market Interpreter', role: 'Macro & Sentiment', color: 'var(--info)' },
+  { name: 'Precedent Researcher', role: 'Historical Precedent', color: 'var(--text-secondary)' },
 ];
 
 // ─── Probability Ring ──────────────────────────────────────────────────────
@@ -750,8 +750,8 @@ export const PredictionView: React.FC = () => {
                   <div style={{
                     display: 'flex', alignItems: 'center', gap: 8,
                     marginTop: 16, padding: '8px 12px', borderRadius: 8,
-                    background: 'rgba(16, 185, 129, 0.06)',
-                    border: '1px solid rgba(16, 185, 129, 0.15)',
+                    background: 'var(--success-soft)',
+                    border: '1px solid rgba(16,185,129,0.15)',
                     fontSize: '0.78rem', color: 'var(--text-tertiary)',
                   }}>
                     <CheckCircle2 size={14} color="var(--success)" />
@@ -828,7 +828,7 @@ export const PredictionView: React.FC = () => {
                   }}>
                     <div style={{
                       width: 6, height: 6, borderRadius: '50%',
-                      background: '#f59e0b', flexShrink: 0,
+                      background: 'var(--warning)', flexShrink: 0,
                     }} />
                     {factor}
                   </div>

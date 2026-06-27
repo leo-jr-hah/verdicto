@@ -172,7 +172,7 @@ export const DisputesView: React.FC = () => {
         {[
           { label: 'Total Disputes', value: stats.total, icon: Gavel, color: 'var(--text-primary)' },
           { label: 'Pending', value: stats.pending, icon: AlertTriangle, color: 'var(--warning)' },
-          { label: 'Under Re-trial', value: stats.underRetrial, icon: Swords, color: 'var(--text-accent)' },
+          { label: 'Under Re-trial', value: stats.underRetrial, icon: Swords, color: 'var(--red-600)' },
           { label: 'Resolved', value: stats.resolved, icon: Scale, color: 'var(--text-secondary)' },
           { label: 'Overturned', value: stats.overturned, icon: Shield, color: 'var(--error)' },
           { label: 'Upheld', value: stats.upheld, icon: Activity, color: 'var(--success)' },
@@ -238,7 +238,7 @@ export const DisputesView: React.FC = () => {
               <strong>3. Resolution:</strong> If 2+ agents vote to overturn, the verdict is corrected. If upheld, the original becomes stronger.
               <br />
               <br />
-              <Link to="/oracle" style={{ color: 'var(--text-accent)', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
+              <Link to="/oracle" style={{ color: 'var(--red-600)', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
                 <ArrowLeft size={14} /> View all verdicts
               </Link>
             </p>
@@ -261,13 +261,13 @@ export const DisputesView: React.FC = () => {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Scale size={16} style={{ color: 'var(--text-accent)' }} />
+            <Scale size={16} style={{ color: 'var(--red-600)' }} />
             <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
               Verdicts Available for Challenge
             </span>
             <span style={{
               fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px',
-              background: 'var(--bg-elevated)', color: 'var(--text-accent)', fontWeight: 600,
+              background: 'var(--bg-elevated)', color: 'var(--red-600)', fontWeight: 600,
             }}>
               {verdicts.length}
             </span>
@@ -364,7 +364,7 @@ export const DisputesView: React.FC = () => {
                   padding: '4px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 500,
                   border: '1px solid', cursor: 'pointer',
                   ...(filter === f
-                    ? { background: 'var(--bg-elevated)', borderColor: 'var(--border-color)', color: 'var(--text-accent)' }
+                    ? { background: 'var(--bg-elevated)', borderColor: 'var(--border-color)', color: 'var(--red-600)' }
                     : { background: 'transparent', borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }),
                 }}
               >
@@ -400,7 +400,7 @@ export const DisputesView: React.FC = () => {
                         ...(d.status === 'pending'
                           ? { background: 'rgba(245,158,11,0.12)', color: 'var(--warning)' }
                           : d.status === 'under_retrial'
-                          ? { background: 'var(--bg-elevated)', color: 'var(--text-accent)' }
+                          ? { background: 'var(--bg-elevated)', color: 'var(--red-600)' }
                           : { background: 'rgba(16,185,129,0.12)', color: 'var(--success)' }),
                       }}>
                         {d.status === 'under_retrial' ? 'Re-trial' : d.status.charAt(0).toUpperCase() + d.status.slice(1)}
@@ -501,7 +501,7 @@ export const DisputesView: React.FC = () => {
                                   <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', marginBottom: '2px' }}>New Verdict</div>
                                   <div style={{
                                     fontSize: '1.1rem', fontWeight: 700,
-                                    color: d.outcome === 'overturned' ? '#EF4444' : '#10B981',
+                                    color: d.outcome === 'overturned' ? 'var(--error)' : 'var(--success)',
                                   }}>
                                     ${d.retrial.newVerdict.value.toLocaleString()}
                                   </div>
@@ -516,14 +516,14 @@ export const DisputesView: React.FC = () => {
                                 <span style={{
                                   fontSize: '0.75rem', padding: '2px 8px', borderRadius: '6px',
                                   background: d.retrial.valueDelta < 0 ? 'var(--error-bg)' : 'var(--success-bg)',
-                                  color: d.retrial.valueDelta < 0 ? '#EF4444' : '#10B981', fontWeight: 600,
+                                  color: d.retrial.valueDelta < 0 ? 'var(--error)' : 'var(--success)', fontWeight: 600,
                                 }}>
                                   Value: {d.retrial.valueDelta > 0 ? '+' : ''}{d.retrial.valueDelta.toFixed(1)}%
                                 </span>
                                 <span style={{
                                   fontSize: '0.75rem', padding: '2px 8px', borderRadius: '6px',
                                   background: d.retrial.confidenceDelta < 0 ? 'var(--error-bg)' : 'var(--success-bg)',
-                                  color: d.retrial.confidenceDelta < 0 ? '#EF4444' : '#10B981', fontWeight: 600,
+                                  color: d.retrial.confidenceDelta < 0 ? 'var(--error)' : 'var(--success)', fontWeight: 600,
                                 }}>
                                   Confidence: {d.retrial.confidenceDelta > 0 ? '+' : ''}{d.retrial.confidenceDelta}
                                 </span>
@@ -546,7 +546,7 @@ export const DisputesView: React.FC = () => {
                                     background: juror.vote === 'A' ? 'var(--success-bg)' : juror.vote === 'B' ? 'var(--error-bg)' : 'var(--warning-bg)',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     fontSize: '0.7rem', fontWeight: 700,
-                                    color: juror.vote === 'A' ? '#10B981' : juror.vote === 'B' ? '#EF4444' : '#F59E0B',
+                                    color: juror.vote === 'A' ? 'var(--success)' : juror.vote === 'B' ? 'var(--error)' : 'var(--warning)',
                                   }}>
                                     {juror.vote}
                                   </div>
@@ -573,7 +573,7 @@ export const DisputesView: React.FC = () => {
                                 padding: '12px 14px', borderRadius: '8px',
                                 background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
                               }}>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-accent)', marginBottom: '4px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--red-600)', marginBottom: '4px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                   Panel Summary
                                 </div>
                                 <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
@@ -594,7 +594,7 @@ export const DisputesView: React.FC = () => {
                                   display: 'inline-flex', alignItems: 'center', gap: '6px',
                                   marginTop: '12px', padding: '8px 14px', borderRadius: '8px',
                                   background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
-                                  color: 'var(--text-accent)', fontSize: '0.78rem', fontWeight: 500,
+                                  color: 'var(--red-600)', fontSize: '0.78rem', fontWeight: 500,
                                   textDecoration: 'none',
                                 }}
                               >
@@ -667,7 +667,7 @@ export const DisputesView: React.FC = () => {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   margin: '0 auto 1rem',
                 }}>
-                  <Swords size={24} color="#EF4444" />
+                  <Swords size={24} color="var(--error)" />
                 </div>
                 <h3 style={{
                   fontSize: '1.2rem', fontWeight: 700,
@@ -689,7 +689,7 @@ export const DisputesView: React.FC = () => {
                 border: `1px solid ${wallet.connected ? 'var(--success-border)' : 'var(--error-border)'}`,
                 display: 'flex', alignItems: 'center', gap: '8px',
               }}>
-                <span style={{ fontSize: '0.8rem', color: wallet.connected ? '#10B981' : '#EF4444', fontWeight: 500 }}>
+                <span style={{ fontSize: '0.8rem', color: wallet.connected ? 'var(--success)' : 'var(--error)', fontWeight: 500 }}>
                   {wallet.connected
                     ? `Wallet connected: ${wallet.publicKey?.slice(0, 8)}...${wallet.publicKey?.slice(-6)}`
                     : 'Wallet not connected. Please connect first.'}
@@ -772,8 +772,8 @@ export const DisputesView: React.FC = () => {
                   disabled={!disputeReason.trim() || !wallet.connected}
                   style={{
                     flex: 2, padding: '0.75rem', borderRadius: '8px', border: 'none',
-                    background: (!disputeReason.trim() || !wallet.connected) ? 'var(--bg-surface-alt)' : '#EF4444',
-                    color: '#fff', cursor: (!disputeReason.trim() || !wallet.connected) ? 'not-allowed' : 'pointer',
+                    background: (!disputeReason.trim() || !wallet.connected) ? 'var(--bg-surface-alt)' : 'var(--error)',
+                    color: 'var(--text-inverse)', cursor: (!disputeReason.trim() || !wallet.connected) ? 'not-allowed' : 'pointer',
                     fontSize: '0.9rem', fontWeight: 600,
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                     opacity: (!disputeReason.trim() || !wallet.connected) ? 0.5 : 1,

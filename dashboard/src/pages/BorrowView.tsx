@@ -119,7 +119,7 @@ function statusColor(status: string): string {
   switch (status) {
     case 'active': case 'healthy': return 'var(--success)';
     case 'warning': return 'var(--warning)';
-    case 'repaid': return 'var(--text-accent)';
+    case 'repaid': return 'var(--red-600)';
     case 'liquidated': return 'var(--error)';
     default: return 'var(--text-tertiary)';
   }
@@ -168,7 +168,7 @@ const StepIndicator: React.FC<{ current: number; steps: string[] }> = ({ current
         }}>
           <div className="borrow-step__dot" style={{
             background: i < current ? 'var(--primary)' : i === current ? 'rgba(255,59,59,0.1)' : 'var(--bg-main)',
-            color: i < current ? '#fff' : i === current ? 'var(--primary)' : 'var(--text-tertiary)',
+            color: i < current ? 'var(--text-inverse)' : i === current ? 'var(--primary)' : 'var(--text-tertiary)',
           }}>
             {i < current ? <CheckCircle2 size={14} /> : i + 1}
           </div>

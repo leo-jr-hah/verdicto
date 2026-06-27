@@ -11,7 +11,7 @@ const NODES = [
 
 const NodeIcon = ({ type }: { type: string }) => {
   const size = 20;
-  const color = '#6B7280';
+  const color = 'var(--text-tertiary)';
   const props: React.SVGProps<SVGSVGElement> = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: color, strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' };
   switch (type) {
     case 'wallet':

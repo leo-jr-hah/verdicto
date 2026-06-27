@@ -78,7 +78,7 @@ const AgentCard: React.FC<{
   index: number;
 }> = ({ label, method, value, confidence, source, reasoning, fallbackTriggered, fallbackProvider, index }) => {
   const [expanded, setExpanded] = useState(false);
-  const color = 'var(--text-accent)';
+  const color = 'var(--red-600)';
 
   return (
     <motion.div
@@ -231,7 +231,7 @@ const ConsensusCard: React.FC<{
         style={{
           display: 'flex', alignItems: 'center', gap: 12,
           padding: '14px 16px', cursor: 'pointer',
-          borderLeft: '3px solid var(--text-accent)',
+          borderLeft: '3px solid var(--red-600)',
         }}
       >
         <div style={{
@@ -240,11 +240,11 @@ const ConsensusCard: React.FC<{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
         }}>
-          <Scale size={18} color="var(--text-accent)" />
+          <Scale size={18} color="var(--red-600)" />
         </div>
         <div style={{ flex: 1 }}>
           <div style={{
-            fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-accent)',
+            fontSize: '0.72rem', fontWeight: 600, color: 'var(--red-600)',
             letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 2,
           }}>
             AI Consensus
@@ -254,7 +254,7 @@ const ConsensusCard: React.FC<{
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-accent)' }}>
+          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--red-600)' }}>
             {formatCurrency(assessment.assessedValue)}
           </div>
           <div style={{
@@ -372,7 +372,7 @@ const ConsensusCard: React.FC<{
                         background: 'var(--bg-elevated, #fff)',
                         border: '1px solid var(--border-color, #e5e7eb)',
                       }}>
-                        <Zap size={13} color="var(--text-accent)" style={{ marginTop: 2, flexShrink: 0 }} />
+                        <Zap size={13} color="var(--red-600)" style={{ marginTop: 2, flexShrink: 0 }} />
                         <div>
                           <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-primary, #111)' }}>
                             {m.name}
@@ -537,7 +537,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
               border: '1px solid var(--border-color)',
             }}>
               <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>MONTHLY PREMIUM</div>
-              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-accent)' }}>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--red-600)' }}>
                 {insurance.premiumCSPR} CSPR
               </div>
               <div style={{ fontSize: '0.68rem', color: 'var(--text-tertiary, #9ca3af)' }}>
@@ -585,14 +585,14 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
             border: '1px solid var(--border-color, #e5e7eb)',
             borderRadius: 12,
             padding: '16px',
-            borderLeft: '3px solid var(--text-accent)',
+            borderLeft: '3px solid var(--red-600)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <TrendingUp size={18} color="var(--text-accent)" />
+            <TrendingUp size={18} color="var(--red-600)" />
             <div>
               <div style={{
-                fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-accent)',
+                fontSize: '0.72rem', fontWeight: 600, color: 'var(--red-600)',
                 letterSpacing: '0.04em', textTransform: 'uppercase',
               }}>
                 LTV Decision Explained
@@ -632,7 +632,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>CONFIDENCE</div>
-                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-accent)' }}>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--red-600)' }}>
                   {(loan.trustBreakdown.confidence * 100).toFixed(0)}%
                 </div>
               </div>
@@ -643,7 +643,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>VALUE RATIO</div>
-                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-accent)' }}>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--red-600)' }}>
                   {(loan.trustBreakdown.valueRatio * 100).toFixed(0)}%
                 </div>
               </div>
@@ -654,7 +654,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>LTV RANGE</div>
-                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-accent)' }}>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--red-600)' }}>
                   {loan.trustBreakdown.ltvRange}
                 </div>
               </div>

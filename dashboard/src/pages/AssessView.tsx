@@ -206,7 +206,7 @@ const logIconMap = {
   warning: <AlertCircle size={12} color="var(--warning)" />,
   error: <XCircle size={12} color="var(--error)" />,
   data: <Database size={12} color="var(--text-secondary)" />,
-  agent: <Zap size={12} color="var(--text-accent)" />,
+  agent: <Zap size={12} color="var(--red-600)" />,
 };
 
 const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, loading }) => {
@@ -297,7 +297,7 @@ const LiveLogPanel: React.FC<{ logs: LogEntry[]; loading: boolean }> = ({ logs, 
                     href={log.detail.replace('Verify: ', '')}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ color: 'var(--text-accent)', textDecoration: 'underline' }}
+                    style={{ color: 'var(--red-600)', textDecoration: 'underline' }}
                   >
                     {log.detail}
                   </a>
@@ -346,12 +346,12 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
       {/* Hero Result Banner */}
       <div style={{
         background: isAboveAsking
-          ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.02))'
+          ? 'linear-gradient(135deg, var(--success-soft), rgba(16, 185, 129, 0.02))'
           : isBelowAsking
             ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.02))'
-            : 'linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.02))',
+            : 'linear-gradient(135deg, var(--bg-inset), var(--bg-inset))',
         borderRadius: '12px',
-        border: `2px solid ${isAboveAsking ? 'var(--success)' : isBelowAsking ? 'var(--error)' : 'var(--text-accent)'}`,
+        border: `2px solid ${isAboveAsking ? 'var(--success)' : isBelowAsking ? 'var(--error)' : 'var(--red-600)'}`,
         padding: '2rem',
         marginBottom: '1.5rem',
         textAlign: 'center',
@@ -362,7 +362,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
         <div style={{
           fontSize: '2.8rem',
           fontWeight: 800,
-          color: isAboveAsking ? '#10b981' : isBelowAsking ? '#ef4444' : 'var(--text-primary)',
+          color: isAboveAsking ? 'var(--success)' : isBelowAsking ? 'var(--error)' : 'var(--text-primary)',
           lineHeight: 1.1,
           marginBottom: '0.5rem',
         }}>
@@ -371,7 +371,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
         <div style={{
           fontSize: '1rem',
           fontWeight: 600,
-          color: isAboveAsking ? '#10b981' : isBelowAsking ? '#ef4444' : 'var(--text-tertiary)',
+          color: isAboveAsking ? 'var(--success)' : isBelowAsking ? 'var(--error)' : 'var(--text-tertiary)',
           marginBottom: '1rem',
         }}>
           {diffPct >= 0 ? '+' : ''}{formatPercent(diffPct)} vs asking price of {formatCurrency(result.askingPrice)}
@@ -383,8 +383,8 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
           padding: '0.4rem 1rem',
           borderRadius: '9999px',
           background: result.divergence <= 15
-            ? 'rgba(16, 185, 129, 0.15)'
-            : 'rgba(245, 158, 11, 0.15)',
+            ? 'rgba(16,185,129,0.15)'
+            : 'rgba(245,158,11,0.15)',
           color: divergenceColor(result.divergence),
           fontSize: '0.85rem',
           fontWeight: 600,
@@ -438,9 +438,9 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
             height: '48px',
             borderRadius: '50%',
             background: isAboveAsking
-              ? 'rgba(16, 185, 129, 0.1)'
+              ? 'var(--success-soft)'
               : isBelowAsking
-                ? 'rgba(239, 68, 68, 0.1)'
+                ? 'var(--error-soft)'
                 : 'var(--bg-surface-alt)',
           }}>
             {isAboveAsking
@@ -455,7 +455,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
             <p style={{
               fontSize: '1.6rem',
               fontWeight: 700,
-              color: isAboveAsking ? '#10b981' : isBelowAsking ? '#ef4444' : 'var(--text-primary)',
+              color: isAboveAsking ? 'var(--success)' : isBelowAsking ? 'var(--error)' : 'var(--text-primary)',
             }}>
               {formatCurrency(result.assessedValue)}
             </p>
@@ -914,7 +914,7 @@ export const AssessView: React.FC = () => {
                   padding: '0.75rem 1rem',
                   borderRadius: '8px',
                   background: 'rgba(239, 68, 68, 0.06)',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  border: '1px solid rgba(239,68,68,0.2)',
                   color: 'var(--error)',
                   fontSize: '0.85rem',
                   marginBottom: '1.5rem',
@@ -1087,7 +1087,7 @@ export const AssessView: React.FC = () => {
                     padding: '0.75rem 1rem',
                     borderRadius: '8px',
                     background: 'rgba(239, 68, 68, 0.06)',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    border: '1px solid rgba(239,68,68,0.2)',
                     color: 'var(--error)',
                     fontSize: '0.85rem',
                     marginTop: '1rem',

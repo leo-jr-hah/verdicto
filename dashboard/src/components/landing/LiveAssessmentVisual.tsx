@@ -33,7 +33,7 @@ export const LiveAssessmentVisual: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
-            background: 'linear-gradient(135deg, var(--text-accent) 0%, var(--text-secondary) 100%)',
+            background: 'linear-gradient(135deg, var(--red-600) 0%, var(--red-800) 100%)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <Globe size={16} color="var(--text-inverse)" />
@@ -80,7 +80,7 @@ export const LiveAssessmentVisual: React.FC = () => {
           { label: 'Comparable Sales', value: '$1,280,000', confidence: 87, color: 'var(--warning)', delay: 1.2 },
           { label: 'DCF Analysis', value: '$1,195,000', confidence: 74, color: 'var(--success)', delay: 1.6 },
           { label: 'Market Context', value: '↑ Trending', confidence: 91, color: 'var(--text-secondary)', delay: 2.0 },
-          { label: 'Data Validation', value: '3 Sources ✓', confidence: 95, color: 'var(--text-accent)', delay: 2.4 },
+          { label: 'Data Validation', value: '3 Sources ✓', confidence: 95, color: 'var(--red-600)', delay: 2.4 },
         ].map((item) => (
           <motion.div
             key={item.label}
@@ -124,8 +124,8 @@ export const LiveAssessmentVisual: React.FC = () => {
         style={{
           marginTop: '0.75rem',
           padding: '1rem 1.25rem',
-          background: 'rgba(16, 185, 129, 0.06)',
-          border: '1px solid rgba(16, 185, 129, 0.2)',
+          background: 'var(--success-soft)',
+          border: '1px solid rgba(16,185,129,0.2)',
           borderRadius: 14,
           display: 'flex', alignItems: 'center', gap: '0.75rem',
         }}

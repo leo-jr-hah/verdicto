@@ -15,7 +15,7 @@ export const StatsBar: React.FC = () => {
         {STATS.map((stat, i) => (
           <Reveal key={stat.label} delay={i * 0.1}>
             <div>
-              <div className="stats-bar__value" style={{ color: 'var(--primary)' }}>
+              <div className="stats-bar__value" style={{ color: 'var(--text-primary)' }}>
                 <AnimatedNumber value={stat.value} suffix={stat.suffix} />
               </div>
               <div className="stats-bar__label">

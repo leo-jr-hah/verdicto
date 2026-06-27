@@ -353,7 +353,7 @@
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  background: var(--bg-surface, #1a1a2e);
+  background: var(--bg-surface, #18181B);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 0.75rem 1rem;
@@ -392,7 +392,7 @@
 .borrow-error-banner__msg {
   flex: 1;
   font-size: 0.85rem;
-  color: #ef4444;
+  color: var(--error);
 }
 
 .borrow-empty-state {

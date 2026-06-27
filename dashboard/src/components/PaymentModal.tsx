@@ -59,12 +59,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             <div className="text-center" style={{ marginBottom: '1.5rem' }}>
               <div style={{
                 width: 56, height: 56, borderRadius: '50%',
-                background: 'rgba(139, 92, 246, 0.1)',
-                border: '2px solid rgba(139, 92, 246, 0.3)',
+                background: 'var(--primary-bg)',
+                border: '2px solid var(--primary-border)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 margin: '0 auto 1rem',
               }}>
-                <Zap size={24} color="#8B5CF6" />
+                <Zap size={24} color="var(--text-secondary)" />
               </div>
               <h3 className="text-xl" style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
                 {title}
@@ -107,7 +107,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             {signError && (
               <div style={{
                 background: 'rgba(239, 68, 68, 0.08)',
-                border: '1px solid rgba(239, 68, 68, 0.2)',
+                border: '1px solid rgba(239,68,68,0.2)',
                 borderRadius: '8px',
                 padding: '0.75rem',
                 marginBottom: '1rem',
@@ -138,7 +138,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 style={{
                   flex: 2,
                   padding: '0.75rem',
-                  background: signing ? '#6366f1aa' : '#6366f1',
+                  background: signing ? 'var(--red-700)' : 'var(--red-600)',
                   color: 'white',
                   cursor: signing ? 'wait' : 'pointer',
                 }}

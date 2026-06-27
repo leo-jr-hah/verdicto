@@ -13,7 +13,7 @@ export const DemoModeBanner: React.FC = () => {
   return (
     <div
       style={{
-        background: 'linear-gradient(135deg, var(--purple) 0%, var(--text-accent) 100%)',
+        background: 'linear-gradient(135deg, var(--text-secondary) 0%, var(--red-600) 100%)',
         color: 'var(--text-inverse)',
         padding: '0.5rem 1rem',
         display: 'flex',

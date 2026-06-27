@@ -44,20 +44,20 @@ export const AgentCard: React.FC<{ agent: typeof AGENTS[0]; index: number }> = (
             repeatDelay: index === 4 ? 0 : 0.5,
           }}
           className="agent-card__icon"
-          style={{ background: isFirst ? 'var(--primary-bg)' : 'var(--bg-surface-alt)', color: isFirst ? 'var(--primary)' : 'var(--text-secondary)' }}
+          style={{ background: 'var(--bg-surface-alt)', color: 'var(--text-secondary)' }}
         >
           {/* Pulsing glow ring */}
           <motion.div
             animate={{ scale: [1, 1.6, 1], opacity: [0.3, 0, 0.3] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeOut', delay: index * 0.3 }}
             className="agent-card__icon-ring"
-            style={{ borderColor: isFirst ? 'var(--primary)' : 'var(--border-color)' }}
+            style={{ borderColor: 'var(--border-color)' }}
           />
           <Icon size={18} />
         </motion.div>
         <div>
           <div className="agent-card__name">{agent.name}</div>
-          <div className="agent-card__role" style={{ color: isFirst ? 'var(--primary)' : 'var(--text-tertiary)' }}>{agent.role}</div>
+          <div className="agent-card__role" style={{ color: 'var(--text-tertiary)' }}>{agent.role}</div>
         </div>
       </div>
 

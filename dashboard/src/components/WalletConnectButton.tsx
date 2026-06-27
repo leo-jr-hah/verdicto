@@ -58,15 +58,15 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             width: 36,
             height: 36,
             padding: 0,
-            background: 'rgba(16, 185, 129, 0.08)',
-            border: '1px solid rgba(16, 185, 129, 0.2)',
+            background: 'var(--success-soft)',
+            border: '1px solid rgba(16,185,129,0.2)',
             borderRadius: '50%',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             position: 'relative',
           }}
         >
-          <Wallet size={16} color="#10B981" />
+          <Wallet size={16} color="var(--success)" />
           <div style={{
             position: 'absolute',
             top: 2,
@@ -74,7 +74,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             width: 8,
             height: 8,
             borderRadius: '50%',
-            background: '#10B981',
+            background: 'var(--success)',
             border: '2px solid var(--bg-surface, #fff)',
           }} />
         </button>
@@ -133,7 +133,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              {copied ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
+              {copied ? <Check size={14} color="var(--success)" /> : <Copy size={14} />}
               {copied ? 'Copied!' : 'Copy Address'}
             </button>
 
@@ -147,7 +147,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
                 width: '100%',
                 padding: '0.5rem 0.75rem',
                 fontSize: '0.85rem',
-                color: '#EF4444',
+                color: 'var(--error)',
                 background: 'transparent',
                 border: 'none',
                 borderRadius: '8px',
@@ -179,9 +179,9 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             padding: '0.5rem 0.75rem',
             fontSize: '0.8rem',
             fontWeight: 600,
-            color: '#10B981',
-            background: 'rgba(16, 185, 129, 0.08)',
-            border: '1px solid rgba(16, 185, 129, 0.2)',
+            color: 'var(--success)',
+            background: 'var(--success-soft)',
+            border: '1px solid rgba(16,185,129,0.2)',
             borderRadius: '999px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
@@ -193,7 +193,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             width: 8,
             height: 8,
             borderRadius: '50%',
-            background: '#10B981',
+            background: 'var(--success)',
             flexShrink: 0,
           }} />
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -260,7 +260,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              {copied ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
+              {copied ? <Check size={14} color="var(--success)" /> : <Copy size={14} />}
               {copied ? 'Copied!' : 'Copy Address'}
             </button>
 
@@ -274,7 +274,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
                 width: '100%',
                 padding: '0.5rem 0.75rem',
                 fontSize: '0.85rem',
-                color: '#EF4444',
+                color: 'var(--error)',
                 background: 'transparent',
                 border: 'none',
                 borderRadius: '8px',
@@ -325,12 +325,12 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             bottom: 'calc(100% + 8px)',
             left: '50%',
             transform: 'translateX(-50%)',
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.2)',
+            background: 'var(--error-soft)',
+            border: '1px solid rgba(239,68,68,0.2)',
             borderRadius: '8px',
             padding: '0.5rem 0.75rem',
             fontSize: '0.8rem',
-            color: '#EF4444',
+            color: 'var(--error)',
             whiteSpace: 'nowrap',
             zIndex: 1000,
             minWidth: '180px',
@@ -376,12 +376,12 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
           bottom: 'calc(100% + 8px)',
           left: 0,
           right: 0,
-          background: 'rgba(239, 68, 68, 0.1)',
-          border: '1px solid rgba(239, 68, 68, 0.2)',
+          background: 'var(--error-soft)',
+          border: '1px solid rgba(239,68,68,0.2)',
           borderRadius: '8px',
           padding: '0.5rem 0.75rem',
           fontSize: '0.8rem',
-          color: '#EF4444',
+          color: 'var(--error)',
           whiteSpace: 'normal',
           zIndex: 1000,
         }}>

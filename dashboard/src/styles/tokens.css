@@ -1,0 +1,174 @@
+/* ============================================
+   VERDICTO DESIGN TOKENS
+   Single source of truth for all visual values
+   Based on verdicto_design_system_overhaul.md
+   ============================================ */
+
+:root {
+  /* ── Red Scale (Strictly Controlled) ─────────────────────────────────────── */
+  --red-50: #FFF1F1;
+  --red-100: #FFE1E1;
+  --red-200: #FFC7C7;
+  --red-500: #FF3B3B;
+  --red-600: #E62E2E;
+  --red-700: #CC1F1F;
+  --red-800: #A31515;
+  --red-900: #7A0F0F;
+
+  /* ── Primary (brand shortcuts) ───────────────────────────────────────────── */
+  --primary: #FF3B3B;
+  --primary-hover: #E03333;
+  --primary-light: #FF6B6B;
+  --primary-bg: rgba(255, 59, 59, 0.06);
+  --primary-bg-strong: rgba(255, 59, 59, 0.12);
+  --primary-border: rgba(255, 59, 59, 0.20);
+  --accent: #FF3B3B;
+
+  /* ── Neutral — Light Mode ────────────────────────────────────────────────── */
+  --bg-canvas: #FFFFFF;
+  --bg-surface: #F9FAFB;
+  --bg-elevated: #FFFFFF;
+  --bg-inset: #F3F4F6;
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-tertiary: #9CA3AF;
+  --text-disabled: #D1D5DB;
+  --text-inverse: #FFFFFF;
+  --border-default: #E5E7EB;
+  --border-subtle: #F3F4F6;
+  --border-focus: #E62E2E;
+
+  /* ── Backward compat aliases ─────────────────────────────────────────────── */
+  --bg-main: var(--bg-canvas);
+  --bg-surface-alt: var(--bg-inset);
+  --border-color: var(--border-default);
+  --border-color-subtle: var(--border-subtle);
+
+  /* ── RGB values for backdrop-filter rgba() ───────────────────────────────── */
+  --bg-main-rgb: 255, 255, 255;
+
+  /* ── Semantic Colors (functional only) ───────────────────────────────────── */
+  --success: #10B981;
+  --success-soft: rgba(16, 185, 129, 0.08);
+  --success-bg: var(--success-soft);
+  --warning: #F59E0B;
+  --warning-soft: rgba(245, 158, 11, 0.08);
+  --warning-bg: var(--warning-soft);
+  --error: #EF4444;
+  --error-soft: rgba(239, 68, 68, 0.08);
+  --error-bg: var(--error-soft);
+  --info: #3B82F6;
+  --info-soft: rgba(59, 130, 246, 0.08);
+
+  /* ── Typography ──────────────────────────────────────────────────────────── */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Geist', 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+
+  /* ── Spacing Scale (4px base) ────────────────────────────────────────────── */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* ── Layout ──────────────────────────────────────────────────────────────── */
+  --page-padding: 32px;
+  --page-padding-x: 32px;
+  --page-padding-y: 24px;
+  --page-max-width: 1440px;
+  --content-gap: 24px;
+  --section-gap: 32px;
+  --card-padding: 20px;
+  --card-radius: 10px;
+
+  /* ── Shadows ─────────────────────────────────────────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+
+  /* ── Animation Tokens ────────────────────────────────────────────────────── */
+  --duration-micro: 150ms;
+  --duration-standard: 300ms;
+  --duration-dramatic: 500ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.12s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+/* ── Dark Mode ───────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg-canvas: #09090B;
+  --bg-surface: #18181B;
+  --bg-elevated: #27272A;
+  --bg-inset: #1C1C1E;
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --text-tertiary: #71717A;
+  --text-disabled: #52525B;
+  --text-inverse: #09090B;
+  --border-default: #27272A;
+  --border-subtle: #3F3F46;
+  --border-focus: #FF3B3B;
+
+  /* Backward compat */
+  --bg-main: var(--bg-canvas);
+  --bg-surface-alt: var(--bg-inset);
+  --border-color: var(--border-default);
+  --border-color-subtle: var(--border-subtle);
+
+  --bg-main-rgb: 9, 9, 11;
+
+  --success-soft: rgba(16, 185, 129, 0.12);
+  --success-bg: var(--success-soft);
+  --warning-soft: rgba(245, 158, 11, 0.12);
+  --warning-bg: var(--warning-soft);
+  --error-soft: rgba(239, 68, 68, 0.12);
+  --error-bg: var(--error-soft);
+  --info-soft: rgba(59, 130, 246, 0.12);
+  --primary-bg: rgba(255, 59, 59, 0.08);
+  --primary-bg-strong: rgba(255, 59, 59, 0.16);
+  --primary-border: rgba(255, 59, 59, 0.25);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :root {
+    --page-padding: 16px;
+    --page-padding-x: 16px;
+    --page-padding-y: 16px;
+    --section-gap: 24px;
+    --card-padding: 16px;
+    --card-radius: 8px;
+  }
+}
+
+/* ── Touch devices ───────────────────────────────────────────────────────── */
+@media (pointer: coarse) {
+  :root {
+    --tap-min-height: 44px;
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

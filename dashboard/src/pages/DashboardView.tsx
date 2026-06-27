@@ -117,10 +117,10 @@ export const DashboardView: React.FC = () => {
         <div className="stat-grid">
           {[
             { label: 'Total Cases', value: totalCases, icon: BarChart3, color: 'var(--text-primary)', bg: 'var(--bg-surface-alt)' },
-            { label: 'Verified', value: onChainCount, icon: CheckCircle2, color: 'var(--success)', bg: 'rgba(16, 185, 129, 0.08)' },
-            { label: 'Oracle Verdicts', value: oracleStats.totalVerdicts, icon: Radio, color: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.08)' },
-            { label: 'Active Agents', value: 5, icon: Zap, color: 'var(--purple)', bg: 'rgba(139, 92, 246, 0.08)' },
-            { label: 'Live Feeds', value: 3, icon: TrendingUp, color: 'var(--warning)', bg: 'rgba(245, 158, 11, 0.08)' },
+            { label: 'Verified', value: onChainCount, icon: CheckCircle2, color: 'var(--success)', bg: 'var(--success-soft)' },
+            { label: 'Oracle Verdicts', value: oracleStats.totalVerdicts, icon: Radio, color: 'var(--text-secondary)', bg: 'var(--bg-inset)' },
+            { label: 'Active Agents', value: 5, icon: Zap, color: 'var(--text-secondary)', bg: 'var(--bg-inset)' },
+            { label: 'Live Feeds', value: 3, icon: TrendingUp, color: 'var(--warning)', bg: 'var(--warning-soft)' },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
