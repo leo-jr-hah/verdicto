@@ -119,9 +119,10 @@ button {
 .sidebar-logo-text {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.1rem;
   letter-spacing: -0.02em;
   color: var(--text-primary);
+  line-height: 1;
 }
 
 /* ── Sidebar Edge Handle (collapse/expand) ────────────────────────────────── */
@@ -2322,16 +2323,17 @@ a:focus-visible {
 .landing-nav-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   text-decoration: none;
 }
 
 .landing-nav-logo-text {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.15rem;
   letter-spacing: -0.02em;
   color: var(--text-primary);
+  line-height: 1;
 }
 
 .landing-nav-links {
@@ -2465,26 +2467,24 @@ a:focus-visible {
 /* ── Shared Logo Image ─────────────────────────────────────────────────── */
 
 .logo-img {
-  object-fit: cover;
-  border-radius: 8px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .logo-img--sm {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
 }
 
 .logo-img--md {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
 }
 
 .logo-img--lg {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
 }
 
 /* ── Sidebar Footer ────────────────────────────────────────────────────── */
