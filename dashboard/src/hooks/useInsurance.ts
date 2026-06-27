@@ -14,6 +14,7 @@ import {
 interface UseInsuranceState {
   loading: boolean;
   error: string | null;
+  errorHint: string | null;
   policies: InsurancePolicy[];
   currentPolicy: InsuranceCreateResponse | null;
   claimResult: ClaimResult | null;
@@ -40,6 +41,7 @@ export function useInsurance(): UseInsuranceReturn {
   const [state, setState] = useState<UseInsuranceState>({
     loading: false,
     error: null,
+    errorHint: null,
     policies: [],
     currentPolicy: null,
     claimResult: null,
@@ -56,7 +58,7 @@ export function useInsurance(): UseInsuranceReturn {
     abortRef.current?.abort();
     abortRef.current = new AbortController();
 
-    setState(prev => ({ ...prev, loading: true, error: null, currentPolicy: null, paymentRequired: null }));
+    setState(prev => ({ ...prev, loading: true, error: null, errorHint: null, currentPolicy: null, paymentRequired: null }));
 
     try {
       const response = await createInsurancePolicy(request);
@@ -78,6 +80,7 @@ export function useInsurance(): UseInsuranceReturn {
           ...prev,
           loading: false,
           error: response.error || 'Insurance request failed.',
+          errorHint: response.hint || null,
         }));
       }
     } catch (err: any) {
@@ -85,6 +88,7 @@ export function useInsurance(): UseInsuranceReturn {
         ...prev,
         loading: false,
         error: err.message || 'Network error.',
+        errorHint: 'Check your internet connection and try again.',
       }));
     }
   }, []);
@@ -93,7 +97,7 @@ export function useInsurance(): UseInsuranceReturn {
     abortRef.current?.abort();
     abortRef.current = new AbortController();
 
-    setState(prev => ({ ...prev, loading: true, error: null, currentPolicy: null, paymentRequired: null }));
+    setState(prev => ({ ...prev, loading: true, error: null, errorHint: null, currentPolicy: null, paymentRequired: null }));
 
     try {
       const response = await createInsurancePolicy(request, paymentProof);
@@ -109,6 +113,7 @@ export function useInsurance(): UseInsuranceReturn {
           ...prev,
           loading: false,
           error: response.error || 'Insurance request failed after payment.',
+          errorHint: response.hint || null,
         }));
       }
     } catch (err: any) {
@@ -116,56 +121,57 @@ export function useInsurance(): UseInsuranceReturn {
         ...prev,
         loading: false,
         error: err.message || 'Network error.',
+        errorHint: 'Check your internet connection and try again.',
       }));
     }
   }, []);
 
   const loadPolicies = useCallback(async (ownerPublicKey?: string) => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setState(prev => ({ ...prev, loading: true, error: null, errorHint: null }));
     try {
       const policies = await fetchInsurancePolicies(ownerPublicKey);
       setState(prev => ({ ...prev, loading: false, policies }));
     } catch (err: any) {
-      setState(prev => ({ ...prev, loading: false, error: err.message || 'Failed to load policies.' }));
+      setState(prev => ({ ...prev, loading: false, error: err.message }));
     }
   }, []);
 
   const loadPolicy = useCallback(async (policyId: string) => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setState(prev => ({ ...prev, loading: true, error: null, errorHint: null }));
     try {
       const policy = await fetchInsurancePolicy(policyId);
       if (policy) {
-        setState(prev => ({ ...prev, loading: false }));
+        setState(prev => ({ ...prev, loading: false, policies: [policy] }));
       } else {
-        setState(prev => ({ ...prev, loading: false, error: 'Policy not found.' }));
+        setState(prev => ({ ...prev, loading: false, error: 'Policy not found' }));
       }
     } catch (err: any) {
-      setState(prev => ({ ...prev, loading: false, error: err.message || 'Failed to load policy.' }));
+      setState(prev => ({ ...prev, loading: false, error: err.message }));
     }
   }, []);
 
   const claim = useCallback(async (policyId: string, reason: string, requestedAmount?: number): Promise<boolean> => {
-    setState(prev => ({ ...prev, loading: true, error: null, claimResult: null }));
+    setState(prev => ({ ...prev, loading: true, error: null, errorHint: null }));
     try {
       const result = await fileInsuranceClaim(policyId, reason, requestedAmount);
-      if (result.success && result.claim) {
-        setState(prev => ({ ...prev, loading: false, claimResult: result.claim! }));
+      if (result.success) {
+        setState(prev => ({ ...prev, loading: false, claimResult: result.claim ?? null }));
         return true;
       } else {
-        setState(prev => ({ ...prev, loading: false, error: result.error || 'Claim failed.' }));
+        setState(prev => ({ ...prev, loading: false, error: result.error || 'Claim failed' }));
         return false;
       }
     } catch (err: any) {
-      setState(prev => ({ ...prev, loading: false, error: err.message || 'Network error.' }));
+      setState(prev => ({ ...prev, loading: false, error: err.message }));
       return false;
     }
   }, []);
 
   const reset = useCallback(() => {
-    abortRef.current?.abort();
     setState({
       loading: false,
       error: null,
+      errorHint: null,
       policies: [],
       currentPolicy: null,
       claimResult: null,
@@ -174,7 +180,7 @@ export function useInsurance(): UseInsuranceReturn {
   }, []);
 
   const clearError = useCallback(() => {
-    setState(prev => ({ ...prev, error: null }));
+    setState(prev => ({ ...prev, error: null, errorHint: null }));
   }, []);
 
   return {

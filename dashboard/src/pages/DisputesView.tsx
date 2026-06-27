@@ -59,7 +59,9 @@ export const DisputesView: React.FC = () => {
       }
       await loadData();
     } else {
-      throw new Error('error' in result ? result.error : 'Dispute filing failed');
+      const err = new Error('error' in result ? result.error : 'Dispute filing failed');
+      (err as any).hint = 'hint' in result ? result.hint : undefined;
+      throw err;
     }
   });
 
@@ -802,6 +804,7 @@ export const DisputesView: React.FC = () => {
         ]}
         signing={payment.signing}
         signError={payment.signError}
+        signErrorHint={payment.signErrorHint}
         onConfirm={payment.confirm}
         onCancel={payment.cancel}
       />

@@ -347,6 +347,7 @@ export const BorrowView: React.FC = () => {
   const {
     loading: loanLoading,
     error: loanError,
+    errorHint: loanErrorHint,
     loans,
     currentLoan,
     paymentRequired,
@@ -531,6 +532,7 @@ export const BorrowView: React.FC = () => {
         ]}
         signing={assessPayment.signing}
         signError={assessPayment.signError}
+        signErrorHint={assessPayment.signErrorHint}
         onConfirm={assessPayment.confirm}
         onCancel={assessPayment.cancel}
       />
@@ -570,9 +572,16 @@ export const BorrowView: React.FC = () => {
           style={{ borderColor: 'var(--error)', background: 'rgba(239,68,68,0.05)' }}
         >
           <AlertCircle size={18} color="var(--error)" />
-          <span className="borrow-error-banner__msg">
-            {loanError || signError}
-          </span>
+          <div style={{ flex: 1 }}>
+            <span className="borrow-error-banner__msg">
+              {loanError || signError}
+            </span>
+            {loanErrorHint && (
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                💡 {loanErrorHint}
+              </div>
+            )}
+          </div>
           <button onClick={() => { clearError(); setSignError(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)' }}>
             <XCircle size={16} />
           </button>

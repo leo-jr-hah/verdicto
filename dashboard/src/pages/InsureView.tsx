@@ -285,6 +285,7 @@ export const InsureView: React.FC = () => {
   const {
     loading: insLoading,
     error: insError,
+    errorHint: insErrorHint,
     policies,
     currentPolicy,
     claimResult,
@@ -454,6 +455,7 @@ export const InsureView: React.FC = () => {
         ]}
         signing={assessPayment.signing}
         signError={assessPayment.signError}
+        signErrorHint={assessPayment.signErrorHint}
         onConfirm={assessPayment.confirm}
         onCancel={assessPayment.cancel}
       />
@@ -485,9 +487,16 @@ export const InsureView: React.FC = () => {
           }}
         >
           <AlertCircle size={18} color="var(--error)" />
-          <span style={{ flex: 1, fontSize: '0.85rem', color: 'var(--error)' }}>
-            {insError || signError}
-          </span>
+          <div style={{ flex: 1 }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--error)' }}>
+              {insError || signError}
+            </span>
+            {insErrorHint && (
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                💡 {insErrorHint}
+              </div>
+            )}
+          </div>
           <button onClick={() => { clearError(); setSignError(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)' }}>
             <XCircle size={16} />
           </button>

@@ -22,6 +22,7 @@ export function usePaymentFlow(
   const [showModal, setShowModal] = useState(false);
   const [signing, setSigning] = useState(false);
   const [signError, setSignError] = useState<string | null>(null);
+  const [signErrorHint, setSignErrorHint] = useState<string | null>(null);
 
   /** Optional stash for any payload the caller needs to carry across the payment step */
   const pendingPayloadRef = useRef<any>(null);
@@ -33,6 +34,7 @@ export function usePaymentFlow(
   const openModal = useCallback((payload?: any) => {
     pendingPayloadRef.current = payload ?? null;
     setSignError(null);
+    setSignErrorHint(null);
     setShowModal(true);
   }, []);
 
@@ -43,6 +45,7 @@ export function usePaymentFlow(
   const confirm = useCallback(async () => {
     setSigning(true);
     setSignError(null);
+    setSignErrorHint(null);
 
     try {
       let paymentProof: string;
@@ -62,6 +65,7 @@ export function usePaymentFlow(
       } else {
         if (!signPayment) {
           setSignError('Wallet not available. Please install Casper Wallet.');
+          setSignErrorHint('Install the Casper Wallet browser extension from the Chrome Web Store.');
           setSigning(false);
           return;
         }
@@ -77,8 +81,13 @@ export function usePaymentFlow(
     } catch (err: any) {
       if (err?.message?.includes('cancelled') || err?.message?.includes('denied')) {
         setSignError('Payment was cancelled. Please approve the transfer in your wallet.');
+        setSignErrorHint(null);
+      } else if (err?.hint) {
+        setSignError(err.message || 'Payment failed.');
+        setSignErrorHint(err.hint);
       } else {
         setSignError(err?.message || 'Failed to sign payment. Please try again.');
+        setSignErrorHint(null);
       }
     } finally {
       setSigning(false);
@@ -90,6 +99,7 @@ export function usePaymentFlow(
     setShowModal(false);
     setSigning(false);
     setSignError(null);
+    setSignErrorHint(null);
     pendingPayloadRef.current = null;
   }, []);
 
@@ -97,6 +107,7 @@ export function usePaymentFlow(
     showModal,
     signing,
     signError,
+    signErrorHint,
     openModal,
     confirm,
     cancel,

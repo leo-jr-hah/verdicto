@@ -588,7 +588,7 @@ export function createWebSocket(onMessage: (msg: WSMessage) => void): WebSocket 
 export async function createLoan(
   request: LoanCreateRequest,
   paymentProof?: string,
-): Promise<{ status: 'success' | 'payment_required' | 'error'; loan?: LoanCreateResponse; paymentRequirements?: X402PaymentRequirements; error?: string }> {
+): Promise<{ status: 'success' | 'payment_required' | 'error'; loan?: LoanCreateResponse; paymentRequirements?: X402PaymentRequirements; error?: string; hint?: string }> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (paymentProof) {
     headers['x-payment-proof'] = paymentProof;
@@ -607,7 +607,7 @@ export async function createLoan(
   }
 
   if (!res.ok || !data.success) {
-    return { status: 'error', error: data.error || `HTTP ${res.status}` };
+    return { status: 'error', error: data.error || `HTTP ${res.status}`, hint: data.hint };
   }
 
   return { status: 'success', loan: data.loan };
@@ -762,7 +762,7 @@ export interface ClaimResult {
 export async function createInsurancePolicy(
   request: InsuranceCreateRequest,
   paymentProof?: string,
-): Promise<{ status: 'success' | 'payment_required' | 'error'; policy?: InsuranceCreateResponse; paymentRequirements?: X402PaymentRequirements; error?: string }> {
+): Promise<{ status: 'success' | 'payment_required' | 'error'; policy?: InsuranceCreateResponse; paymentRequirements?: X402PaymentRequirements; error?: string; hint?: string }> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (paymentProof) {
     headers['x-payment-proof'] = paymentProof;
@@ -781,7 +781,7 @@ export async function createInsurancePolicy(
   }
 
   if (!res.ok || !data.success) {
-    return { status: 'error', error: data.error || `HTTP ${res.status}` };
+    return { status: 'error', error: data.error || `HTTP ${res.status}`, hint: data.hint };
   }
 
   return { status: 'success', policy: data.policy };
@@ -1097,7 +1097,7 @@ export async function fetchDispute(disputeId: string): Promise<Dispute | null> {
 export type FileDisputeResponse =
   | { status: 'success'; dispute: Dispute }
   | { status: 'payment_required'; paymentRequirements: any }
-  | { status: 'error'; error: string };
+  | { status: 'error'; error: string; hint?: string };
 
 export async function fileDispute(
   assetId: string,
@@ -1126,7 +1126,7 @@ export async function fileDispute(
     if (data.success && data.dispute) {
       return { status: 'success', dispute: data.dispute };
     }
-    return { status: 'error', error: data.error || 'Unknown error' };
+    return { status: 'error', error: data.error || 'Unknown error', hint: data.hint };
   } catch (err: any) {
     return { status: 'error', error: err.message };
   }

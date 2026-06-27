@@ -16,6 +16,7 @@ export interface PaymentModalProps {
   features?: string[];
   signing: boolean;
   signError: string | null;
+  signErrorHint?: string | null;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -30,6 +31,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   features,
   signing,
   signError,
+  signErrorHint,
   onConfirm,
   onCancel,
 }) => {
@@ -111,8 +113,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 borderRadius: '8px',
                 padding: '0.75rem',
                 marginBottom: '1rem',
-              }} className="text-sm text-error">
-                {signError}
+              }}>
+                <div className="text-sm text-error">{signError}</div>
+                {signErrorHint && (
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
+                    💡 {signErrorHint}
+                  </div>
+                )}
               </div>
             )}
 

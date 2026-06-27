@@ -702,6 +702,7 @@ export const AssessView: React.FC = () => {
         ]}
         signing={payment.signing}
         signError={payment.signError}
+        signErrorHint={payment.signErrorHint}
         onConfirm={payment.confirm}
         onCancel={payment.cancel}
       />

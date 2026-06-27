@@ -15,6 +15,7 @@ import {
 interface UseLoanState {
   loading: boolean;
   error: string | null;
+  errorHint: string | null;
   loans: Loan[];
   currentLoan: LoanCreateResponse | null;
   revaluationResult: RevaluationResult | null;
@@ -43,6 +44,7 @@ export function useLoan(): UseLoanReturn {
   const [state, setState] = useState<UseLoanState>({
     loading: false,
     error: null,
+    errorHint: null,
     loans: [],
     currentLoan: null,
     revaluationResult: null,
@@ -59,7 +61,7 @@ export function useLoan(): UseLoanReturn {
     abortRef.current?.abort();
     abortRef.current = new AbortController();
 
-    setState(prev => ({ ...prev, loading: true, error: null, currentLoan: null, paymentRequired: null }));
+    setState(prev => ({ ...prev, loading: true, error: null, errorHint: null, currentLoan: null, paymentRequired: null }));
 
     try {
       const response = await createLoan(request);
@@ -81,6 +83,7 @@ export function useLoan(): UseLoanReturn {
           ...prev,
           loading: false,
           error: response.error || 'Loan request failed.',
+          errorHint: response.hint || null,
         }));
       }
     } catch (err: any) {
@@ -88,6 +91,7 @@ export function useLoan(): UseLoanReturn {
         ...prev,
         loading: false,
         error: err.message || 'Network error.',
+        errorHint: 'Check your internet connection and try again.',
       }));
     }
   }, []);
@@ -96,7 +100,7 @@ export function useLoan(): UseLoanReturn {
     abortRef.current?.abort();
     abortRef.current = new AbortController();
 
-    setState(prev => ({ ...prev, loading: true, error: null, currentLoan: null, paymentRequired: null }));
+    setState(prev => ({ ...prev, loading: true, error: null, errorHint: null, currentLoan: null, paymentRequired: null }));
 
     try {
       const response = await createLoan(request, paymentProof);
@@ -112,6 +116,7 @@ export function useLoan(): UseLoanReturn {
           ...prev,
           loading: false,
           error: response.error || 'Loan request failed after payment.',
+          errorHint: response.hint || null,
         }));
       }
     } catch (err: any) {
@@ -119,6 +124,7 @@ export function useLoan(): UseLoanReturn {
         ...prev,
         loading: false,
         error: err.message || 'Network error.',
+        errorHint: 'Check your internet connection and try again.',
       }));
     }
   }, []);
@@ -182,6 +188,7 @@ export function useLoan(): UseLoanReturn {
     setState({
       loading: false,
       error: null,
+      errorHint: null,
       loans: [],
       currentLoan: null,
       revaluationResult: null,
@@ -190,7 +197,7 @@ export function useLoan(): UseLoanReturn {
   }, []);
 
   const clearError = useCallback(() => {
-    setState(prev => ({ ...prev, error: null }));
+    setState(prev => ({ ...prev, error: null, errorHint: null }));
   }, []);
 
   return {
