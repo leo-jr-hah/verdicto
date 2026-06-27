@@ -176,6 +176,7 @@ export interface LoanCreateResponse {
   trustBreakdown: { confidence: number; valueRatio: number; ltvRange: string };
   // Verdicto Point 2: Escrow
   escrowLockTxHash?: string;
+  escrowReleaseTxHash?: string;
 }
 
 export interface RevaluationResult {

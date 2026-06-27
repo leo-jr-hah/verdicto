@@ -3,13 +3,13 @@ import { motion } from 'framer-motion';
 import {
   Shield, ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle,
   Loader2, RotateCcw, RefreshCw, AlertCircle, XCircle,
-  FileText, Building2, Palette, Gem, TrendingDown, Info,
+  FileText, Building2, Palette, Gem, TrendingDown,
 } from 'lucide-react';
 import { useWallet } from '../contexts/CSPRClickContext';
 import { useInsurance } from '../hooks/useInsurance';
 import { useAssessment } from '../hooks/useAssessment';
 import {
-  type AssetType, type InsuranceCreateRequest, type InsurancePolicy, type AssessmentRequest,
+  type AssetType, type InsuranceCreateRequest, type AssessmentRequest,
 } from '../services/api';
 import { PLATFORM_WALLET, INSURANCE_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
 import { AgentExplainer } from '../components/AgentExplainer';
@@ -49,12 +49,6 @@ function riskColor(score: number): string {
   if (score <= 30) return 'var(--success)';
   if (score <= 55) return 'var(--warning)';
   return 'var(--error)';
-}
-
-function riskLabel(score: number): string {
-  if (score <= 30) return 'Low Risk';
-  if (score <= 55) return 'Medium Risk';
-  return 'High Risk';
 }
 
 function statusVariant(status: string): string {

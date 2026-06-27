@@ -24,7 +24,6 @@ import { useAssessment } from '../hooks/useAssessment';
 import {
   type AssetType,
   type LoanCreateRequest,
-  type Loan,
   type AssessmentRequest,
 } from '../services/api';
 import { PLATFORM_WALLET, LOAN_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
@@ -108,12 +107,6 @@ function healthColor(ratio: number): string {
   if (ratio >= 1.5) return 'var(--success)';
   if (ratio >= 1.2) return 'var(--warning)';
   return 'var(--error)';
-}
-
-function healthLabel(ratio: number): string {
-  if (ratio >= 1.5) return 'Healthy';
-  if (ratio >= 1.2) return 'At Risk';
-  return 'Liquidation Risk';
 }
 
 function statusVariant(status: string): string {
