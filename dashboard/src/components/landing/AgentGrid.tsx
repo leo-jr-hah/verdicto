@@ -15,12 +15,13 @@ export const AgentGrid: React.FC = () => {
               <span>The Agents</span>
             </div>
             <h2 className="landing-section__title">
-              Two valuations. Three jurors.<br />
-              <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Every analysis formed independently.</span>
+              Two analysts. Three jurors.<br />
+              <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Every step cryptographically signed.</span>
             </h2>
             <p className="landing-section__subtitle">
               Two valuation agents produce independent estimates using different methodologies.
-              Three specialized jurors then evaluate which is more credible, weighted by on-chain trust scores.
+              Three specialized jurors then evaluate credibility, validate evidence, and reach consensus —
+              each signing HMAC receipts that chain together into a tamper-proof audit trail.
             </p>
           </div>
         </Reveal>

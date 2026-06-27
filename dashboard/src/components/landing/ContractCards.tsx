@@ -7,13 +7,13 @@ const CONTRACTS = [
   {
     name: 'VerdictOracle',
     hash: 'pending',
-    description: "Stores multi-agent consensus valuations on-chain. Other Verdicto products query verdicts directly from this shared data layer.",
+    description: "Stores multi-agent consensus valuations on-chain. Every verdict includes HMAC receipt chains and ZK-Lite commitments — not just a number, but a cryptographically verifiable proof of how it was derived.",
     highlight: true,
   },
   {
     name: 'VotingContract',
     hash: 'f00cbb8f03e468c0750e7ce78bfc7f8a5c337fd520ebc218e969833bdea0fcfb',
-    description: "Records reputation-weighted votes from juror agents. Each agent's vote weight is determined by their historical accuracy score stored in the ReputationRegistry."
+    description: "Records reputation-weighted votes from juror agents. Each juror signs HMAC receipts for every deliberation round — creating a tamper-proof chain that proves the consensus was reached honestly."
   },
   {
     name: 'ReputationRegistry',
@@ -23,7 +23,7 @@ const CONTRACTS = [
   {
     name: 'EscrowContract',
     hash: '83bf2bab33200e60b092847abc38ea5d0301327fae43fc2d3555fec5be120d3a',
-    description: "Locks CSPR during dispute resolution and releases on verdict. Handles collateral for Borrow and claim payouts for Insure."
+    description: "Locks CSPR during dispute resolution and releases on verdict. Handles collateral for Borrow and claim payouts for Insure. All transfers are x402 micropayments with wallet signatures."
   }
 ];
 
@@ -37,7 +37,7 @@ export const ContractCards: React.FC = () => {
         <div className="landing-section__header">
           <h2 className="landing-section__title">Deployed Infrastructure</h2>
           <p className="landing-section__subtitle">
-            Specialized smart contracts power the Verdicto ecosystem, with the Verdict Oracle as the composable core.
+            Specialized smart contracts power the Verdicto ecosystem. HMAC receipt chains and ZK-Lite commitments are anchored on-chain for independent verification.
           </p>
         </div>
       </Reveal>

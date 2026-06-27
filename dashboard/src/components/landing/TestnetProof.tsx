@@ -8,23 +8,23 @@ import { Shield, Scale, TrendingUp, Zap } from 'lucide-react';
 const CAPABILITIES = [
   {
     icon: <Scale size={20} />,
-    title: 'Dual-Agent Valuation',
-    desc: 'Two independent AI analysts produce separate valuations using distinct methodologies. A three-juror panel weighs the results, producing a single consensus verdict with a confidence score.',
+    title: 'HMAC Receipt Chains',
+    desc: 'Every juror deliberation round is signed with HMAC-SHA256. Receipts chain together — each links to the previous via `previousReceiptId`. Tamper with one and the entire chain breaks.',
   },
   {
     icon: <Shield size={20} />,
-    title: 'On-Chain Lending',
-    desc: 'Borrow against assessed collateral. The AI determines loan-to-value ratios, disburses testnet CSPR, and monitors health ratios in real time. Liquidation thresholds enforced contract-side.',
+    title: 'ZK-Lite Commitments',
+    desc: 'After every assessment, a SHA-256 commitment of the execution state (input, agent state, Casper block height) is anchored on-chain. Verify the agents ran correctly without re-executing.',
   },
   {
     icon: <TrendingUp size={20} />,
-    title: 'Parametric Insurance',
-    desc: 'Insure assets against value decline. Claims trigger automatic AI revaluation — if the loss exceeds the deductible, payout is computed and disbursed without manual adjudication.',
+    title: 'Adversarial Deliberation',
+    desc: 'Two analysts produce independent valuations. Three jurors evaluate credibility with peer review. Disagreements trigger multi-round deliberation — not a simple average.',
   },
   {
     icon: <Zap size={20} />,
-    title: 'Prediction Markets',
-    desc: 'Resolve real-world outcome questions with multi-agent consensus. Each prediction is backed by the same oracle infrastructure, with receipts stored on-chain for auditability.',
+    title: 'x402 Micropayments',
+    desc: 'Each product is gated by a native CSPR transfer signed by the user wallet. No API keys, no accounts — just cryptographic proof of payment.',
   },
 ];
 
@@ -56,12 +56,12 @@ export const TestnetProof: React.FC = () => {
               Live on Testnet
             </div>
             <h2 className="landing-section__title" style={{ textAlign: 'left', marginBottom: '20px' }}>
-              Four Products.<br/>One Oracle.
+              Every Assessment.<br/>Cryptographically Proven.
             </h2>
             <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '32px' }}>
-              Verdicto is a complete RWA infrastructure stack — not a single-purpose tool.
-              Every product feeds from the same Verdict Oracle, producing composable, on-chain data
-              that any Casper dApp can query.
+              Not "trust us" — verify it. Every AI assessment produces HMAC receipt chains
+              and ZK-Lite commitments anchored to Casper L1. Tamper with any step and the
+              cryptographic proof breaks. Four products, one verification layer.
             </p>
             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
               <Link to="/dashboard" className="btn btn-primary" style={{ padding: '12px 24px', borderRadius: '10px' }}>

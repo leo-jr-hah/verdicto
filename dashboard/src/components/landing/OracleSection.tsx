@@ -5,45 +5,49 @@ import { Radio, Zap, Shield, Globe, TrendingUp } from 'lucide-react';
 const FEATURES = [
   {
     icon: <Radio size={20} />,
-    title: 'Shared Data Layer',
-    desc: 'Any Casper smart contract can query the Verdict Oracle directly. Fully on-chain, no external dependencies.',
+    title: 'HMAC Receipt Chains',
+    desc: 'Every juror signs each deliberation round with HMAC-SHA256. Receipts chain together — each links to the previous via `previousReceiptId`. Tamper with one receipt and the entire chain breaks.',
   },
   {
     icon: <Zap size={20} />,
-    title: '0.1 CSPR Per Query',
-    desc: 'Micropayment per query, signed by the user wallet. Pay per query, on-chain, verifiable.',
+    title: 'ZK-Lite Commitments',
+    desc: 'After every assessment, a SHA-256 commitment of the full execution state (input, agent state, Casper block height) is anchored on-chain. Anyone can verify the agents ran correctly without re-executing.',
   },
   {
     icon: <Shield size={20} />,
-    title: 'Multi-Agent Consensus',
-    desc: 'Each verdict is the output of multiple independent AI agents: valuation specialists and jurors, with cryptographic receipt chains proving nothing was altered.',
+    title: 'Adversarial Deliberation',
+    desc: 'Two analysts produce independent valuations. Three jurors evaluate credibility, weighted by on-chain trust scores. Disagreements trigger multi-round peer review — not a simple average.',
   },
   {
     icon: <Globe size={20} />,
-    title: '24h Freshness Guarantee',
-    desc: 'Every verdict has an expiry timestamp. Smart contracts can check `is_expired()` before using a price. Stale data is automatically rejected.',
+    title: 'x402 Pay-Per-Query',
+    desc: 'Each oracle query is a native CSPR transfer signed by the user wallet. No API keys, no accounts — just a micropayment with cryptographic proof of authorization.',
   },
 ];
 
 const USE_CASES = [
-  { label: 'Lending Protocols', desc: 'Query asset value → calculate LTV → disburse loan', icon: <TrendingUp size={16} /> },
-  { label: 'DAO Treasuries', desc: 'Verify RWA collateral before governance votes', icon: <Shield size={16} /> },
-  { label: 'Insurance Contracts', desc: 'Price policies against oracle valuations', icon: <Shield size={16} /> },
-  { label: 'Confidence Analysis', desc: 'Run multi-agent confidence scoring for RWA outcomes', icon: <TrendingUp size={16} /> },
+  { label: 'Lending Protocols', desc: 'Query verified valuation → calculate LTV → disburse loan', icon: <TrendingUp size={16} /> },
+  { label: 'DAO Treasuries', desc: 'Verify RWA collateral with tamper-proof receipts', icon: <Shield size={16} /> },
+  { label: 'Insurance Contracts', desc: 'Price policies against cryptographically committed valuations', icon: <Shield size={16} /> },
+  { label: 'Dispute Resolution', desc: 'Challenge verdicts — re-trials produce new HMAC chains', icon: <TrendingUp size={16} /> },
 ];
 
-const CODE_SNIPPET = `// Cross-contract call from any Casper dApp
+const CODE_SNIPPET = `// Every assessment produces a verifiable receipt chain
 let verdict = oracle.get_verdict("ASSESS-1719000000000");
 
-// Enforce staleness: expired verdicts rejected contract-side
-if oracle.is_expired(asset_id) {
-    revert("Verdict expired - request fresh assessment");
+// Verify HMAC chain integrity — each receipt links to the previous
+for receipt in verdict.receipts {
+    assert(verify_hmac(receipt, juror_key));
+    assert(receipt.prev == prev_receipt_id);
 }
 
-if verdict.confidence >= 80 {
-    let ltv = calculate_ltv(verdict.value, loan_amount);
-    disburse_loan(loan_amount, collateral);
-}`;
+// Verify ZK-Lite commitment matches on-chain anchor
+let commitment = sha256(verdict.input + verdict.agent_state
+    + verdict.block_height + verdict.timestamp);
+assert(commitment == oracle.get_commitment(asset_id));
+
+// Now safe to use — agents ran correctly, nothing was altered
+let ltv = calculate_ltv(verdict.value, loan_amount);`;
 
 export const OracleSection: React.FC = () => {
   const ref = useRef(null);
@@ -62,11 +66,10 @@ export const OracleSection: React.FC = () => {
           <Radio size={16} style={{ color: 'var(--red-600)' }} />
           <span>Composable Primitive</span>
         </div>
-        <h2 className="landing-section__title">The Oracle for Real-World Assets</h2>
+        <h2 className="landing-section__title">Cryptographically Verifiable AI</h2>
         <p className="landing-section__subtitle">
-          Verdict Oracle stores multi-agent consensus valuations on-chain.
-          Verdicto powers its own Borrow and Insure products using the same data.
-          Any Casper dApp can query the Oracle directly.
+          Every assessment produces HMAC receipt chains and ZK-Lite commitments.
+          Not "trust us" — verify it yourself on Casper.
         </p>
       </motion.div>
 

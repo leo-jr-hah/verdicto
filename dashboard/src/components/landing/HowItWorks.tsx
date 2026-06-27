@@ -5,31 +5,31 @@ import { Upload, BarChart3, Users, ShieldCheck } from 'lucide-react';
 const STEPS = [
   {
     num: '01',
-    title: 'Connect Your Wallet',
+    title: 'Connect & Pay',
     icon: Upload,
-    description: 'Connect your Casper Wallet in one click. Your wallet handles all payments and receives all disbursements. No account creation needed.',
-    detail: 'Casper Wallet via CSPRClick SDK',
+    description: 'Connect your Casper Wallet. Pay 2.5 CSPR via a native transfer — the wallet signs it, producing a cryptographic payment proof. No accounts, no API keys.',
+    detail: 'x402 micropayment with wallet signature',
   },
   {
     num: '02',
-    title: 'Choose Your Product',
+    title: 'Multi-Agent Analysis',
     icon: BarChart3,
-    description: 'Pick what you need: Assess an asset for its market value, Borrow against it, Insure it against loss, or run a Confidence Analysis. Each product uses the same multi-agent AI engine.',
-    detail: 'Assess, Borrow, Insure, or Predict',
+    description: 'Two independent AI analysts produce separate valuations using different methodologies. Each agent\'s input, state, and output are recorded for the ZK-Lite commitment.',
+    detail: '2 analysts with independent methodologies',
   },
   {
     num: '03',
-    title: 'AI Agents Analyze',
+    title: 'Juror Deliberation',
     icon: Users,
-    description: 'Multiple independent AI agents work in parallel. Each queries real market data, selects its own methodology, and produces a result with full reasoning. If agents disagree, jurors deliberate with peer review.',
-    detail: 'Multi-Agent Analysis with Peer Review',
+    description: 'Three specialized jurors evaluate which analysis is more credible. Every deliberation round is signed with HMAC-SHA256 — each receipt chains to the previous. If agents disagree, multi-round peer review kicks in.',
+    detail: 'HMAC receipt chains — tamper-proof audit trail',
   },
   {
     num: '04',
-    title: 'Result On-Chain',
+    title: 'On-Chain Commitment',
     icon: ShieldCheck,
-    description: 'Consensus verdict stored in the Oracle. Borrow, insure, or verify against it. Autonomous keepers monitor collateral health and insurance policies 24/7 with no human in the loop.',
-    detail: 'Composable On-Chain Primitive',
+    description: 'A ZK-Lite commitment (SHA-256 of execution state + Casper block height) is anchored on-chain. The verdict, receipts, and commitment are all independently verifiable.',
+    detail: 'ZK-Lite execution proof anchored to Casper L1',
   },
 ];
 

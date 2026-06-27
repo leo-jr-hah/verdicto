@@ -97,8 +97,8 @@ const useScramble = (text: string, duration = 700, delay = 0) => {
 
 /* ── Scramble Headline ──────────────────────────────────────────────── */
 const ScrambleHeadline: React.FC = () => {
-  const line1 = 'The Oracle for';
-  const line2 = 'Tokenized Equity';
+  const line1 = 'Cryptographically Verifiable';
+  const line2 = 'AI for RWA';
   const { display: d1, done: done1 } = useScramble(line1, 500, 200);
   const { display: d2, done: done2 } = useScramble(line2, 700, 400);
 
@@ -182,14 +182,25 @@ const TERMINAL_LINES = [
   { type: 'system', text: 'consensus-engine v2.4.1 initialized' },
   { type: 'system', text: 'connecting to casper-testnet...' },
   { type: 'divider' },
-  { type: 'agent', name: 'analyst-alpha', status: 'online', text: 'valuation model loaded' },
-  { type: 'agent', name: 'analyst-beta', status: 'online', text: 'market data synced' },
-  { type: 'agent', name: 'analyst-gamma', status: 'online', text: 'risk model calibrated' },
+  { type: 'agent', name: 'analyst-alpha', status: 'online', text: 'comparable sales model loaded' },
+  { type: 'agent', name: 'analyst-beta', status: 'online', text: 'DCF model calibrated' },
+  { type: 'agent', name: 'juror-1', status: 'online', text: 'credibility evaluator ready' },
+  { type: 'agent', name: 'juror-2', status: 'online', text: 'evidence validator ready' },
+  { type: 'agent', name: 'juror-3', status: 'online', text: 'consensus arbiter ready' },
   { type: 'divider' },
   { type: 'label', text: 'incoming assessment' },
   { type: 'data', label: 'asset', value: 'Manhattan Loft, 2BR/2BA' },
   { type: 'data', label: 'type', value: 'residential_real_estate' },
   { type: 'data', label: 'source', value: 'zillow, redfin, mls' },
+  { type: 'divider' },
+  { type: 'label', text: 'hmac receipt chain' },
+  { type: 'data', label: 'round 1', value: 'a3f8...c2d1 (analyst-alpha)' },
+  { type: 'data', label: 'round 2', value: '7b2e...9f4a (analyst-beta)' },
+  { type: 'data', label: 'round 3', value: 'd1c5...3e8b (juror consensus)' },
+  { type: 'divider' },
+  { type: 'label', text: 'zk-lite commitment' },
+  { type: 'data', label: 'commitment', value: 'sha256(input + state + block#847291)' },
+  { type: 'data', label: 'anchor', value: 'deploy-0xf4a2...8c1d on casper-testnet' },
   { type: 'divider' },
   { type: 'verdict', score: 94, label: 'consensus confidence' },
 ];
@@ -319,10 +330,10 @@ const AgentTerminal: React.FC = () => {
 
 /* ── Stats Strip ────────────────────────────────────────────────────── */
 const STATS = [
-  { value: 3, suffix: '', label: 'AI Agents' },
-  { value: 4, suffix: '', label: 'Products' },
-  { value: 100, suffix: '%', label: 'On-Chain' },
-  { value: 24, suffix: '/7', label: 'Verifiable' },
+  { value: 5, suffix: '', label: 'AI Agents' },
+  { value: 2, suffix: '', label: 'Analysts' },
+  { value: 3, suffix: '', label: 'Jurors' },
+  { value: 100, suffix: '%', label: 'Cryptographically Proven' },
 ];
 
 const StatsStrip: React.FC = () => (
