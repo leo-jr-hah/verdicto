@@ -11,25 +11,25 @@ Backend: [verdicto-production.up.railway.app](https://verdicto-production.up.rai
 
 ## What It Does
 
-Verdicto covers the full lifecycle of a real-world asset on-chain. Six products, one platform.
+Verdicto covers the full lifecycle of a real-world asset on-chain.
 
 **Assess** (2.5 CSPR)
-Submit an asset like real estate, fine art, or a commodity. Two AI agents independently value it using different methodologies. Three AI jurors deliberate and vote. A consensus verdict is reached and stored on-chain.
+Submit an asset like real estate, fine art, or a commodity. Independent AI agents value it using different methodologies. A jury of AI jurors deliberates and votes. A consensus verdict is reached and stored on-chain.
 
 **Borrow** (5 CSPR)
-Use an assessment as collateral. The system determines Loan-to-Value ratio, disburses real CSPR, and an autonomous keeper monitors collateral health every 30 minutes.
+Use an assessment as collateral. The system determines Loan-to-Value ratio, disburses real CSPR, and an autonomous keeper monitors collateral health continuously.
 
 **Insure** (3 CSPR)
 Insure an asset against value loss. AI generates a risk score and premium. File claims with automatic AI revaluation and on-chain payout.
 
 **Predict** (1 CSPR)
-Ask any yes/no question about future events. Three AI analysts independently research and forecast. Oracle resolves outcomes on-chain.
+Ask any yes/no question about future events. Independent AI analysts research and forecast. Oracle resolves outcomes on-chain.
 
 **Oracle**
 Every verdict is stored in an on-chain Oracle contract. Immutable, timestamped, auditable by anyone. Browse verdicts, see agent reasoning, verify receipts.
 
 **Disputes** (5 CSPR)
-Anyone can challenge a verdict by staking 5 CSPR. A re-trial is triggered with a different jury and fresh evidence. Autonomous keepers monitor the challenge period.
+Anyone can challenge a verdict by staking CSPR. A re-trial is triggered with a fresh jury and new evidence. Autonomous keepers monitor the challenge period.
 
 ---
 
@@ -37,19 +37,19 @@ Anyone can challenge a verdict by staking 5 CSPR. A re-trial is triggered with a
 
 ### The Assessment Pipeline
 
-When a user submits an asset and pays 2.5 CSPR, here is what happens:
+When a user submits an asset and pays the assessment fee, here is what happens:
 
-1. The orchestrator receives the request and dispatches it to two independent analyst agents.
+1. The orchestrator receives the request and dispatches it to independent analyst agents in parallel.
 
-2. Agent A is a Comps Specialist. It pulls comparable sales data, recent transactions, and market signals. Agent B is a Fundamentals Analyst. It runs DCF analysis, evaluates income potential, and pulls macro context from the FRED API.
+2. Each agent specializes in a different valuation methodology. One focuses on comparable sales and market data. Another runs discounted cash flow analysis and evaluates fundamentals. Each agent pulls from real market data APIs independently.
 
-3. Both agents produce their own estimated value, confidence score, reasoning, and risk factors. The system calculates how far apart the two valuations are (the divergence).
+3. Every agent produces its own estimated value, confidence score, reasoning, and risk factors. The system calculates how far apart the valuations are.
 
-4. Three AI jurors then deliberate. The Evidence Analyst evaluates document quality and proof strength. The Market Data Interpreter examines market trends and pricing signals. The Precedent Researcher looks at historical case outcomes.
+4. A jury of AI jurors then deliberates. Each juror has a different specialty: one evaluates evidence quality and proof strength, another examines market trends and pricing signals, another researches historical case outcomes.
 
-5. Each juror votes: Agent A preferred, Split, or Agent B preferred.
+5. Each juror votes on which analysis they find most convincing.
 
-6. A consensus verdict is reached. The final value is stored on-chain. An HMAC-signed receipt chain is generated for full auditability.
+6. A consensus verdict is reached. The final value is stored on-chain. A cryptographic receipt chain is generated for full auditability.
 
 ### Real Market Data Sources
 
@@ -62,37 +62,37 @@ When a user submits an asset and pays 2.5 CSPR, here is what happens:
 
 All APIs are free or have free tiers. No paid API keys required for the demo.
 
-### LLM Fallback Chain
+### Graceful Degradation
 
-The system works even with zero API keys configured. The fallback chain is: MiMo (primary) then Groq (secondary) then a deterministic heuristic that uses real market data with formula-based calculations. Every fallback is flagged in the UI and receipt.
+The system works even with zero API keys configured. When no LLM provider is available, agents fall back to formula-based calculations using real market data. Every fallback is flagged in the UI and receipt so users always know what they are getting.
 
 ---
 
 ## Architecture
 
-The system has four layers.
+The system is built in four layers.
 
-**Frontend** is a React 19 + TypeScript + Vite app. It has a landing page with an interactive story explainer, six product views (Assess, Borrow, Insure, Predict, Oracle, Disputes), a real-time WebSocket agent log called "Under the Hood", and Casper Wallet integration for CSPR payments.
+**Frontend** is a React app with TypeScript. It has a landing page with an interactive story explainer, six product views, a real-time WebSocket agent log called "Under the Hood", and Casper Wallet integration for CSPR payments.
 
-**Orchestrator** is an Express + TypeScript server. It handles all API routes: assessment creation, loan creation, insurance creation, dispute filing, and verdict retrieval. Payment-gated endpoints use x402 verification.
+**Orchestrator** is an Express server. It handles all API routes: assessment creation, loan creation, insurance creation, dispute filing, and verdict retrieval. Payment-gated endpoints use x402 verification.
 
-**Agent Layer** runs five MCP servers on separate ports. Valuation Agent A (Comps Specialist) on :4001, Valuation Agent B (Fundamentals) on :4002, Evidence Analyst Juror on :4003, Market Data Interpreter Juror on :4004, and Precedent Researcher Juror on :4005.
+**Agent Layer** runs independent AI agents as separate services. Each agent specializes in either valuation or jury deliberation. Agents communicate with the orchestrator over HTTP and produce structured, machine-readable outputs.
 
-**Shared Layer** contains the core logic: agent-engine.ts for LLM-powered valuation, juror-engine.ts for jury deliberation and voting, trust-framework.ts for agent reputation scoring, audit-trail.ts for HMAC receipt chains, x402-middleware.ts for on-chain payment verification, casper-contracts.ts for smart contract interactions, data-sources.ts for RentCast/Met Museum/CoinGecko, verifiable-execution.ts for ZK-lite execution proofs, and transaction-log.ts for on-chain transaction recording.
+**Shared Layer** contains the core platform logic: agent orchestration, jury deliberation and voting, agent reputation scoring, cryptographic receipt chains, on-chain payment verification, smart contract interactions, market data aggregation, verifiable execution proofs, and transaction logging.
 
 ---
 
 ## Smart Contracts
 
-Verdicto interacts with three deployed Odra contracts on Casper Testnet.
+Verdicto uses three deployed smart contracts on Casper Testnet.
 
-| Contract | Entry Points | Purpose |
-|----------|-------------|---------|
-| VotingContract | cast_vote, get_verdict, get_tally | On-chain jury voting for assessments |
-| ReputationRegistry | register_agent, get_agent, update_parking_score | Agent reputation and trust tiers |
-| VerdictOracle | store_verdict, get_verdict, dispute_verdict | Immutable verdict storage and dispute resolution |
+| Contract | Purpose |
+|----------|---------|
+| VotingContract | On-chain jury voting for assessments |
+| ReputationRegistry | Agent reputation and trust tiers |
+| VerdictOracle | Immutable verdict storage and dispute resolution |
 
-All contract calls use casper-client put-deploy with session deploys, verified via CSPR.cloud API.
+All contract calls are verified via CSPR.cloud API.
 
 ---
 
@@ -123,13 +123,13 @@ No API keys. No accounts. No subscriptions. Payment is authentication.
 
 ## Cryptographic Receipt Chain
 
-Every step of the AI deliberation is recorded in an HMAC-SHA256 signed receipt chain. Each receipt contains:
+Every step of the AI deliberation is recorded in a signed receipt chain. Each receipt contains:
 
-- inputHash: SHA-256 of the evidence fed to the juror
-- outputHash: SHA-256 of the juror's analysis
-- reasoningHash: SHA-256 of the reasoning text
-- signature: HMAC-SHA256 of all fields using a derived key
-- previousReceiptId: chain linking to the previous receipt
+- A hash of the evidence fed to the juror
+- A hash of the juror's analysis
+- A hash of the reasoning text
+- A cryptographic signature over all fields
+- A reference to the previous receipt in the chain
 
 The chain is tamper-evident. Modifying any receipt breaks all downstream signatures. The full chain is stored in the database and displayed in the UI.
 
@@ -137,23 +137,13 @@ The chain is tamper-evident. Modifying any receipt breaks all downstream signatu
 
 ## Trust Scoring Framework
 
-Each agent has a 5-dimension trust score based on the March 2026 IETF Trust Scoring Draft.
-
-| Dimension | Weight | How It's Measured |
-|-----------|--------|------------------|
-| Identity Verified | Gate | On-chain registration in ReputationRegistry |
-| Execution Score | 40% | Challenge-response verification |
-| Output Consistency | 30% | Variance across runs with same input |
-| Economic Stake | 30% | CSPR staked as collateral |
-| Aggregate Score | 0-1000 | Weighted combination |
-
-Tiers: Unverified, Bronze (500+), Silver (750+), Gold (900+), Platinum. Higher-tier agents get more weight in jury deliberation.
+Each agent has a multi-dimension trust score. Dimensions include identity verification, execution accuracy, output consistency, and economic stake. Agents are assigned tiers from Unverified up to Platinum. Higher-tier agents get more weight in jury deliberation.
 
 ---
 
 ## Frontend
 
-Tech stack: React 19, TypeScript, Vite, Casper Wallet SDK (window.CasperWalletProvider), WebSocket for real-time agent logs, Tailwind CSS with dark mode.
+Built with React, TypeScript, Vite, Tailwind CSS, and Casper Wallet SDK. Dark mode by default.
 
 Key UI features:
 
@@ -167,13 +157,13 @@ Key UI features:
 
 ## What It Demonstrates
 
-Adversarial AI consensus. Agents are designed to disagree. Agent A trusts market data. Agent B trusts fundamentals. The jury resolves the disagreement.
+Adversarial AI consensus. Agents are designed to disagree. One trusts market data. Another trusts fundamentals. The jury resolves the disagreement.
 
 On-chain verifiability. Every verdict, vote, and payment is on Casper Testnet. Every receipt is cryptographically signed.
 
 x402 machine-to-machine payments. Real micropayments verified on-chain, no accounts or API keys.
 
-Graceful degradation. Works with zero API keys. LLM fallback chain: MiMo, then Groq, then deterministic heuristic.
+Graceful degradation. Works with zero API keys. When no LLM is available, the system falls back to deterministic calculations using real market data.
 
 Full RWA lifecycle. Not just valuation. Borrow, insure, predict, and dispute resolution on the same platform.
 
@@ -189,14 +179,14 @@ All verdicts are stored on-chain via the VerdictOracle contract. The deployer ac
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS |
-| Backend | Express, TypeScript, Node.js 20+ |
-| AI Agents | MiMo (primary LLM), Groq (fallback), deterministic heuristic |
-| Agent Protocol | Model Context Protocol (MCP) SDK |
-| Blockchain | Casper Testnet, casper-js-sdk, casper-client CLI |
+| Frontend | React, TypeScript, Vite, Tailwind CSS |
+| Backend | Express, TypeScript, Node.js |
+| AI Agents | LLM-powered with deterministic fallback |
+| Agent Protocol | Model Context Protocol (MCP) |
+| Blockchain | Casper Testnet, casper-js-sdk |
 | Data APIs | RentCast, Met Museum, CoinGecko, FRED |
 | Payments | x402 micropayment verification via CSPR.cloud |
-| Database | SQLite (better-sqlite3) |
+| Database | SQLite |
 | Signing | HMAC-SHA256 receipt chains, ECDSA on Casper |
 | Smart Contracts | Odra (Rust), VotingContract, ReputationRegistry, VerdictOracle |
 | Hosting | Railway (backend), Vercel (frontend) |
@@ -221,13 +211,13 @@ Shows the product is thoughtfully designed, not just a tech demo.
 
 ### 3. Assessment Page, Asset Selection
 
-[PASTE SCREENSHOT: The /assess page showing the demo assets grid (Manhattan Condo, Basquiat Painting, etc.) with the Pay and Assess button visible]
+[PASTE SCREENSHOT: The /assess page showing the demo assets grid with the Pay and Assess button visible]
 
 Shows the product surface. Multiple asset classes supported.
 
 ### 4. Assessment Running, "Under the Hood" Agent Log
 
-[PASTE SCREENSHOT: The terminal-style real-time log showing agents working. Look for lines like "Agent A analyzing...", "Juror 1 deliberating...", "Consensus reached"]
+[PASTE SCREENSHOT: The terminal-style real-time log showing agents working. Look for lines showing analysis, deliberation, and consensus]
 
 This is the hero screenshot. Shows the multi-agent system in action, which is the core differentiator.
 
@@ -245,7 +235,7 @@ Shows the system is running and producing real on-chain data.
 
 ### 7. Borrow or Insure Product
 
-[PASTE SCREENSHOT: Either the /borrow or /insure page showing the wizard UI, collateral selection step, or insurance policy creation]
+[PASTE SCREENSHOT: Either the /borrow or /insure page showing the wizard UI]
 
 Shows Verdicto is more than just valuation. Full RWA lifecycle.
 
