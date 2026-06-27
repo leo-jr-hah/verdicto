@@ -4,7 +4,7 @@ import { Zap, Wallet, Loader2 } from 'lucide-react';
 
 /**
  * Shared payment confirmation modal used across all products.
- * Consistent design: dark overlay, centered card, fee breakdown, confirm/cancel buttons.
+ * Brutalist design: sharp borders, mono labels, data-panel fee breakdown.
  */
 export interface PaymentModalProps {
   open: boolean;
@@ -54,51 +54,45 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="payment-modal"
-            style={{ background: 'var(--bg-elevated)', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}
+            className="payment-modal bg-elevated border rounded-sm"
+            style={{ boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}
           >
             {/* Header */}
-            <div className="text-center" style={{ marginBottom: '1.5rem' }}>
-              <div style={{
-                width: 56, height: 56, borderRadius: '50%',
-                background: 'var(--accent-soft)',
-                border: '2px solid var(--accent)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 1rem',
-              }}>
-                <Zap size={24} color="var(--text-secondary)" />
+            <div className="text-center mb-6">
+              <div
+                className="flex items-center justify-center rounded-full border-accent bg-accent-soft mx-auto mb-4"
+                style={{ width: 56, height: 56, borderWidth: 2 }}
+              >
+                <Zap size={24} className="text-secondary" />
               </div>
-              <h3 className="text-xl" style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+              <h3 className="text-xl font-bold text-primary mb-2">
                 {title}
               </h3>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              <p className="text-sm text-secondary leading-relaxed">
                 {description}
               </p>
             </div>
 
-            {/* Fee breakdown */}
-            <div style={{
-              background: 'var(--bg-sunken)',
-              borderRadius: 'var(--card-radius)',
-              padding: '1rem 1.25rem',
-              marginBottom: '1.5rem',
-            }}>
-              <div className="flex justify-between items-center" style={{ marginBottom: '0.5rem' }}>
-                <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{feeLabel}</span>
-                <span className="text-xl" style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-                  {feeAmount} CSPR
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                <span>Network</span>
-                <span>{networkLabel}</span>
+            {/* Fee breakdown — data-panel style */}
+            <div className="data-panel mb-6">
+              <div className="data-panel-body">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-secondary">{feeLabel}</span>
+                  <span className="text-xl font-bold text-primary">
+                    {feeAmount} CSPR
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-tertiary">
+                  <span>Network</span>
+                  <span>{networkLabel}</span>
+                </div>
               </div>
             </div>
 
             {/* What you get */}
             {features && features.length > 0 && (
-              <div className="text-sm" style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-                <div style={{ fontWeight: 600, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>You'll receive:</div>
+              <div className="text-sm text-secondary mb-6 leading-relaxed">
+                <div className="font-semibold text-primary mb-1">You'll receive:</div>
                 {features.map((f, i) => (
                   <div key={i}>• {f}</div>
                 ))}
@@ -107,16 +101,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
             {/* Error */}
             {signError && (
-              <div style={{
-                background: 'var(--error-soft)',
-                border: '1px solid var(--error)',
-                borderRadius: '8px',
-                padding: '0.75rem',
-                marginBottom: '1rem',
-              }}>
+              <div className="bg-error-soft border border-error rounded-sm p-3 mb-4">
                 <div className="text-sm text-error">{signError}</div>
                 {signErrorHint && (
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
+                  <div className="text-xs text-secondary mt-1">
                     💡 {signErrorHint}
                   </div>
                 )}
@@ -128,15 +116,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               <button
                 onClick={onCancel}
                 disabled={signing}
-                className="btn btn-secondary"
+                className="btn-secondary flex-1 p-3 rounded-sm"
                 style={{
-                  flex: 1,
-                  padding: '0.75rem',
                   cursor: signing ? 'not-allowed' : 'pointer',
                   opacity: signing ? 0.5 : 1,
-                  background: 'var(--bg-sunken)',
-                  color: 'var(--text-primary)',
-                  border: '1px solid var(--border-strong)',
                 }}
               >
                 Cancel
@@ -144,20 +127,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               <button
                 onClick={onConfirm}
                 disabled={signing}
-                className="btn"
+                className="btn-primary flex-2 p-3 rounded-sm font-semibold"
                 style={{
                   flex: 2,
-                  padding: '0.75rem',
-                  background: signing ? '#9A3E24' : '#B7410E',
-                  color: '#FFFFFF',
                   cursor: signing ? 'wait' : 'pointer',
-                  border: 'none',
-                  fontWeight: 600,
                 }}
               >
                 {signing ? (
                   <>
-                    <Loader2 size={16} className="spin" />
+                    <Loader2 size={16} className="animate-spin" />
                     Waiting for Wallet…
                   </>
                 ) : (

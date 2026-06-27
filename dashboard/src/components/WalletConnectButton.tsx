@@ -44,71 +44,39 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
     }
   };
 
-  // Connected state — collapsed sidebar: show just a green dot icon
+  // ─── Connected + Collapsed sidebar: green dot icon ───────────────────────
   if (connected && publicKey && collapsed) {
     return (
-      <div ref={dropdownRef} style={{ position: 'relative' }}>
+      <div ref={dropdownRef} className="relative">
         <button
           onClick={() => setDropdownOpen(!dropdownOpen)}
           title={publicKey}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 36,
-            height: 36,
-            padding: 0,
-            background: 'var(--success-soft)',
-            border: '1px solid var(--success)',
-            borderRadius: '50%',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            position: 'relative',
-          }}
+          className="flex items-center justify-center rounded-full border border-success bg-success-soft cursor-pointer transition-colors"
+          style={{ width: 36, height: 36, padding: 0, position: 'relative' }}
         >
-          <Wallet size={16} color="var(--text-secondary)" />
-          <div style={{
-            position: 'absolute',
-            top: 2,
-            right: 2,
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
-            background: 'var(--text-secondary)',
-            border: '2px solid var(--bg-surface, #fff)',
-          }} />
+          <Wallet size={16} className="text-secondary" />
+          <div
+            className="absolute rounded-full bg-secondary"
+            style={{ top: 2, right: 2, width: 8, height: 8, border: '2px solid var(--bg-surface, #fff)' }}
+          />
         </button>
 
         {dropdownOpen && (
-          <div style={{
-            position: 'absolute',
-            bottom: 'calc(100% + 8px)',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: 'var(--bg-elevated)',
-            border: '1px solid var(--border)',
-            borderRadius: '12px',
-            padding: '0.5rem',
-            minWidth: '220px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-            zIndex: 1000,
-          }}>
+          <div
+            className="absolute bg-elevated border rounded-sm p-2"
+            style={{
+              bottom: 'calc(100% + 8px)',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              minWidth: 220,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              zIndex: 1000,
+            }}
+          >
             {/* Connected account info */}
-            <div style={{
-              padding: '0.75rem',
-              borderBottom: '1px solid var(--border)',
-              marginBottom: '0.25rem',
-            }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Connected
-              </div>
-              <div style={{
-                fontSize: '0.75rem',
-                fontFamily: 'monospace',
-                wordBreak: 'break-all',
-                color: 'var(--text-primary)',
-                lineHeight: 1.4,
-              }}>
+            <div className="p-3 border-b mb-1">
+              <div className="mono-xs uppercase text-secondary mb-1">Connected</div>
+              <div className="mono-sm text-primary" style={{ wordBreak: 'break-all', lineHeight: 1.4 }}>
                 {publicKey}
               </div>
             </div>
@@ -116,44 +84,18 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             {/* Copy Address */}
             <button
               onClick={() => { copyKey(); }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.85rem',
-                color: 'var(--text-primary)',
-                background: 'transparent',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'background 0.15s',
-              }}
+              className="flex items-center gap-2 w-full p-2 text-sm text-primary bg-transparent border-none rounded-sm cursor-pointer transition-colors"
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              {copied ? <Check size={14} color="var(--text-secondary)" /> : <Copy size={14} />}
+              {copied ? <Check size={14} className="text-secondary" /> : <Copy size={14} />}
               {copied ? 'Copied!' : 'Copy Address'}
             </button>
 
             {/* Disconnect */}
             <button
               onClick={() => { disconnect(); setDropdownOpen(false); }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.85rem',
-                color: 'var(--error)',
-                background: 'transparent',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'background 0.15s',
-              }}
+              className="flex items-center gap-2 w-full p-2 text-sm text-error bg-transparent border-none rounded-sm cursor-pointer transition-colors"
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--error-soft)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
@@ -166,76 +108,32 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
     );
   }
 
-  // Connected state — expanded sidebar: show key + dropdown
+  // ─── Connected + Expanded sidebar: key + dropdown ────────────────────────
   if (connected && publicKey) {
     return (
-      <div ref={dropdownRef} style={{ position: 'relative' }}>
+      <div ref={dropdownRef} className="relative">
         <button
           onClick={() => setDropdownOpen(!dropdownOpen)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.5rem 0.75rem',
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-            background: 'var(--success-soft)',
-            border: '1px solid var(--success)',
-            borderRadius: '999px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            width: '100%',
-            justifyContent: 'center',
-          }}
+          className="flex items-center gap-2 p-2 text-sm font-semibold text-secondary bg-success-soft border border-success rounded-full cursor-pointer transition-colors w-full justify-center"
         >
-          <div style={{
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
-            background: 'var(--text-secondary)',
-            flexShrink: 0,
-          }} />
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {truncateKey(publicKey)}
-          </span>
-          <ChevronDown size={14} style={{
-            transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s ease',
-            flexShrink: 0,
-          }} />
+          <div className="flex-shrink-0 rounded-full bg-secondary" style={{ width: 8, height: 8 }} />
+          <span className="truncate">{truncateKey(publicKey)}</span>
+          <ChevronDown size={14} className="flex-shrink-0" />
         </button>
 
         {dropdownOpen && (
-          <div style={{
-            position: 'absolute',
-            bottom: 'calc(100% + 8px)',
-            left: 0,
-            right: 0,
-            background: 'var(--bg-elevated)',
-            border: '1px solid var(--border)',
-            borderRadius: '12px',
-            padding: '0.5rem',
-            minWidth: '220px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-            zIndex: 1000,
-          }}>
-            {/* Connected account info */}
-            <div style={{
-              padding: '0.75rem',
-              borderBottom: '1px solid var(--border)',
-              marginBottom: '0.25rem',
-            }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Connected
-              </div>
-              <div style={{
-                fontSize: '0.75rem',
-                fontFamily: 'monospace',
-                wordBreak: 'break-all',
-                color: 'var(--text-primary)',
-                lineHeight: 1.4,
-              }}>
+          <div
+            className="absolute bg-elevated border rounded-sm p-2 w-full"
+            style={{
+              bottom: 'calc(100% + 8px)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              zIndex: 1000,
+            }}
+          >
+            {/* Full key */}
+            <div className="p-3 border-b mb-1">
+              <div className="mono-xs uppercase text-secondary mb-1">Connected</div>
+              <div className="mono-sm text-primary" style={{ wordBreak: 'break-all', lineHeight: 1.4 }}>
                 {publicKey}
               </div>
             </div>
@@ -243,44 +141,18 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             {/* Copy Address */}
             <button
               onClick={() => { copyKey(); }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.85rem',
-                color: 'var(--text-primary)',
-                background: 'transparent',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'background 0.15s',
-              }}
+              className="flex items-center gap-2 w-full p-2 text-sm text-primary bg-transparent border-none rounded-sm cursor-pointer transition-colors"
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              {copied ? <Check size={14} color="var(--text-secondary)" /> : <Copy size={14} />}
+              {copied ? <Check size={14} className="text-secondary" /> : <Copy size={14} />}
               {copied ? 'Copied!' : 'Copy Address'}
             </button>
 
             {/* Disconnect */}
             <button
               onClick={() => { disconnect(); setDropdownOpen(false); }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.85rem',
-                color: 'var(--error)',
-                background: 'transparent',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'background 0.15s',
-              }}
+              className="flex items-center gap-2 w-full p-2 text-sm text-error bg-transparent border-none rounded-sm cursor-pointer transition-colors"
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--error-soft)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
@@ -293,101 +165,37 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
     );
   }
 
-  // Disconnected — collapsed sidebar: icon-only button
-  if (collapsed) {
+  // ─── Not connected ───────────────────────────────────────────────────────
+  if (!walletInstalled) {
     return (
-      <div style={{ position: 'relative' }}>
-        <button
-          onClick={connect}
-          disabled={loading}
-          title={loading ? 'Connecting...' : walletInstalled ? 'Connect Wallet' : 'Install Wallet'}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 36,
-            height: 36,
-            padding: 0,
-            background: 'var(--bg-elevated)',
-            border: '1px solid var(--border)',
-            borderRadius: '50%',
-            cursor: loading ? 'wait' : 'pointer',
-            transition: 'all 0.2s ease',
-            opacity: loading ? 0.7 : 1,
-          }}
-        >
-          <Wallet size={16} />
-        </button>
-
-        {error && (
-          <div style={{
-            position: 'absolute',
-            bottom: 'calc(100% + 8px)',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: 'var(--error-soft)',
-            border: '1px solid var(--error)',
-            borderRadius: '8px',
-            padding: '0.5rem 0.75rem',
-            fontSize: '0.8rem',
-            color: 'var(--error)',
-            whiteSpace: 'nowrap',
-            zIndex: 1000,
-            minWidth: '180px',
-          }}>
-            {error}
-          </div>
-        )}
-      </div>
+      <a
+        href="https://chromewebstore.google.com/detail/casper-wallet/abkahkcbhngaebpcgfmhkoioedceoigp?hl=en"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="btn-primary w-full justify-center text-sm"
+      >
+        <Wallet size={16} />
+        Install Wallet
+      </a>
     );
   }
 
-  // Disconnected — expanded sidebar: full "Connect Wallet" button
   return (
-    <div style={{ position: 'relative', width: '100%' }}>
+    <div className="flex flex-col gap-2 w-full">
       <button
         onClick={connect}
         disabled={loading}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          padding: '0.5rem 0.75rem',
-          fontSize: '0.8rem',
-          fontWeight: 600,
-          color: loading ? 'var(--text-secondary)' : 'var(--text-primary)',
-          background: 'var(--bg-elevated)',
-          border: '1px solid var(--border)',
-          borderRadius: '999px',
-          cursor: loading ? 'wait' : 'pointer',
-          transition: 'all 0.2s ease',
-          opacity: loading ? 0.7 : 1,
-          width: '100%',
-          justifyContent: 'center',
-        }}
+        className="btn-primary w-full justify-center text-sm"
+        style={{ cursor: loading ? 'wait' : 'pointer' }}
       >
-        <Wallet size={14} />
-        {loading ? 'Connecting...' : walletInstalled ? 'Connect Wallet' : 'Install Wallet'}
+        <Wallet size={16} />
+        {loading ? 'Connecting…' : 'Connect Wallet'}
       </button>
-
       {error && (
-        <div style={{
-          position: 'absolute',
-          bottom: 'calc(100% + 8px)',
-          left: 0,
-          right: 0,
-          background: 'var(--error-soft)',
-          border: '1px solid var(--error)',
-          borderRadius: '8px',
-          padding: '0.5rem 0.75rem',
-          fontSize: '0.8rem',
-          color: 'var(--error)',
-          whiteSpace: 'normal',
-          zIndex: 1000,
-        }}>
-          {error}
-        </div>
+        <div className="text-xs text-error text-center">{error}</div>
       )}
     </div>
   );
 };
+
+export default WalletConnectButton;

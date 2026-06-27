@@ -17,7 +17,6 @@ import type { AssessmentResult } from '../services/api';
 
 interface AgentExplainerProps {
   assessment: AssessmentResult;
-  /** Insurance-specific context to display */
   insurance?: {
     riskScore: number;
     riskFactors: string[];
@@ -26,7 +25,6 @@ interface AgentExplainerProps {
     premiumCSPR: number;
     deductiblePercent: number;
   };
-  /** Loan-specific context to display */
   loan?: {
     ltvRatio: number;
     loanAmountCSPR: number;
@@ -85,69 +83,45 @@ const AgentCard: React.FC<{
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.1 }}
-      style={{
-        background: 'var(--bg-elevated, #fff)',
-        border: `1px solid var(--border-color, #e5e7eb)`,
-        borderRadius: 12,
-        overflow: 'hidden',
-      }}
+      className="bg-elevated border rounded-sm overflow-hidden"
     >
       {/* Header */}
       <div
         onClick={() => setExpanded(!expanded)}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 12,
-          padding: '14px 16px', cursor: 'pointer',
-          borderLeft: `3px solid ${color}`,
-          transition: 'background 0.15s ease',
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover, #f9fafb)'}
+        className="flex items-center gap-3 p-3 cursor-pointer transition-colors"
+        style={{ borderLeft: `3px solid ${color}` }}
+        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
         onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
       >
         {/* Icon */}
-        <div style={{
-          width: 38, height: 38, borderRadius: 10,
-          background: `${color}12`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
-        }}>
+        <div
+          className="flex items-center justify-center flex-shrink-0 rounded-sm"
+          style={{ width: 38, height: 38, background: `${color}12` }}
+        >
           <Brain size={18} color={color} />
         </div>
 
         {/* Info */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontSize: '0.72rem', fontWeight: 600, color, letterSpacing: '0.04em',
-            textTransform: 'uppercase', marginBottom: 2,
-          }}>
+        <div className="flex-1" style={{ minWidth: 0 }}>
+          <div className="mono-xs font-semibold uppercase mb-0" style={{ color, letterSpacing: '0.04em' }}>
             {label}
           </div>
-          <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary, #111)' }}>
-            {method}
-          </div>
+          <div className="text-sm font-semibold text-primary">{method}</div>
         </div>
 
         {/* Value + Confidence */}
-        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary, #111)' }}>
-            {formatCurrency(value)}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
-            <div style={{
-              width: 6, height: 6, borderRadius: '50%',
-              background: confidenceColor(confidence),
-            }} />
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 500 }}>
+        <div className="text-right flex-shrink-0">
+          <div className="text-lg font-bold text-primary">{formatCurrency(value)}</div>
+          <div className="flex items-center gap-1 justify-end">
+            <div className="rounded-full" style={{ width: 6, height: 6, background: confidenceColor(confidence) }} />
+            <span className="mono-xs text-tertiary font-medium">
               {(confidence * 100).toFixed(0)}% conf
             </span>
           </div>
         </div>
 
-        <motion.div
-          animate={{ rotate: expanded ? 90 : 0 }}
-          transition={{ duration: 0.15 }}
-        >
-          <ChevronRight size={16} color="var(--text-tertiary, #9ca3af)" />
+        <motion.div animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.15 }}>
+          <ChevronRight size={16} className="text-tertiary" />
         </motion.div>
       </div>
 
@@ -161,41 +135,23 @@ const AgentCard: React.FC<{
             transition={{ duration: 0.2 }}
             style={{ overflow: 'hidden' }}
           >
-            <div style={{
-              padding: '0 16px 16px',
-              borderTop: '1px solid var(--border-color, #e5e7eb)',
-            }}>
+            <div className="p-4 border-t">
               {/* Data Source */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                margin: '12px 0 8px',
-                fontSize: '0.72rem', color: 'var(--text-tertiary, #9ca3af)',
-              }}>
+              <div className="flex items-center gap-1 mono-xs text-tertiary mt-3 mb-2">
                 <Database size={12} />
-                <span>Data Source: <strong style={{ color: 'var(--text-secondary, #6b7280)' }}>{source}</strong></span>
+                <span>Data Source: <strong className="text-secondary">{source}</strong></span>
               </div>
 
               {/* Fallback warning */}
               {fallbackTriggered && (
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '6px 10px', marginBottom: 8,
-                  background: 'var(--warning-soft)', borderRadius: 6,
-                  fontSize: '0.72rem', color: 'var(--text-tertiary)',
-                }}>
+                <div className="flex items-center gap-1 p-2 mb-2 bg-warning-soft rounded-sm mono-xs text-tertiary">
                   <AlertTriangle size={12} />
                   Fallback to {fallbackProvider || 'deterministic'} response (LLM timeout)
                 </div>
               )}
 
               {/* Reasoning */}
-              <div style={{
-                fontSize: '0.82rem', lineHeight: 1.65,
-                color: 'var(--text-secondary, #6b7280)',
-                background: 'var(--bg-surface, #f3f4f6)',
-                borderRadius: 8, padding: '12px 14px',
-                border: '1px solid var(--border-color-subtle, var(--border-color, #e5e7eb))',
-              }}>
+              <div className="text-sm leading-relaxed text-secondary bg-sunken rounded-sm p-3 border">
                 {reasoning}
               </div>
             </div>
@@ -219,53 +175,32 @@ const ConsensusCard: React.FC<{
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.1 }}
-      style={{
-        background: 'var(--bg-elevated)',
-        border: '1px solid var(--border)',
-        borderRadius: 12,
-        overflow: 'hidden',
-      }}
+      className="bg-elevated border rounded-sm overflow-hidden"
     >
       <div
         onClick={() => setExpanded(!expanded)}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 12,
-          padding: '14px 16px', cursor: 'pointer',
-          borderLeft: '3px solid var(--red-600)',
-        }}
+        className="flex items-center gap-3 p-3 cursor-pointer"
+        style={{ borderLeft: '3px solid var(--red-600)' }}
       >
-        <div style={{
-          width: 38, height: 38, borderRadius: 10,
-          background: 'var(--bg-elevated)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
-        }}>
+        <div className="flex items-center justify-center flex-shrink-0 rounded-sm bg-elevated" style={{ width: 38, height: 38 }}>
           <Scale size={18} color="var(--red-600)" />
         </div>
-        <div style={{ flex: 1 }}>
-          <div style={{
-            fontSize: '0.72rem', fontWeight: 600, color: 'var(--red-600)',
-            letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 2,
-          }}>
+        <div className="flex-1">
+          <div className="mono-xs font-semibold text-accent uppercase mb-0" style={{ letterSpacing: '0.04em' }}>
             AI Consensus
           </div>
-          <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary, #111)' }}>
+          <div className="text-sm font-semibold text-primary">
             {verdict?.decision || 'Weighted Average'}
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--red-600)' }}>
-            {formatCurrency(assessment.assessedValue)}
-          </div>
-          <div style={{
-            fontSize: '0.72rem', fontWeight: 600,
-            color: divergenceColor(divergence),
-          }}>
+        <div className="text-right">
+          <div className="text-xl font-bold text-accent">{formatCurrency(assessment.assessedValue)}</div>
+          <div className="mono-xs font-semibold" style={{ color: divergenceColor(divergence) }}>
             {divergence.toFixed(1)}% divergence
           </div>
         </div>
         <motion.div animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.15 }}>
-          <ChevronRight size={16} color="var(--text-tertiary, #9ca3af)" />
+          <ChevronRight size={16} className="text-tertiary" />
         </motion.div>
       </div>
 
@@ -278,33 +213,20 @@ const ConsensusCard: React.FC<{
             transition={{ duration: 0.2 }}
             style={{ overflow: 'hidden' }}
           >
-            <div style={{
-              padding: '0 16px 16px',
-              borderTop: '1px solid var(--border)',
-            }}>
+            <div className="p-4 border-t">
               {/* How consensus works */}
-              <div style={{
-                margin: '12px 0',
-                padding: '12px 14px',
-                background: 'var(--bg-surface, #f3f4f6)',
-                borderRadius: 8,
-                fontSize: '0.82rem',
-                lineHeight: 1.65,
-                color: 'var(--text-secondary, #6b7280)',
-              }}>
-                <div style={{ fontWeight: 600, color: 'var(--text-primary, #111)', marginBottom: 6 }}>
-                  How the consensus was reached:
-                </div>
+              <div className="bg-sunken rounded-sm p-3 text-sm leading-relaxed text-secondary mb-3">
+                <div className="font-semibold text-primary mb-2">How the consensus was reached:</div>
                 {divergence <= 15 ? (
                   <span>
-                    Both agents <strong style={{ color: 'var(--text-secondary)' }}>agreed within 15%</strong>, so the final value is a
+                    Both agents <strong className="text-secondary">agreed within 15%</strong>, so the final value is a
                     confidence-weighted average. Agent A's valuation ({formatCurrency(assessment.valuationA.value)}) was weighted at{' '}
                     <strong>{(assessment.valuationA.confidence * 100).toFixed(0)}%</strong> confidence, and Agent B's
                     ({formatCurrency(assessment.valuationB.value)}) at <strong>{(assessment.valuationB.confidence * 100).toFixed(0)}%</strong>.
                   </span>
                 ) : (
                   <span>
-                    Agents <strong style={{ color: 'var(--text-tertiary)' }}>diverged by {divergence.toFixed(1)}%</strong> - a jury
+                    Agents <strong className="text-tertiary">diverged by {divergence.toFixed(1)}%</strong> - a jury
                     panel of 3 independent AI jurors deliberated in 2 rounds. In Round 1, each juror independently
                     evaluated both valuations. In Round 2, jurors reviewed each other's reasoning and revised their
                     votes. Final verdict was weighted by each juror's on-chain reputation score.
@@ -313,43 +235,34 @@ const ConsensusCard: React.FC<{
               </div>
 
               {/* Divergence bar visualization */}
-              <div style={{ marginBottom: 8 }}>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary, #9ca3af)', marginBottom: 6, fontWeight: 600 }}>
-                  VALUATION RANGE
-                </div>
-                <div style={{
-                  position: 'relative', height: 28,
-                  background: 'var(--bg-surface, #f3f4f6)',
-                  borderRadius: 6, overflow: 'hidden',
-                }}>
+              <div className="mb-2">
+                <div className="mono-xs text-tertiary font-semibold mb-2">VALUATION RANGE</div>
+                <div className="relative bg-sunken rounded-sm overflow-hidden" style={{ height: 28 }}>
                   {/* Range fill */}
-                  <div style={{
-                    position: 'absolute',
-                    left: `${(Math.min(assessment.valuationA.value, assessment.valuationB.value) / Math.max(assessment.valuationA.value, assessment.valuationB.value)) * 20}%`,
-                    right: '20%',
-                    top: 0, bottom: 0,
-                    background: `linear-gradient(90deg, rgba(107,114,128,0.12), rgba(107,114,128,0.22))`,
-                    borderRadius: 6,
-                  }} />
+                  <div
+                    className="absolute rounded-sm"
+                    style={{
+                      left: `${(Math.min(assessment.valuationA.value, assessment.valuationB.value) / Math.max(assessment.valuationA.value, assessment.valuationB.value)) * 20}%`,
+                      right: '20%',
+                      top: 0, bottom: 0,
+                      background: 'linear-gradient(90deg, rgba(107,114,128,0.12), rgba(107,114,128,0.22))',
+                    }}
+                  />
                   {/* Consensus marker */}
-                  <div style={{
-                    position: 'absolute',
-                    left: `${((assessment.assessedValue - Math.min(assessment.valuationA.value, assessment.valuationB.value)) /
-                      (Math.max(assessment.valuationA.value, assessment.valuationB.value) - Math.min(assessment.valuationA.value, assessment.valuationB.value) || 1)) * 60 + 20}%`,
-                    top: 2, bottom: 2,
-                    width: 3, background: 'var(--text-primary)', borderRadius: 2,
-                  }} />
+                  <div
+                    className="absolute rounded-sm"
+                    style={{
+                      left: `${((assessment.assessedValue - Math.min(assessment.valuationA.value, assessment.valuationB.value)) /
+                        (Math.max(assessment.valuationA.value, assessment.valuationB.value) - Math.min(assessment.valuationA.value, assessment.valuationB.value) || 1)) * 60 + 20}%`,
+                      top: 2, bottom: 2,
+                      width: 3, background: 'var(--text-primary)',
+                    }}
+                  />
                   {/* Labels */}
-                  <div style={{
-                    position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)',
-                    fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)',
-                  }}>
+                  <div className="absolute text-xs font-bold text-secondary" style={{ left: 8, top: '50%', transform: 'translateY(-50%)' }}>
                     {formatCurrency(Math.min(assessment.valuationA.value, assessment.valuationB.value))}
                   </div>
-                  <div style={{
-                    position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
-                    fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)',
-                  }}>
+                  <div className="absolute text-xs font-bold text-secondary" style={{ right: 8, top: '50%', transform: 'translateY(-50%)' }}>
                     {formatCurrency(Math.max(assessment.valuationA.value, assessment.valuationB.value))}
                   </div>
                 </div>
@@ -357,29 +270,20 @@ const ConsensusCard: React.FC<{
 
               {/* Methodology */}
               {assessment.methodology && (
-                <div style={{ marginTop: 12 }}>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary, #9ca3af)', marginBottom: 6, fontWeight: 600 }}>
+                <div className="mt-3">
+                  <div className="mono-xs text-tertiary font-semibold mb-2">
                     {assessment.methodology.title.toUpperCase()}
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary, #6b7280)', lineHeight: 1.6, marginBottom: 8 }}>
+                  <div className="text-xs text-secondary leading-normal mb-2">
                     {assessment.methodology.description}
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div className="flex flex-col gap-1">
                     {assessment.methodology.methods.map((m, i) => (
-                      <div key={i} style={{
-                        display: 'flex', alignItems: 'flex-start', gap: 8,
-                        padding: '8px 10px', borderRadius: 6,
-                        background: 'var(--bg-elevated, #fff)',
-                        border: '1px solid var(--border-color, #e5e7eb)',
-                      }}>
-                        <Zap size={13} color="var(--red-600)" style={{ marginTop: 2, flexShrink: 0 }} />
+                      <div key={i} className="flex items-start gap-2 p-2 rounded-sm bg-elevated border">
+                        <Zap size={13} color="var(--red-600)" className="mt-0 flex-shrink-0" />
                         <div>
-                          <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-primary, #111)' }}>
-                            {m.name}
-                          </div>
-                          <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary, #9ca3af)', lineHeight: 1.5 }}>
-                            {m.description}
-                          </div>
+                          <div className="text-xs font-semibold text-primary">{m.name}</div>
+                          <div className="mono-xs text-tertiary leading-normal">{m.description}</div>
                         </div>
                       </div>
                     ))}
@@ -398,18 +302,11 @@ const ConsensusCard: React.FC<{
 
 export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insurance, loan }) => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div className="flex flex-col gap-2">
       {/* Section header */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 8,
-        marginBottom: 4,
-      }}>
+      <div className="flex items-center gap-2 mb-1">
         <Activity size={16} color="var(--primary, #ef4444)" />
-        <span style={{
-          fontSize: '0.82rem', fontWeight: 700,
-          color: 'var(--text-primary, #111)',
-          letterSpacing: '0.02em',
-        }}>
+        <span className="text-sm font-bold text-primary" style={{ letterSpacing: '0.02em' }}>
           How AI Agents Reached This Result
         </span>
       </div>
@@ -449,64 +346,40 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.3 }}
-          style={{
-            background: 'var(--bg-elevated, #fff)',
-            border: '1px solid var(--border-color, #e5e7eb)',
-            borderRadius: 12,
-            padding: '16px',
-            borderLeft: `3px solid ${riskColor(insurance.riskScore)}`,
-          }}
+          className="bg-elevated border rounded-sm p-4"
+          style={{ borderLeft: `3px solid ${riskColor(insurance.riskScore)}` }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <div className="flex items-center gap-2 mb-3">
             <Shield size={18} color={riskColor(insurance.riskScore)} />
             <div>
-              <div style={{
-                fontSize: '0.72rem', fontWeight: 600, color: riskColor(insurance.riskScore),
-                letterSpacing: '0.04em', textTransform: 'uppercase',
-              }}>
+              <div className="mono-xs font-semibold uppercase" style={{ color: riskColor(insurance.riskScore), letterSpacing: '0.04em' }}>
                 Risk Analysis
               </div>
-              <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary, #111)' }}>
+              <div className="text-sm font-semibold text-primary">
                 {insurance.tier} - Risk Score {insurance.riskScore}/100
               </div>
             </div>
           </div>
 
           {/* Risk gauge */}
-          <div style={{ marginBottom: 12 }}>
-            <div style={{
-              height: 8, borderRadius: 4,
-              background: 'var(--bg-surface, #f3f4f6)',
-              overflow: 'hidden',
-            }}>
+          <div className="mb-3">
+            <div className="bg-sunken rounded-full overflow-hidden" style={{ height: 8 }}>
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${insurance.riskScore}%` }}
                 transition={{ duration: 0.8, ease: 'easeOut', delay: 0.4 }}
-                style={{
-                  height: '100%', borderRadius: 4,
-                  background: 'var(--bg-inset)',
-                }}
+                className="h-full rounded-full bg-inset"
               />
             </div>
-            <div style={{
-              display: 'flex', justifyContent: 'space-between',
-              fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', marginTop: 4,
-            }}>
+            <div className="flex justify-between mono-xs text-tertiary mt-1">
               <span>Low Risk</span>
               <span>High Risk</span>
             </div>
           </div>
 
           {/* How risk was calculated */}
-          <div style={{
-            fontSize: '0.78rem', lineHeight: 1.65,
-            color: 'var(--text-secondary, #6b7280)',
-            background: 'var(--bg-surface, #f3f4f6)',
-            borderRadius: 8, padding: '10px 12px',
-            marginBottom: 12,
-          }}>
-            Risk is calculated from <strong>assessment confidence</strong> ({(assessment.valuationA.confidence * 100).toFixed(0)}% &times; {(assessment.valuationB.confidence * 100).toFixed(0)}%) 
+          <div className="text-xs leading-relaxed text-secondary bg-sunken rounded-sm p-3 mb-3">
+            Risk is calculated from <strong>assessment confidence</strong> ({(assessment.valuationA.confidence * 100).toFixed(0)}% &times; {(assessment.valuationB.confidence * 100).toFixed(0)}%)
             and <strong>value-to-asking ratio</strong> ({((assessment.assessedValue / assessment.askingPrice) * 100).toFixed(0)}%).
             {insurance.riskScore <= 30 && ' Both signals are strong → low risk → lower premium.'}
             {insurance.riskScore > 30 && insurance.riskScore <= 55 && ' Moderate signals → standard risk → standard premium.'}
@@ -514,58 +387,28 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
           </div>
 
           {/* Coverage & Premium breakdown */}
-          <div style={{
-            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8,
-            marginBottom: 12,
-          }}>
-            <div style={{
-              padding: '10px 12px', borderRadius: 8,
-              background: 'var(--success-soft)',
-              border: '1px solid var(--success)',
-            }}>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>COVERAGE</div>
-              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                {formatCurrency(insurance.coverageAmount)}
-              </div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-tertiary, #9ca3af)' }}>
+          <div className="grid grid-2 gap-2 mb-3">
+            <div className="p-3 rounded-sm bg-success-soft border border-success">
+              <div className="mono-xs text-tertiary font-semibold">COVERAGE</div>
+              <div className="text-base font-bold text-secondary">{formatCurrency(insurance.coverageAmount)}</div>
+              <div className="mono-xs text-tertiary">
                 {((insurance.coverageAmount / assessment.assessedValue) * 100).toFixed(0)}% of AI valuation
               </div>
             </div>
-            <div style={{
-              padding: '10px 12px', borderRadius: 8,
-              background: 'rgba(139,92,246,0.04)',
-              border: '1px solid var(--border)',
-            }}>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>MONTHLY PREMIUM</div>
-              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--red-600)' }}>
-                {insurance.premiumCSPR} CSPR
-              </div>
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-tertiary, #9ca3af)' }}>
-                {insurance.deductiblePercent}% deductible applies
-              </div>
+            <div className="p-3 rounded-sm border bg-elevated">
+              <div className="mono-xs text-tertiary font-semibold">MONTHLY PREMIUM</div>
+              <div className="text-base font-bold text-accent">{insurance.premiumCSPR} CSPR</div>
+              <div className="mono-xs text-tertiary">{insurance.deductiblePercent}% deductible applies</div>
             </div>
           </div>
 
           {/* Risk factors */}
           {insurance.riskFactors.length > 0 && (
-            <div style={{
-              padding: '10px 12px', borderRadius: 8,
-              background: 'var(--warning-soft)',
-              border: '1px solid var(--warning)',
-            }}>
-              <div style={{
-                fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-tertiary)',
-                marginBottom: 6,
-              }}>
-                RISK FACTORS IDENTIFIED
-              </div>
+            <div className="p-3 rounded-sm bg-warning-soft border border-warning">
+              <div className="mono-xs font-semibold text-tertiary mb-2">RISK FACTORS IDENTIFIED</div>
               {insurance.riskFactors.map((f, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  fontSize: '0.78rem', color: 'var(--text-secondary, #6b7280)',
-                  marginBottom: 4,
-                }}>
-                  <AlertTriangle size={12} color="var(--text-tertiary)" />
+                <div key={i} className="flex items-center gap-1 text-xs text-secondary mb-1">
+                  <AlertTriangle size={12} className="text-tertiary" />
                   {f}
                 </div>
               ))}
@@ -580,37 +423,23 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.3 }}
-          style={{
-            background: 'var(--bg-elevated, #fff)',
-            border: '1px solid var(--border-color, #e5e7eb)',
-            borderRadius: 12,
-            padding: '16px',
-            borderLeft: '3px solid var(--red-600)',
-          }}
+          className="bg-elevated border rounded-sm p-4"
+          style={{ borderLeft: '3px solid var(--red-600)' }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={18} color="var(--red-600)" />
             <div>
-              <div style={{
-                fontSize: '0.72rem', fontWeight: 600, color: 'var(--red-600)',
-                letterSpacing: '0.04em', textTransform: 'uppercase',
-              }}>
+              <div className="mono-xs font-semibold text-accent uppercase" style={{ letterSpacing: '0.04em' }}>
                 LTV Decision Explained
               </div>
-              <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary, #111)' }}>
+              <div className="text-sm font-semibold text-primary">
                 {loan.ltvRatio.toFixed(0)}% Loan-to-Value Ratio
               </div>
             </div>
           </div>
 
           {/* LTV explanation */}
-          <div style={{
-            fontSize: '0.78rem', lineHeight: 1.65,
-            color: 'var(--text-secondary, #6b7280)',
-            background: 'var(--bg-surface, #f3f4f6)',
-            borderRadius: 8, padding: '10px 12px',
-            marginBottom: 12,
-          }}>
+          <div className="text-xs leading-relaxed text-secondary bg-sunken rounded-sm p-3 mb-3">
             The AI calculated an LTV of <strong>{loan.ltvRatio.toFixed(0)}%</strong> based on the asset's
             assessment confidence and market data quality. This means you can borrow up to{' '}
             <strong>{formatCurrency(loan.loanAmountCSPR)}</strong> against your collateral valued at{' '}
@@ -622,39 +451,22 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
 
           {/* Trust breakdown if available */}
           {loan.trustBreakdown && (
-            <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8,
-            }}>
-              <div style={{
-                padding: '10px', borderRadius: 8,
-                background: 'var(--bg-elevated)',
-                border: '1px solid var(--border)',
-                textAlign: 'center',
-              }}>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>CONFIDENCE</div>
-                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--red-600)' }}>
+            <div className="grid grid-3 gap-2">
+              <div className="p-2 rounded-sm bg-elevated border text-center">
+                <div className="mono-xs text-tertiary font-semibold">CONFIDENCE</div>
+                <div className="text-base font-bold text-accent">
                   {(loan.trustBreakdown.confidence * 100).toFixed(0)}%
                 </div>
               </div>
-              <div style={{
-                padding: '10px', borderRadius: 8,
-                background: 'var(--bg-elevated)',
-                border: '1px solid var(--border)',
-                textAlign: 'center',
-              }}>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>VALUE RATIO</div>
-                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--red-600)' }}>
+              <div className="p-2 rounded-sm bg-elevated border text-center">
+                <div className="mono-xs text-tertiary font-semibold">VALUE RATIO</div>
+                <div className="text-base font-bold text-accent">
                   {(loan.trustBreakdown.valueRatio * 100).toFixed(0)}%
                 </div>
               </div>
-              <div style={{
-                padding: '10px', borderRadius: 8,
-                background: 'var(--bg-elevated)',
-                border: '1px solid var(--border)',
-                textAlign: 'center',
-              }}>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>LTV RANGE</div>
-                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--red-600)' }}>
+              <div className="p-2 rounded-sm bg-elevated border text-center">
+                <div className="mono-xs text-tertiary font-semibold">LTV RANGE</div>
+                <div className="text-base font-bold text-accent">
                   {loan.trustBreakdown.ltvRange}
                 </div>
               </div>
@@ -662,13 +474,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
           )}
 
           {/* Liquidation warning */}
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            marginTop: 12, padding: '8px 10px',
-            background: 'var(--warning-soft)',
-            borderRadius: 6,
-            fontSize: '0.72rem', color: 'var(--text-tertiary)',
-          }}>
+          <div className="flex items-center gap-1 mt-3 p-2 bg-warning-soft rounded-sm mono-xs text-tertiary">
             <AlertTriangle size={13} />
             A Borrow Keeper monitors collateral value every 30 minutes. If LTV exceeds 80%, a margin call is issued. At 90%, automatic liquidation triggers.
           </div>

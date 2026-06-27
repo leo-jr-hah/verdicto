@@ -25,7 +25,7 @@
 - [x] 4.2 All hardcoded values tokenized (font-size, font-weight, gap, padding, margin, border-radius, letter-spacing)
 
 ## Phase 5: Shared Components
-- [ ] 5.1 WalletConnectButton, PaymentModal, AgentExplainer CSS
+- [x] 5.1 WalletConnectButton, PaymentModal, AgentExplainer CSS — converted to brutalism utility classes
 
 ## Phase 6: Cleanup & Build
 - [x] 6.1 Remove all `--nm-*` references from codebase (0 remaining)
