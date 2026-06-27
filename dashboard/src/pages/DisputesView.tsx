@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Gavel, RefreshCw, Swords, Scale, AlertTriangle, Shield, ChevronDown, ChevronUp, Activity, ArrowLeft, Loader2, ExternalLink } from 'lucide-react';
+import { Gavel, RefreshCw, Scale, AlertTriangle, Shield, ChevronDown, ChevronUp, Activity, ArrowLeft, Loader2, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { fetchOracleVerdicts, fetchDisputes, fileDispute, triggerRetrial, type OracleVerdict, type Dispute } from '../services/api';
@@ -169,7 +169,7 @@ export const DisputesView: React.FC = () => {
         {[
           { label: 'Total Disputes', value: stats.total, icon: Gavel, color: 'var(--text-primary)' },
           { label: 'Pending', value: stats.pending, icon: AlertTriangle, color: 'var(--text-tertiary)' },
-          { label: 'Under Re-trial', value: stats.underRetrial, icon: Swords, color: 'var(--red-600)' },
+          { label: 'Under Re-trial', value: stats.underRetrial, icon: RefreshCw, color: 'var(--red-600)' },
           { label: 'Resolved', value: stats.resolved, icon: Scale, color: 'var(--text-secondary)' },
           { label: 'Overturned', value: stats.overturned, icon: Shield, color: 'var(--error)' },
           { label: 'Upheld', value: stats.upheld, icon: Activity, color: 'var(--text-secondary)' },
@@ -221,7 +221,7 @@ export const DisputesView: React.FC = () => {
             background: 'var(--error-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
           }}>
-            <Swords size={24} style={{ color: 'var(--error)' }} />
+            <Scale size={24} style={{ color: 'var(--error)' }} />
           </div>
           <div>
             <h3 style={{ margin: '0 0 8px', fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -298,15 +298,18 @@ export const DisputesView: React.FC = () => {
                   </div>
                 </div>
                 {activeDisputedAssets.has(v.assetId) ? (
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: '6px',
-                    padding: '8px 16px', borderRadius: '8px',
-                    border: '1px solid var(--warning-border)', background: 'var(--warning-bg)',
-                    color: 'var(--text-tertiary)', fontSize: '0.82rem', fontWeight: 600,
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '5px',
+                    padding: '5px 12px', borderRadius: '6px',
+                    background: 'rgba(245, 158, 11, 0.1)',
+                    border: '1px solid rgba(245, 158, 11, 0.25)',
+                    color: '#D97706',
+                    fontSize: '0.75rem', fontWeight: 600,
+                    whiteSpace: 'nowrap',
                   }}>
-                    <AlertTriangle size={14} />
-                    Dispute Active
-                  </div>
+                    <AlertTriangle size={12} />
+                    Disputed
+                  </span>
                 ) : (
                   <button
                     onClick={() => {
@@ -317,7 +320,7 @@ export const DisputesView: React.FC = () => {
                     }}
                     className="dispute-challenge-btn"
                   >
-                    <Swords size={14} />
+                    <Scale size={13} />
                     Challenge
                   </button>
                 )}
@@ -382,21 +385,21 @@ export const DisputesView: React.FC = () => {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                       <span style={{
-                        fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 600,
+                        fontSize: '0.7rem', padding: '3px 10px', borderRadius: '6px', fontWeight: 600,
                         ...(d.status === 'pending'
-                          ? { background: 'rgba(245,158,11,0.12)', color: 'var(--text-tertiary)' }
+                          ? { background: 'rgba(245, 158, 11, 0.1)', color: '#D97706', border: '1px solid rgba(245, 158, 11, 0.2)' }
                           : d.status === 'under_retrial'
-                          ? { background: 'var(--bg-elevated)', color: 'var(--red-600)' }
-                          : { background: 'rgba(16,185,129,0.12)', color: 'var(--text-secondary)' }),
+                          ? { background: 'rgba(124, 58, 237, 0.1)', color: '#7C3AED', border: '1px solid rgba(124, 58, 237, 0.2)' }
+                          : { background: 'rgba(16, 185, 129, 0.1)', color: '#059669', border: '1px solid rgba(16, 185, 129, 0.2)' }),
                       }}>
                         {d.status === 'under_retrial' ? 'Re-trial' : d.status.charAt(0).toUpperCase() + d.status.slice(1)}
                       </span>
                       {d.outcome && (
                         <span style={{
-                          fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 600,
+                          fontSize: '0.7rem', padding: '3px 10px', borderRadius: '6px', fontWeight: 600,
                           ...(d.outcome === 'overturned'
-                            ? { background: 'rgba(239,68,68,0.12)', color: 'var(--error)' }
-                            : { background: 'rgba(16,185,129,0.12)', color: 'var(--text-secondary)' }),
+                            ? { background: 'rgba(239, 68, 68, 0.1)', color: '#DC2626', border: '1px solid rgba(239, 68, 68, 0.2)' }
+                            : { background: 'rgba(16, 185, 129, 0.1)', color: '#059669', border: '1px solid rgba(16, 185, 129, 0.2)' }),
                         }}>
                           {d.outcome === 'overturned' ? 'Overturned' : 'Upheld'}
                         </span>
@@ -624,7 +627,7 @@ export const DisputesView: React.FC = () => {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 1rem',
           }}>
-            <Swords size={24} color="var(--error)" />
+            <Scale size={24} color="var(--error)" />
           </div>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
             Challenge Verdict
@@ -713,7 +716,7 @@ export const DisputesView: React.FC = () => {
           onConfirm={handleReasonSubmit}
           confirmLabel="Continue to Payment"
           confirmDisabled={!disputeReason.trim() || !wallet.connected}
-          confirmIcon={<Swords size={16} />}
+          confirmIcon={<Scale size={16} />}
         />
       </AppModal>
 

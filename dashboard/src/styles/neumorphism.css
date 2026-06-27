@@ -847,24 +847,25 @@
 .dispute-challenge-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 20px;
+  gap: 5px;
+  padding: 6px 14px;
   cursor: pointer;
-  border: 2px solid var(--accent);
-  border-radius: 8px;
-  font-size: 0.82rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  font-size: 0.78rem;
   font-weight: 600;
   font-family: inherit;
   color: white;
   background: var(--accent);
-  transition: all 180ms ease-out;
+  transition: all 150ms ease-out;
+  white-space: nowrap;
 }
 
 .dispute-challenge-btn:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
+  background: var(--accent-hover, #c0392b);
+  border-color: var(--accent-hover, #c0392b);
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px var(--accent-glow);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .dispute-challenge-btn:active {
