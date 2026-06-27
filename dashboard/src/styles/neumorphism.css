@@ -838,3 +838,200 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   DISPUTE VIEW — BUTTONS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Challenge Button (Uiverse.io by cssbuttons-io) ─────────────────────────
+   Expanding circle fill on hover. Uses --nm-accent (red brand).
+   The ::before pseudo-element is a circle that scales up from bottom-right
+   to fill the entire button on hover.
+────────────────────────────────────────────────────────────────────────────── */
+.dispute-challenge-btn {
+  --color: var(--nm-accent);
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  border: 2px solid var(--color);
+  transition: color 0.5s ease;
+  z-index: 1;
+  font-size: 0.82rem;
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--color);
+  background: transparent;
+}
+
+.dispute-challenge-btn::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  background: var(--color);
+  height: 150px;
+  width: 200px;
+  border-radius: 50%;
+  top: 100%;
+  left: 100%;
+  transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dispute-challenge-btn:hover {
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px var(--nm-accent-glow);
+}
+
+.dispute-challenge-btn:hover::before {
+  top: -30px;
+  left: -30px;
+}
+
+.dispute-challenge-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.dispute-challenge-btn:active::before {
+  background: var(--nm-accent-hover);
+  transition: background 0s;
+}
+
+/* ── Refresh Button (neumorphic) ──────────────────────────────────────────── */
+.dispute-refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  background: var(--nm-base);
+  color: var(--nm-text-secondary);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-family: inherit;
+  box-shadow:
+    4px 4px 10px var(--nm-shadow-dark),
+    -4px -4px 10px var(--nm-shadow-light);
+  transition: all 0.2s ease;
+}
+
+.dispute-refresh-btn:hover {
+  box-shadow:
+    6px 6px 14px var(--nm-shadow-dark-deep),
+    -6px -6px 14px var(--nm-shadow-light-deep);
+  color: var(--nm-text-primary);
+}
+
+.dispute-refresh-btn:active {
+  box-shadow:
+    inset 3px 3px 6px var(--nm-shadow-dark),
+    inset -3px -3px 6px var(--nm-shadow-light);
+}
+
+/* ── Filter Tabs (neumorphic) ─────────────────────────────────────────────── */
+.dispute-filter-tab {
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: var(--nm-text-muted);
+  box-shadow: none;
+}
+
+.dispute-filter-tab:hover {
+  color: var(--nm-text-secondary);
+  background: rgba(var(--nm-base-rgb), 0.6);
+}
+
+.dispute-filter-tab--active {
+  background: var(--nm-base);
+  color: var(--nm-accent);
+  font-weight: 600;
+  box-shadow:
+    inset 2px 2px 5px var(--nm-shadow-dark),
+    inset -2px -2px 5px var(--nm-shadow-light);
+}
+
+/* ── Modal Buttons (neumorphic) ───────────────────────────────────────────── */
+.dispute-modal-cancel-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 10px;
+  border: none;
+  background: var(--nm-base);
+  color: var(--nm-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow:
+    4px 4px 10px var(--nm-shadow-dark),
+    -4px -4px 10px var(--nm-shadow-light);
+  transition: all 0.2s ease;
+}
+
+.dispute-modal-cancel-btn:hover {
+  box-shadow:
+    6px 6px 14px var(--nm-shadow-dark-deep),
+    -6px -6px 14px var(--nm-shadow-light-deep);
+  color: var(--nm-text-primary);
+}
+
+.dispute-modal-cancel-btn:active {
+  box-shadow:
+    inset 3px 3px 6px var(--nm-shadow-dark),
+    inset -3px -3px 6px var(--nm-shadow-light);
+}
+
+.dispute-modal-submit-btn {
+  flex: 2;
+  padding: 0.75rem;
+  border-radius: 10px;
+  border: none;
+  background: var(--nm-accent);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow:
+    4px 4px 10px var(--nm-shadow-dark),
+    -4px -4px 10px var(--nm-shadow-light),
+    0 2px 12px var(--nm-accent-glow);
+  transition: all 0.2s ease;
+}
+
+.dispute-modal-submit-btn:hover:not(:disabled) {
+  background: var(--nm-accent-hover);
+  box-shadow:
+    6px 6px 14px var(--nm-shadow-dark-deep),
+    -6px -6px 14px var(--nm-shadow-light-deep),
+    0 4px 20px var(--nm-accent-glow);
+  transform: translateY(-1px);
+}
+
+.dispute-modal-submit-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.dispute-modal-submit-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+  background: var(--nm-text-placeholder);
+}

@@ -154,13 +154,7 @@ export const DisputesView: React.FC = () => {
             <button
               onClick={loadData}
               disabled={loading}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                padding: '8px 16px', borderRadius: '8px',
-                border: '1px solid var(--border-color)', background: 'var(--bg-primary)',
-                color: 'var(--text-primary)', cursor: loading ? 'wait' : 'pointer',
-                fontSize: '0.85rem', fontWeight: 500,
-              }}
+              className="dispute-refresh-btn"
             >
               <RefreshCw size={14} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
               Refresh
@@ -320,12 +314,7 @@ export const DisputesView: React.FC = () => {
                       }
                       setShowReasonModal(v.assetId);
                     }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '6px',
-                      padding: '8px 16px', borderRadius: '8px',
-                      border: '1px solid var(--error-border)', background: 'var(--error-bg)',
-                      color: 'var(--error)', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
-                    }}
+                    className="dispute-challenge-btn"
                   >
                     <Swords size={14} />
                     Challenge
@@ -362,13 +351,7 @@ export const DisputesView: React.FC = () => {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                style={{
-                  padding: '4px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 500,
-                  border: '1px solid', cursor: 'pointer',
-                  ...(filter === f
-                    ? { background: 'var(--bg-elevated)', borderColor: 'var(--border-color)', color: 'var(--red-600)' }
-                    : { background: 'transparent', borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }),
-                }}
+                className={`dispute-filter-tab ${filter === f ? 'dispute-filter-tab--active' : ''}`}
               >
                 {f === 'active' ? `Active (${disputes.filter(d => d.status !== 'resolved').length})` : f === 'under_retrial' ? 'Re-trial' : f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
@@ -761,25 +744,14 @@ export const DisputesView: React.FC = () => {
               <div style={{ display: 'flex', gap: '0.75rem' }}>
                 <button
                   onClick={handleReasonCancel}
-                  style={{
-                    flex: 1, padding: '0.75rem', borderRadius: '8px',
-                    border: '1px solid var(--border-color)', background: 'transparent',
-                    color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer',
-                  }}
+                  className="dispute-modal-cancel-btn"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleReasonSubmit}
                   disabled={!disputeReason.trim() || !wallet.connected}
-                  style={{
-                    flex: 2, padding: '0.75rem', borderRadius: '8px', border: 'none',
-                    background: (!disputeReason.trim() || !wallet.connected) ? 'var(--bg-surface-alt)' : 'var(--error)',
-                    color: 'var(--text-inverse)', cursor: (!disputeReason.trim() || !wallet.connected) ? 'not-allowed' : 'pointer',
-                    fontSize: '0.9rem', fontWeight: 600,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                    opacity: (!disputeReason.trim() || !wallet.connected) ? 0.5 : 1,
-                  }}
+                  className="dispute-modal-submit-btn"
                 >
                   <Swords size={16} />
                   Continue to Payment
