@@ -3120,6 +3120,7 @@ a:focus-visible {
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
+  text-decoration: none;
   margin-top: auto;
   padding-top: var(--space-4);
   cursor: pointer;
