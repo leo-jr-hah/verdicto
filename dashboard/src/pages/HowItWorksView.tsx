@@ -157,9 +157,9 @@ const LayerCard: React.FC<{ layer: typeof LAYERS[0]; isOpen: boolean; onToggle: 
     <div
       onClick={onToggle}
       style={{
-        display: 'flex', alignItems: 'center', gap: 'var(--sp-4)',
-        padding: 'var(--sp-5)', cursor: 'pointer', userSelect: 'none',
-        transition: 'background var(--transition-fast)',
+        display: 'flex', alignItems: 'center', gap: 'var(--space-4)',
+        padding: 'var(--space-5)', cursor: 'pointer', userSelect: 'none',
+        transition: 'background var(--duration-fast) var(--ease-out-expo)',
       }}
     >
       <div style={{
@@ -170,17 +170,17 @@ const LayerCard: React.FC<{ layer: typeof LAYERS[0]; isOpen: boolean; onToggle: 
         {layer.icon}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-sans)' }}>
           {layer.title}
         </div>
         <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginTop: 2 }}>
           {layer.subtitle}
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 'var(--sp-2)', flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap: 'var(--space-2)', flexShrink: 0 }}>
         {layer.stats.map(s => (
           <span key={s} style={{
-            fontSize: 11, color: 'var(--text-tertiary)', background: 'var(--bg-surface)',
+            fontSize: 11, color: 'var(--text-tertiary)', background: 'var(--bg-elevated)',
             padding: '3px 8px', borderRadius: 6, whiteSpace: 'nowrap',
           }}>
             {s}
@@ -198,9 +198,9 @@ const LayerCard: React.FC<{ layer: typeof LAYERS[0]; isOpen: boolean; onToggle: 
           transition={{ duration: 0.25 }}
           style={{ overflow: 'hidden' }}
         >
-          <div style={{ padding: '0 var(--sp-5) var(--sp-5)', borderTop: '1px solid var(--border-color)' }}>
+          <div style={{ padding: '0 var(--space-5) var(--space-5)', borderTop: '1px solid var(--border)' }}>
             {layer.items.map((item, i) => (
-              <div key={item.label} style={{ paddingTop: i > 0 ? 'var(--sp-3)' : 'var(--sp-4)' }}>
+              <div key={item.label} style={{ paddingTop: i > 0 ? 'var(--space-3)' : 'var(--space-4)' }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>
                   {item.label}
                 </div>
@@ -229,15 +229,15 @@ const FlowDiagram: React.FC<{ flow: typeof FLOWS[0]; index: number }> = ({ flow,
       initial={{ opacity: 0, y: 24 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      style={{ padding: 'var(--sp-5)' }}
+      style={{ padding: 'var(--space-5)' }}
     >
       <div style={{
-        fontSize: 14, fontWeight: 600, color: flow.color, marginBottom: 'var(--sp-4)',
-        fontFamily: 'var(--font-display)', letterSpacing: '-0.01em',
+        fontSize: 14, fontWeight: 600, color: flow.color, marginBottom: 'var(--space-4)',
+        fontFamily: 'var(--font-sans)', letterSpacing: '-0.01em',
       }}>
         {flow.title}
       </div>
-      <div className="flow-diagram-container" style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-2)', overflowX: 'auto', paddingBottom: 'var(--sp-2)' }}>
+      <div className="flow-diagram-container" style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', overflowX: 'auto', paddingBottom: 'var(--space-2)' }}>
         {flow.steps.map((step, i) => (
           <React.Fragment key={step.label}>
             <div style={{ flex: 1, minWidth: 120, textAlign: 'center' }}>
@@ -280,7 +280,7 @@ const AgentTable: React.FC = () => (
                 textAlign: 'left', padding: '10px 14px',
                 color: 'var(--text-tertiary)', fontWeight: 600, fontSize: 11,
                 textTransform: 'uppercase', letterSpacing: '0.05em',
-                borderBottom: '1px solid var(--border-color)',
+                borderBottom: '1px solid var(--border)',
               }}>
                 {h}
               </th>
@@ -290,23 +290,23 @@ const AgentTable: React.FC = () => (
         <tbody>
           {AGENTS.map(agent => (
             <tr key={agent.name}>
-              <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)' }}>
+              <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text-primary)', borderBottom: '1px solid var(--border)' }}>
                 {agent.name}
               </td>
-              <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--border-color)' }}>
+              <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)' }}>
                 <span style={{
                   display: 'inline-block', padding: '2px 8px', borderRadius: 6,
                   fontSize: 11, fontWeight: 500,
-                  background: agent.role === 'Primary Valuator' ? 'var(--bg-surface)' : 'var(--bg-elevated)',
+                  background: agent.role === 'Primary Valuator' ? 'var(--bg-elevated)' : 'var(--bg-elevated)',
                   color: agent.role === 'Primary Valuator' ? 'var(--text-secondary)' : 'var(--red-600)',
                 }}>
                   {agent.role}
                 </span>
               </td>
-              <td style={{ padding: '10px 14px', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)' }}>
+              <td style={{ padding: '10px 14px', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>
                 {agent.method}
               </td>
-              <td style={{ padding: '10px 14px', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)' }}>
+              <td style={{ padding: '10px 14px', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>
                 {agent.data}
               </td>
             </tr>
@@ -318,13 +318,13 @@ const AgentTable: React.FC = () => (
     {/* Mobile Card View */}
     <div className="mobile-card-view" style={{ padding: '1rem' }}>
       {AGENTS.map(agent => (
-        <div key={agent.name} style={{ background: 'var(--bg-surface-alt)', padding: '1rem', borderRadius: 12, border: '1px solid var(--border-color)' }}>
+        <div key={agent.name} style={{ background: 'var(--bg-sunken)', padding: '1rem', borderRadius: 12, border: '1px solid var(--border)' }}>
           <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>{agent.name}</div>
           <div style={{ marginBottom: 12 }}>
             <span style={{
               display: 'inline-block', padding: '2px 8px', borderRadius: 6,
               fontSize: 11, fontWeight: 500,
-              background: agent.role === 'Primary Valuator' ? 'var(--bg-surface)' : 'var(--bg-elevated)',
+              background: agent.role === 'Primary Valuator' ? 'var(--bg-elevated)' : 'var(--bg-elevated)',
               color: agent.role === 'Primary Valuator' ? 'var(--text-secondary)' : 'var(--red-600)',
             }}>
               {agent.role}
@@ -345,11 +345,11 @@ const AgentTable: React.FC = () => (
 // ─── Section Heading ──────────────────────────────────────────────────────────
 
 const SectionHeading: React.FC<{ icon: React.ReactNode; title: string; subtitle: string }> = ({ icon, title, subtitle }) => (
-  <div style={{ marginBottom: 'var(--sp-5)' }}>
+  <div style={{ marginBottom: 'var(--space-5)' }}>
     <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: 'var(--sp-2)',
+      display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)',
       fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)',
-      textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 'var(--sp-2)',
+      textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 'var(--space-2)',
     }}>
       {icon}
       <span>{title}</span>
@@ -366,14 +366,14 @@ export const HowItWorksView: React.FC = () => {
   const [openLayer, setOpenLayer] = useState<string | null>('frontend');
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: 'var(--sp-6) var(--sp-5) var(--sp-16)' }}>
+    <div style={{ maxWidth: 1100, margin: '0 auto', padding: 'var(--space-6) var(--space-5) var(--sp-16)' }}>
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <Reveal>
-        <div style={{ textAlign: 'center', padding: 'var(--sp-8) 0 var(--sp-12)' }}>
+        <div style={{ textAlign: 'center', padding: 'var(--space-8) 0 var(--sp-12)' }}>
           <h1 style={{
             fontSize: 'clamp(2rem, 4vw, 2.75rem)', fontWeight: 800,
-            fontFamily: 'var(--font-display)', letterSpacing: '-0.03em',
-            color: 'var(--text-primary)', lineHeight: 1.15, margin: '0 0 var(--sp-4)',
+            fontFamily: 'var(--font-sans)', letterSpacing: '-0.03em',
+            color: 'var(--text-primary)', lineHeight: 1.15, margin: '0 0 var(--space-4)',
           }}>
             How Verdicto Works
           </h1>
@@ -400,17 +400,17 @@ export const HowItWorksView: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.06 }}
-                style={{ padding: 'var(--sp-5)' }}
+                style={{ padding: 'var(--space-5)' }}
               >
                 <div style={{
                   width: 36, height: 36, borderRadius: 8,
-                  background: 'var(--bg-surface)', color: 'var(--text-secondary)',
+                  background: 'var(--bg-elevated)', color: 'var(--text-secondary)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  marginBottom: 'var(--sp-3)',
+                  marginBottom: 'var(--space-3)',
                 }}>
                   {item.icon}
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', marginBottom: 'var(--sp-2)' }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-sans)', marginBottom: 'var(--space-2)' }}>
                   {item.title}
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
@@ -430,7 +430,7 @@ export const HowItWorksView: React.FC = () => {
             title="Three-Layer Architecture"
             subtitle="Every assessment flows through three layers: a secure client interface, an autonomous AI agent network, and on-chain settlement. Click each layer to learn more."
           />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
             {LAYERS.map(layer => (
               <LayerCard
                 key={layer.id}
@@ -451,7 +451,7 @@ export const HowItWorksView: React.FC = () => {
             title="Product Lifecycles"
             subtitle="From asset submission to on-chain settlement, each product follows a structured, auditable process."
           />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             {FLOWS.map((flow, i) => (
               <FlowDiagram key={flow.id} flow={flow} index={i} />
             ))}
@@ -481,13 +481,13 @@ export const HowItWorksView: React.FC = () => {
           />
 
           {/* Tier cards */}
-          <div className="tier-grid" style={{ marginBottom: 'var(--sp-4)' }}>
+          <div className="tier-grid" style={{ marginBottom: 'var(--space-4)' }}>
             {TIERS.map(tier => (
-              <div key={tier.name} className="card" style={{ textAlign: 'center', padding: 'var(--sp-4)' }}>
+              <div key={tier.name} className="card" style={{ textAlign: 'center', padding: 'var(--space-4)' }}>
                 <span style={{
                   display: 'inline-block', padding: '4px 12px', borderRadius: 8,
                   fontSize: 12, fontWeight: 700, color: 'var(--bg-primary)', background: tier.color,
-                  marginBottom: 'var(--sp-2)',
+                  marginBottom: 'var(--space-2)',
                 }}>
                   {tier.name}
                 </span>
@@ -502,13 +502,13 @@ export const HowItWorksView: React.FC = () => {
           </div>
 
           {/* Trust detail cards */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
             {[
               { label: 'How Scores Are Earned', value: 'Agents are evaluated on historical accuracy, consistency of confidence scores, quality of reasoning, and effective use of available data. Higher-scoring agents carry more weight in consensus decisions.' },
               { label: 'Retroactive Settlement', value: 'Unlike consensus-based systems, Verdicto does not reward agents for agreeing with each other. When a real-world outcome occurs (a property sells, a market shifts), each agent\'s confidence score is compared to reality. The closest agent gains reputation; the furthest loses it.' },
               { label: 'Anti-Groupthink Design', value: 'Because reputation is earned through accuracy rather than conformity, agents are incentivized to produce independent analyses rather than cluster around a safe middle ground. This is the core differentiator from single-model AI valuation.' },
             ].map(item => (
-              <div key={item.label} className="card" style={{ padding: 'var(--sp-3) var(--sp-4)' }}>
+              <div key={item.label} className="card" style={{ padding: 'var(--space-3) var(--space-4)' }}>
                 <div style={{
                   fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)',
                   textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2,
@@ -546,17 +546,17 @@ export const HowItWorksView: React.FC = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', marginBottom: 'var(--sp-3)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
                   <FileCode size={18} style={{ color: 'var(--text-secondary)' }} />
-                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', flex: 1 }}>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-sans)', flex: 1 }}>
                     {c.name}
                   </span>
                 </div>
-                <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 var(--sp-3)' }}>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 var(--space-3)' }}>
                   {c.desc}
                 </p>
                 <div style={{
-                  display: 'flex', alignItems: 'center', gap: 'var(--sp-1)',
+                  display: 'flex', alignItems: 'center', gap: 'var(--space-1)',
                   fontSize: 11, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)',
                 }}>
                   <Lock size={11} />
@@ -579,9 +579,9 @@ export const HowItWorksView: React.FC = () => {
 
           {/* Payment flow */}
           <div className="card" style={{
-            padding: 'var(--sp-4) var(--sp-5)',
-            display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-2)',
-            overflowX: 'auto', marginBottom: 'var(--sp-4)',
+            padding: 'var(--space-4) var(--space-5)',
+            display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)',
+            overflowX: 'auto', marginBottom: 'var(--space-4)',
           }}>
             {[
               { step: 1, label: 'Request', detail: 'User initiates an action' },
@@ -615,8 +615,8 @@ export const HowItWorksView: React.FC = () => {
           </div>
 
           {/* Fee grid */}
-          <div className="card" style={{ padding: 'var(--sp-4) var(--sp-5)' }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--sp-3)', fontFamily: 'var(--font-display)' }}>
+          <div className="card" style={{ padding: 'var(--space-4) var(--space-5)' }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 'var(--space-3)', fontFamily: 'var(--font-sans)' }}>
               Fee Structure
             </div>
             <div className="why-verdict-grid">
@@ -646,12 +646,12 @@ export const HowItWorksView: React.FC = () => {
           />
           <div className="limitations-grid">
             {/* What's Real */}
-            <div className="card" style={{ padding: 'var(--sp-5)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', marginBottom: 'var(--sp-4)' }}>
+            <div className="card" style={{ padding: 'var(--space-5)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
                 <Shield size={16} style={{ color: 'var(--text-secondary)' }} />
-                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)', fontFamily: 'var(--font-display)' }}>Production-Ready</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)', fontFamily: 'var(--font-sans)' }}>Production-Ready</span>
               </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                 {[
                   'All four products (Assess, Borrow, Insure, Confidence) work end-to-end',
                   'Micropayments are real wallet-signed CSPR transfers, not simulated',
@@ -663,7 +663,7 @@ export const HowItWorksView: React.FC = () => {
                 ].map(item => (
                   <li key={item} style={{
                     fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6,
-                    paddingLeft: 'var(--sp-4)', position: 'relative',
+                    paddingLeft: 'var(--space-4)', position: 'relative',
                   }}>
                     <span style={{ position: 'absolute', left: 0, color: 'var(--text-secondary)', fontWeight: 700 }}>✓</span>
                     {item}
@@ -673,12 +673,12 @@ export const HowItWorksView: React.FC = () => {
             </div>
 
             {/* What's Simplified */}
-            <div className="card" style={{ padding: 'var(--sp-5)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', marginBottom: 'var(--sp-4)' }}>
+            <div className="card" style={{ padding: 'var(--space-5)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
                 <Eye size={16} style={{ color: 'var(--text-tertiary)' }} />
-                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-tertiary)', fontFamily: 'var(--font-display)' }}>Currently Simplified</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-tertiary)', fontFamily: 'var(--font-sans)' }}>Currently Simplified</span>
               </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                 {[
                   'Loan and insurance state is held in-memory. Production will use persistent on-chain or database storage',
                   'Disbursement uses a pre-funded platform wallet. Production will route through escrow contracts',
@@ -687,7 +687,7 @@ export const HowItWorksView: React.FC = () => {
                 ].map(item => (
                   <li key={item} style={{
                     fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6,
-                    paddingLeft: 'var(--sp-4)', position: 'relative',
+                    paddingLeft: 'var(--space-4)', position: 'relative',
                   }}>
                     <span style={{ position: 'absolute', left: 0, color: 'var(--text-tertiary)', fontWeight: 700 }}>⚠</span>
                     {item}

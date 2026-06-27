@@ -80,7 +80,7 @@ export const OracleSection: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.1 + i * 0.08 }}
             className="card oracle-feature-card"
           >
-            <div className="oracle-feature-icon" style={{ background: 'var(--primary-bg)', color: 'var(--red-600)' }}>
+            <div className="oracle-feature-icon" style={{ background: 'var(--accent-soft)', color: 'var(--red-600)' }}>
               {f.icon}
             </div>
             <h3 className="oracle-feature-title">{f.title}</h3>

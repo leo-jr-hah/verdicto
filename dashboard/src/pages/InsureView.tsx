@@ -134,8 +134,8 @@ const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '0.7rem 0.9rem',
   borderRadius: '6px',
-  border: '1px solid var(--border-color)',
-  background: 'var(--bg-main)',
+  border: '1px solid var(--border)',
+  background: 'var(--bg-base)',
   color: 'var(--text-primary)',
   fontSize: '0.95rem',
   fontFamily: 'var(--font-sans)',
@@ -151,7 +151,7 @@ const btnPrimary: React.CSSProperties = {
   padding: '0.75rem 1.5rem',
   borderRadius: '8px',
   border: 'none',
-  background: 'var(--primary)',
+  background: 'var(--accent)',
   color: 'var(--text-inverse)',
   fontSize: '0.95rem',
   fontWeight: 600,
@@ -161,14 +161,14 @@ const btnPrimary: React.CSSProperties = {
 
 const btnSecondary: React.CSSProperties = {
   ...btnPrimary,
-  background: 'var(--bg-surface)',
+  background: 'var(--bg-elevated)',
   color: 'var(--text-primary)',
-  border: '1px solid var(--border-color)',
+  border: '1px solid var(--border)',
 };
 
 const cardStyle: React.CSSProperties = {
-  background: 'var(--bg-surface)',
-  border: '1px solid var(--border-color)',
+  background: 'var(--bg-elevated)',
+  border: '1px solid var(--border)',
   borderRadius: '12px',
   padding: '1.5rem',
 };
@@ -223,7 +223,7 @@ const PolicyCard: React.FC<{
 
       {/* Risk bar */}
       <div style={{ marginBottom: '1rem' }}>
-        <div style={{ height: 6, borderRadius: 3, background: 'var(--bg-main)', overflow: 'hidden' }}>
+        <div style={{ height: 6, borderRadius: 3, background: 'var(--bg-base)', overflow: 'hidden' }}>
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${policy.riskScore}%` }}
@@ -259,7 +259,7 @@ const PolicyCard: React.FC<{
 
       {/* Claim history */}
       {policy.claimHistory.length > 0 && (
-        <div style={{ marginTop: '0.75rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+        <div style={{ marginTop: '0.75rem', borderTop: '1px solid var(--border)', paddingTop: '0.75rem' }}>
           <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.4rem' }}>
             Claims ({policy.claimHistory.length})
           </div>
@@ -463,7 +463,7 @@ export const InsureView: React.FC = () => {
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-          <Shield size={28} color="var(--primary)" />
+          <Shield size={28} color="var(--accent)" />
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Insure Your Asset</h2>
         </div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
@@ -480,7 +480,7 @@ export const InsureView: React.FC = () => {
             ...cardStyle,
             marginBottom: '1rem',
             borderColor: 'var(--error)',
-            background: 'var(--nm-error-bg)',
+            background: 'var(--error-soft)',
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem',
@@ -523,11 +523,11 @@ export const InsureView: React.FC = () => {
                     gap: '0.5rem',
                     padding: '1.25rem 1rem',
                     borderRadius: '8px',
-                    border: `2px solid ${isActive ? 'var(--primary)' : 'var(--border-color)'}`,
-                    background: isActive ? 'rgba(255, 59, 59, 0.04)' : 'var(--bg-surface)',
+                    border: `2px solid ${isActive ? 'var(--accent)' : 'var(--border)'}`,
+                    background: isActive ? 'rgba(255, 59, 59, 0.04)' : 'var(--bg-elevated)',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
-                    color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
+                    color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
                   }}
                 >
                   {type.icon}
@@ -571,7 +571,7 @@ export const InsureView: React.FC = () => {
 
           <div style={{ marginBottom: '1.25rem' }}>
             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-              Asset Name <span style={{ color: 'var(--primary)' }}>*</span>
+              Asset Name <span style={{ color: 'var(--accent)' }}>*</span>
             </label>
             <input
               type="text"
@@ -598,7 +598,7 @@ export const InsureView: React.FC = () => {
           <div className="insure-coverage-period-grid">
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                Estimated Value (USD) <span style={{ color: 'var(--primary)' }}>*</span>
+                Estimated Value (USD) <span style={{ color: 'var(--accent)' }}>*</span>
               </label>
               <input
                 type="number"
@@ -661,7 +661,7 @@ export const InsureView: React.FC = () => {
           {assetType === 'commodity' && (
             <div style={{ marginBottom: '1.25rem' }}>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                Weight (oz) <span style={{ color: 'var(--primary)' }}>*</span>
+                Weight (oz) <span style={{ color: 'var(--accent)' }}>*</span>
               </label>
               <input
                 type="number"
@@ -713,7 +713,7 @@ export const InsureView: React.FC = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={cardStyle}>
           {assessmentLoading || insLoading ? (
             <div style={{ textAlign: 'center', padding: '2rem' }}>
-              <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)', marginBottom: '1rem' }} />
+              <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', color: 'var(--accent)', marginBottom: '1rem' }} />
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
                 {assessmentLoading ? 'AI Agents Are Assessing Your Asset' : 'Calculating Risk & Premium...'}
               </h3>
@@ -731,17 +731,17 @@ export const InsureView: React.FC = () => {
               </div>
 
               <div className="insure-estimate-grid">
-                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Your Estimate</div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(assessmentResult.askingPrice)}</div>
                 </div>
-                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>AI Valuation</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary)' }}>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent)' }}>
                     {formatCurrency(assessmentResult.assessedValue)}
                   </div>
                 </div>
-                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Coverage</div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                     {coveragePercent ? `${coveragePercent}%` : 'Max'}
@@ -780,25 +780,25 @@ export const InsureView: React.FC = () => {
           </div>
 
           <div className="insure-claim-info-grid">
-            <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+            <div style={{ padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Coverage Amount</div>
               <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                 {formatCurrency(currentPolicy.coverageAmount)}
               </div>
             </div>
-            <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+            <div style={{ padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Asset Value</div>
               <div style={{ fontSize: '1.3rem', fontWeight: 700 }}>
                 {formatCurrency(currentPolicy.assessedValue)}
               </div>
             </div>
-            <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+            <div style={{ padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Risk Score</div>
               <div style={{ fontSize: '1.3rem', fontWeight: 700, color: riskColor(currentPolicy.riskScore) }}>
                 {currentPolicy.riskScore}/100, {currentPolicy.tier}
               </div>
             </div>
-            <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+            <div style={{ padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Premium</div>
               <div style={{ fontSize: '1.3rem', fontWeight: 700 }}>
                 {currentPolicy.premiumCSPR} CSPR/mo
@@ -808,7 +808,7 @@ export const InsureView: React.FC = () => {
 
           {/* Risk factors */}
           {currentPolicy.riskFactors.length > 0 && (
-            <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'var(--nm-warning-bg)', borderRadius: '8px', border: '1px solid var(--nm-warning-border)' }}>
+            <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'var(--warning-soft)', borderRadius: '8px', border: '1px solid var(--warning)' }}>
               <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.4rem' }}>Risk Factors</div>
               {currentPolicy.riskFactors.map((f, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>
@@ -821,9 +821,9 @@ export const InsureView: React.FC = () => {
 
           <div style={{
             padding: '0.75rem',
-            background: 'var(--nm-success-bg)',
+            background: 'var(--success-soft)',
             borderRadius: '8px',
-            border: '1px solid var(--nm-success-border)',
+            border: '1px solid var(--success)',
             marginBottom: '1.5rem',
             fontSize: '0.85rem',
             color: 'var(--text-secondary)',
@@ -878,7 +878,7 @@ export const InsureView: React.FC = () => {
 
           {insLoading && policies.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem' }}>
-              <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)' }} />
+              <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--accent)' }} />
             </div>
           ) : policies.length === 0 ? (
             <div style={{ ...cardStyle, textAlign: 'center', padding: '3rem' }}>
@@ -905,7 +905,7 @@ export const InsureView: React.FC = () => {
               animate={{ opacity: 1 }}
               style={{
                 position: 'fixed', inset: 0,
-                background: 'var(--nm-overlay-heavy)',
+                background: 'rgba(0,0,0,0.7)',
                 backdropFilter: 'blur(4px)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 zIndex: 1000,
@@ -926,7 +926,7 @@ export const InsureView: React.FC = () => {
                 </p>
                 <div style={{ marginBottom: '1rem' }}>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                    Reason for Claim <span style={{ color: 'var(--primary)' }}>*</span>
+                    Reason for Claim <span style={{ color: 'var(--accent)' }}>*</span>
                   </label>
                   <textarea
                     value={claimReason}
@@ -965,7 +965,7 @@ export const InsureView: React.FC = () => {
                 exit={{ opacity: 0 }}
                 style={{
                   position: 'fixed', inset: 0,
-                  background: 'var(--nm-overlay-heavy)',
+                  background: 'rgba(0,0,0,0.7)',
                   backdropFilter: 'blur(4px)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   zIndex: 1001,
@@ -987,7 +987,7 @@ export const InsureView: React.FC = () => {
                           ${claimResult.amount.toLocaleString()}
                         </p>
                         <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', margin: 0 }}>
-                          Simulated payout — no real funds transferred
+                          Simulated payout - no real funds transferred
                         </p>
                       </>
                     ) : (
@@ -1003,11 +1003,11 @@ export const InsureView: React.FC = () => {
 
                   {claimResult.revaluation && (
                     <div className="insure-revaluation-grid">
-                      <div style={{ padding: '0.75rem', background: 'var(--bg-main)', borderRadius: '8px', textAlign: 'center' }}>
+                      <div style={{ padding: '0.75rem', background: 'var(--bg-base)', borderRadius: '8px', textAlign: 'center' }}>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Previous Value</div>
                         <div style={{ fontWeight: 600 }}>{formatCurrency(claimResult.revaluation.previousValue)}</div>
                       </div>
-                      <div style={{ padding: '0.75rem', background: 'var(--bg-main)', borderRadius: '8px', textAlign: 'center' }}>
+                      <div style={{ padding: '0.75rem', background: 'var(--bg-base)', borderRadius: '8px', textAlign: 'center' }}>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Current Value</div>
                         <div style={{ fontWeight: 600, color: 'var(--error)' }}>{formatCurrency(claimResult.revaluation.newValue)}</div>
                       </div>

@@ -424,7 +424,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
     } else {
       // Unknown format — pass through and hope for the best
       taggedSigBytes = sigBytes;
-      console.warn('[signPayment] Unexpected signature length:', sigBytes.length, '— passing through');
+      console.warn('[signPayment] Unexpected signature length:', sigBytes.length, '- passing through');
     }
 
     const signedDeploy = Deploy.setSignature(deploy, taggedSigBytes, PublicKey.fromHex(publicKey));

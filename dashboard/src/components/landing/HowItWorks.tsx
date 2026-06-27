@@ -91,7 +91,7 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
       >
         <motion.div
           className="card hiw-card"
-          whileHover={{ y: -4, boxShadow: '0 20px 60px var(--nm-shadow-dark)' }}
+          whileHover={{ y: -4, boxShadow: '0 20px 60px rgba(0,0,0,0.06)' }}
           transition={{ duration: 0.3 }}
         >
           {/* Animated border glow — neutral */}
@@ -100,7 +100,7 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: index * 0.4 }}
             style={{
               position: 'absolute', inset: 0, borderRadius: 'inherit',
-              border: '1.5px solid var(--border-default)',
+              border: '1.5px solid var(--border)',
               pointerEvents: 'none',
             }}
           />
@@ -111,7 +111,7 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
               className="hiw-card__icon-glow"
               animate={inView ? { rotate: 360 } : {}}
               transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-              style={{ border: '2px dashed var(--border-subtle)' }}
+              style={{ border: '2px dashed var(--border-weak)' }}
             />
             <motion.div
               className="hiw-card__icon-box"
@@ -123,7 +123,7 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
                 ],
               } : {}}
               transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              style={{ background: 'var(--primary-bg)', color: 'var(--red-600)' }}
+              style={{ background: 'var(--accent-soft)', color: 'var(--red-600)' }}
             >
               <motion.div
                 animate={inView ? { y: [0, -3, 0] } : {}}
@@ -143,7 +143,7 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
 
 export const HowItWorks: React.FC = () => {
   return (
-    <section id="how-it-works" className="landing-section" style={{ background: 'var(--bg-main)', borderTop: '1px solid var(--border-color)' }}>
+    <section id="how-it-works" className="landing-section" style={{ background: 'var(--bg-base)', borderTop: '1px solid var(--border)' }}>
       <div className="landing-section__container">
         {/* Section header */}
         <div className="landing-section__header">

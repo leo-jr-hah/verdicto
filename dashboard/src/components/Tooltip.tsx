@@ -37,15 +37,15 @@ export const Tooltip: React.FC<TooltipProps> = ({ term, explanation, children })
               transform: 'translateX(-50%)',
               marginBottom: '8px',
               padding: '8px 12px',
-              background: 'var(--bg-main)',
-              border: '1px solid var(--border-color)',
+              background: 'var(--bg-base)',
+              border: '1px solid var(--border)',
               borderRadius: '6px',
               fontSize: '0.8rem',
               color: 'var(--text-primary)',
               width: 'max-content',
               maxWidth: '250px',
               zIndex: 100,
-              boxShadow: '0 4px 12px var(--nm-shadow-dark)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
               lineHeight: 1.4,
               pointerEvents: 'none'
             }}

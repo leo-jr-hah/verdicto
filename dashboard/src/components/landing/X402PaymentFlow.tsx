@@ -108,7 +108,7 @@ export const X402PaymentFlow: React.FC = () => {
                 'Verifiable on testnet.cspr.live'
               ].map((text, i) => (
                 <div key={i} className="x402-check-item">
-                  <CheckCircle2 size={18} color="var(--primary)" />
+                  <CheckCircle2 size={18} color="var(--accent)" />
                   <span>{text}</span>
                 </div>
               ))}
@@ -131,14 +131,14 @@ export const X402PaymentFlow: React.FC = () => {
                   </filter>
                 </defs>
                 <path ref={pathRef} d={MOTION_D} fill="none" stroke="none"/>
-                <circle ref={trailRef} r="10" fill="var(--primary)" opacity="0.15"/>
-                <circle ref={glowRef} r="16" fill="var(--primary)" opacity="0.12" filter="url(#dotGlow)"/>
-                <circle ref={dotRef} r="5" fill="var(--primary)"/>
+                <circle ref={trailRef} r="10" fill="var(--accent)" opacity="0.15"/>
+                <circle ref={glowRef} r="16" fill="var(--accent)" opacity="0.12" filter="url(#dotGlow)"/>
+                <circle ref={dotRef} r="5" fill="var(--accent)"/>
               </svg>
               <div className="x402-nodes">
                 {NODES.map((node, i) => (
                   <div key={i} className="x402-node">
-                    <div className="card x402-node-card" style={{ border: '1px solid var(--border-color)' }}>
+                    <div className="card x402-node-card" style={{ border: '1px solid var(--border)' }}>
                       <NodeIcon type={node.icon} />
                       {node.label}
                     </div>

@@ -180,7 +180,7 @@ const AgentCard: React.FC<{
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: 6,
                   padding: '6px 10px', marginBottom: 8,
-                  background: 'var(--nm-warning-bg)', borderRadius: 6,
+                  background: 'var(--warning-soft)', borderRadius: 6,
                   fontSize: '0.72rem', color: 'var(--text-tertiary)',
                 }}>
                   <AlertTriangle size={12} />
@@ -221,7 +221,7 @@ const ConsensusCard: React.FC<{
       transition={{ duration: 0.35, delay: index * 0.1 }}
       style={{
         background: 'var(--bg-elevated)',
-        border: '1px solid var(--border-color)',
+        border: '1px solid var(--border)',
         borderRadius: 12,
         overflow: 'hidden',
       }}
@@ -236,7 +236,7 @@ const ConsensusCard: React.FC<{
       >
         <div style={{
           width: 38, height: 38, borderRadius: 10,
-          background: 'var(--bg-surface)',
+          background: 'var(--bg-elevated)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
         }}>
@@ -280,7 +280,7 @@ const ConsensusCard: React.FC<{
           >
             <div style={{
               padding: '0 16px 16px',
-              borderTop: '1px solid var(--border-color)',
+              borderTop: '1px solid var(--border)',
             }}>
               {/* How consensus works */}
               <div style={{
@@ -520,8 +520,8 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
           }}>
             <div style={{
               padding: '10px 12px', borderRadius: 8,
-              background: 'var(--nm-success-bg)',
-              border: '1px solid var(--nm-success-border)',
+              background: 'var(--success-soft)',
+              border: '1px solid var(--success)',
             }}>
               <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>COVERAGE</div>
               <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
@@ -534,7 +534,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
             <div style={{
               padding: '10px 12px', borderRadius: 8,
               background: 'rgba(139,92,246,0.04)',
-              border: '1px solid var(--border-color)',
+              border: '1px solid var(--border)',
             }}>
               <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>MONTHLY PREMIUM</div>
               <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--red-600)' }}>
@@ -550,8 +550,8 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
           {insurance.riskFactors.length > 0 && (
             <div style={{
               padding: '10px 12px', borderRadius: 8,
-              background: 'var(--nm-warning-bg)',
-              border: '1px solid var(--nm-warning-border)',
+              background: 'var(--warning-soft)',
+              border: '1px solid var(--warning)',
             }}>
               <div style={{
                 fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-tertiary)',
@@ -627,8 +627,8 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
             }}>
               <div style={{
                 padding: '10px', borderRadius: 8,
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-color)',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border)',
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>CONFIDENCE</div>
@@ -638,8 +638,8 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
               </div>
               <div style={{
                 padding: '10px', borderRadius: 8,
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-color)',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border)',
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>VALUE RATIO</div>
@@ -649,8 +649,8 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
               </div>
               <div style={{
                 padding: '10px', borderRadius: 8,
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-color)',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border)',
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>LTV RANGE</div>
@@ -665,7 +665,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
           <div style={{
             display: 'flex', alignItems: 'center', gap: 6,
             marginTop: 12, padding: '8px 10px',
-            background: 'var(--nm-warning-bg)',
+            background: 'var(--warning-soft)',
             borderRadius: 6,
             fontSize: '0.72rem', color: 'var(--text-tertiary)',
           }}>

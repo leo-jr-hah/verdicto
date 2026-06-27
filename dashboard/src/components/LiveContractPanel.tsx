@@ -47,9 +47,9 @@ const StatCard: React.FC<{
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, delay: index * 0.1 }}
     style={{
-      background: 'var(--bg-surface)',
+      background: 'var(--bg-elevated)',
       borderRadius: '12px',
-      border: '1px solid var(--border-color)',
+      border: '1px solid var(--border)',
       padding: '1.25rem',
     }}
   >
@@ -92,14 +92,14 @@ const AgentRow: React.FC<{
       alignItems: 'center',
       gap: '0.75rem',
       padding: '0.75rem 1rem',
-      borderBottom: '1px solid var(--border-color)',
+      borderBottom: '1px solid var(--border)',
     }}
   >
     <div style={{
       width: 36,
       height: 36,
       borderRadius: '8px',
-      background: 'var(--primary-bg)',
+      background: 'var(--accent-soft)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -118,10 +118,10 @@ const AgentRow: React.FC<{
       padding: '0.3rem 0.7rem',
       borderRadius: '6px',
       background: agent.reputation >= 800
-        ? 'var(--nm-success-soft)'
+        ? 'var(--success-soft)'
         : agent.reputation >= 600
-          ? 'var(--nm-warning-soft)'
-          : 'var(--nm-error-soft)',
+          ? 'var(--warning-soft)'
+          : 'var(--error-soft)',
       color: agent.reputation >= 800 ? 'var(--text-secondary)' : agent.reputation >= 600 ? 'var(--text-tertiary)' : 'var(--red-600)',
       fontSize: '0.85rem',
       fontWeight: 700,
@@ -184,7 +184,7 @@ export const LiveContractPanel: React.FC = () => {
   if (loading && !state) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem' }}>
-        <Loader2 size={24} color="var(--primary)" className="animate-spin" />
+        <Loader2 size={24} color="var(--accent)" className="animate-spin" />
         <span style={{ marginLeft: '0.75rem', color: 'var(--text-secondary)' }}>Loading…</span>
       </div>
     );
@@ -195,7 +195,7 @@ export const LiveContractPanel: React.FC = () => {
       <div style={{
         background: 'var(--error-soft)',
         borderRadius: '12px',
-        border: '1px solid var(--nm-error-border)',
+        border: '1px solid var(--error)',
         padding: '2rem',
         textAlign: 'center',
       }}>
@@ -203,7 +203,7 @@ export const LiveContractPanel: React.FC = () => {
         <p style={{ color: 'var(--text-secondary)' }}>{error}</p>
         <button onClick={loadState} style={{
           marginTop: '1rem', padding: '0.5rem 1rem', borderRadius: '6px',
-          border: '1px solid var(--border-color)', background: 'var(--bg-surface)',
+          border: '1px solid var(--border)', background: 'var(--bg-elevated)',
           cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-secondary)',
         }}>
           Retry
@@ -219,7 +219,7 @@ export const LiveContractPanel: React.FC = () => {
       {/* Header with connection status */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Activity size={20} color="var(--primary)" />
+          <Activity size={20} color="var(--accent)" />
           <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)' }}>
             Protocol Overview
           </h2>
@@ -244,7 +244,7 @@ export const LiveContractPanel: React.FC = () => {
             style={{
               display: 'flex', alignItems: 'center', gap: '0.3rem',
               padding: '0.4rem 0.8rem', borderRadius: '6px',
-              border: '1px solid var(--border-color)', background: 'var(--bg-surface)',
+              border: '1px solid var(--border)', background: 'var(--bg-elevated)',
               cursor: loading ? 'not-allowed' : 'pointer',
               fontSize: '0.8rem', color: 'var(--text-secondary)',
               opacity: loading ? 0.6 : 1,
@@ -298,21 +298,21 @@ export const LiveContractPanel: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.4 }}
         style={{
-          background: 'var(--bg-surface)',
+          background: 'var(--bg-elevated)',
           borderRadius: '12px',
-          border: '1px solid var(--border-color)',
+          border: '1px solid var(--border)',
           overflow: 'hidden',
         }}
       >
         <div style={{
           display: 'flex', alignItems: 'center', gap: '0.5rem',
-          padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)',
+          padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)',
         }}>
-          <Users size={16} color="var(--primary)" />
+          <Users size={16} color="var(--accent)" />
           <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Agent Reputation</span>
           <span style={{
             marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-tertiary)',
-            padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'var(--bg-surface-alt)',
+            padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'var(--bg-sunken)',
           }}>
             Verified on Casper
           </span>

@@ -11,8 +11,8 @@
   margin-bottom: 1.5rem;
 }
 
-.insure-header__title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; margin: 0; }
-.insure-header__subtitle { color: var(--nm-text-secondary); font-size: 0.85rem; margin: 0.25rem 0 0; }
+.insure-header__title { font-family: var(--font-sans); font-size: 1.5rem; font-weight: 700; margin: 0; }
+.insure-header__subtitle { color: var(--text-secondary); font-size: 0.85rem; margin: 0.25rem 0 0; }
 
 /* Step indicator */
 .insure-steps {
@@ -33,8 +33,8 @@
   width: 24px; height: 24px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 0.75rem; font-weight: 700;
-  background: var(--nm-base);
-  box-shadow: var(--shadow-extruded-small);
+  background: var(--bg-base);
+  box-shadow: var(--shadow-sm);
 }
 
 .insure-step__line { flex: 1; height: 2px; }
@@ -49,19 +49,19 @@
 
 .insure-asset-btn {
   display: flex; flex-direction: column; align-items: center;
-  gap: 0.5rem; padding: 1.25rem 1rem; border-radius: var(--radius-lg);
-  border: none; background: var(--nm-base);
-  box-shadow: var(--shadow-extruded-small);
-  cursor: pointer; transition: all var(--duration-standard) var(--ease-out); color: var(--nm-text-secondary);
+  gap: 0.5rem; padding: 1.25rem 1rem; border-radius: var(--radius-md);
+  border: none; background: var(--bg-base);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer; transition: all var(--duration-base) var(--ease-out-expo); color: var(--text-secondary);
 }
 
 .insure-asset-btn:hover {
-  box-shadow: var(--shadow-extruded-small-hover);
+  box-shadow: var(--shadow-sm);
   transform: translateY(-2px);
 }
 
 .insure-asset-btn--active {
-  box-shadow: var(--shadow-inset); color: var(--nm-accent);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); color: var(--accent);
 }
 
 /* Form */
@@ -92,27 +92,27 @@
 }
 
 .insure-premium-card {
-  padding: 1rem; background: var(--nm-base); border-radius: var(--radius-lg);
-  text-align: center; box-shadow: var(--shadow-inset);
+  padding: 1rem; background: var(--bg-base); border-radius: var(--radius-md);
+  text-align: center; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
 }
 
 .insure-premium-card__label {
-  font-size: 0.75rem; color: var(--nm-text-muted); margin-bottom: 0.25rem;
+  font-size: 0.75rem; color: var(--text-tertiary); margin-bottom: 0.25rem;
 }
 
-.insure-premium-card__value { font-size: 1.1rem; font-weight: 700; color: var(--nm-text-primary); }
+.insure-premium-card__value { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
 
 /* Policy card */
 .insure-policy-card {
-  background: var(--nm-base); border: none;
+  background: var(--bg-base); border: none;
   border-radius: var(--radius-xl); padding: 1.5rem; margin-bottom: 1rem;
-  box-shadow: var(--shadow-extruded);
-  transition: transform var(--duration-standard) var(--ease-out), box-shadow var(--duration-standard) var(--ease-out);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-base) var(--ease-out-expo), box-shadow var(--duration-base) var(--ease-out-expo);
 }
 
 .insure-policy-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-extruded-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .insure-policy-card__header {
@@ -124,14 +124,14 @@
 }
 
 .insure-policy-card__stat-label {
-  font-size: 0.75rem; color: var(--nm-text-muted); margin-bottom: 0.2rem;
+  font-size: 0.75rem; color: var(--text-tertiary); margin-bottom: 0.2rem;
 }
 
-.insure-policy-card__stat-value { font-size: 0.9rem; font-weight: 600; color: var(--nm-text-primary); }
+.insure-policy-card__stat-value { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); }
 
 .insure-policy-card__info-box {
-  padding: 0.75rem 1rem; background: var(--nm-base); border-radius: var(--radius-md);
-  box-shadow: var(--shadow-inset);
+  padding: 0.75rem 1rem; background: var(--bg-base); border-radius: var(--radius-sm);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
   margin-bottom: 1rem; font-size: 0.8rem;
 }
 
@@ -152,13 +152,13 @@
 }
 
 .insure-claim-modal {
-  background: var(--nm-base); border: none;
+  background: var(--bg-base); border: none;
   border-radius: var(--radius-xl); padding: 1.5rem; width: 100%; max-width: 480px;
-  box-shadow: var(--shadow-extruded);
+  box-shadow: var(--shadow-sm);
 }
 
 .insure-claim-modal__title {
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
   font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;
 }
 
@@ -168,19 +168,19 @@
 .insure-empty {
   text-align: center;
   padding: 3rem 1rem;
-  background: var(--nm-base);
+  background: var(--bg-base);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-inset);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
 }
 
 .insure-empty__icon {
   width: 56px; height: 56px; margin: 0 auto 1rem;
   display: flex; align-items: center; justify-content: center;
-  background: var(--nm-base); border-radius: var(--radius-full);
-  box-shadow: var(--shadow-inset); color: var(--nm-text-muted);
+  background: var(--bg-base); border-radius: var(--radius-full);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); color: var(--text-tertiary);
 }
 
-.insure-empty__text { color: var(--nm-text-secondary); font-size: 0.9rem; }
+.insure-empty__text { color: var(--text-secondary); font-size: 0.9rem; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MOBILE (<768px)

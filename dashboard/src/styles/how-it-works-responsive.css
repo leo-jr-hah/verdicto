@@ -32,7 +32,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
   .why-verdict-grid { grid-template-columns: 1fr; }
-  .why-verdict-grid > div { border-radius: var(--radius-lg); margin-bottom: 0.5rem; }
+  .why-verdict-grid > div { border-radius: var(--radius-md); margin-bottom: 0.5rem; }
 
   .tier-grid { grid-template-columns: repeat(2, 1fr); }
   .limitations-grid { grid-template-columns: 1fr; }
@@ -57,8 +57,8 @@
   .flow-diagram-container > div {
     scroll-snap-align: center;
     flex: 0 0 85% !important;
-    background: var(--nm-base);
-    box-shadow: var(--shadow-extruded);
+    background: var(--bg-base);
+    box-shadow: var(--shadow-sm);
     padding: 1rem;
     border-radius: var(--radius-xl);
   }

@@ -17,9 +17,9 @@
 .disputes-how-banner {
   display: flex; align-items: flex-start; gap: 1rem;
   padding: 1.5rem; margin-bottom: 2rem;
-  background: var(--nm-base);
+  background: var(--bg-base);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-extruded);
+  box-shadow: var(--shadow-sm);
 }
 
 .disputes-how-banner__icon { flex-shrink: 0; }
@@ -34,12 +34,12 @@
 /* Verdict/dispute list items */
 .disputes-list-item {
   padding: 1rem 1.5rem; border-bottom: none;
-  cursor: pointer; transition: all var(--duration-standard) var(--ease-out);
-  border-radius: var(--radius-lg);
+  cursor: pointer; transition: all var(--duration-base) var(--ease-out-expo);
+  border-radius: var(--radius-md);
   margin-bottom: 0.5rem;
 }
 
-.disputes-list-item:hover { box-shadow: var(--shadow-extruded-small); }
+.disputes-list-item:hover { box-shadow: var(--shadow-sm); }
 
 .disputes-list-item__header {
   display: flex; justify-content: space-between; align-items: center;
@@ -53,8 +53,8 @@
 
 /* Expanded detail */
 .disputes-detail {
-  padding: 1.5rem; background: var(--nm-base); border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-inset);
+  padding: 1.5rem; background: var(--bg-base); border-radius: var(--radius-xl);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
   margin: 0.75rem 0;
 }
 
@@ -63,7 +63,7 @@
 }
 
 .disputes-detail__section-title {
-  font-size: 0.85rem; font-weight: 600; color: var(--nm-text-secondary);
+  font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);
   margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
 }
 
@@ -74,7 +74,7 @@
 }
 
 .disputes-retrial-grid__arrow {
-  font-size: 1.2rem; color: var(--nm-text-muted); text-align: center;
+  font-size: 1.2rem; color: var(--text-tertiary); text-align: center;
 }
 
 .disputes-retrial-grid__value { text-align: center; }
@@ -86,8 +86,8 @@
 
 .disputes-panel-vote {
   display: flex; align-items: center; gap: 0.75rem;
-  padding: 0.5rem 0.75rem; background: var(--nm-base); border-radius: var(--radius-md);
-  box-shadow: var(--shadow-inset-small);
+  padding: 0.5rem 0.75rem; background: var(--bg-base); border-radius: var(--radius-sm);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
 }
 
 /* Reason modal */
@@ -98,22 +98,22 @@
 }
 
 .disputes-reason-modal {
-  background: var(--nm-base); border: none;
+  background: var(--bg-base); border: none;
   border-radius: var(--radius-xl); padding: 1.5rem; width: 100%; max-width: 480px;
-  box-shadow: var(--shadow-extruded);
+  box-shadow: var(--shadow-sm);
 }
 
 .disputes-reason-modal textarea {
   width: 100%; min-height: 120px; padding: 0.75rem;
-  border-radius: var(--radius-md); border: none;
-  background: var(--nm-base); color: var(--nm-text-primary);
-  box-shadow: var(--shadow-inset);
-  font-size: 0.95rem; font-family: var(--font-body);
+  border-radius: var(--radius-sm); border: none;
+  background: var(--bg-base); color: var(--text-primary);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+  font-size: 0.95rem; font-family: var(--font-sans);
   resize: vertical; margin-bottom: 1rem; outline: none;
 }
 
 .disputes-reason-modal textarea:focus {
-  box-shadow: var(--shadow-inset-deep), var(--shadow-focus);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.08), 0 0 0 2px var(--accent-soft);
 }
 
 .disputes-reason-modal__actions { display: flex; gap: 0.75rem; }

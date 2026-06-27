@@ -25,7 +25,7 @@ export const AgentCard: React.FC<{ agent: typeof AGENTS[0]; index: number }> = (
       className="agent-card"
     >
       {/* Accent bar */}
-      <div className="agent-card__accent-bar" style={{ background: 'var(--border-color)' }} />
+      <div className="agent-card__accent-bar" style={{ background: 'var(--border)' }} />
 
       <div className="agent-card__header">
         <motion.div
@@ -43,14 +43,14 @@ export const AgentCard: React.FC<{ agent: typeof AGENTS[0]; index: number }> = (
             repeatDelay: index === 4 ? 0 : 0.5,
           }}
           className="agent-card__icon"
-          style={{ background: 'var(--bg-surface-alt)', color: 'var(--text-secondary)' }}
+          style={{ background: 'var(--bg-sunken)', color: 'var(--text-secondary)' }}
         >
           {/* Pulsing glow ring */}
           <motion.div
             animate={{ scale: [1, 1.6, 1], opacity: [0.3, 0, 0.3] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeOut', delay: index * 0.3 }}
             className="agent-card__icon-ring"
-            style={{ borderColor: 'var(--border-color)' }}
+            style={{ borderColor: 'var(--border)' }}
           />
           <Icon size={18} />
         </motion.div>

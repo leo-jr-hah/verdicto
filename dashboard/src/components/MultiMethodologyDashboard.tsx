@@ -98,9 +98,9 @@ const AgentCard: React.FC<{
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, delay: index * 0.1 }}
     style={{
-      background: 'var(--bg-surface)',
+      background: 'var(--bg-elevated)',
       borderRadius: '12px',
-      border: '1px solid var(--border-color)',
+      border: '1px solid var(--border)',
       overflow: 'hidden',
     }}
   >
@@ -110,14 +110,14 @@ const AgentCard: React.FC<{
       alignItems: 'center',
       gap: '0.75rem',
       padding: '1rem 1.25rem',
-      borderBottom: '1px solid var(--border-color)',
+      borderBottom: '1px solid var(--border)',
     }}>
       <div style={{
         width: 36,
         height: 36,
         borderRadius: '8px',
-        background: 'var(--bg-surface-alt)',
-        border: '1px solid var(--border-color)',
+        background: 'var(--bg-sunken)',
+        border: '1px solid var(--border)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -136,7 +136,7 @@ const AgentCard: React.FC<{
       <div style={{
         padding: '0.2rem 0.6rem',
         borderRadius: '4px',
-        background: 'var(--bg-surface-alt)',
+        background: 'var(--bg-sunken)',
         color: 'var(--text-secondary)',
         fontSize: '0.7rem',
         fontWeight: 600,
@@ -167,10 +167,10 @@ const AgentCard: React.FC<{
             padding: '0.3rem 0.7rem',
             borderRadius: '9999px',
             background: confidence >= 0.8
-              ? 'var(--nm-success-soft)'
+              ? 'var(--success-soft)'
               : confidence >= 0.6
-                ? 'var(--nm-warning-soft)'
-                : 'var(--nm-error-soft)',
+                ? 'var(--warning-soft)'
+                : 'var(--error-soft)',
             color: confidence >= 0.8 ? 'var(--text-secondary)' : confidence >= 0.6 ? 'var(--text-tertiary)' : 'var(--red-600)',
             fontSize: '0.85rem',
             fontWeight: 700,
@@ -185,7 +185,7 @@ const AgentCard: React.FC<{
         width: '100%',
         height: '4px',
         borderRadius: '2px',
-        background: 'var(--border-color)',
+        background: 'var(--border)',
         marginBottom: '0.75rem',
         overflow: 'hidden',
       }}>
@@ -196,7 +196,7 @@ const AgentCard: React.FC<{
           style={{
             height: '100%',
             borderRadius: '2px',
-            background: 'var(--primary)',
+            background: 'var(--accent)',
           }}
         />
       </div>
@@ -216,7 +216,7 @@ const AgentCard: React.FC<{
 
       {/* Reasoning */}
       <div style={{
-        background: 'var(--bg-surface-alt)',
+        background: 'var(--bg-sunken)',
         borderRadius: '8px',
         padding: '0.75rem 1rem',
         fontSize: '0.8rem',
@@ -266,15 +266,15 @@ const DivergenceBar: React.FC<{
 
   return (
     <div style={{
-      background: 'var(--bg-surface)',
+      background: 'var(--bg-elevated)',
       borderRadius: '12px',
-      border: '1px solid var(--border-color)',
+      border: '1px solid var(--border)',
       padding: '1.5rem',
     }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Scale size={16} color="var(--primary)" />
+          <Scale size={16} color="var(--accent)" />
           <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
             Valuation Range
           </span>
@@ -300,9 +300,9 @@ const DivergenceBar: React.FC<{
           bottom: 0,
           left: `${bandLeft}%`,
           width: `${bandWidth}%`,
-          background: 'var(--primary-bg)',
-          borderLeft: '1px dashed var(--primary-border)',
-          borderRight: '1px dashed var(--primary-border)',
+          background: 'var(--accent-soft)',
+          borderLeft: '1px dashed var(--accent)',
+          borderRight: '1px dashed var(--accent)',
           borderRadius: '4px',
           zIndex: 0,
         }} />
@@ -418,9 +418,9 @@ const DivergenceBar: React.FC<{
           top: '-4px',
           bottom: '-4px',
           width: '2px',
-          background: 'var(--primary)',
+          background: 'var(--accent)',
           zIndex: 2,
-          boxShadow: '0 0 6px var(--primary-border)',
+          boxShadow: '0 0 6px var(--accent)',
         }}>
           <div style={{
             position: 'absolute',
@@ -428,7 +428,7 @@ const DivergenceBar: React.FC<{
             left: '50%',
             transform: 'translateX(-50%)',
             fontSize: '0.6rem',
-            color: 'var(--primary)',
+            color: 'var(--accent)',
             whiteSpace: 'nowrap',
             fontWeight: 700,
           }}>
@@ -442,7 +442,7 @@ const DivergenceBar: React.FC<{
         position: 'relative',
         height: '20px',
         marginTop: '1.5rem',
-        borderTop: '1px solid var(--border-color)',
+        borderTop: '1px solid var(--border)',
         paddingTop: '0.4rem',
       }}>
         {ticks.map((tick, i) => (
@@ -541,14 +541,14 @@ const RiskFlags: React.FC<{ result: AssessmentResult }> = ({ result }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.6 }}
       style={{
-        background: 'var(--bg-surface)',
+        background: 'var(--bg-elevated)',
         borderRadius: '12px',
-        border: '1px solid var(--border-color)',
+        border: '1px solid var(--border)',
         padding: '1.25rem',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-        <Shield size={16} color="var(--primary)" />
+        <Shield size={16} color="var(--accent)" />
         <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
           Risk Assessment
         </span>
@@ -600,9 +600,9 @@ const ConsensusSummary: React.FC<{
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.7 }}
       style={{
-        background: 'var(--bg-surface)',
+        background: 'var(--bg-elevated)',
         borderRadius: '12px',
-        border: '1px solid var(--border-color)',
+        border: '1px solid var(--border)',
         padding: '1.25rem',
       }}
     >
@@ -700,7 +700,7 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
   ];
 
   const agentValues = agentData.map(a => a.value);
-  const agentColors = agentData.map(() => 'var(--primary)');
+  const agentColors = agentData.map(() => 'var(--accent)');
 
   return (
     <div>
@@ -711,7 +711,7 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
         gap: '0.5rem',
         marginBottom: '1.5rem',
       }}>
-        <Scale size={20} color="var(--primary)" />
+        <Scale size={20} color="var(--accent)" />
         <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)' }}>
           Multi-Methodology Analysis
         </h2>
@@ -719,7 +719,7 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
           fontSize: '0.7rem',
           padding: '0.2rem 0.6rem',
           borderRadius: '4px',
-          background: 'var(--primary-bg)',
+          background: 'var(--accent-soft)',
           color: 'var(--text-secondary)',
           fontWeight: 600,
         }}>
@@ -740,7 +740,7 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
             marginBottom: '1.5rem',
             borderRadius: '10px',
             background: 'var(--warning-soft)',
-            border: '1px solid var(--nm-warning-border)',
+            border: '1px solid var(--warning)',
           }}
         >
           <AlertTriangle size={18} color="var(--text-tertiary)" style={{ marginTop: 2, flexShrink: 0 }} />

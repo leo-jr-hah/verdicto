@@ -94,11 +94,11 @@ const AssetTypeSelector: React.FC<{
             gap: '0.5rem',
             padding: '1.25rem 1rem',
             borderRadius: '8px',
-            border: `2px solid ${isActive ? 'var(--primary)' : 'var(--border-color)'}`,
-            background: isActive ? 'rgba(255, 59, 59, 0.04)' : 'var(--bg-surface)',
+            border: `2px solid ${isActive ? 'var(--accent)' : 'var(--border)'}`,
+            background: isActive ? 'rgba(255, 59, 59, 0.04)' : 'var(--bg-elevated)',
             cursor: 'pointer',
             transition: 'all 0.15s ease',
-            color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
+            color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
           }}
         >
           {type.icon}
@@ -125,7 +125,7 @@ const FormField: React.FC<{
       marginBottom: '0.4rem',
     }}>
       {label}
-      {required && <span style={{ color: 'var(--primary)', marginLeft: '2px' }}>*</span>}
+      {required && <span style={{ color: 'var(--accent)', marginLeft: '2px' }}>*</span>}
     </label>
     {children}
     {error && (
@@ -140,8 +140,8 @@ const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '0.7rem 0.9rem',
   borderRadius: '6px',
-  border: '1px solid var(--border-color)',
-  background: 'var(--bg-main)',
+  border: '1px solid var(--border)',
+  background: 'var(--bg-base)',
   color: 'var(--text-primary)',
   fontSize: '0.95rem',
   fontFamily: 'var(--font-sans)',
@@ -168,8 +168,8 @@ const DemoAssetCard: React.FC<{
         gap: '0.75rem',
         padding: '0.75rem 1rem',
         borderRadius: '6px',
-        border: '1px solid var(--border-color)',
-        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        background: 'var(--bg-elevated)',
         cursor: 'pointer',
         textAlign: 'left',
         width: '100%',
@@ -185,7 +185,7 @@ const DemoAssetCard: React.FC<{
           {asset.description}
         </div>
       </div>
-      <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--primary)', whiteSpace: 'nowrap' }}>
+      <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--accent)', whiteSpace: 'nowrap' }}>
         {formatCurrency(asset.askingPrice)}
       </div>
     </button>
@@ -339,9 +339,9 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
     >
       {/* Hero Result Banner */}
       <div style={{
-        background: 'var(--bg-surface)',
+        background: 'var(--bg-elevated)',
         borderRadius: '12px',
-        border: '1px solid var(--border-color)',
+        border: '1px solid var(--border)',
         padding: '2rem',
         marginBottom: '1.5rem',
         textAlign: 'center',
@@ -350,8 +350,8 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
           Final Assessed Value
           <span style={{
             fontSize: '0.6rem', fontWeight: 700, padding: '2px 6px',
-            borderRadius: 6, background: 'var(--nm-warning-bg)',
-            color: 'var(--nm-warning-text)', border: '1px solid var(--nm-warning-border)',
+            borderRadius: 6, background: 'var(--warning-soft)',
+            color: 'var(--warning)', border: '1px solid var(--warning)',
             letterSpacing: '0.05em',
           }}>DEMO</span>
         </div>
@@ -398,9 +398,9 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
 
       {/* Header */}
       <div style={{
-        background: 'var(--bg-surface)',
+        background: 'var(--bg-elevated)',
         borderRadius: '12px',
-        border: '1px solid var(--border-color)',
+        border: '1px solid var(--border)',
         padding: '2rem',
         marginBottom: '1.5rem',
       }}>
@@ -461,14 +461,14 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
       {/* Verdicto */}
       {result.verdict && (
         <div style={{
-          background: 'var(--bg-surface)',
+          background: 'var(--bg-elevated)',
           borderRadius: '10px',
-          border: '1px solid var(--border-color)',
+          border: '1px solid var(--border)',
           padding: '1.25rem',
           marginBottom: '1.5rem',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-            <Shield size={18} color="var(--primary)" />
+            <Shield size={18} color="var(--accent)" />
             <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Court Verdicto</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -477,7 +477,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
                 Decision: <strong style={{ color: 'var(--text-primary)' }}>{result.verdict.decision}</strong>
               </p>
             </div>
-            <p style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary)' }}>
+            <p style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent)' }}>
               {formatCurrency(result.verdict.finalValue)}
             </p>
           </div>
@@ -492,7 +492,7 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
           gap: '0.5rem',
           padding: '0.75rem 1rem',
           borderRadius: '8px',
-          background: 'var(--bg-surface-alt)',
+          background: 'var(--bg-sunken)',
           fontSize: '0.8rem',
           color: 'var(--text-secondary)',
         }}>
@@ -509,9 +509,9 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
       {result.dataSources && result.dataSources.length > 0 && (
         <div style={{
           marginTop: '1rem',
-          background: 'var(--bg-surface)',
+          background: 'var(--bg-elevated)',
           borderRadius: '10px',
-          border: '1px solid var(--border-color)',
+          border: '1px solid var(--border)',
           padding: '1rem 1.25rem',
         }}>
           <h4 style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -755,7 +755,7 @@ export const AssessView: React.FC = () => {
                     gap: '0.4rem',
                     background: 'none',
                     border: 'none',
-                    color: 'var(--primary)',
+                    color: 'var(--accent)',
                     fontSize: '0.85rem',
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -806,9 +806,9 @@ export const AssessView: React.FC = () => {
             {/* Form */}
             <form onSubmit={handleSubmit}>
               <div className="edge-to-edge-mobile" style={{
-                background: 'var(--bg-surface)',
+                background: 'var(--bg-elevated)',
                 borderRadius: '12px',
-                border: '1px solid var(--border-color)',
+                border: '1px solid var(--border)',
                 padding: '1.75rem',
                 marginBottom: '1.5rem',
               }}>
@@ -904,8 +904,8 @@ export const AssessView: React.FC = () => {
                   gap: '0.5rem',
                   padding: '0.75rem 1rem',
                   borderRadius: '8px',
-                  background: 'var(--nm-error-bg)',
-                  border: '1px solid var(--nm-error-border)',
+                  background: 'var(--error-soft)',
+                  border: '1px solid var(--error)',
                   color: 'var(--error)',
                   fontSize: '0.85rem',
                   marginBottom: '1.5rem',
@@ -929,7 +929,7 @@ export const AssessView: React.FC = () => {
                   padding: '0.9rem',
                   borderRadius: '8px',
                   border: 'none',
-                  background: loading ? 'var(--text-tertiary)' : 'var(--primary)',
+                  background: loading ? 'var(--text-tertiary)' : 'var(--accent)',
                   color: 'white',
                   fontSize: '1rem',
                   fontWeight: 600,
@@ -955,9 +955,9 @@ export const AssessView: React.FC = () => {
 
               {/* Right: Guidance Panel */}
               <div className="edge-to-edge-mobile" style={{
-                background: 'var(--bg-surface)',
+                background: 'var(--bg-elevated)',
                 borderRadius: '12px',
-                border: '1px solid var(--border-color)',
+                border: '1px solid var(--border)',
                 padding: '1.5rem',
                 position: 'sticky',
                 top: '6rem',
@@ -976,7 +976,7 @@ export const AssessView: React.FC = () => {
                     <div key={item.step} style={{ display: 'flex', gap: '0.75rem' }}>
                       <div style={{
                         width: '24px', height: '24px', borderRadius: '50%',
-                        background: 'var(--primary)', color: 'white',
+                        background: 'var(--accent)', color: 'white',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: '0.7rem', fontWeight: 700, flexShrink: 0,
                       }}>
@@ -990,7 +990,7 @@ export const AssessView: React.FC = () => {
                   ))}
                 </div>
 
-                <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+                <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
                   <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Supported Asset Classes</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                     {[
@@ -1006,7 +1006,7 @@ export const AssessView: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ marginTop: '1.25rem', padding: '0.75rem', background: 'var(--bg-main)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <div style={{ marginTop: '1.25rem', padding: '0.75rem', background: 'var(--bg-base)', borderRadius: '8px', border: '1px solid var(--border)' }}>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
                     <strong style={{ color: 'var(--text-secondary)' }}>Tip:</strong> Use "Try a demo asset" above to see a full valuation without entering data manually.
                   </div>
@@ -1026,9 +1026,9 @@ export const AssessView: React.FC = () => {
             <div className="assess-bottom-row" style={{ marginBottom: '2rem', alignItems: 'stretch' }}>
               {/* Left: Asset summary card */}
               <div style={{
-                background: 'var(--bg-surface)',
+                background: 'var(--bg-elevated)',
                 borderRadius: '12px',
-                border: '1px solid var(--border-color)',
+                border: '1px solid var(--border)',
                 padding: '1.5rem',
                 display: 'flex',
                 flexDirection: 'column',
@@ -1047,7 +1047,7 @@ export const AssessView: React.FC = () => {
                   </div>
                   <div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Asking Price</div>
-                    <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--primary)' }}>{formatCurrency(parseFloat(askingPrice.replace(/[^0-9.]/g, '')))}</div>
+                    <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--accent)' }}>{formatCurrency(parseFloat(askingPrice.replace(/[^0-9.]/g, '')))}</div>
                   </div>
                   {location && (
                     <div>
@@ -1077,8 +1077,8 @@ export const AssessView: React.FC = () => {
                     gap: '0.5rem',
                     padding: '0.75rem 1rem',
                     borderRadius: '8px',
-                    background: 'var(--nm-error-bg)',
-                    border: '1px solid var(--nm-error-border)',
+                    background: 'var(--error-soft)',
+                    border: '1px solid var(--error)',
                     color: 'var(--error)',
                     fontSize: '0.85rem',
                     marginTop: '1rem',
@@ -1108,8 +1108,8 @@ export const AssessView: React.FC = () => {
                     width: '100%',
                     padding: '0.75rem',
                     borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border)',
+                    background: 'var(--bg-elevated)',
                     color: 'var(--text-primary)',
                     fontSize: '0.9rem',
                     fontWeight: 600,

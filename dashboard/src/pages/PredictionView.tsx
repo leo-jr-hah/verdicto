@@ -99,7 +99,7 @@ const ProbabilityRing: React.FC<{ value: number; size?: number }> = ({ value, si
   return (
     <div style={{ position: 'relative', width: size, height: size }}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--border-color)" strokeWidth={8} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--border)" strokeWidth={8} />
         <motion.circle
           cx={size / 2} cy={size / 2} r={r}
           fill="none" stroke={color} strokeWidth={8}
@@ -143,14 +143,14 @@ const AgentBar: React.FC<{ agent: PredictionAgent; index: number }> = ({ agent, 
       onClick={() => setExpanded(!expanded)}
       style={{
         background: 'var(--bg-elevated)',
-        border: '1px solid var(--border-color)',
+        border: '1px solid var(--border)',
         borderRadius: 'var(--card-radius)',
         overflow: 'hidden',
         cursor: 'pointer',
         transition: 'border-color 0.15s ease',
       }}
       onMouseEnter={(e) => e.currentTarget.style.borderColor = `${agent.color}50`}
-      onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
+      onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
     >
       <div style={{
         display: 'flex', alignItems: 'center', gap: 12,
@@ -180,7 +180,7 @@ const AgentBar: React.FC<{ agent: PredictionAgent; index: number }> = ({ agent, 
           </div>
           <div style={{
             width: '100%', height: 4, borderRadius: 2,
-            background: 'var(--border-color)',
+            background: 'var(--border)',
             overflow: 'hidden',
           }}>
             <motion.div
@@ -213,7 +213,7 @@ const AgentBar: React.FC<{ agent: PredictionAgent; index: number }> = ({ agent, 
           >
             <div style={{
               padding: '0 16px 14px',
-              borderTop: '1px solid var(--border-color-subtle, var(--border-color))',
+              borderTop: '1px solid var(--border-color-subtle, var(--border))',
               marginTop: 0, paddingTop: 12,
             }}>
               <div style={{ display: 'flex', gap: 16, marginBottom: 10 }}>
@@ -238,9 +238,9 @@ const AgentBar: React.FC<{ agent: PredictionAgent; index: number }> = ({ agent, 
               </div>
               <div style={{
                 fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.6,
-                background: 'var(--bg-surface)',
+                background: 'var(--bg-elevated)',
                 borderRadius: 8, padding: '10px 12px',
-                border: '1px solid var(--border-color-subtle, var(--border-color))',
+                border: '1px solid var(--border-color-subtle, var(--border))',
               }}>
                 {agent.reasoning}
               </div>
@@ -356,7 +356,7 @@ export const PredictionView: React.FC = () => {
             <div style={{
               width: '100%',
               background: 'var(--bg-elevated)',
-              border: '1px solid var(--border-color)',
+              border: '1px solid var(--border)',
               borderRadius: 'var(--card-radius)',
               padding: '24px 28px',
               boxShadow: 'var(--shadow-sm)',
@@ -368,7 +368,7 @@ export const PredictionView: React.FC = () => {
                   fontSize: '0.82rem', fontWeight: 600,
                   color: 'var(--text-primary)', marginBottom: 8,
                 }}>
-                  <Target size={14} color="var(--primary)" />
+                  <Target size={14} color="var(--accent)" />
                   Confidence Question
                 </label>
                 <textarea
@@ -378,8 +378,8 @@ export const PredictionView: React.FC = () => {
                   rows={3}
                   style={{
                     width: '100%', padding: '12px 14px', borderRadius: 10,
-                    border: '1.5px solid var(--border-color)',
-                    background: 'var(--bg-surface)',
+                    border: '1.5px solid var(--border)',
+                    background: 'var(--bg-elevated)',
                     color: 'var(--text-primary)', fontSize: '0.95rem',
                     fontFamily: 'var(--font-sans)',
                     outline: 'none', resize: 'vertical',
@@ -387,11 +387,11 @@ export const PredictionView: React.FC = () => {
                     lineHeight: 1.5,
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--primary)';
-                    e.currentTarget.style.boxShadow = '0 0 0 3px var(--nm-focus-ring)';
+                    e.currentTarget.style.borderColor = 'var(--accent)';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px var(--accent-soft)';
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--border-color)';
+                    e.currentTarget.style.borderColor = 'var(--border)';
                     e.currentTarget.style.boxShadow = 'none';
                   }}
                 />
@@ -416,10 +416,10 @@ export const PredictionView: React.FC = () => {
                         onClick={() => setTimeframe(tf)}
                         style={{
                           padding: '8px 16px', borderRadius: 8,
-                          border: `1.5px solid ${active ? 'var(--primary)' : 'var(--border-color)'}`,
-                          background: active ? 'rgba(255, 59, 59, 0.06)' : 'var(--bg-surface)',
+                          border: `1.5px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
+                          background: active ? 'rgba(255, 59, 59, 0.06)' : 'var(--bg-elevated)',
                           cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
-                          color: active ? 'var(--primary)' : 'var(--text-secondary)',
+                          color: active ? 'var(--accent)' : 'var(--text-secondary)',
                           transition: 'all 0.15s ease',
                           display: 'flex', alignItems: 'center', gap: 5,
                         }}
@@ -434,7 +434,7 @@ export const PredictionView: React.FC = () => {
 
               {/* Divider */}
               <div style={{
-                height: 1, background: 'var(--border-color)',
+                height: 1, background: 'var(--border)',
                 margin: '0 -28px 20px',
               }} />
 
@@ -449,12 +449,12 @@ export const PredictionView: React.FC = () => {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                     padding: '12px 28px', borderRadius: 10, border: 'none',
                     background: question.trim()
-                      ? 'linear-gradient(135deg, var(--primary), var(--primary-dark, #cc2222))'
-                      : 'var(--border-color)',
+                      ? 'linear-gradient(135deg, var(--accent), var(--primary-dark, #cc2222))'
+                      : 'var(--border)',
                     color: 'var(--text-inverse)', fontSize: '0.95rem', fontWeight: 700,
                     cursor: question.trim() ? 'pointer' : 'not-allowed',
                     transition: 'all 0.2s ease',
-                    boxShadow: question.trim() ? '0 2px 8px var(--nm-accent-glow)' : 'none',
+                    boxShadow: question.trim() ? '0 2px 8px var(--accent-glow)' : 'none',
                   }}
                 >
                   <Wallet size={16} />
@@ -491,7 +491,7 @@ export const PredictionView: React.FC = () => {
                 style={{
                   display: 'flex', alignItems: 'center', gap: 8,
                   padding: '10px 16px', borderRadius: 8,
-                  border: '1px dashed var(--border-color)',
+                  border: '1px dashed var(--border)',
                   background: 'transparent',
                   cursor: 'pointer', fontSize: '0.82rem',
                   color: 'var(--text-tertiary)',
@@ -499,12 +499,12 @@ export const PredictionView: React.FC = () => {
                   width: '100%', justifyContent: 'center',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--primary)';
-                  e.currentTarget.style.color = 'var(--primary)';
-                  e.currentTarget.style.background = 'var(--nm-accent-bg)';
+                  e.currentTarget.style.borderColor = 'var(--accent)';
+                  e.currentTarget.style.color = 'var(--accent)';
+                  e.currentTarget.style.background = 'var(--accent-soft)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--border-color)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
                   e.currentTarget.style.color = 'var(--text-tertiary)';
                   e.currentTarget.style.background = 'transparent';
                 }}
@@ -533,17 +533,17 @@ export const PredictionView: React.FC = () => {
                           style={{
                             display: 'flex', alignItems: 'flex-start', gap: 10,
                             padding: '14px 16px', borderRadius: 10,
-                            border: '1px solid var(--border-color)',
+                            border: '1px solid var(--border)',
                             background: 'var(--bg-elevated)',
                             cursor: 'pointer', textAlign: 'left',
                             transition: 'all 0.15s ease',
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = 'var(--primary)';
-                            e.currentTarget.style.boxShadow = '0 2px 8px var(--nm-focus-ring)';
+                            e.currentTarget.style.borderColor = 'var(--accent)';
+                            e.currentTarget.style.boxShadow = '0 2px 8px var(--accent-soft)';
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = 'var(--border-color)';
+                            e.currentTarget.style.borderColor = 'var(--border)';
                             e.currentTarget.style.boxShadow = 'none';
                           }}
                         >
@@ -593,7 +593,7 @@ export const PredictionView: React.FC = () => {
               transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
               style={{ marginBottom: 20 }}
             >
-              <Loader2 size={48} color="var(--primary)" />
+              <Loader2 size={48} color="var(--accent)" />
             </motion.div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>
               Running Confidence Analysis
@@ -648,8 +648,8 @@ export const PredictionView: React.FC = () => {
               onClick={handleReset}
               style={{
                 display: 'flex', alignItems: 'center', gap: 8,
-                padding: '10px 24px', borderRadius: 8, border: '1px solid var(--border-color)',
-                background: 'var(--bg-surface)', cursor: 'pointer',
+                padding: '10px 24px', borderRadius: 8, border: '1px solid var(--border)',
+                background: 'var(--bg-elevated)', cursor: 'pointer',
                 fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)',
               }}
             >
@@ -671,7 +671,7 @@ export const PredictionView: React.FC = () => {
               marginBottom: 24, gap: 16, flexWrap: 'wrap',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
-                <Target size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
+                <Target size={18} color="var(--accent)" style={{ flexShrink: 0 }} />
                 <div style={{
                   fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)',
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
@@ -680,16 +680,16 @@ export const PredictionView: React.FC = () => {
                 </div>
                 <span style={{
                   fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px',
-                  borderRadius: 6, background: 'var(--nm-warning-bg)',
-                  color: 'var(--nm-warning-text)', border: '1px solid var(--nm-warning-border)',
+                  borderRadius: 6, background: 'var(--warning-soft)',
+                  color: 'var(--warning)', border: '1px solid var(--warning)',
                   flexShrink: 0, letterSpacing: '0.05em',
                 }}>DEMO</span>
               </div>
               <button onClick={handleReset} style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '8px 16px', borderRadius: 8,
-                border: '1px solid var(--border-color)',
-                background: 'var(--bg-surface)', cursor: 'pointer',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-elevated)', cursor: 'pointer',
                 fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)',
                 transition: 'all 0.15s ease',
                 flexShrink: 0,
@@ -729,8 +729,8 @@ export const PredictionView: React.FC = () => {
                     { label: 'Agents', value: `${result.agents.length} analyzed`, icon: <Target size={14} /> },
                   ].map((stat) => (
                     <div key={stat.label} style={{
-                      background: 'var(--bg-surface)',
-                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border)',
                       borderRadius: 10, padding: '14px 16px',
                     }}>
                       <div style={{
@@ -757,7 +757,7 @@ export const PredictionView: React.FC = () => {
                     display: 'flex', alignItems: 'center', gap: 8,
                     marginTop: 16, padding: '8px 12px', borderRadius: 8,
                     background: 'var(--success-soft)',
-                    border: '1px solid var(--nm-success-border)',
+                    border: '1px solid var(--success)',
                     fontSize: '0.78rem', color: 'var(--text-tertiary)',
                   }}>
                     <CheckCircle2 size={14} color="var(--text-secondary)" />
@@ -767,7 +767,7 @@ export const PredictionView: React.FC = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        color: 'var(--primary)', textDecoration: 'none',
+                        color: 'var(--accent)', textDecoration: 'none',
                         fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3,
                       }}
                     >
@@ -789,8 +789,8 @@ export const PredictionView: React.FC = () => {
                 <span style={{
                   fontSize: '0.7rem', fontWeight: 500, color: 'var(--text-tertiary)',
                   padding: '2px 8px', borderRadius: 4,
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border)',
                 }}>
                   {result.agents.length} agents
                 </span>
@@ -810,7 +810,7 @@ export const PredictionView: React.FC = () => {
               style={{
                 background: 'var(--bg-elevated)',
                 borderRadius: 'var(--card-radius)',
-                border: '1px solid var(--border-color)',
+                border: '1px solid var(--border)',
                 padding: '18px 22px',
               }}
             >
@@ -829,8 +829,8 @@ export const PredictionView: React.FC = () => {
                     display: 'flex', alignItems: 'center', gap: 10,
                     fontSize: '0.82rem', color: 'var(--text-secondary)',
                     padding: '8px 12px', borderRadius: 8,
-                    background: 'var(--nm-warning-bg)',
-                    border: '1px solid var(--nm-warning-border)',
+                    background: 'var(--warning-soft)',
+                    border: '1px solid var(--warning)',
                   }}>
                     <div style={{
                       width: 6, height: 6, borderRadius: '50%',

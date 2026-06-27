@@ -177,7 +177,7 @@ const AgentCard: React.FC<{
       onClick={onClick}
       style={{
         background: 'var(--bg-elevated)',
-        border: `1px solid ${isSelected ? agent.accentColor : 'var(--border-color)'}`,
+        border: `1px solid ${isSelected ? agent.accentColor : 'var(--border)'}`,
         borderRadius: 'var(--card-radius)',
         padding: '16px 20px',
         cursor: 'pointer',
@@ -308,10 +308,10 @@ const AgentDetailPanel: React.FC<{ agent: AgentData }> = ({ agent }) => {
             {agent.strengths.map((s, i) => (
               <span key={i} style={{
                 padding: '4px 10px', borderRadius: 6,
-                background: 'var(--bg-surface)',
+                background: 'var(--bg-elevated)',
                 color: 'var(--text-secondary)',
                 fontSize: '0.8rem',
-                border: '1px solid var(--border-color-subtle)',
+                border: '1px solid var(--border-weak)',
               }}>
                 {s}
               </span>
@@ -330,9 +330,9 @@ const AgentDetailPanel: React.FC<{ agent: AgentData }> = ({ agent }) => {
             ].map((item) => (
               <div key={item.type} style={{
                 flex: 1, padding: '10px 12px',
-                background: 'var(--bg-surface)',
+                background: 'var(--bg-elevated)',
                 borderRadius: 8,
-                border: '1px solid var(--border-color-subtle)',
+                border: '1px solid var(--border-weak)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, color: 'var(--text-tertiary)' }}>
                   {item.icon}
@@ -350,9 +350,9 @@ const AgentDetailPanel: React.FC<{ agent: AgentData }> = ({ agent }) => {
         <div style={{ gridColumn: 'span 2' }}>
           <div style={labelStyle}>SCORE HISTORY</div>
           <div style={{
-            background: 'var(--bg-surface)',
+            background: 'var(--bg-elevated)',
             borderRadius: 8, padding: '12px 16px',
-            border: '1px solid var(--border-color-subtle)',
+            border: '1px solid var(--border-weak)',
           }}>
             <MiniSparkline
               data={agent.history.map(h => h.score)}
@@ -453,14 +453,14 @@ export const ReputationView: React.FC = () => {
       <div className="reputation-metrics-grid"
         style={{ gap: 16, marginBottom: 32 }}>
         {[
-          { label: 'Total Agents', value: metrics.totalAgents, icon: <Shield size={18} />, color: 'var(--primary)' },
+          { label: 'Total Agents', value: metrics.totalAgents, icon: <Shield size={18} />, color: 'var(--accent)' },
           { label: 'Avg Score', value: metrics.avgScore, icon: <TrendingUp size={18} />, color: 'var(--text-secondary)' },
           { label: 'Avg Success', value: `${metrics.avgSuccess}%`, icon: <CheckCircle2 size={18} />, color: 'var(--text-tertiary)' },
           { label: 'Total Assessments', value: metrics.totalAssessments.toLocaleString(), icon: <Target size={18} />, color: 'var(--text-secondary)' },
         ].map((stat, i) => (
           <div key={i} style={{
             background: 'var(--bg-elevated)',
-            border: '1px solid var(--border-color)',
+            border: '1px solid var(--border)',
             borderRadius: 'var(--card-radius)',
             padding: '16px 20px',
             display: 'flex', alignItems: 'center', gap: 12,

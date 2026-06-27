@@ -247,9 +247,9 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
 
 const STATUS_CONFIG = {
   live: { label: 'Live', color: 'var(--text-secondary)', bg: 'var(--success-soft)' },
-  building: { label: 'Building', color: 'var(--red-600)', bg: 'var(--primary-bg)' },
+  building: { label: 'Building', color: 'var(--red-600)', bg: 'var(--accent-soft)' },
   planned: { label: 'Planned', color: 'var(--text-tertiary)', bg: 'rgba(245, 158, 11, 0.1)' },
-  future: { label: 'Future', color: 'var(--text-tertiary)', bg: 'var(--bg-surface-alt)' },
+  future: { label: 'Future', color: 'var(--text-tertiary)', bg: 'var(--bg-sunken)' },
 };
 
 const CATEGORY_CONFIG = {
@@ -271,9 +271,9 @@ const RoadmapCard: React.FC<{ item: RoadmapItem; index: number }> = ({ item, ind
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
       style={{
-        background: 'var(--bg-surface)',
+        background: 'var(--bg-elevated)',
         borderRadius: '12px',
-        border: '1px solid var(--border-color)',
+        border: '1px solid var(--border)',
         padding: '1.25rem',
         opacity: item.status === 'future' ? 0.7 : 1,
         transition: 'all 0.2s ease',
@@ -370,9 +370,9 @@ export const RoadmapView: React.FC = () => {
         style={{ gap: '1rem', marginBottom: '2rem' }}>
         {sections.map((section) => (
           <div key={section.title} style={{
-            background: 'var(--bg-surface)',
+            background: 'var(--bg-elevated)',
             borderRadius: '10px',
-            border: '1px solid var(--border-color)',
+            border: '1px solid var(--border)',
             padding: '1rem',
             textAlign: 'center',
           }}>
@@ -432,7 +432,7 @@ export const RoadmapView: React.FC = () => {
         style={{
           background: 'linear-gradient(135deg, var(--bg-inset), var(--bg-inset))',
           borderRadius: '12px',
-          border: '1px solid var(--primary-border)',
+          border: '1px solid var(--accent)',
           padding: '2rem',
           textAlign: 'center',
           marginTop: '1rem',

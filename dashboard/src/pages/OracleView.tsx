@@ -125,7 +125,7 @@ export const OracleView: React.FC = () => {
               style={{
                 display: 'flex', alignItems: 'center', gap: '6px',
                 padding: '8px 16px', borderRadius: '8px',
-                border: '1px solid var(--border-color)', background: 'var(--bg-primary)',
+                border: '1px solid var(--border)', background: 'var(--bg-primary)',
                 color: 'var(--text-primary)', cursor: loading ? 'wait' : 'pointer',
                 fontSize: '0.85rem', fontWeight: 500,
               }}
@@ -155,7 +155,7 @@ export const OracleView: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               style={{
                 padding: '16px 18px', borderRadius: '12px',
-                background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
+                background: 'var(--bg-elevated)', border: '1px solid var(--border)',
                 display: 'flex', alignItems: 'center', gap: '12px',
               }}
             >
@@ -185,14 +185,14 @@ export const OracleView: React.FC = () => {
         style={{
           padding: '24px', borderRadius: '12px',
           background: 'var(--bg-elevated)',
-          border: '1px solid var(--border-color)',
+          border: '1px solid var(--border)',
           marginBottom: '32px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
           <div style={{
             width: '48px', height: '48px', borderRadius: '12px',
-            background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
           }}>
             <Radio size={24} style={{ color: 'var(--red-600)' }} />
@@ -217,7 +217,7 @@ export const OracleView: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
         style={{
-          borderRadius: '12px', border: '1px solid var(--border-color)',
+          borderRadius: '12px', border: '1px solid var(--border)',
           background: 'var(--bg-primary)', marginBottom: '32px', overflow: 'hidden',
         }}
       >
@@ -250,7 +250,7 @@ export const OracleView: React.FC = () => {
                     position: 'absolute', top: '8px', right: '28px',
                     display: 'flex', alignItems: 'center', gap: '4px',
                     padding: '4px 10px', borderRadius: '6px',
-                    border: '1px solid var(--border-color)', background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border)', background: 'var(--bg-secondary)',
                     color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.75rem',
                   }}
                 >
@@ -258,7 +258,7 @@ export const OracleView: React.FC = () => {
                 </button>
                 <pre style={{
                   margin: 0, padding: '16px', borderRadius: '8px',
-                  background: 'var(--bg-secondary)', border: '1px solid var(--border-color)',
+                  background: 'var(--bg-secondary)', border: '1px solid var(--border)',
                   fontSize: '0.82rem', lineHeight: 1.6, overflow: 'auto',
                   color: 'var(--text-primary)', fontFamily: "'SF Mono', 'Fira Code', monospace",
                 }}>
@@ -276,12 +276,12 @@ export const OracleView: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
         style={{
-          borderRadius: '12px', border: '1px solid var(--border-color)',
+          borderRadius: '12px', border: '1px solid var(--border)',
           background: 'var(--bg-primary)', overflow: 'hidden',
         }}
       >
         <div style={{
-          padding: '16px 20px', borderBottom: '1px solid var(--border-color)',
+          padding: '16px 20px', borderBottom: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

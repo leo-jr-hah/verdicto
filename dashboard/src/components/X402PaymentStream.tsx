@@ -59,7 +59,7 @@ const PaymentRow: React.FC<{ payment: PaymentEvent; index: number }> = ({ paymen
         alignItems: 'center',
         gap: '0.75rem',
         padding: '0.75rem 1rem',
-        borderBottom: '1px solid var(--border-color)',
+        borderBottom: '1px solid var(--border)',
         background: index === 0 ? 'var(--bg-inset)' : 'transparent',
       }}
     >
@@ -162,7 +162,7 @@ export const X402PaymentStream: React.FC = () => {
       {/* Stats bar */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
         <div style={{
-          background: 'var(--bg-surface)', borderRadius: '10px', border: '1px solid var(--border-color)',
+          background: 'var(--bg-elevated)', borderRadius: '10px', border: '1px solid var(--border)',
           padding: '1rem', textAlign: 'center',
         }}>
           <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-secondary)' }}>
@@ -171,7 +171,7 @@ export const X402PaymentStream: React.FC = () => {
           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Total Volume</div>
         </div>
         <div style={{
-          background: 'var(--bg-surface)', borderRadius: '10px', border: '1px solid var(--border-color)',
+          background: 'var(--bg-elevated)', borderRadius: '10px', border: '1px solid var(--border)',
           padding: '1rem', textAlign: 'center',
         }}>
           <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-secondary)' }}>
@@ -180,7 +180,7 @@ export const X402PaymentStream: React.FC = () => {
           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Confirmed</div>
         </div>
         <div style={{
-          background: 'var(--bg-surface)', borderRadius: '10px', border: '1px solid var(--border-color)',
+          background: 'var(--bg-elevated)', borderRadius: '10px', border: '1px solid var(--border)',
           padding: '1rem', textAlign: 'center',
         }}>
           <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-tertiary)' }}>
@@ -196,21 +196,21 @@ export const X402PaymentStream: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         style={{
-          background: 'var(--bg-surface)',
+          background: 'var(--bg-elevated)',
           borderRadius: '12px',
-          border: '1px solid var(--border-color)',
+          border: '1px solid var(--border)',
           overflow: 'hidden',
         }}
       >
         <div style={{
           display: 'flex', alignItems: 'center', gap: '0.5rem',
-          padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-color)',
+          padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)',
         }}>
           <Zap size={14} color="var(--text-secondary)" />
           <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>Recent Payments</span>
           <span style={{
             marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-tertiary)',
-            padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'var(--bg-surface-alt)',
+            padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'var(--bg-sunken)',
           }}>
             {payments.length} transactions
           </span>

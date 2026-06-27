@@ -116,7 +116,7 @@ export const DashboardView: React.FC = () => {
       <div className="section">
         <div className="stat-grid">
           {[
-            { label: 'Total Cases', value: totalCases, icon: BarChart3, color: 'var(--text-primary)', bg: 'var(--bg-surface-alt)' },
+            { label: 'Total Cases', value: totalCases, icon: BarChart3, color: 'var(--text-primary)', bg: 'var(--bg-sunken)' },
             { label: 'Verified', value: onChainCount, icon: CheckCircle2, color: 'var(--text-secondary)', bg: 'var(--success-soft)' },
             { label: 'Oracle Verdicts', value: oracleStats.totalVerdicts, icon: Radio, color: 'var(--text-secondary)', bg: 'var(--bg-inset)' },
             { label: 'Active Agents', value: 5, icon: Zap, color: 'var(--text-secondary)', bg: 'var(--bg-inset)' },
@@ -165,14 +165,14 @@ export const DashboardView: React.FC = () => {
                 alignItems: 'center',
                 gap: '12px',
                 textDecoration: 'none',
-                background: action.primary ? 'var(--primary)' : undefined,
+                background: action.primary ? 'var(--accent)' : undefined,
                 color: action.primary ? 'var(--text-inverse)' : undefined,
                 border: action.primary ? 'none' : undefined,
                 transition: 'transform 0.12s ease, box-shadow 0.12s ease',
               }}
             >
               <div style={{
-                background: action.primary ? 'rgba(255,255,255,0.2)' : 'var(--bg-surface-alt)',
+                background: action.primary ? 'rgba(255,255,255,0.2)' : 'var(--bg-sunken)',
                 padding: '10px',
                 borderRadius: '8px',
                 display: 'flex',
@@ -195,7 +195,7 @@ export const DashboardView: React.FC = () => {
       <div className="grid-main-sidebar">
         {/* Activity Feed */}
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div className="card-header" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)', marginBottom: 0 }}>
+          <div className="card-header" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', marginBottom: 0 }}>
             <div>
               <div className="card-title">Recent Activity</div>
               <div className="card-subtitle">Latest cases and transactions</div>
@@ -227,11 +227,11 @@ export const DashboardView: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '12px 20px',
-                    borderBottom: '1px solid var(--border-color-subtle)',
+                    borderBottom: '1px solid var(--border-weak)',
                     cursor: 'pointer',
                     transition: 'background 0.12s ease',
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-surface)')}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-elevated)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
@@ -239,7 +239,7 @@ export const DashboardView: React.FC = () => {
                       width: '32px',
                       height: '32px',
                       borderRadius: '8px',
-                      background: 'var(--bg-surface-alt)',
+                      background: 'var(--bg-sunken)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -285,7 +285,7 @@ export const DashboardView: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '10px 0',
-                borderBottom: i < 2 ? '1px solid var(--border-color-subtle)' : 'none',
+                borderBottom: i < 2 ? '1px solid var(--border-weak)' : 'none',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div className={`status-dot status-dot-${item.status}`} />
@@ -310,13 +310,13 @@ export const DashboardView: React.FC = () => {
                 alignItems: 'center',
                 gap: '10px',
                 padding: '8px 0',
-                borderBottom: i < AGENTS.length - 1 ? '1px solid var(--border-color-subtle)' : 'none',
+                borderBottom: i < AGENTS.length - 1 ? '1px solid var(--border-weak)' : 'none',
               }}>
                 <div style={{
                   width: '28px',
                   height: '28px',
                   borderRadius: '7px',
-                  background: 'var(--bg-surface-alt)',
+                  background: 'var(--bg-sunken)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

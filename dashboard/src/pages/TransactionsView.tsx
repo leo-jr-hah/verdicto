@@ -31,7 +31,7 @@ function typeColor(type: string): string {
     case 'x402 Payment': return 'var(--text-tertiary)';
     case 'ExecuteVerdict': return 'var(--red-600)';
     case 'UpdateReputation': return 'var(--text-secondary)';
-    case 'SubmitAssessment': return 'var(--primary)';
+    case 'SubmitAssessment': return 'var(--accent)';
     default: return 'var(--text-secondary)';
   }
 }

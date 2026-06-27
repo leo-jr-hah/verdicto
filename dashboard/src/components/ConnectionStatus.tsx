@@ -46,8 +46,8 @@ export const ConnectionStatus: React.FC = () => {
       fontSize: '0.85rem',
       fontWeight: 600,
       color: isOnline ? 'var(--text-secondary)' : 'var(--text-tertiary)',
-      background: 'var(--bg-surface)',
-      border: '1px solid var(--border-color)',
+      background: 'var(--bg-elevated)',
+      border: '1px solid var(--border)',
       borderRadius: '999px'
     }}>
       {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />}

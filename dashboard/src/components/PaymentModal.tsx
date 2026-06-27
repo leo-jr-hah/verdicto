@@ -55,14 +55,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
             className="payment-modal"
-            style={{ background: 'var(--bg-surface)', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}
+            style={{ background: 'var(--bg-elevated)', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}
           >
             {/* Header */}
             <div className="text-center" style={{ marginBottom: '1.5rem' }}>
               <div style={{
                 width: 56, height: 56, borderRadius: '50%',
-                background: 'var(--primary-bg)',
-                border: '2px solid var(--primary-border)',
+                background: 'var(--accent-soft)',
+                border: '2px solid var(--accent)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 margin: '0 auto 1rem',
               }}>
@@ -78,7 +78,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
             {/* Fee breakdown */}
             <div style={{
-              background: 'var(--bg-surface-alt)',
+              background: 'var(--bg-sunken)',
               borderRadius: 'var(--card-radius)',
               padding: '1rem 1.25rem',
               marginBottom: '1.5rem',
@@ -108,8 +108,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             {/* Error */}
             {signError && (
               <div style={{
-                background: 'var(--nm-error-bg)',
-                border: '1px solid var(--nm-error-border)',
+                background: 'var(--error-soft)',
+                border: '1px solid var(--error)',
                 borderRadius: '8px',
                 padding: '0.75rem',
                 marginBottom: '1rem',

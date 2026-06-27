@@ -181,7 +181,7 @@ export const DisputesView: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               style={{
                 padding: '20px', borderRadius: '12px',
-                background: 'var(--bg-primary)', border: '1px solid var(--border-color)',
+                background: 'var(--bg-primary)', border: '1px solid var(--border)',
                 display: 'flex', alignItems: 'center', gap: '14px',
               }}
             >
@@ -210,7 +210,7 @@ export const DisputesView: React.FC = () => {
         style={{
           padding: '24px', borderRadius: '12px',
           background: 'var(--bg-elevated)',
-          border: '1px solid var(--border-color)',
+          border: '1px solid var(--border)',
           marginBottom: '32px',
         }}
       >
@@ -248,12 +248,12 @@ export const DisputesView: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
         style={{
-          borderRadius: '12px', border: '1px solid var(--border-color)',
+          borderRadius: '12px', border: '1px solid var(--border)',
           background: 'var(--bg-primary)', overflow: 'hidden', marginBottom: '32px',
         }}
       >
         <div style={{
-          padding: '16px 20px', borderBottom: '1px solid var(--border-color)',
+          padding: '16px 20px', borderBottom: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -284,7 +284,7 @@ export const DisputesView: React.FC = () => {
               <div
                 key={v.assetId}
                 style={{
-                  padding: '14px 20px', borderBottom: '1px solid var(--border-color)',
+                  padding: '14px 20px', borderBottom: '1px solid var(--border)',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
                 }}
               >
@@ -332,12 +332,12 @@ export const DisputesView: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
         style={{
-          borderRadius: '12px', border: '1px solid var(--border-color)',
+          borderRadius: '12px', border: '1px solid var(--border)',
           background: 'var(--bg-primary)', overflow: 'hidden',
         }}
       >
         <div style={{
-          padding: '16px 20px', borderBottom: '1px solid var(--border-color)',
+          padding: '16px 20px', borderBottom: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -370,7 +370,7 @@ export const DisputesView: React.FC = () => {
         ) : (
           <div>
             {filteredDisputes.map((d) => (
-              <div key={d.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+              <div key={d.id} style={{ borderBottom: '1px solid var(--border)' }}>
                 <div
                   style={{
                     padding: '14px 20px', cursor: 'pointer',
@@ -413,8 +413,8 @@ export const DisputesView: React.FC = () => {
                         color: d.outcome === 'overturned' ? 'var(--red-600)' : 'var(--text-secondary)',
                       }}>
                         {d.outcome === 'overturned'
-                          ? 'Re-trial found the original verdict incorrect. Decision has been reversed. (Demo — simulated re-trial)'
-                          : 'Re-trial confirmed the original verdict. Challenge was unsuccessful. (Demo — simulated re-trial)'}
+                          ? 'Re-trial found the original verdict incorrect. Decision has been reversed. (Demo - simulated re-trial)'
+                          : 'Re-trial confirmed the original verdict. Challenge was unsuccessful. (Demo - simulated re-trial)'}
                       </div>
                     )}
                   </div>
@@ -429,7 +429,7 @@ export const DisputesView: React.FC = () => {
                       exit={{ height: 0, opacity: 0 }}
                       style={{ overflow: 'hidden' }}
                     >
-                      <div style={{ padding: '0 20px 16px', borderTop: '1px solid var(--border-color)' }}>
+                      <div style={{ padding: '0 20px 16px', borderTop: '1px solid var(--border)' }}>
                         <div style={{ paddingTop: '12px' }}>
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                             Challenger
@@ -523,7 +523,7 @@ export const DisputesView: React.FC = () => {
                               {d.retrial.panel.map((juror, i) => (
                                 <div key={i} style={{
                                   padding: '10px 12px', borderRadius: '8px',
-                                  background: 'var(--bg-primary)', border: '1px solid var(--border-color)',
+                                  background: 'var(--bg-primary)', border: '1px solid var(--border)',
                                   display: 'flex', alignItems: 'flex-start', gap: '10px',
                                 }}>
                                   <div style={{
@@ -556,7 +556,7 @@ export const DisputesView: React.FC = () => {
                             {d.retrial.reasoning && (
                               <div style={{
                                 padding: '12px 14px', borderRadius: '8px',
-                                background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
+                                background: 'var(--bg-elevated)', border: '1px solid var(--border)',
                               }}>
                                 <div style={{ fontSize: '0.7rem', color: 'var(--red-600)', marginBottom: '4px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                   Panel Summary
@@ -578,7 +578,7 @@ export const DisputesView: React.FC = () => {
                                 style={{
                                   display: 'inline-flex', alignItems: 'center', gap: '6px',
                                   marginTop: '12px', padding: '8px 14px', borderRadius: '8px',
-                                  background: 'var(--bg-elevated)', border: '1px solid var(--border-color)',
+                                  background: 'var(--bg-elevated)', border: '1px solid var(--border)',
                                   color: 'var(--red-600)', fontSize: '0.78rem', fontWeight: 500,
                                   textDecoration: 'none',
                                 }}
@@ -634,13 +634,13 @@ export const DisputesView: React.FC = () => {
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
               style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-color)',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border)',
                 borderRadius: '16px',
                 padding: '2rem',
                 maxWidth: '480px',
                 width: '90%',
-                boxShadow: '0 24px 64px var(--nm-overlay)',
+                boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
               }}
             >
               {/* Header */}
@@ -683,7 +683,7 @@ export const DisputesView: React.FC = () => {
 
               {/* Target asset */}
               <div style={{
-                background: 'var(--bg-surface-alt)',
+                background: 'var(--bg-sunken)',
                 borderRadius: '10px', padding: '1rem 1.25rem', marginBottom: '16px',
               }}>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -706,7 +706,7 @@ export const DisputesView: React.FC = () => {
                   rows={4}
                   style={{
                     width: '100%', padding: '10px 12px', borderRadius: '8px',
-                    border: '1px solid var(--border-color)', background: 'var(--bg-primary)',
+                    border: '1px solid var(--border)', background: 'var(--bg-primary)',
                     color: 'var(--text-primary)', fontSize: '0.9rem', lineHeight: 1.5,
                     resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box',
                   }}

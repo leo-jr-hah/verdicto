@@ -5,7 +5,7 @@ import { GradientOrb } from './Backgrounds';
 
 export const AgentGrid: React.FC = () => {
   return (
-    <section id="agents" className="landing-section" style={{ borderTop: '1px solid var(--border-color)', position: 'relative' }}>
+    <section id="agents" className="landing-section" style={{ borderTop: '1px solid var(--border)', position: 'relative' }}>
       <GradientOrb color1="rgba(6,182,212,0.06)" color2="rgba(59,130,246,0.04)" size={400} x="15%" y="40%" delay={2} />
 
       <div className="landing-section__container" style={{ position: 'relative', zIndex: 1 }}>

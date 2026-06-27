@@ -163,12 +163,12 @@ const StepIndicator: React.FC<{ current: number; steps: string[] }> = ({ current
     {steps.map((label, i) => (
       <React.Fragment key={i}>
         <div className="borrow-step" style={{
-          color: i <= current ? 'var(--primary)' : 'var(--text-tertiary)',
+          color: i <= current ? 'var(--accent)' : 'var(--text-tertiary)',
           fontWeight: i === current ? 700 : 500,
         }}>
           <div className="borrow-step__dot" style={{
-            background: i < current ? 'var(--primary)' : i === current ? 'rgba(255,59,59,0.1)' : 'var(--bg-main)',
-            color: i < current ? 'var(--text-inverse)' : i === current ? 'var(--primary)' : 'var(--text-tertiary)',
+            background: i < current ? 'var(--accent)' : i === current ? 'rgba(255,59,59,0.1)' : 'var(--bg-base)',
+            color: i < current ? 'var(--text-inverse)' : i === current ? 'var(--accent)' : 'var(--text-tertiary)',
           }}>
             {i < current ? <CheckCircle2 size={14} /> : i + 1}
           </div>
@@ -176,7 +176,7 @@ const StepIndicator: React.FC<{ current: number; steps: string[] }> = ({ current
         </div>
         {i < steps.length - 1 && (
           <div className="borrow-step__line" style={{
-            background: i < current ? 'var(--primary)' : 'var(--border-color)',
+            background: i < current ? 'var(--accent)' : 'var(--border)',
           }} />
         )}
       </React.Fragment>
@@ -257,14 +257,14 @@ const LoanCard: React.FC<{
           </div>
           {loan.escrowLockTxHash && (
             <div style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-              🔒 Lock: <code style={{ fontSize: '0.75rem', background: 'var(--bg-surface)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
+              🔒 Lock: <code style={{ fontSize: '0.75rem', background: 'var(--bg-elevated)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
                 {loan.escrowLockTxHash.slice(0, 16)}...
               </code>
             </div>
           )}
           {loan.escrowReleaseTxHash && (
             <div style={{ color: 'var(--text-secondary)' }}>
-              🔓 Release: <code style={{ fontSize: '0.75rem', background: 'var(--bg-surface)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
+              🔓 Release: <code style={{ fontSize: '0.75rem', background: 'var(--bg-elevated)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
                 {loan.escrowReleaseTxHash.slice(0, 16)}...
               </code>
             </div>
@@ -280,7 +280,7 @@ const LoanCard: React.FC<{
           </div>
           {loan.revaluationHistory.slice(-3).map((rev, i) => (
             <div key={i} className="borrow-loan-card__reval-item" style={{
-              borderLeft: `3px solid ${rev.status === 'warning' || rev.status === 'liquidated' ? 'var(--red-600)' : 'var(--border-color)'}`,
+              borderLeft: `3px solid ${rev.status === 'warning' || rev.status === 'liquidated' ? 'var(--red-600)' : 'var(--border)'}`,
             }}>
               <div className="borrow-loan-card__reval-header">
                 <span style={{ color: 'var(--text-secondary)' }}>
@@ -648,13 +648,13 @@ export const BorrowView: React.FC = () => {
               padding: '1rem',
               marginBottom: '1.25rem',
               borderRadius: '8px',
-              border: '1px solid var(--nm-accent-border)',
-              background: 'var(--nm-accent-bg)',
+              border: '1px solid var(--accent)',
+              background: 'var(--accent-soft)',
               display: 'flex',
               alignItems: 'center',
               gap: '0.75rem',
             }}>
-              <AlertCircle size={18} color="var(--primary)" />
+              <AlertCircle size={18} color="var(--accent)" />
               <span style={{ flex: 1, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                 Connect your Casper wallet to run the assessment and receive a loan offer.
               </span>
@@ -670,7 +670,7 @@ export const BorrowView: React.FC = () => {
 
           <div style={{ marginBottom: '1.25rem' }}>
             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-              Asset Name <span style={{ color: 'var(--primary)' }}>*</span>
+              Asset Name <span style={{ color: 'var(--accent)' }}>*</span>
             </label>
             <input
               value={assetName}
@@ -697,7 +697,7 @@ export const BorrowView: React.FC = () => {
           <div className="borrow-form-grid">
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                Estimated Value (USD) <span style={{ color: 'var(--primary)' }}>*</span>
+                Estimated Value (USD) <span style={{ color: 'var(--accent)' }}>*</span>
               </label>
               <input
                 type="number"
@@ -730,7 +730,7 @@ export const BorrowView: React.FC = () => {
           {assetType === 'real-estate' && (
             <div style={{ marginBottom: '1.25rem' }}>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                Location <span style={{ color: 'var(--primary)' }}>*</span>
+                Location <span style={{ color: 'var(--accent)' }}>*</span>
               </label>
               <input
                 value={location}
@@ -744,7 +744,7 @@ export const BorrowView: React.FC = () => {
           {assetType === 'art' && (
             <div style={{ marginBottom: '1.25rem' }}>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                Artist & Medium <span style={{ color: 'var(--primary)' }}>*</span>
+                Artist & Medium <span style={{ color: 'var(--accent)' }}>*</span>
               </label>
               <input
                 value={artistOrMedium}
@@ -758,7 +758,7 @@ export const BorrowView: React.FC = () => {
           {assetType === 'commodity' && (
             <div style={{ marginBottom: '1.25rem' }}>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                Weight (oz) <span style={{ color: 'var(--primary)' }}>*</span>
+                Weight (oz) <span style={{ color: 'var(--accent)' }}>*</span>
               </label>
               <input
                 type="number"
@@ -810,7 +810,7 @@ export const BorrowView: React.FC = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
           {assessmentLoading ? (
             <div style={{ textAlign: 'center', padding: '2rem' }}>
-              <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)', marginBottom: '1rem' }} />
+              <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', color: 'var(--accent)', marginBottom: '1rem' }} />
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
                 AI Agents Are Assessing Your Asset
               </h3>
@@ -826,17 +826,17 @@ export const BorrowView: React.FC = () => {
               </div>
 
           <div className="borrow-assess-grid">
-                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Your Estimate</div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(assessmentResult.askingPrice)}</div>
                 </div>
-                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>AI Valuation</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary)' }}>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent)' }}>
                     {formatCurrency(assessmentResult.assessedValue)}
                   </div>
                 </div>
-                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+                <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>
                     <LTVTooltip>Max Loan (75% LTV)</LTVTooltip>
                   </div>
@@ -886,19 +886,19 @@ export const BorrowView: React.FC = () => {
           </div>
 
           <div className="borrow-offer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+            <div style={{ padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Loan Amount</div>
               <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                 ${currentLoan.loanAmountCSPR.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </div>
             </div>
-            <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+            <div style={{ padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Collateral Value</div>
               <div style={{ fontSize: '1.3rem', fontWeight: 700 }}>
                 {formatCurrency(currentLoan.assessedValue)}
               </div>
             </div>
-            <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+            <div style={{ padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>
                 <LTVTooltip>LTV Ratio</LTVTooltip>
               </div>
@@ -906,7 +906,7 @@ export const BorrowView: React.FC = () => {
                 {currentLoan.ltvRatio.toFixed(0)}%
               </div>
             </div>
-            <div style={{ padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px' }}>
+            <div style={{ padding: '1rem', background: 'var(--bg-base)', borderRadius: '8px' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Platform Fee</div>
               <div style={{ fontSize: '1.3rem', fontWeight: 700 }}>
                 {currentLoan.platformFeeCSPR} CSPR
@@ -918,7 +918,7 @@ export const BorrowView: React.FC = () => {
           {currentLoan.trustBreakdown && (
             <div style={{
               padding: '0.75rem 1rem',
-              background: 'var(--bg-main)',
+              background: 'var(--bg-base)',
               borderRadius: '8px',
               marginBottom: '1rem',
               fontSize: '0.8rem',
@@ -938,8 +938,8 @@ export const BorrowView: React.FC = () => {
           {currentLoan.escrowLockTxHash && (
             <div style={{
               padding: '0.75rem 1rem',
-              background: 'var(--nm-success-bg)',
-              border: '1px solid var(--nm-success-border)',
+              background: 'var(--success-soft)',
+              border: '1px solid var(--success)',
               borderRadius: '8px',
               marginBottom: '1rem',
               fontSize: '0.8rem',
@@ -948,7 +948,7 @@ export const BorrowView: React.FC = () => {
                 🔒 Escrow Lock
               </div>
               <div style={{ color: 'var(--text-secondary)' }}>
-                Collateral locked on-chain: <code style={{ fontSize: '0.75rem', background: 'var(--bg-surface)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
+                Collateral locked on-chain: <code style={{ fontSize: '0.75rem', background: 'var(--bg-elevated)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
                   {currentLoan.escrowLockTxHash.slice(0, 20)}...
                 </code>
               </div>
@@ -957,15 +957,15 @@ export const BorrowView: React.FC = () => {
 
           <div style={{
             padding: '1rem',
-            background: 'var(--nm-success-bg)',
-            border: '1px solid var(--nm-success-border)',
+            background: 'var(--success-soft)',
+            border: '1px solid var(--success)',
             borderRadius: '8px',
             marginBottom: '1.5rem',
             fontSize: '0.85rem',
             color: 'var(--text-secondary)',
           }}>
             <Info size={14} style={{ verticalAlign: 'middle', marginRight: '0.4rem', color: 'var(--text-secondary)' }} />
-            <strong>Demo Mode</strong> — Simulated loan disbursed to your wallet. In production, real CSPR would be transferred on-chain. Monitor your health ratio to avoid liquidation.
+            <strong>Demo Mode</strong>  - Simulated loan disbursed to your wallet. In production, real CSPR would be transferred on-chain. Monitor your health ratio to avoid liquidation.
             {currentLoan.disbursementTxHash && (
               <> Tx: <code style={{ fontSize: '0.75rem' }}>{currentLoan.disbursementTxHash.slice(0, 16)}...</code></>
             )}
@@ -1013,7 +1013,7 @@ export const BorrowView: React.FC = () => {
 
           {loanLoading && loans.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem' }}>
-              <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)' }} />
+              <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--accent)' }} />
             </div>
           ) : loans.length === 0 ? (
             <div className="card borrow-empty-state">

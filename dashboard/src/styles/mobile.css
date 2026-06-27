@@ -5,7 +5,7 @@
 /* ── Focus ring — accessible, consistent ─────────────────────────────────── */
 *:focus-visible {
   outline: none;
-  box-shadow: var(--shadow-focus);
+  box-shadow: 0 0 0 2px var(--accent-soft);
 }
 
 /* ── Tap targets on touch devices ────────────────────────────────────────── */

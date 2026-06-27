@@ -18,12 +18,12 @@ const FlipButton: React.FC<{
   const isPrimary = variant === 'primary';
 
   const normalStyle: React.CSSProperties = isPrimary
-    ? { background: 'var(--primary)', color: 'var(--text-inverse)', border: '2px solid var(--primary)' }
-    : { background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '2px solid var(--border-color)' };
+    ? { background: 'var(--accent)', color: 'var(--text-inverse)', border: '2px solid var(--accent)' }
+    : { background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '2px solid var(--border)' };
 
   const hoveredStyle: React.CSSProperties = isPrimary
-    ? { background: 'var(--text-inverse)', color: 'var(--primary)', border: '2px solid var(--primary)', boxShadow: '0 0 24px rgba(255,59,59,0.3)' }
-    : { background: 'var(--primary)', color: 'var(--text-inverse)', border: '2px solid var(--primary)', boxShadow: '0 0 24px rgba(255,59,59,0.3)' };
+    ? { background: 'var(--text-inverse)', color: 'var(--accent)', border: '2px solid var(--accent)', boxShadow: '0 0 24px var(--accent-glow)' }
+    : { background: 'var(--accent)', color: '#FFFFFF', border: '2px solid var(--accent)', boxShadow: '0 0 24px var(--accent-glow)' };
 
   const Tag = to ? Link : 'button';
   const tagProps = to ? { to } : { onClick };
@@ -66,7 +66,7 @@ export const HeroSection: React.FC = () => {
           <motion.div
             animate={{ opacity: [1, 0.4, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
-            style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--primary)' }}
+            style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)' }}
           />
           <span>Live on Casper Testnet</span>
         </motion.div>
@@ -82,11 +82,11 @@ export const HeroSection: React.FC = () => {
             letterSpacing: '-0.04em',
             color: 'var(--text-primary)',
             maxWidth: 800,
-            margin: '0 auto 1.5rem',
+            margin: '0 0 1.5rem',
           }}
         >
           The On-Chain Oracle{' '}
-          <span style={{ color: 'var(--primary)' }}>for Real-World Assets</span>
+          <span style={{ color: 'var(--accent)' }}>for Real-World Assets</span>
         </motion.h1>
 
         {/* Subheadline */}
@@ -99,7 +99,7 @@ export const HeroSection: React.FC = () => {
             color: 'var(--text-secondary)',
             lineHeight: 1.65,
             maxWidth: 560,
-            margin: '0 auto 2.5rem',
+            margin: '0 0 2.5rem',
           }}
         >
           Multi-agent AI consensus valuations, stored on-chain as a composable
@@ -112,7 +112,7 @@ export const HeroSection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="flex gap-4 justify-center"
+          className="flex gap-4"
           style={{ flexWrap: 'wrap', marginBottom: '2rem', pointerEvents: 'auto' }}
         >
           <FlipButton to="/oracle" variant="primary" className="btn btn-primary btn-lg">
