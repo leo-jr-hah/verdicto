@@ -2831,11 +2831,11 @@ a:focus-visible {
 
 /* Dark-section overrides — applied via parent class */
 .landing-section--dark .landing-section__title {
-  color: var(--text-dark-primary);
+  color: #FFFFFF;
 }
 
 .landing-section--dark .landing-section__subtitle {
-  color: var(--text-dark-secondary);
+  color: rgba(255, 255, 255, 0.55);
 }
 
 /* ── Landing Badge (section labels) ────────────────────────────────────── */
@@ -3255,10 +3255,10 @@ a:focus-visible {
 
 .x402-section {
   width: 100%;
-  background: var(--bg-dark-elevated);
+  background: var(--navy-900);
   padding: var(--space-16) var(--page-padding-x);
-  border-top: 1px solid var(--border-dark);
-  border-bottom: 1px solid var(--border-dark);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .x402-layout {
@@ -3359,7 +3359,7 @@ a:focus-visible {
   max-width: var(--container-max);
   margin: 0 auto;
   padding: var(--space-16) var(--page-padding-x);
-  background: var(--bg-base);
+  background: var(--navy-900);
 }
 
 .contracts-grid {
@@ -3371,27 +3371,28 @@ a:focus-visible {
 .contract-card {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
   padding: var(--space-6);
+  background: rgba(4, 20, 34, 0.6);
 }
 
 .contract-card--highlight {
-  border: 1px solid var(--accent);
-  background: var(--accent-soft);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  background: rgba(201, 168, 76, 0.04);
 }
 
 .contract-card__name {
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
-  color: var(--text-primary);
+  color: #FFFFFF;
   font-family: var(--font-mono);
   margin-bottom: var(--space-4);
 }
 
 .contract-card__desc {
   font-size: var(--text-base);
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.5);
   line-height: var(--leading-relaxed);
   flex: 1;
   margin-bottom: var(--space-6);
@@ -3403,9 +3404,10 @@ a:focus-visible {
   gap: var(--space-2);
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
-  color: var(--text-primary);
+  color: var(--accent);
   text-decoration: none;
   transition: color var(--duration-base) var(--ease-out-expo);
+  font-family: var(--font-mono);
 }
 
 .contract-card__link:hover {
@@ -3423,7 +3425,7 @@ a:focus-visible {
   max-width: var(--container-max);
   margin: 0 auto;
   padding: var(--space-16) var(--page-padding-x);
-  background: var(--bg-base);
+  background: var(--navy-950);
 }
 
 .testnet-layout {
@@ -3520,8 +3522,8 @@ a:focus-visible {
 
 .landing-footer-full {
   width: 100%;
-  border-top: 1px solid var(--border);
-  background: var(--bg-elevated);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: #010508;
   padding: var(--space-12) var(--space-8) var(--space-8);
 }
 

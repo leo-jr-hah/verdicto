@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useInView } from 'motion/react';
+import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { Shield, Zap, Users, TrendingUp } from 'lucide-react';
 import gsap from 'gsap';

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { motion, useInView } from 'motion/react';
-import { ExternalLink, Lock, CheckCircle2, Wallet, Cpu, FileCode, Coins } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Lock, CheckCircle2, Wallet, Cpu, FileCode, Coins } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
