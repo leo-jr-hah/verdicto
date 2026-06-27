@@ -21,14 +21,23 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 let _client: SupabaseClient | null = null;
 
-function getClient(): SupabaseClient | null {
+async function getClient(): Promise<SupabaseClient | null> {
   if (_client) return _client;
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.log('  [DB] ⚠️  SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set — DB writes disabled');
     return null;
   }
+
+  // Node < 22 lacks native WebSocket — inject `ws` package for Supabase realtime
+  let realtimeOptions: Record<string, any> = { params: { eventsPerSecond: 0 } };
+  try {
+    const ws = (await import('ws')).default;
+    realtimeOptions.transport = ws;
+  } catch { /* ws not installed — fine on Node 22+ which has native WS */ }
+
   _client = createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: { persistSession: false },
+    realtime: realtimeOptions,
   });
   console.log(`  [DB] ✅ Supabase client initialized (${SUPABASE_URL})`);
   return _client;
@@ -37,7 +46,7 @@ function getClient(): SupabaseClient | null {
 // ─── Generic Upsert Helper ──────────────────────────────────────────────────
 
 async function upsert(table: string, row: Record<string, any>, onConflict?: string) {
-  const client = getClient();
+  const client = await getClient();
   if (!client) return; // graceful no-op
 
   try {
@@ -53,7 +62,7 @@ async function upsert(table: string, row: Record<string, any>, onConflict?: stri
 }
 
 async function insert(table: string, row: Record<string, any>) {
-  const client = getClient();
+  const client = await getClient();
   if (!client) return;
 
   try {
@@ -67,7 +76,7 @@ async function insert(table: string, row: Record<string, any>) {
 }
 
 async function select(table: string, filters: Record<string, any>, order?: { column: string; ascending?: boolean }) {
-  const client = getClient();
+  const client = await getClient();
   if (!client) return null;
 
   try {
@@ -385,7 +394,7 @@ export async function getAllDisputes(): Promise<DbDispute[]> {
 // ─── Health Check ───────────────────────────────────────────────────────────
 
 export async function checkDbHealth(): Promise<boolean> {
-  const client = getClient();
+  const client = await getClient();
   if (!client) return false;
   try {
     const { error } = await client.from('assessments').select('assessment_id').limit(1);
