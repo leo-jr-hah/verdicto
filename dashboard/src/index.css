@@ -2470,19 +2470,21 @@ a:focus-visible {
 }
 
 .logo-img--sm {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
 }
 
 .logo-img--md {
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
 }
 
 .logo-img--lg {
-  width: 36px;
-  height: 36px;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
 }
 
 /* ── Sidebar Footer ────────────────────────────────────────────────────── */
