@@ -56,7 +56,7 @@ export const AgentCard: React.FC<{ agent: typeof AGENTS[0]; index: number }> = (
         </motion.div>
         <div>
           <div className="agent-card__name">{agent.name}</div>
-          <div className="agent-card__role" style={{ color: 'var(--text-tertiary)' }}>{agent.role}</div>
+          <div className="agent-card__role">{agent.role}</div>
         </div>
       </div>
 

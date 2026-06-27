@@ -3,26 +3,21 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { Reveal } from './UIComponents';
 import { fetchContractState, type ContractState } from '../../services/api';
-import { Shield, Scale, TrendingUp, Zap } from 'lucide-react';
 
 const CAPABILITIES = [
   {
-    icon: <Scale size={20} />,
     title: 'HMAC Receipt Chains',
     desc: 'Every juror deliberation round is signed with HMAC-SHA256. Receipts chain together, each linking to the previous via `previousReceiptId`. Tamper with one and the entire chain breaks.',
   },
   {
-    icon: <Shield size={20} />,
     title: 'ZK-Lite Commitments',
     desc: 'After every assessment, a SHA-256 commitment of the execution state (input, agent state, Casper block height) is anchored on-chain. Verify the agents ran correctly without re-executing.',
   },
   {
-    icon: <TrendingUp size={20} />,
     title: 'Adversarial Deliberation',
     desc: 'Two analysts produce independent valuations. Three jurors evaluate credibility with peer review. Disagreements trigger multi-round deliberation, not a simple average.',
   },
   {
-    icon: <Zap size={20} />,
     title: 'x402 Micropayments',
     desc: 'Each product is gated by a native CSPR transfer signed by the user wallet. No API keys, no accounts, just cryptographic proof of payment.',
   },
@@ -91,14 +86,6 @@ export const TestnetProof: React.FC = () => {
                     background: 'var(--bg-elevated)',
                   }}
                 >
-                  <div style={{
-                    width: 36, height: 36, borderRadius: '8px',
-                    background: 'var(--accent-soft)', color: 'var(--red-600)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    marginBottom: '0.75rem',
-                  }}>
-                    {cap.icon}
-                  </div>
                   <h3 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--text-primary)' }}>
                     {cap.title}
                   </h3>

@@ -95,10 +95,10 @@ export const X402PaymentFlow: React.FC = () => {
             <div className="landing-badge landing-badge--red">
               x402 Protocol
             </div>
-            <h2 className="landing-section__title" style={{ textAlign: 'left', marginBottom: '20px' }}>
+            <h2 className="landing-section__title" style={{ textAlign: 'left', marginBottom: '20px', color: 'var(--text-dark-primary)' }}>
               Cryptographic Payment<br/>Gates Every Request
             </h2>
-            <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '24px' }}>
+            <p style={{ fontSize: '1.1rem', color: 'var(--text-dark-secondary)', lineHeight: 1.6, marginBottom: '24px' }}>
               Every agent request is gated by a native CSPR transfer signed by the user's wallet.
               The orchestrator verifies the cryptographic payment proof before dispatching to any agent.
               Then HMAC receipts and ZK-Lite commitments prove the work was done correctly.

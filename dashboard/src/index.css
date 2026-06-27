@@ -3161,8 +3161,8 @@ a:focus-visible {
 }
 
 .agent-card {
-  background: var(--bg-dark-elevated);
-  border: 1px solid var(--border-dark);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: var(--space-6);
   position: relative;
@@ -3172,7 +3172,7 @@ a:focus-visible {
 }
 
 .agent-card:hover {
-  border-color: var(--card-accent, var(--border-dark-strong));
+  border-color: var(--border-strong);
 }
 
 .agent-card__accent-bar {
@@ -3211,7 +3211,7 @@ a:focus-visible {
 .agent-card__name {
   font-size: var(--text-base);
   font-weight: var(--weight-bold);
-  color: var(--text-dark-primary);
+  color: var(--text-primary);
 }
 
 .agent-card__role {
@@ -3220,12 +3220,12 @@ a:focus-visible {
   font-weight: var(--weight-medium);
   text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
-  color: var(--accent);
+  color: var(--text-tertiary);
 }
 
 .agent-card__desc {
   font-size: var(--text-xs);
-  color: var(--text-dark-secondary);
+  color: var(--text-secondary);
   line-height: var(--leading-relaxed);
   margin: 0;
 }
@@ -3246,7 +3246,7 @@ a:focus-visible {
 .agent-card__dots-label {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--text-dark-muted);
+  color: var(--text-tertiary);
   margin-left: var(--space-1);
 }
 
@@ -3358,6 +3358,7 @@ a:focus-visible {
   max-width: var(--container-max);
   margin: 0 auto;
   padding: var(--space-16) var(--page-padding-x);
+  background: var(--bg-base);
 }
 
 .contracts-grid {
@@ -3421,6 +3422,7 @@ a:focus-visible {
   max-width: var(--container-max);
   margin: 0 auto;
   padding: var(--space-16) var(--page-padding-x);
+  background: var(--bg-base);
 }
 
 .testnet-layout {

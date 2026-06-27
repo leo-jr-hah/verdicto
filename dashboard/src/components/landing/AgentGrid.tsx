@@ -5,7 +5,7 @@ import { GradientOrb } from './Backgrounds';
 
 export const AgentGrid: React.FC = () => {
   return (
-    <section id="agents" className="landing-section" style={{ borderTop: '1px solid var(--border)', position: 'relative' }}>
+    <section id="agents" className="landing-section" style={{ background: 'var(--bg-base)', borderTop: '1px solid var(--border)', position: 'relative' }}>
       <GradientOrb color1="rgba(6,182,212,0.06)" color2="rgba(59,130,246,0.04)" size={400} x="15%" y="40%" delay={2} />
 
       <div className="landing-section__container" style={{ position: 'relative', zIndex: 1 }}>
@@ -14,11 +14,11 @@ export const AgentGrid: React.FC = () => {
             <div className="landing-badge landing-badge--cyan">
               <span>The Agents</span>
             </div>
-            <h2 className="landing-section__title">
+            <h2 className="landing-section__title" style={{ color: 'var(--text-primary)' }}>
               Two analysts. Three jurors.<br />
               <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Every step cryptographically signed.</span>
             </h2>
-            <p className="landing-section__subtitle">
+            <p className="landing-section__subtitle" style={{ color: 'var(--text-secondary)' }}>
               Two valuation agents produce independent estimates using different methodologies.
               Three specialized jurors then evaluate credibility, validate evidence, and reach consensus,
               each signing HMAC receipts that chain together into a tamper-proof audit trail.
