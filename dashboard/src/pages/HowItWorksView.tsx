@@ -5,7 +5,19 @@ import {
   Zap, TrendingUp, Users,
 } from 'lucide-react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { Reveal } from '../components/landing/UIComponents';
+
+const Reveal: React.FC<{ children: React.ReactNode; delay?: number }> = ({ children, delay = 0 }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, delay }}
+    >
+      {children}
+    </motion.div>
+  );
+};
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 

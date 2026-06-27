@@ -1,20 +1,23 @@
 import React from 'react';
-import { OracleSection } from '../components/landing/OracleSection';
-import { HowItWorks } from '../components/landing/HowItWorks';
-import { AgentGrid } from '../components/landing/AgentGrid';
-import { ContractCards } from '../components/landing/ContractCards';
-import { TestnetProof } from '../components/landing/TestnetProof';
+import { TrustSection } from '../components/landing/TrustSection';
+import { ProcessSection } from '../components/landing/ProcessSection';
+import { LiveStateSection } from '../components/landing/LiveStateSection';
+import { ContractProofSection } from '../components/landing/ContractProofSection';
+import { ClosingCTA } from '../components/landing/ClosingCTA';
 import { Footer } from '../components/landing/Footer';
 
 export const LandingPage: React.FC = () => {
   return (
     <div style={{ position: 'relative', overflowX: 'hidden', background: 'var(--navy-950)' }}>
+      {/* HERO — UNTOUCHED */}
+      {/* <HeroSection /> is rendered by the router/layout, not here */}
+
       <main>
-        <OracleSection />
-        <HowItWorks />
-        <AgentGrid />
-        <ContractCards />
-        <TestnetProof />
+        <TrustSection />
+        <ProcessSection />
+        <LiveStateSection />
+        <ContractProofSection />
+        <ClosingCTA />
       </main>
 
       <Footer />
