@@ -3401,6 +3401,32 @@ a:focus-visible {
   line-height: 1.6;
 }
 
+/* ── Footer social icons (X + GitHub) ──────────────────────────────── */
+.footer-social-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.footer-social-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  transition: all var(--transition-fast);
+}
+
+.footer-social-icon:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+  background: var(--bg-elevated);
+}
+
 .landing-footer-full__columns {
   display: flex;
   gap: 48px;
