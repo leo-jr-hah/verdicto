@@ -2589,44 +2589,6 @@ a:focus-visible {
   pointer-events: auto;
 }
 
-/* ── Stats Row ─────────────────────────────────────────────────────────── */
-
-.hero-stats-row {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 2rem;
-}
-
-.hero-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.hero-stat__value {
-  font-family: var(--font-mono);
-  font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-}
-
-.hero-stat__label {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.hero-stat__divider {
-  width: 1px;
-  height: 32px;
-  background: var(--border);
-}
-
 /* ── Scroll Cue ────────────────────────────────────────────────────────── */
 
 .hero-scroll-cue {
@@ -2879,6 +2841,18 @@ a:focus-visible {
   font-family: var(--font-mono);
   letter-spacing: var(--tracking-tight);
   line-height: var(--leading-none);
+}
+
+.stats-bar__metric {
+  text-align: center;
+}
+
+.stats-bar__detail {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: var(--space-1);
+  line-height: var(--leading-relaxed);
 }
 
 .stats-bar__label {

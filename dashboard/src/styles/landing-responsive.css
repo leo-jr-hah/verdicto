@@ -67,14 +67,6 @@
     justify-content: center;
   }
 
-  .hero-stats-row {
-    gap: 1rem;
-  }
-
-  .hero-stat__value {
-    font-size: var(--text-lg);
-  }
-
   .hero-grid-lines {
     background-size: 50px 50px;
   }

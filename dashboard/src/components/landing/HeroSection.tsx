@@ -30,10 +30,10 @@ const RotatingWord: React.FC = () => {
       <AnimatePresence mode="wait">
         <motion.span
           key={ROTATING_WORDS[index]}
-          initial={{ y: '100%', opacity: 0 }}
-          animate={{ y: '0%', opacity: 1 }}
-          exit={{ y: '-100%', opacity: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ y: 12, opacity: 0, filter: 'blur(4px)' }}
+          animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+          exit={{ y: -12, opacity: 0, filter: 'blur(4px)' }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           style={{ display: 'inline-block' }}
         >
           {ROTATING_WORDS[index]}
@@ -185,34 +185,6 @@ export const HeroSection: React.FC = () => {
           <FlipButton to="/assess" variant="secondary" className="btn btn-lg">
             Value an Asset <ArrowRight size={16} />
           </FlipButton>
-        </motion.div>
-
-        {/* Stats row */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-          className="hero-stats-row"
-        >
-          <div className="hero-stat">
-            <span className="hero-stat__value">3</span>
-            <span className="hero-stat__label">AI Agents</span>
-          </div>
-          <div className="hero-stat__divider" />
-          <div className="hero-stat">
-            <span className="hero-stat__value">4</span>
-            <span className="hero-stat__label">Products</span>
-          </div>
-          <div className="hero-stat__divider" />
-          <div className="hero-stat">
-            <span className="hero-stat__value">100%</span>
-            <span className="hero-stat__label">On-Chain</span>
-          </div>
-          <div className="hero-stat__divider" />
-          <div className="hero-stat">
-            <span className="hero-stat__value">24/7</span>
-            <span className="hero-stat__label">Verifiable</span>
-          </div>
         </motion.div>
 
         {/* Scroll cue */}
