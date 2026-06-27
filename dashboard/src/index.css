@@ -14,10 +14,13 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── Brand ──────────────────────────────────────────────────────────────── */
+  /* ── Brand: Red ─────────────────────────────────────────────────────────── */
   --primary: #FF3B3B;
   --primary-hover: #E03333;
+  --primary-light: #FF6B6B;
   --primary-bg: rgba(255, 59, 59, 0.06);
+  --primary-bg-strong: rgba(255, 59, 59, 0.12);
+  --primary-border: rgba(255, 59, 59, 0.20);
   --accent: #FF3B3B;
 
   /* ── RGB values for backdrop-filter rgba() ─────────────────────────────── */
@@ -37,15 +40,14 @@
   --text-tertiary: #9CA3AF;
   --text-inverse: #FFFFFF;
 
-  /* ── Semantic Colors ────────────────────────────────────────────────────── */
+  /* ── Semantic Colors (status only — never decorative) ───────────────────── */
   --success: #10B981;
+  --success-bg: rgba(16, 185, 129, 0.08);
   --warning: #F59E0B;
+  --warning-bg: rgba(245, 158, 11, 0.08);
   --error: #EF4444;
-  --info: #3B82F6;
-  --purple: #8B5CF6;
-  --cyan: #06B6D4;
-  --pink: #EC4899;
-  --orange: #F97316;
+  --error-bg: rgba(239, 68, 68, 0.08);
+  --info: #6B7280;
 
   /* ── Typography ─────────────────────────────────────────────────────────── */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -87,7 +89,6 @@
 
 [data-theme="dark"] {
   --bg-main: #09090B;
-  --accent: #FF3B3B;
   --bg-main-rgb: 9, 9, 11;
   --bg-surface: #18181B;
   --bg-surface-alt: #27272A;
@@ -99,6 +100,13 @@
   --text-secondary: #A1A1AA;
   --text-tertiary: #71717A;
   --text-inverse: #09090B;
+
+  --success-bg: rgba(16, 185, 129, 0.12);
+  --warning-bg: rgba(245, 158, 11, 0.12);
+  --error-bg: rgba(239, 68, 68, 0.12);
+  --primary-bg: rgba(255, 59, 59, 0.08);
+  --primary-bg-strong: rgba(255, 59, 59, 0.16);
+  --primary-border: rgba(255, 59, 59, 0.25);
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);

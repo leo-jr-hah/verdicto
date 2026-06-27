@@ -35,8 +35,6 @@ interface AgentProfile {
   name: string;
   role: string;
   icon: React.ReactNode;
-  color: string;
-  bgColor: string;
   methodology: string;
   description: string;
 }
@@ -47,8 +45,6 @@ const AGENTS: AgentProfile[] = [
     name: 'Valuation Agent A',
     role: 'Comparable Sales',
     icon: <Search size={18} />,
-    color: '#EC4899',
-    bgColor: 'rgba(236, 72, 153, 0.08)',
     methodology: 'Comparable Sales Analysis',
     description: 'Analyzes recent sales of similar properties in the same market via RentCast API. Adjusts for differences in size, condition, location, and amenities.',
   },
@@ -57,8 +53,6 @@ const AGENTS: AgentProfile[] = [
     name: 'Valuation Agent B',
     role: 'DCF Analysis',
     icon: <BarChart3 size={18} />,
-    color: '#F97316',
-    bgColor: 'rgba(249, 115, 22, 0.08)',
     methodology: 'Discounted Cash Flow (DCF)',
     description: 'Projects future rental income using FRED economic data and applies a discount rate to calculate present value. Considers vacancy rates, operating expenses, and market trends.',
   },
@@ -67,8 +61,6 @@ const AGENTS: AgentProfile[] = [
     name: 'Evidence Analyst',
     role: 'Juror: Evidence',
     icon: <Search size={18} />,
-    color: '#10B981',
-    bgColor: 'rgba(16, 185, 129, 0.08)',
     methodology: 'Evidence Validation',
     description: 'Reviews data quality, source reliability, and methodology rigor using MiMo LLM reasoning. Flags inconsistencies, outliers, and potential data manipulation.',
   },
@@ -77,8 +69,6 @@ const AGENTS: AgentProfile[] = [
     name: 'Market Data Interpreter',
     role: 'Juror: Market Data',
     icon: <TrendingUp size={18} />,
-    color: '#06B6D4',
-    bgColor: 'rgba(6, 182, 212, 0.08)',
     methodology: 'Market Trend Analysis',
     description: 'Evaluates macroeconomic conditions, interest rates, local market dynamics, and seasonal patterns using MiMo LLM and live market feeds.',
   },
@@ -87,8 +77,6 @@ const AGENTS: AgentProfile[] = [
     name: 'Precedent Researcher',
     role: 'Juror: Precedent',
     icon: <BookOpen size={18} />,
-    color: '#8B5CF6',
-    bgColor: 'rgba(139, 92, 246, 0.08)',
     methodology: 'Precedent Research',
     description: 'Searches historical assessments via Vectra vector database to find relevant precedents and valuation frameworks for current asset assessments.',
   },
@@ -123,18 +111,17 @@ const AgentCard: React.FC<{
       gap: '0.75rem',
       padding: '1rem 1.25rem',
       borderBottom: '1px solid var(--border-color)',
-      background: agent.bgColor,
     }}>
       <div style={{
         width: 36,
         height: 36,
         borderRadius: '8px',
-        background: `${agent.color}20`,
-        border: `1px solid ${agent.color}40`,
+        background: 'var(--bg-surface-alt)',
+        border: '1px solid var(--border-color)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: agent.color,
+        color: 'var(--text-secondary)',
       }}>
         {agent.icon}
       </div>
@@ -149,8 +136,8 @@ const AgentCard: React.FC<{
       <div style={{
         padding: '0.2rem 0.6rem',
         borderRadius: '4px',
-        background: `${agent.color}15`,
-        color: agent.color,
+        background: 'var(--bg-surface-alt)',
+        color: 'var(--text-secondary)',
         fontSize: '0.7rem',
         fontWeight: 600,
       }}>
@@ -165,7 +152,7 @@ const AgentCard: React.FC<{
           <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginBottom: '0.15rem' }}>
             Estimated Value
           </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: agent.color }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>
             {formatCurrency(value)}
           </div>
         </div>
@@ -209,7 +196,7 @@ const AgentCard: React.FC<{
           style={{
             height: '100%',
             borderRadius: '2px',
-            background: `linear-gradient(90deg, ${agent.color}, ${agent.color}cc)`,
+            background: 'var(--primary)',
           }}
         />
       </div>
@@ -713,7 +700,7 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
   ];
 
   const agentValues = agentData.map(a => a.value);
-  const agentColors = agentData.map(a => a.agent.color);
+  const agentColors = agentData.map(() => 'var(--primary)');
 
   return (
     <div>

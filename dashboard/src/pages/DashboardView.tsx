@@ -7,11 +7,11 @@ import { LiveContractPanel } from '../components/LiveContractPanel';
 import { X402PaymentStream } from '../components/X402PaymentStream';
 
 const AGENTS = [
-  { name: 'Valuation Agent A', color: '#EC4899', role: 'Valuation', method: 'Market Comparables', initials: 'VA' },
-  { name: 'Valuation Agent B', color: '#F97316', role: 'Valuation', method: 'Income Analysis', initials: 'VB' },
-  { name: 'Evidence Analyst', color: '#10B981', role: 'Analysis', method: 'Document Review', initials: 'EA' },
-  { name: 'Market Interpreter', color: '#06B6D4', role: 'Analysis', method: 'Market Context', initials: 'MI' },
-  { name: 'Precedent Researcher', color: '#8B5CF6', role: 'Analysis', method: 'Case Research', initials: 'PR' },
+  { name: 'Valuation Agent A', role: 'Valuation', method: 'Market Comparables', initials: 'VA' },
+  { name: 'Valuation Agent B', role: 'Valuation', method: 'Income Analysis', initials: 'VB' },
+  { name: 'Evidence Analyst', role: 'Analysis', method: 'Document Review', initials: 'EA' },
+  { name: 'Market Interpreter', role: 'Analysis', method: 'Market Context', initials: 'MI' },
+  { name: 'Precedent Researcher', role: 'Analysis', method: 'Case Research', initials: 'PR' },
 ];
 
 const QUICK_ACTIONS = [
@@ -316,13 +316,13 @@ export const DashboardView: React.FC = () => {
                   width: '28px',
                   height: '28px',
                   borderRadius: '7px',
-                  background: `${agent.color}15`,
+                  background: 'var(--bg-surface-alt)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '10px',
                   fontWeight: 700,
-                  color: agent.color,
+                  color: 'var(--text-secondary)',
                   flexShrink: 0,
                 }}>
                   {agent.initials}

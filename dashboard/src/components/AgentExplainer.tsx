@@ -47,21 +47,21 @@ function formatCurrency(value: number): string {
 }
 
 function confidenceColor(c: number): string {
-  if (c >= 0.8) return '#10b981';
-  if (c >= 0.6) return '#f59e0b';
-  return '#ef4444';
+  if (c >= 0.8) return 'var(--success)';
+  if (c >= 0.6) return 'var(--warning)';
+  return 'var(--error)';
 }
 
 function riskColor(r: number): string {
-  if (r <= 30) return '#10b981';
-  if (r <= 55) return '#f59e0b';
-  return '#ef4444';
+  if (r <= 30) return 'var(--success)';
+  if (r <= 55) return 'var(--warning)';
+  return 'var(--error)';
 }
 
 function divergenceColor(d: number): string {
-  if (d <= 10) return '#10b981';
-  if (d <= 20) return '#f59e0b';
-  return '#ef4444';
+  if (d <= 10) return 'var(--success)';
+  if (d <= 20) return 'var(--warning)';
+  return 'var(--error)';
 }
 
 // ─── Sub-components ────────────────────────────────────────────────────────
@@ -73,11 +73,10 @@ const AgentCard: React.FC<{
   confidence: number;
   source: string;
   reasoning: string;
-  color: string;
   fallbackTriggered?: boolean;
   fallbackProvider?: string;
   index: number;
-}> = ({ label, method, value, confidence, source, reasoning, color, fallbackTriggered, fallbackProvider, index }) => {
+}> = ({ label, method, value, confidence, source, reasoning, fallbackTriggered, fallbackProvider, index }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -181,7 +180,7 @@ const AgentCard: React.FC<{
                   display: 'flex', alignItems: 'center', gap: 6,
                   padding: '6px 10px', marginBottom: 8,
                   background: 'rgba(245,158,11,0.08)', borderRadius: 6,
-                  fontSize: '0.72rem', color: '#f59e0b',
+                  fontSize: '0.72rem', color: 'var(--warning)',
                 }}>
                   <AlertTriangle size={12} />
                   Fallback to {fallbackProvider || 'deterministic'} response (LLM timeout)
@@ -231,20 +230,20 @@ const ConsensusCard: React.FC<{
         style={{
           display: 'flex', alignItems: 'center', gap: 12,
           padding: '14px 16px', cursor: 'pointer',
-          borderLeft: '3px solid #8b5cf6',
+          borderLeft: '3px solid var(--text-accent)',
         }}
       >
         <div style={{
           width: 38, height: 38, borderRadius: 10,
-          background: 'rgba(139,92,246,0.1)',
+          background: 'rgba(139,92,246,0.08)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
         }}>
-          <Scale size={18} color="#8b5cf6" />
+          <Scale size={18} color="var(--text-accent)" />
         </div>
         <div style={{ flex: 1 }}>
           <div style={{
-            fontSize: '0.72rem', fontWeight: 600, color: '#8b5cf6',
+            fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-accent)',
             letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 2,
           }}>
             AI Consensus
@@ -254,7 +253,7 @@ const ConsensusCard: React.FC<{
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#8b5cf6' }}>
+          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-accent)' }}>
             {formatCurrency(assessment.assessedValue)}
           </div>
           <div style={{
@@ -280,7 +279,7 @@ const ConsensusCard: React.FC<{
           >
             <div style={{
               padding: '0 16px 16px',
-              borderTop: '1px solid rgba(139,92,246,0.15)',
+              borderTop: '1px solid var(--border-color)',
             }}>
               {/* How consensus works */}
               <div style={{
@@ -297,14 +296,14 @@ const ConsensusCard: React.FC<{
                 </div>
                 {divergence <= 15 ? (
                   <span>
-                    Both agents <strong style={{ color: '#10b981' }}>agreed within 15%</strong>, so the final value is a
+                    Both agents <strong style={{ color: 'var(--success)' }}>agreed within 15%</strong>, so the final value is a
                     confidence-weighted average. Agent A's valuation ({formatCurrency(assessment.valuationA.value)}) was weighted at{' '}
                     <strong>{(assessment.valuationA.confidence * 100).toFixed(0)}%</strong> confidence, and Agent B's
                     ({formatCurrency(assessment.valuationB.value)}) at <strong>{(assessment.valuationB.confidence * 100).toFixed(0)}%</strong>.
                   </span>
                 ) : (
                   <span>
-                    Agents <strong style={{ color: '#f59e0b' }}>diverged by {divergence.toFixed(1)}%</strong> - a jury
+                    Agents <strong style={{ color: 'var(--warning)' }}>diverged by {divergence.toFixed(1)}%</strong> - a jury
                     panel of 3 independent AI jurors deliberated in 2 rounds. In Round 1, each juror independently
                     evaluated both valuations. In Round 2, jurors reviewed each other's reasoning and revised their
                     votes. Final verdict was weighted by each juror's on-chain reputation score.
@@ -328,7 +327,7 @@ const ConsensusCard: React.FC<{
                     left: `${(Math.min(assessment.valuationA.value, assessment.valuationB.value) / Math.max(assessment.valuationA.value, assessment.valuationB.value)) * 20}%`,
                     right: '20%',
                     top: 0, bottom: 0,
-                    background: `linear-gradient(90deg, rgba(236,72,153,0.15), rgba(249,115,22,0.15))`,
+                    background: `linear-gradient(90deg, rgba(107,114,128,0.12), rgba(107,114,128,0.22))`,
                     borderRadius: 6,
                   }} />
                   {/* Consensus marker */}
@@ -337,18 +336,18 @@ const ConsensusCard: React.FC<{
                     left: `${((assessment.assessedValue - Math.min(assessment.valuationA.value, assessment.valuationB.value)) /
                       (Math.max(assessment.valuationA.value, assessment.valuationB.value) - Math.min(assessment.valuationA.value, assessment.valuationB.value) || 1)) * 60 + 20}%`,
                     top: 2, bottom: 2,
-                    width: 3, background: '#8b5cf6', borderRadius: 2,
+                    width: 3, background: 'var(--text-primary)', borderRadius: 2,
                   }} />
                   {/* Labels */}
                   <div style={{
                     position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)',
-                    fontSize: '0.7rem', fontWeight: 700, color: '#EC4899',
+                    fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)',
                   }}>
                     {formatCurrency(Math.min(assessment.valuationA.value, assessment.valuationB.value))}
                   </div>
                   <div style={{
                     position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
-                    fontSize: '0.7rem', fontWeight: 700, color: '#F97316',
+                    fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)',
                   }}>
                     {formatCurrency(Math.max(assessment.valuationA.value, assessment.valuationB.value))}
                   </div>
@@ -372,7 +371,7 @@ const ConsensusCard: React.FC<{
                         background: 'var(--bg-elevated, #fff)',
                         border: '1px solid var(--border-color, #e5e7eb)',
                       }}>
-                        <Zap size={13} color="#8b5cf6" style={{ marginTop: 2, flexShrink: 0 }} />
+                        <Zap size={13} color="var(--text-accent)" style={{ marginTop: 2, flexShrink: 0 }} />
                         <div>
                           <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-primary, #111)' }}>
                             {m.name}
@@ -422,7 +421,6 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
         confidence={assessment.valuationA.confidence}
         source={assessment.valuationA.source}
         reasoning={assessment.valuationA.reasoning}
-        color="#EC4899"
         fallbackTriggered={assessment.valuationA.fallbackTriggered}
         fallbackProvider={assessment.valuationA.fallbackProvider}
         index={0}
@@ -436,7 +434,6 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
         confidence={assessment.valuationB.confidence}
         source={assessment.valuationB.source}
         reasoning={assessment.valuationB.reasoning}
-        color="#F97316"
         fallbackTriggered={assessment.valuationB.fallbackTriggered}
         fallbackProvider={assessment.valuationB.fallbackProvider}
         index={1}
@@ -487,7 +484,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
                 transition={{ duration: 0.8, ease: 'easeOut', delay: 0.4 }}
                 style={{
                   height: '100%', borderRadius: 4,
-                  background: `linear-gradient(90deg, #10b981, #f59e0b, #ef4444)`,
+                  background: `linear-gradient(90deg, var(--success), var(--warning), var(--error))`,
                 }}
               />
             </div>
@@ -526,7 +523,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
               border: '1px solid rgba(16,185,129,0.15)',
             }}>
               <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>COVERAGE</div>
-              <div style={{ fontSize: '1rem', fontWeight: 700, color: '#10b981' }}>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--success)' }}>
                 {formatCurrency(insurance.coverageAmount)}
               </div>
               <div style={{ fontSize: '0.68rem', color: 'var(--text-tertiary, #9ca3af)' }}>
@@ -535,11 +532,11 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
             </div>
             <div style={{
               padding: '10px 12px', borderRadius: 8,
-              background: 'rgba(139,92,246,0.05)',
-              border: '1px solid rgba(139,92,246,0.15)',
+              background: 'rgba(139,92,246,0.04)',
+              border: '1px solid var(--border-color)',
             }}>
               <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>MONTHLY PREMIUM</div>
-              <div style={{ fontSize: '1rem', fontWeight: 700, color: '#8b5cf6' }}>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-accent)' }}>
                 {insurance.premiumCSPR} CSPR
               </div>
               <div style={{ fontSize: '0.68rem', color: 'var(--text-tertiary, #9ca3af)' }}>
@@ -587,14 +584,14 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
             border: '1px solid var(--border-color, #e5e7eb)',
             borderRadius: 12,
             padding: '16px',
-            borderLeft: '3px solid #3b82f6',
+            borderLeft: '3px solid var(--text-accent)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <TrendingUp size={18} color="#3b82f6" />
+            <TrendingUp size={18} color="var(--text-accent)" />
             <div>
               <div style={{
-                fontSize: '0.72rem', fontWeight: 600, color: '#3b82f6',
+                fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-accent)',
                 letterSpacing: '0.04em', textTransform: 'uppercase',
               }}>
                 LTV Decision Explained
@@ -629,34 +626,34 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
             }}>
               <div style={{
                 padding: '10px', borderRadius: 8,
-                background: 'rgba(59,130,246,0.05)',
-                border: '1px solid rgba(59,130,246,0.15)',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-color)',
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>CONFIDENCE</div>
-                <div style={{ fontSize: '1rem', fontWeight: 700, color: '#3b82f6' }}>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-accent)' }}>
                   {(loan.trustBreakdown.confidence * 100).toFixed(0)}%
                 </div>
               </div>
               <div style={{
                 padding: '10px', borderRadius: 8,
-                background: 'rgba(59,130,246,0.05)',
-                border: '1px solid rgba(59,130,246,0.15)',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-color)',
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>VALUE RATIO</div>
-                <div style={{ fontSize: '1rem', fontWeight: 700, color: '#3b82f6' }}>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-accent)' }}>
                   {(loan.trustBreakdown.valueRatio * 100).toFixed(0)}%
                 </div>
               </div>
               <div style={{
                 padding: '10px', borderRadius: 8,
-                background: 'rgba(59,130,246,0.05)',
-                border: '1px solid rgba(59,130,246,0.15)',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-color)',
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>LTV RANGE</div>
-                <div style={{ fontSize: '1rem', fontWeight: 700, color: '#3b82f6' }}>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-accent)' }}>
                   {loan.trustBreakdown.ltvRange}
                 </div>
               </div>

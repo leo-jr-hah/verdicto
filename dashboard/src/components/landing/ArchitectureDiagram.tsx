@@ -41,30 +41,30 @@ interface FlowNode {
 
 const NODES: FlowNode[] = [
   // Row 0: Entry
-  { id: 'user', label: 'You', sublabel: 'Connect wallet, choose product', icon: <User size={18} />, accentColor: '#3B82F6', row: 0, col: 0 },
-  { id: 'orchestrator', label: 'Orchestrator', sublabel: 'Routes to product pipeline', icon: <Brain size={18} />, accentColor: '#8B5CF6', row: 0, col: 1 },
+  { id: 'user', label: 'You', sublabel: 'Connect wallet, choose product', icon: <User size={18} />, accentColor: 'var(--primary)', row: 0, col: 0 },
+  { id: 'orchestrator', label: 'Orchestrator', sublabel: 'Routes to product pipeline', icon: <Brain size={18} />, accentColor: 'var(--text-secondary)', row: 0, col: 1 },
 
   // Row 1: Data & Payment
-  { id: 'datasources', label: 'Data Sources', sublabel: 'RentCast, FRED, CSPR.cloud', icon: <Database size={18} />, accentColor: '#06B6D4', row: 1, col: 0 },
-  { id: 'x402', label: 'x402 Payment', sublabel: '1-5 CSPR per product', icon: <Zap size={18} />, accentColor: '#F59E0B', row: 1, col: 1 },
+  { id: 'datasources', label: 'Data Sources', sublabel: 'RentCast, FRED, CSPR.cloud', icon: <Database size={18} />, accentColor: 'var(--text-secondary)', row: 1, col: 0 },
+  { id: 'x402', label: 'x402 Payment', sublabel: '1-5 CSPR per product', icon: <Zap size={18} />, accentColor: 'var(--primary)', row: 1, col: 1 },
 
   // Row 2: AI Agents
-  { id: 'comps', label: 'Agent A', sublabel: 'Comparable sales analysis', icon: <Search size={18} />, accentColor: '#10B981', row: 2, col: 0 },
-  { id: 'dcf', label: 'Agent B', sublabel: 'Discounted cash flow', icon: <TrendingUp size={18} />, accentColor: '#10B981', row: 2, col: 1 },
-  { id: 'llm', label: 'LLM Engine', sublabel: 'Qualitative reasoning', icon: <Brain size={18} />, accentColor: '#10B981', row: 2, col: 2 },
+  { id: 'comps', label: 'Agent A', sublabel: 'Comparable sales analysis', icon: <Search size={18} />, accentColor: 'var(--text-secondary)', row: 2, col: 0 },
+  { id: 'dcf', label: 'Agent B', sublabel: 'Discounted cash flow', icon: <TrendingUp size={18} />, accentColor: 'var(--text-secondary)', row: 2, col: 1 },
+  { id: 'llm', label: 'LLM Engine', sublabel: 'Qualitative reasoning', icon: <Brain size={18} />, accentColor: 'var(--text-secondary)', row: 2, col: 2 },
 
   // Row 3: Jurors
-  { id: 'evidence', label: 'Evidence Analyst', sublabel: 'Data quality review', icon: <Shield size={18} />, accentColor: '#EC4899', row: 3, col: 0 },
-  { id: 'market', label: 'Market Interpreter', sublabel: 'Macro trends and timing', icon: <TrendingUp size={18} />, accentColor: '#EC4899', row: 3, col: 1 },
-  { id: 'precedent', label: 'Precedent Researcher', sublabel: 'Historical comparisons', icon: <BookOpen size={18} />, accentColor: '#EC4899', row: 3, col: 2 },
+  { id: 'evidence', label: 'Evidence Analyst', sublabel: 'Data quality review', icon: <Shield size={18} />, accentColor: 'var(--text-tertiary)', row: 3, col: 0 },
+  { id: 'market', label: 'Market Interpreter', sublabel: 'Macro trends and timing', icon: <TrendingUp size={18} />, accentColor: 'var(--text-tertiary)', row: 3, col: 1 },
+  { id: 'precedent', label: 'Precedent Researcher', sublabel: 'Historical comparisons', icon: <BookOpen size={18} />, accentColor: 'var(--text-tertiary)', row: 3, col: 2 },
 
   // Row 4: Settlement
-  { id: 'trust', label: 'Trust Framework', sublabel: 'Reputation scoring', icon: <Scale size={18} />, accentColor: '#F59E0B', row: 4, col: 0 },
-  { id: 'hmac', label: 'HMAC Receipt Chain', sublabel: 'Tamper-proof audit trail', icon: <FileCheck size={18} />, accentColor: '#F59E0B', row: 4, col: 1 },
-  { id: 'verdict', label: 'Verdict Oracle', sublabel: 'On-chain dispute resolution', icon: <Gavel size={18} />, accentColor: '#8B5CF6', row: 4, col: 2 },
+  { id: 'trust', label: 'Trust Framework', sublabel: 'Reputation scoring', icon: <Scale size={18} />, accentColor: 'var(--text-secondary)', row: 4, col: 0 },
+  { id: 'hmac', label: 'HMAC Receipt Chain', sublabel: 'Tamper-proof audit trail', icon: <FileCheck size={18} />, accentColor: 'var(--text-secondary)', row: 4, col: 1 },
+  { id: 'verdict', label: 'Verdict Oracle', sublabel: 'On-chain dispute resolution', icon: <Gavel size={18} />, accentColor: 'var(--primary)', row: 4, col: 2 },
 
   // Row 5: On-chain
-  { id: 'blockchain', label: 'Casper Blockchain', sublabel: 'Immutable on-chain record', icon: <Link2 size={18} />, accentColor: '#3B82F6', row: 5, col: 1 },
+  { id: 'blockchain', label: 'Casper Blockchain', sublabel: 'Immutable on-chain record', icon: <Link2 size={18} />, accentColor: 'var(--primary)', row: 5, col: 1 },
 ];
 
 interface FlowEdge {
