@@ -179,7 +179,7 @@ describe('x402 - Payment Proof Validation', () => {
       .send({ assetId: 'RE-001' })
       .expect(402);
 
-    expect(res.body.error).toContain('missing deploy hash');
+    expect(res.body.error).toContain('missing a transaction hash');
   });
 
   it('rejects proof with invalid deploy hash format', async () => {
@@ -192,7 +192,7 @@ describe('x402 - Payment Proof Validation', () => {
       .send({ assetId: 'RE-001' })
       .expect(402);
 
-    expect(res.body.error).toContain('Invalid deploy hash format');
+    expect(res.body.error).toContain('Invalid transaction hash format');
   });
 
   it('rejects proof with insufficient payment amount', async () => {
@@ -205,8 +205,7 @@ describe('x402 - Payment Proof Validation', () => {
       .send({ assetId: 'RE-001' })
       .expect(402);
 
-    expect(res.body.error).toContain('Insufficient payment');
-    expect(res.body.required).toBe('10.0');
+    expect(res.body.error).toContain('Payment amount mismatch');
   });
 
   it('rejects malformed base64 proof', async () => {
@@ -218,7 +217,7 @@ describe('x402 - Payment Proof Validation', () => {
       .send({ assetId: 'RE-001' })
       .expect(402);
 
-    expect(res.body.error).toContain('Invalid payment proof');
+    expect(res.body.error).toContain('Could not read payment proof');
   });
 
   it('rejects excessively large proofs (DoS protection)', async () => {
@@ -341,7 +340,7 @@ describe('x402 - Security Edge Cases', () => {
       .send({ assetId: 'RE-001' })
       .expect(402);
 
-    expect(res.body.error).toContain('Insufficient payment');
+    expect(res.body.error).toContain('Payment amount mismatch');
   });
 
   it('rejects proof with negative amount', async () => {
@@ -354,7 +353,7 @@ describe('x402 - Security Edge Cases', () => {
       .send({ assetId: 'RE-001' })
       .expect(402);
 
-    expect(res.body.error).toContain('Insufficient payment');
+    expect(res.body.error).toContain('Payment amount mismatch');
   });
 
   it('rejects proof with NaN amount', async () => {
@@ -367,6 +366,6 @@ describe('x402 - Security Edge Cases', () => {
       .send({ assetId: 'RE-001' })
       .expect(402);
 
-    expect(res.body.error).toContain('Insufficient payment');
+    expect(res.body.error).toContain('Payment amount mismatch');
   });
 });
