@@ -31,10 +31,26 @@
   box-sizing: border-box;
 }
 
+/* Scrollbar — dark track to match background */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #041422;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  background: #041422;
 }
 
 body {
@@ -2474,8 +2490,8 @@ a:focus-visible {
 
 .hero-section-new {
   position: relative;
-  min-height: 85vh;
-  min-height: 85dvh;
+  height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
   display: flex;
   align-items: center;
   justify-content: flex-start;

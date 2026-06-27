@@ -9,10 +9,10 @@ export const LandingLayout: React.FC = () => {
 
   return (
     <div className="landing-page-wrapper">
-      {/* ── Hero (renders first, ~85vh) ── */}
+      {/* ── Hero (full viewport minus nav height) ── */}
       <HeroSection />
 
-      {/* ── Sticky Navigation (sits below hero, locks on scroll) ── */}
+      {/* ── Sticky Navigation (locks to top on scroll) ── */}
       <nav className="landing-nav">
         <div className="landing-nav__inner">
           {/* Logo */}
