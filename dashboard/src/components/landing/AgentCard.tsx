@@ -14,7 +14,6 @@ export const AgentCard: React.FC<{ agent: typeof AGENTS[0]; index: number }> = (
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
   const Icon = agent.icon;
-  const isFirst = index === 0;
 
   return (
     <motion.div
@@ -22,11 +21,11 @@ export const AgentCard: React.FC<{ agent: typeof AGENTS[0]; index: number }> = (
       initial={{ opacity: 0, y: 40 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ y: -4, borderColor: 'var(--primary)' }}
+      whileHover={{ y: -4, borderColor: 'var(--red-600)' }}
       className="agent-card"
     >
       {/* Accent bar */}
-      <div className="agent-card__accent-bar" style={{ background: isFirst ? 'var(--primary)' : 'var(--border-color)' }} />
+      <div className="agent-card__accent-bar" style={{ background: 'var(--border-color)' }} />
 
       <div className="agent-card__header">
         <motion.div
@@ -71,7 +70,7 @@ export const AgentCard: React.FC<{ agent: typeof AGENTS[0]; index: number }> = (
             animate={{ opacity: [0.3, 1, 0.3], y: [0, -3, 0] }}
             transition={{ duration: 1.2, delay: i * 0.2, repeat: Infinity, ease: 'easeInOut' }}
             className="agent-card__dot"
-            style={{ background: isFirst ? 'var(--primary)' : 'var(--text-tertiary)' }}
+            style={{ background: 'var(--text-tertiary)' }}
           />
         ))}
         <span className="agent-card__dots-label">Independent analysis</span>

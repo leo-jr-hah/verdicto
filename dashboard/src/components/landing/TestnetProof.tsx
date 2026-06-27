@@ -60,9 +60,9 @@ export const TestnetProof: React.FC = () => {
               {/* Terminal Header */}
               <div className="testnet-terminal__header">
                 <div className="testnet-terminal__dots">
-                  <div className="testnet-terminal__dot" style={{ background: 'var(--error)' }} />
-                  <div className="testnet-terminal__dot" style={{ background: 'var(--warning)' }} />
-                  <div className="testnet-terminal__dot" style={{ background: 'var(--success)' }} />
+                  <div className="testnet-terminal__dot" style={{ background: 'var(--text-tertiary)' }} />
+                  <div className="testnet-terminal__dot" style={{ background: 'var(--text-tertiary)' }} />
+                  <div className="testnet-terminal__dot" style={{ background: 'var(--text-tertiary)' }} />
                 </div>
                 <div className="testnet-terminal__label">cspr-testnet</div>
               </div>

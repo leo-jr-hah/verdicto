@@ -19,9 +19,9 @@ export const BlockchainRecord: React.FC = () => {
         <motion.div
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
-          style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--success)' }}
+          style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--text-tertiary)' }}
         />
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--success)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           Casper Testnet, Block Confirmed
         </span>
       </div>
@@ -63,7 +63,7 @@ export const BlockchainRecord: React.FC = () => {
             borderRadius: 8,
           }}
         >
-          <div style={{ fontSize: '0.6rem', color: 'var(--success)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem', fontFamily: 'var(--font-sans)' }}>
+          <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem', fontFamily: 'var(--font-sans)' }}>
             Transaction Hash
           </div>
           <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
@@ -73,7 +73,7 @@ export const BlockchainRecord: React.FC = () => {
                 initial={{ opacity: 0 }}
                 animate={inView ? { opacity: 1 } : {}}
                 transition={{ duration: 0.3, delay: 0.9 + i * 0.1 }}
-                style={{ fontSize: '0.8rem', color: 'var(--success)' }}
+                style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}
               >
                 {part}
               </motion.span>
