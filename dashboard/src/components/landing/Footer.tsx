@@ -77,7 +77,7 @@ export const Footer: React.FC = () => {
                 <Link to="/architecture" className="footer-link">Architecture</Link>
                 <Link to="/roadmap" className="footer-link">Roadmap</Link>
                 <a href="https://docs.casper.network" target="_blank" rel="noopener noreferrer" className="footer-link">Casper Docs</a>
-                <a href="https://github.com/leo-jr-hah/verdicto" target="_blank" rel="noopener noreferrer" className="footer-link">GitHub</a>
+
               </div>
             </div>
           </div>
