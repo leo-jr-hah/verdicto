@@ -640,7 +640,7 @@ export const DisputesView: React.FC = () => {
                 padding: '2rem',
                 maxWidth: '480px',
                 width: '90%',
-                boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
+                boxShadow: '0 24px 64px var(--nm-overlay)',
               }}
             >
               {/* Header */}

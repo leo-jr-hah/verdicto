@@ -180,7 +180,7 @@ const AgentCard: React.FC<{
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: 6,
                   padding: '6px 10px', marginBottom: 8,
-                  background: 'rgba(245,158,11,0.08)', borderRadius: 6,
+                  background: 'var(--nm-warning-bg)', borderRadius: 6,
                   fontSize: '0.72rem', color: 'var(--text-tertiary)',
                 }}>
                   <AlertTriangle size={12} />
@@ -520,8 +520,8 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
           }}>
             <div style={{
               padding: '10px 12px', borderRadius: 8,
-              background: 'rgba(16,185,129,0.05)',
-              border: '1px solid rgba(16,185,129,0.15)',
+              background: 'var(--nm-success-bg)',
+              border: '1px solid var(--nm-success-border)',
             }}>
               <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary, #9ca3af)', fontWeight: 600 }}>COVERAGE</div>
               <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
@@ -550,8 +550,8 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
           {insurance.riskFactors.length > 0 && (
             <div style={{
               padding: '10px 12px', borderRadius: 8,
-              background: 'rgba(245,158,11,0.05)',
-              border: '1px solid rgba(245,158,11,0.15)',
+              background: 'var(--nm-warning-bg)',
+              border: '1px solid var(--nm-warning-border)',
             }}>
               <div style={{
                 fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-tertiary)',
@@ -665,7 +665,7 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
           <div style={{
             display: 'flex', alignItems: 'center', gap: 6,
             marginTop: 12, padding: '8px 10px',
-            background: 'rgba(245,158,11,0.06)',
+            background: 'var(--nm-warning-bg)',
             borderRadius: 6,
             fontSize: '0.72rem', color: 'var(--text-tertiary)',
           }}>

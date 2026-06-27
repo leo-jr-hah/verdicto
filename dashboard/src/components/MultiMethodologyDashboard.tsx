@@ -167,10 +167,10 @@ const AgentCard: React.FC<{
             padding: '0.3rem 0.7rem',
             borderRadius: '9999px',
             background: confidence >= 0.8
-              ? 'rgba(16,185,129,0.15)'
+              ? 'var(--nm-success-soft)'
               : confidence >= 0.6
-                ? 'rgba(245,158,11,0.15)'
-                : 'rgba(239,68,68,0.15)',
+                ? 'var(--nm-warning-soft)'
+                : 'var(--nm-error-soft)',
             color: confidence >= 0.8 ? 'var(--text-secondary)' : confidence >= 0.6 ? 'var(--text-tertiary)' : 'var(--red-600)',
             fontSize: '0.85rem',
             fontWeight: 700,
@@ -740,7 +740,7 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
             marginBottom: '1.5rem',
             borderRadius: '10px',
             background: 'var(--warning-soft)',
-            border: '1px solid rgba(245, 158, 11, 0.25)',
+            border: '1px solid var(--nm-warning-border)',
           }}
         >
           <AlertTriangle size={18} color="var(--text-tertiary)" style={{ marginTop: 2, flexShrink: 0 }} />

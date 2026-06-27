@@ -350,8 +350,8 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
           Final Assessed Value
           <span style={{
             fontSize: '0.6rem', fontWeight: 700, padding: '2px 6px',
-            borderRadius: 6, background: 'rgba(245,158,11,0.12)',
-            color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)',
+            borderRadius: 6, background: 'var(--nm-warning-bg)',
+            color: 'var(--nm-warning-text)', border: '1px solid var(--nm-warning-border)',
             letterSpacing: '0.05em',
           }}>DEMO</span>
         </div>
@@ -904,8 +904,8 @@ export const AssessView: React.FC = () => {
                   gap: '0.5rem',
                   padding: '0.75rem 1rem',
                   borderRadius: '8px',
-                  background: 'rgba(239, 68, 68, 0.06)',
-                  border: '1px solid rgba(239,68,68,0.2)',
+                  background: 'var(--nm-error-bg)',
+                  border: '1px solid var(--nm-error-border)',
                   color: 'var(--error)',
                   fontSize: '0.85rem',
                   marginBottom: '1.5rem',
@@ -1077,8 +1077,8 @@ export const AssessView: React.FC = () => {
                     gap: '0.5rem',
                     padding: '0.75rem 1rem',
                     borderRadius: '8px',
-                    background: 'rgba(239, 68, 68, 0.06)',
-                    border: '1px solid rgba(239,68,68,0.2)',
+                    background: 'var(--nm-error-bg)',
+                    border: '1px solid var(--nm-error-border)',
                     color: 'var(--error)',
                     fontSize: '0.85rem',
                     marginTop: '1rem',

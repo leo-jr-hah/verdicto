@@ -118,10 +118,10 @@ const AgentRow: React.FC<{
       padding: '0.3rem 0.7rem',
       borderRadius: '6px',
       background: agent.reputation >= 800
-        ? 'rgba(16,185,129,0.15)'
+        ? 'var(--nm-success-soft)'
         : agent.reputation >= 600
-          ? 'rgba(245,158,11,0.15)'
-          : 'rgba(239,68,68,0.15)',
+          ? 'var(--nm-warning-soft)'
+          : 'var(--nm-error-soft)',
       color: agent.reputation >= 800 ? 'var(--text-secondary)' : agent.reputation >= 600 ? 'var(--text-tertiary)' : 'var(--red-600)',
       fontSize: '0.85rem',
       fontWeight: 700,
@@ -195,7 +195,7 @@ export const LiveContractPanel: React.FC = () => {
       <div style={{
         background: 'var(--error-soft)',
         borderRadius: '12px',
-        border: '1px solid rgba(239,68,68,0.2)',
+        border: '1px solid var(--nm-error-border)',
         padding: '2rem',
         textAlign: 'center',
       }}>

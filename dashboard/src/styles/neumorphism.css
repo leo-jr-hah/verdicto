@@ -63,7 +63,7 @@
 /* ── Primary Accent Extruded (CTA buttons) ──────────────────────────────── */
 .nm-extruded-primary {
   background: var(--nm-accent);
-  color: #FFFFFF;
+  color: var(--text-inverse);
   border-radius: var(--radius-md);
   box-shadow:
     6px 6px 12px rgba(165, 150, 140, 0.5),
@@ -882,7 +882,7 @@
 }
 
 .dispute-challenge-btn:hover {
-  color: #fff;
+  color: var(--text-inverse);
   transform: translateY(-1px);
   box-shadow: 0 4px 20px var(--nm-accent-glow);
 }
@@ -1000,7 +1000,7 @@
   border-radius: 10px;
   border: none;
   background: var(--nm-accent);
-  color: #fff;
+  color: var(--text-inverse);
   font-size: 0.9rem;
   font-weight: 600;
   font-family: inherit;

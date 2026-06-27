@@ -108,8 +108,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             {/* Error */}
             {signError && (
               <div style={{
-                background: 'rgba(239, 68, 68, 0.08)',
-                border: '1px solid rgba(239,68,68,0.2)',
+                background: 'var(--nm-error-bg)',
+                border: '1px solid var(--nm-error-border)',
                 borderRadius: '8px',
                 padding: '0.75rem',
                 marginBottom: '1rem',

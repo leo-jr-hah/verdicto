@@ -388,7 +388,7 @@ export const PredictionView: React.FC = () => {
                   }}
                   onFocus={(e) => {
                     e.currentTarget.style.borderColor = 'var(--primary)';
-                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 59, 59, 0.08)';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px var(--nm-focus-ring)';
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = 'var(--border-color)';
@@ -454,7 +454,7 @@ export const PredictionView: React.FC = () => {
                     color: 'var(--text-inverse)', fontSize: '0.95rem', fontWeight: 700,
                     cursor: question.trim() ? 'pointer' : 'not-allowed',
                     transition: 'all 0.2s ease',
-                    boxShadow: question.trim() ? '0 2px 8px rgba(255, 59, 59, 0.25)' : 'none',
+                    boxShadow: question.trim() ? '0 2px 8px var(--nm-accent-glow)' : 'none',
                   }}
                 >
                   <Wallet size={16} />
@@ -501,7 +501,7 @@ export const PredictionView: React.FC = () => {
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = 'var(--primary)';
                   e.currentTarget.style.color = 'var(--primary)';
-                  e.currentTarget.style.background = 'rgba(255, 59, 59, 0.03)';
+                  e.currentTarget.style.background = 'var(--nm-accent-bg)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = 'var(--border-color)';
@@ -540,7 +540,7 @@ export const PredictionView: React.FC = () => {
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.borderColor = 'var(--primary)';
-                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 59, 59, 0.08)';
+                            e.currentTarget.style.boxShadow = '0 2px 8px var(--nm-focus-ring)';
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.borderColor = 'var(--border-color)';
@@ -680,8 +680,8 @@ export const PredictionView: React.FC = () => {
                 </div>
                 <span style={{
                   fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px',
-                  borderRadius: 6, background: 'rgba(245,158,11,0.12)',
-                  color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)',
+                  borderRadius: 6, background: 'var(--nm-warning-bg)',
+                  color: 'var(--nm-warning-text)', border: '1px solid var(--nm-warning-border)',
                   flexShrink: 0, letterSpacing: '0.05em',
                 }}>DEMO</span>
               </div>
@@ -757,7 +757,7 @@ export const PredictionView: React.FC = () => {
                     display: 'flex', alignItems: 'center', gap: 8,
                     marginTop: 16, padding: '8px 12px', borderRadius: 8,
                     background: 'var(--success-soft)',
-                    border: '1px solid rgba(16,185,129,0.15)',
+                    border: '1px solid var(--nm-success-border)',
                     fontSize: '0.78rem', color: 'var(--text-tertiary)',
                   }}>
                     <CheckCircle2 size={14} color="var(--text-secondary)" />
@@ -829,8 +829,8 @@ export const PredictionView: React.FC = () => {
                     display: 'flex', alignItems: 'center', gap: 10,
                     fontSize: '0.82rem', color: 'var(--text-secondary)',
                     padding: '8px 12px', borderRadius: 8,
-                    background: 'rgba(245, 158, 11, 0.04)',
-                    border: '1px solid rgba(245, 158, 11, 0.1)',
+                    background: 'var(--nm-warning-bg)',
+                    border: '1px solid var(--nm-warning-border)',
                   }}>
                     <div style={{
                       width: 6, height: 6, borderRadius: '50%',

@@ -91,7 +91,7 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
       >
         <motion.div
           className="card hiw-card"
-          whileHover={{ y: -4, boxShadow: '0 20px 60px rgba(0,0,0,0.1)' }}
+          whileHover={{ y: -4, boxShadow: '0 20px 60px var(--nm-shadow-dark)' }}
           transition={{ duration: 0.3 }}
         >
           {/* Animated border glow — neutral */}

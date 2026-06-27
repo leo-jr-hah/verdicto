@@ -238,6 +238,27 @@
   --red-700: #B02030;
   --red-800: #8A1825;
   --red-900: #6A101A;
+
+  /* ── Overlay / Backdrop ─────────────────────────────────────────────────── */
+  --nm-overlay: rgba(0, 0, 0, 0.40);
+  --nm-overlay-heavy: rgba(0, 0, 0, 0.60);
+
+  /* ── Semantic Aliases (used by components) ──────────────────────────────── */
+  --nm-accent-border: rgba(230, 57, 70, 0.20);
+  --nm-accent-bg: rgba(230, 57, 70, 0.06);
+  --nm-success-border: rgba(45, 159, 94, 0.20);
+  --nm-success-bg: rgba(45, 159, 94, 0.05);
+  --nm-warning-border: rgba(212, 149, 12, 0.20);
+  --nm-warning-bg: rgba(212, 149, 12, 0.05);
+  --nm-warning-text: var(--nm-warning);
+  --nm-error-border: rgba(220, 53, 69, 0.20);
+  --nm-error-bg: rgba(220, 53, 69, 0.06);
+  --nm-info-border: rgba(59, 125, 216, 0.20);
+  --nm-info-bg: rgba(59, 125, 216, 0.05);
+
+  /* ── Focus / Ring ───────────────────────────────────────────────────────── */
+  --nm-focus-ring: rgba(230, 57, 70, 0.08);
+  --nm-focus-ring-hover: rgba(230, 57, 70, 0.25);
 }
 
 /* ── Dark Mode ───────────────────────────────────────────────────────────── */
@@ -322,6 +343,25 @@
   --error-bg: var(--nm-error-soft);
   --info: var(--nm-info);
   --info-soft: var(--nm-info-soft);
+
+  /* ── Dark Mode Semantic Aliases ─────────────────────────────────────────── */
+  --nm-overlay: rgba(0, 0, 0, 0.55);
+  --nm-overlay-heavy: rgba(0, 0, 0, 0.70);
+
+  --nm-accent-border: rgba(255, 77, 90, 0.25);
+  --nm-accent-bg: rgba(255, 77, 90, 0.08);
+  --nm-success-border: rgba(61, 191, 112, 0.25);
+  --nm-success-bg: rgba(61, 191, 112, 0.08);
+  --nm-warning-border: rgba(240, 176, 64, 0.25);
+  --nm-warning-bg: rgba(240, 176, 64, 0.08);
+  --nm-warning-text: var(--nm-warning);
+  --nm-error-border: rgba(240, 80, 96, 0.25);
+  --nm-error-bg: rgba(240, 80, 96, 0.08);
+  --nm-info-border: rgba(91, 159, 232, 0.25);
+  --nm-info-bg: rgba(91, 159, 232, 0.08);
+
+  --nm-focus-ring: rgba(255, 77, 90, 0.12);
+  --nm-focus-ring-hover: rgba(255, 77, 90, 0.30);
 }
 
 /* ── Mobile ──────────────────────────────────────────────────────────────── */

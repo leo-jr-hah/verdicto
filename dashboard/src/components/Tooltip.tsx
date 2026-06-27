@@ -45,7 +45,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ term, explanation, children })
               width: 'max-content',
               maxWidth: '250px',
               zIndex: 100,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              boxShadow: '0 4px 12px var(--nm-shadow-dark)',
               lineHeight: 1.4,
               pointerEvents: 'none'
             }}

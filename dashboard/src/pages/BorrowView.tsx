@@ -648,8 +648,8 @@ export const BorrowView: React.FC = () => {
               padding: '1rem',
               marginBottom: '1.25rem',
               borderRadius: '8px',
-              border: '1px solid rgba(255,59,59,0.25)',
-              background: 'rgba(255,59,59,0.04)',
+              border: '1px solid var(--nm-accent-border)',
+              background: 'var(--nm-accent-bg)',
               display: 'flex',
               alignItems: 'center',
               gap: '0.75rem',
@@ -938,8 +938,8 @@ export const BorrowView: React.FC = () => {
           {currentLoan.escrowLockTxHash && (
             <div style={{
               padding: '0.75rem 1rem',
-              background: 'rgba(16,185,129,0.05)',
-              border: '1px solid rgba(16,185,129,0.2)',
+              background: 'var(--nm-success-bg)',
+              border: '1px solid var(--nm-success-border)',
               borderRadius: '8px',
               marginBottom: '1rem',
               fontSize: '0.8rem',
@@ -957,8 +957,8 @@ export const BorrowView: React.FC = () => {
 
           <div style={{
             padding: '1rem',
-            background: 'rgba(16,185,129,0.05)',
-            border: '1px solid rgba(16,185,129,0.2)',
+            background: 'var(--nm-success-bg)',
+            border: '1px solid var(--nm-success-border)',
             borderRadius: '8px',
             marginBottom: '1.5rem',
             fontSize: '0.85rem',

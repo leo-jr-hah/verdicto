@@ -59,7 +59,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             height: 36,
             padding: 0,
             background: 'var(--success-soft)',
-            border: '1px solid rgba(16,185,129,0.2)',
+            border: '1px solid var(--nm-success-border)',
             borderRadius: '50%',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
@@ -90,7 +90,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             borderRadius: '12px',
             padding: '0.5rem',
             minWidth: '220px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            boxShadow: '0 8px 32px var(--nm-overlay)',
             zIndex: 1000,
           }}>
             {/* Connected account info */}
@@ -154,7 +154,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
                 cursor: 'pointer',
                 transition: 'background 0.15s',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239,68,68,0.08)')}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--nm-error-bg)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               <LogOut size={14} />
@@ -181,7 +181,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             fontWeight: 600,
             color: 'var(--text-secondary)',
             background: 'var(--success-soft)',
-            border: '1px solid rgba(16,185,129,0.2)',
+            border: '1px solid var(--nm-success-border)',
             borderRadius: '999px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
@@ -217,7 +217,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             borderRadius: '12px',
             padding: '0.5rem',
             minWidth: '220px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            boxShadow: '0 8px 32px var(--nm-overlay)',
             zIndex: 1000,
           }}>
             {/* Connected account info */}
@@ -281,7 +281,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
                 cursor: 'pointer',
                 transition: 'background 0.15s',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239,68,68,0.08)')}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--nm-error-bg)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               <LogOut size={14} />
@@ -326,7 +326,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             left: '50%',
             transform: 'translateX(-50%)',
             background: 'var(--error-soft)',
-            border: '1px solid rgba(239,68,68,0.2)',
+            border: '1px solid var(--nm-error-border)',
             borderRadius: '8px',
             padding: '0.5rem 0.75rem',
             fontSize: '0.8rem',
@@ -377,7 +377,7 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
           left: 0,
           right: 0,
           background: 'var(--error-soft)',
-          border: '1px solid rgba(239,68,68,0.2)',
+          border: '1px solid var(--nm-error-border)',
           borderRadius: '8px',
           padding: '0.5rem 0.75rem',
           fontSize: '0.8rem',

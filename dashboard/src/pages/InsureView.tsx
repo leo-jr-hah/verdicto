@@ -480,7 +480,7 @@ export const InsureView: React.FC = () => {
             ...cardStyle,
             marginBottom: '1rem',
             borderColor: 'var(--error)',
-            background: 'rgba(239,68,68,0.05)',
+            background: 'var(--nm-error-bg)',
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem',
@@ -808,7 +808,7 @@ export const InsureView: React.FC = () => {
 
           {/* Risk factors */}
           {currentPolicy.riskFactors.length > 0 && (
-            <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'rgba(245,158,11,0.05)', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.2)' }}>
+            <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'var(--nm-warning-bg)', borderRadius: '8px', border: '1px solid var(--nm-warning-border)' }}>
               <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '0.4rem' }}>Risk Factors</div>
               {currentPolicy.riskFactors.map((f, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>
@@ -821,9 +821,9 @@ export const InsureView: React.FC = () => {
 
           <div style={{
             padding: '0.75rem',
-            background: 'rgba(16,185,129,0.05)',
+            background: 'var(--nm-success-bg)',
             borderRadius: '8px',
-            border: '1px solid rgba(16,185,129,0.2)',
+            border: '1px solid var(--nm-success-border)',
             marginBottom: '1.5rem',
             fontSize: '0.85rem',
             color: 'var(--text-secondary)',
@@ -905,7 +905,7 @@ export const InsureView: React.FC = () => {
               animate={{ opacity: 1 }}
               style={{
                 position: 'fixed', inset: 0,
-                background: 'rgba(0,0,0,0.6)',
+                background: 'var(--nm-overlay-heavy)',
                 backdropFilter: 'blur(4px)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 zIndex: 1000,
@@ -965,7 +965,7 @@ export const InsureView: React.FC = () => {
                 exit={{ opacity: 0 }}
                 style={{
                   position: 'fixed', inset: 0,
-                  background: 'rgba(0,0,0,0.6)',
+                  background: 'var(--nm-overlay-heavy)',
                   backdropFilter: 'blur(4px)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   zIndex: 1001,
