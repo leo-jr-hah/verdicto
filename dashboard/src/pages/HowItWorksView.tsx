@@ -659,7 +659,7 @@ export const HowItWorksView: React.FC = () => {
                   'AI agents use live market data from established financial data providers',
                   'Autonomous monitors run continuously without human intervention',
                   'Every execution step produces a cryptographically verifiable receipt',
-                  'Full test suite passing with comprehensive coverage',
+                  'Full test suite passing with solid coverage',
                 ].map(item => (
                   <li key={item} style={{
                     fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6,
