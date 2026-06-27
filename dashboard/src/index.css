@@ -3,6 +3,7 @@
 @import './styles/brutalism.css';
 @import './styles/mobile.css';
 @import './styles/landing-responsive.css';
+@import './styles/landing-gsap.css';
 @import './styles/dashboard-responsive.css';
 @import './styles/assess-responsive.css';
 @import './styles/borrow-responsive.css';
