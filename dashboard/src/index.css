@@ -3082,15 +3082,15 @@ a:focus-visible {
   gap: var(--space-4);
   min-height: 380px;
   justify-content: flex-start;
-  background: #041422;
+  background: var(--navy-950);
 }
 
 .primitive-row:first-child .primitive-panel:nth-child(2) {
-  background: #061a2e;
+  background: var(--navy-900);
 }
 
 .primitive-row:last-child .primitive-panel:nth-child(1) {
-  background: #061a2e;
+  background: var(--navy-900);
 }
 
 .primitive-panel__title {

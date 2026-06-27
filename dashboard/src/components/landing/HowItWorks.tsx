@@ -143,15 +143,15 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
 
 export const HowItWorks: React.FC = () => {
   return (
-    <section id="how-it-works" className="landing-section landing-section--dark" style={{ background: 'var(--bg-dark)', borderTop: '1px solid var(--border-dark)' }}>
-      <div className="landing-section__container">
+    <section id="how-it-works" className="landing-section-dark landing-section-dark--a landing-blueprint">
+      <div className="landing-section-dark__inner">
         {/* Section header */}
-        <div className="landing-section__header">
-          <div className="landing-badge landing-badge--navy">
+        <div className="landing-dark-header">
+          <div className="landing-dark-header__tag">
             <span>How It Works</span>
           </div>
-          <h2 className="landing-section__title">From wallet to verdict</h2>
-          <p className="landing-section__subtitle">
+          <h2 className="landing-dark-header__title">From wallet to verdict</h2>
+          <p className="landing-dark-header__subtitle">
             Connect your wallet, pick a product, and let multiple AI agents produce a cryptographically signed, on-chain result.
           </p>
         </div>

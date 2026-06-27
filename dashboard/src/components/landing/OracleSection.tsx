@@ -54,7 +54,7 @@ const Panel: React.FC<{ panel: PanelData; index: number }> = ({ panel, index }) 
 
 export const OracleSection: React.FC = () => {
   return (
-    <section className="primitive-section">
+    <section className="primitive-section landing-blueprint">
       <div className="primitive-row">
         {ROW1.map((panel, i) => (
           <Panel key={panel.title} panel={panel} index={i} />
