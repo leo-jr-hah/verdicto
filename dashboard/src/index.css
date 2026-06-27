@@ -2828,6 +2828,15 @@ a:focus-visible {
   margin: 0 auto;
 }
 
+/* Dark-section overrides — applied via parent class */
+.landing-section--dark .landing-section__title {
+  color: var(--text-dark-primary);
+}
+
+.landing-section--dark .landing-section__subtitle {
+  color: var(--text-dark-secondary);
+}
+
 /* ── Landing Badge (section labels) ────────────────────────────────────── */
 
 .landing-badge {
@@ -2848,6 +2857,10 @@ a:focus-visible {
 
 .landing-badge--red {
   color: var(--accent);
+}
+
+.landing-badge--navy {
+  color: var(--navy-100);
 }
 
 .landing-badge--purple {
@@ -2942,20 +2955,20 @@ a:focus-visible {
   align-items: center;
   gap: var(--space-2);
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--navy-300);
 }
 
 .hiw-step-num__value {
   font-size: var(--text-xl);
   font-weight: var(--weight-bold);
   font-family: var(--font-mono);
-  color: var(--accent);
+  color: var(--navy-300);
 }
 
 .hiw-step-num__line {
   height: 1px;
   display: block;
-  background: var(--accent);
+  background: var(--navy-300);
 }
 
 .hiw-step-title {
@@ -2985,6 +2998,9 @@ a:focus-visible {
   text-align: center;
   position: relative;
   overflow: hidden;
+  background: var(--bg-dark-elevated);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-sm);
 }
 
 .hiw-card__icon-wrap {
@@ -3013,7 +3029,7 @@ a:focus-visible {
 .hiw-card__detail {
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
-  color: var(--text-primary);
+  color: var(--text-dark-primary);
 }
 
 .hiw-trust-bar {
@@ -3023,9 +3039,9 @@ a:focus-visible {
   gap: var(--space-2);
   margin-top: var(--space-10);
   padding: var(--space-4);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-dark);
   font-size: var(--text-base);
-  color: var(--text-secondary);
+  color: var(--text-dark-secondary);
   text-align: center;
   max-width: 600px;
   margin-left: auto;

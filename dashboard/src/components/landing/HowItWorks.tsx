@@ -55,14 +55,14 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
         style={{ order: isEven ? 0 : 1 }}
         className="hiw-step-text"
       >
-        <div className="hiw-step-num" style={{ color: 'var(--red-600)' }}>
+        <div className="hiw-step-num" style={{ color: 'var(--navy-300)' }}>
           <motion.span
             className="hiw-step-num__value"
             animate={inView ? {
               textShadow: [
-                '0 0 0px var(--red-600)',
-                '0 0 12px var(--red-600)',
-                '0 0 0px var(--red-600)',
+                '0 0 0px var(--navy-300)',
+                '0 0 12px var(--navy-300)',
+                '0 0 0px var(--navy-300)',
               ],
             } : {}}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
@@ -73,7 +73,7 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
             className="hiw-step-num__line"
             animate={inView ? { width: [0, 40, 40, 0] } : {}}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: index * 0.3 }}
-            style={{ background: 'var(--red-600)' }}
+            style={{ background: 'var(--navy-300)' }}
           />
         </div>
 
@@ -90,8 +90,8 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
         className="hiw-step-visual"
       >
         <motion.div
-          className="card hiw-card"
-          whileHover={{ y: -4, boxShadow: '0 20px 60px rgba(0,0,0,0.06)' }}
+          className="hiw-card"
+          whileHover={{ y: -4, boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}
           transition={{ duration: 0.3 }}
         >
           {/* Animated border glow — neutral */}
@@ -100,7 +100,7 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: index * 0.4 }}
             style={{
               position: 'absolute', inset: 0, borderRadius: 'inherit',
-              border: '1.5px solid var(--border)',
+              border: '1.5px solid var(--navy-700)',
               pointerEvents: 'none',
             }}
           />
@@ -111,19 +111,19 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
               className="hiw-card__icon-glow"
               animate={inView ? { rotate: 360 } : {}}
               transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-              style={{ border: '2px dashed var(--border-weak)' }}
+              style={{ border: '2px dashed var(--navy-600)' }}
             />
             <motion.div
               className="hiw-card__icon-box"
               animate={inView ? {
                 boxShadow: [
-                  '0 0 0 0px rgba(230,46,46,0)',
-                  '0 0 20px 6px rgba(230,46,46,0.08)',
-                  '0 0 0 0px rgba(230,46,46,0)',
+                  '0 0 0 0px rgba(12,45,72,0)',
+                  '0 0 20px 6px rgba(12,45,72,0.15)',
+                  '0 0 0 0px rgba(12,45,72,0)',
                 ],
               } : {}}
               transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              style={{ background: 'var(--accent-soft)', color: 'var(--red-600)' }}
+              style={{ background: 'var(--navy-700)', color: 'var(--navy-100)' }}
             >
               <motion.div
                 animate={inView ? { y: [0, -3, 0] } : {}}
@@ -143,11 +143,11 @@ const StepCard: React.FC<{ step: typeof STEPS[0]; index: number }> = ({ step, in
 
 export const HowItWorks: React.FC = () => {
   return (
-    <section id="how-it-works" className="landing-section" style={{ background: 'var(--bg-base)', borderTop: '1px solid var(--border)' }}>
+    <section id="how-it-works" className="landing-section landing-section--dark" style={{ background: 'var(--bg-dark)', borderTop: '1px solid var(--border-dark)' }}>
       <div className="landing-section__container">
         {/* Section header */}
         <div className="landing-section__header">
-          <div className="landing-badge landing-badge--red">
+          <div className="landing-badge landing-badge--navy">
             <span>How It Works</span>
           </div>
           <h2 className="landing-section__title">From wallet to verdict</h2>
