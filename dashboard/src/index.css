@@ -2401,7 +2401,7 @@ a:focus-visible {
   font-weight: var(--weight-bold);
   font-size: 1.15rem;
   letter-spacing: var(--tracking-tight);
-  color: var(--text-primary);
+  color: #FFFFFF;
   line-height: 1;
 }
 
@@ -2414,13 +2414,13 @@ a:focus-visible {
 .landing-nav-link {
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
   transition: color var(--duration-fast) var(--ease-out-expo);
 }
 
 .landing-nav-link:hover {
-  color: var(--text-primary);
+  color: #FFFFFF;
 }
 
 .landing-cta-btn {
@@ -3613,7 +3613,7 @@ a:focus-visible {
   border: none;
   padding: var(--space-2);
   cursor: pointer;
-  color: var(--text-primary);
+  color: #FFFFFF;
 }
 
 @media (max-width: 768px) {

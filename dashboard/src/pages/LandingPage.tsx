@@ -9,7 +9,7 @@ import { Footer } from '../components/landing/Footer';
 
 export const LandingPage: React.FC = () => {
   return (
-    <div style={{ position: 'relative', overflowX: 'hidden', background: 'var(--bg-base)' }}>
+    <div style={{ position: 'relative', overflowX: 'hidden', background: 'var(--bg-dark)' }}>
       <main>
         <OracleSection />
         <HowItWorks />
