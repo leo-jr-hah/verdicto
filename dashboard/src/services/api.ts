@@ -11,7 +11,7 @@ const WS_URL = import.meta.env.VITE_WS_URL || (import.meta.env.PROD ? 'wss://ver
 
 export interface TransactionEntry {
   id: string;
-  type: 'ZK-Lite Commitment' | 'Native Transfer' | 'HMAC Receipt Chain' | 'ExecuteVerdict' | 'UpdateReputation' | 'SubmitAssessment' | 'x402 Payment';
+  type: 'ZK-Lite Commitment' | 'Native Transfer' | 'HMAC Receipt Chain' | 'ExecuteVerdict' | 'UpdateReputation' | 'SubmitAssessment' | 'x402 Payment' | 'ContractCall' | 'Dispute Filed' | 'Retrial Complete';
   action: string;
   hash: string;
   contract: string;
@@ -249,6 +249,31 @@ export async function fetchTransactions(): Promise<TransactionEntry[]> {
     }));
   } catch (err) {
     console.error('[API] Failed to fetch transactions:', err);
+    throw err;
+  }
+}
+
+// ─── Predictions ─────────────────────────────────────────────────────────────
+
+export interface PredictionEntry {
+  prediction_id: string;
+  question: string;
+  timeframe: string;
+  asset_type: string;
+  probability: number;
+  confidence: number;
+  agents: { name: string; role: string; color: string; probability: number; confidence: number; reasoning: string }[];
+  risk_factors: string[];
+  created_at: number;
+}
+
+export async function fetchPredictions(): Promise<PredictionEntry[]> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/predictions`);
+    const data = await handleResponse<{ success: boolean; predictions: PredictionEntry[] }>(res);
+    return data.predictions || [];
+  } catch (err) {
+    console.error('[API] Failed to fetch predictions:', err);
     throw err;
   }
 }

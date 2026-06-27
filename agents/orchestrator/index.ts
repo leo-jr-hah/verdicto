@@ -51,11 +51,52 @@ import { attachWebSocket, emitEvent } from '../websocket-server.js';
 import { computeAggregateTrust } from '../shared/trust-framework.js';
 import { createDeliberationReceipt, DeliberationReceipt, verifyReceiptChain } from '../shared/audit-trail.js';
 import { createExecutionCommitment, storeCommitmentOnCasper } from '../shared/verifiable-execution.js';
-import { saveTransaction, createTransactionEntry, loadTransactions } from '../shared/transaction-log.js';
+import { saveTransaction as saveTransactionFile, createTransactionEntry, loadTransactions as loadTransactionsFile } from '../shared/transaction-log.js';
 import { runDualValuation, type ValuationRequest } from '../shared/agent-engine.js';
 import { fetchAssetData, type AssetData } from '../shared/data-sources.js';
 import { casperX402Middleware } from '../shared/x402-middleware.js';
 import * as db from '../shared/db.js';
+
+// ─── Dual-write transaction helper ──────────────────────────────────────────
+// Writes to BOTH the local JSON file (fast, for dev) AND Supabase (persistent, for prod).
+function saveTransaction(entry: ReturnType<typeof createTransactionEntry>) {
+  // File-based (existing behavior)
+  saveTransactionFile(entry);
+  // Supabase (persistent across deploys)
+  db.saveTransactionToDb({
+    id: entry.id,
+    type: entry.type,
+    action: entry.action,
+    hash: entry.hash,
+    contract: entry.contract,
+    block_height: entry.blockHeight,
+    timestamp: new Date(entry.timestamp).getTime(),
+    explorer_url: entry.explorerUrl,
+    on_chain: entry.onChain,
+    metadata: entry.metadata,
+  }).catch(err => console.warn(`  [DB] ⚠️ Failed to save transaction to Supabase: ${err.message}`));
+}
+
+/** Load transactions from Supabase first; fall back to file-based for local dev */
+async function loadTransactions() {
+  const dbTxs = await db.getTransactionsFromDb(200);
+  if (dbTxs.length > 0) {
+    return dbTxs.map(tx => ({
+      id: tx.id,
+      type: tx.type as any,
+      action: tx.action,
+      hash: tx.hash,
+      contract: tx.contract,
+      blockHeight: tx.block_height,
+      timestamp: new Date(tx.timestamp).toISOString(),
+      explorerUrl: tx.explorer_url,
+      onChain: tx.on_chain,
+      metadata: tx.metadata,
+    }));
+  }
+  // Fallback to file-based (local dev without Supabase)
+  return loadTransactionsFile();
+}
 import type { AssetType } from '../shared/types.js';
 
 // ─── Named constants ─────────────────────────────────────────────────────────
@@ -962,9 +1003,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     res.json({ status: 'ok', service: 'verdicto-orchestrator' });
   });
 
-  app.get('/api/transactions', (_, res) => {
+  app.get('/api/transactions', async (_, res) => {
     try {
-      const transactions = loadTransactions();
+      const transactions = await loadTransactions();
       res.json({ success: true, transactions });
     } catch (err: any) {
       res.status(500).json({ success: false, error: sanitizeError(err) });
@@ -2139,10 +2180,53 @@ Respond in JSON format:
       saveTransaction(predTx);
       emitEvent('transaction', predTx);
 
+      // ── DB: Persist prediction to Supabase ──
+      db.savePrediction({
+        prediction_id: predictionId,
+        question,
+        timeframe,
+        asset_type: assetType || 'general',
+        probability: Math.round(consensusProbability * 1000) / 1000,
+        confidence: Math.round(avgConfidence * 1000) / 1000,
+        agents: agents.map(a => ({
+          name: a.name,
+          role: a.role,
+          color: a.color,
+          probability: Math.round(a.probability * 1000) / 1000,
+          confidence: Math.round(a.confidence * 1000) / 1000,
+          reasoning: a.reasoning,
+          fallbackTriggered: a.fallbackTriggered,
+        })),
+        risk_factors: riskFactors,
+        created_at: Date.now(),
+      }).catch(err => console.warn(`  [DB] ⚠️ Failed to save prediction: ${err.message}`));
+
       console.log(`  🎯 Consensus: ${(consensusProbability * 100).toFixed(1)}% (confidence: ${(avgConfidence * 100).toFixed(1)}%)`);
       res.json(response);
     } catch (err: any) {
       console.error('[Predict] Error:', err.message);
+      res.status(500).json({ success: false, error: sanitizeError(err) });
+    }
+  });
+
+  // ─── Prediction History ─────────────────────────────────────────────────────
+
+  app.get('/api/predictions', async (_, res) => {
+    try {
+      const predictions = await db.getPredictionsFromDb(100);
+      res.json({ success: true, predictions });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: sanitizeError(err) });
+    }
+  });
+
+  // ─── Assessment History ─────────────────────────────────────────────────────
+
+  app.get('/api/assessments', async (_, res) => {
+    try {
+      const assessments = await db.getAssessmentsFromDb(100);
+      res.json({ success: true, assessments });
+    } catch (err: any) {
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -2826,6 +2910,31 @@ Respond in JSON format:
       saveTransaction(repayTx);
       emitEvent('transaction', repayTx);
 
+      // ── DB: Update loan in Supabase ──
+      db.saveLoan({
+        loan_id: loan.loanId,
+        borrower_public_key: loan.borrowerPublicKey,
+        asset_id: loan.assetId,
+        asset_type: loan.assetType,
+        asset_name: loan.assetName,
+        assessed_value: loan.assessedValue,
+        ltv_ratio: loan.ltvRatio,
+        loan_amount_cspr: loan.loanAmountCSPR,
+        collateral_assessment_id: loan.collateralAssessmentId,
+        status: loan.status,
+        health_ratio: loan.healthRatio,
+        created_at: loan.createdAt,
+        last_revalued_at: loan.lastRevaluedAt,
+        repaid_amount_cspr: loan.repaidAmountCSPR,
+        repayment_history: loan.repaymentHistory,
+        disbursement_tx_hash: loan.disbursementTxHash,
+        platform_fee_cspr: loan.platformFeeCSPR,
+        trust_breakdown: loan.trustBreakdown,
+        escrow_lock_tx_hash: loan.escrowLockTxHash,
+        escrow_release_tx_hash: loan.escrowReleaseTxHash,
+        revaluation_history: loan.revaluationHistory,
+      }).catch(err => console.warn(`  [DB] ⚠️ Failed to update loan after repay: ${err.message}`));
+
       res.json({
         success: true,
         loan: {
@@ -2975,6 +3084,31 @@ Respond in JSON format:
       );
       saveTransaction(revalTx);
       emitEvent('transaction', revalTx);
+
+      // ── DB: Update loan in Supabase after revaluation ──
+      db.saveLoan({
+        loan_id: loan.loanId,
+        borrower_public_key: loan.borrowerPublicKey,
+        asset_id: loan.assetId,
+        asset_type: loan.assetType,
+        asset_name: loan.assetName,
+        assessed_value: loan.assessedValue,
+        ltv_ratio: loan.ltvRatio,
+        loan_amount_cspr: loan.loanAmountCSPR,
+        collateral_assessment_id: loan.collateralAssessmentId,
+        status: loan.status,
+        health_ratio: loan.healthRatio,
+        created_at: loan.createdAt,
+        last_revalued_at: loan.lastRevaluedAt,
+        repaid_amount_cspr: loan.repaidAmountCSPR,
+        repayment_history: loan.repaymentHistory,
+        disbursement_tx_hash: loan.disbursementTxHash,
+        platform_fee_cspr: loan.platformFeeCSPR,
+        trust_breakdown: loan.trustBreakdown,
+        escrow_lock_tx_hash: loan.escrowLockTxHash,
+        escrow_release_tx_hash: loan.escrowReleaseTxHash,
+        revaluation_history: loan.revaluationHistory,
+      }).catch(err => console.warn(`  [DB] ⚠️ Failed to update loan after revalue: ${err.message}`));
 
       res.json({
         success: true,
@@ -3453,6 +3587,27 @@ Respond in JSON format:
       if (claimStatus === 'paid') {
         policy.status = 'paid';
       }
+
+      // ── DB: Update insurance policy in Supabase after claim ──
+      db.saveInsurance({
+        policy_id: policy.policyId,
+        owner_public_key: policy.ownerPublicKey,
+        asset_id: policy.assetId,
+        asset_type: policy.assetType,
+        asset_name: policy.assetName,
+        assessed_value: policy.assessedValue,
+        coverage_amount: policy.coverageAmount,
+        premium_cspr: policy.premiumCSPR,
+        deductible_percent: policy.deductiblePercent,
+        status: policy.status,
+        risk_score: policy.riskScore,
+        risk_factors: policy.riskFactors,
+        tier: policy.tier,
+        platform_fee_cspr: policy.platformFeeCSPR,
+        expires_at: policy.expiresAt,
+        created_at: policy.createdAt,
+        claim_history: policy.claimHistory,
+      }).catch(err => console.warn(`  [DB] ⚠️ Failed to update insurance after claim: ${err.message}`));
 
       res.json({
         success: true,

@@ -29,7 +29,7 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    title: '',  // No group name — standalone items
+    title: 'RESOURCES',
     items: [
       { name: 'How Verdicto Works', path: '/how-it-works', icon: Cpu },
       { name: 'Architecture', path: '/architecture', icon: GitBranch },

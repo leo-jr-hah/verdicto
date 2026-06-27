@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ExternalLink, RefreshCw, Wifi, WifiOff, Shield, Hash, Clock, BarChart3, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { fetchTransactions, createWebSocket, type TransactionEntry, type WSMessage } from '../services/api';
+import { fetchTransactions, fetchPredictions, createWebSocket, type TransactionEntry, type PredictionEntry, type WSMessage } from '../services/api';
 
 function formatTime(isoString: string): string {
   const date = new Date(isoString);
@@ -36,7 +36,7 @@ function typeColor(type: string): string {
   }
 }
 
-const FILTER_TABS = ['all', 'valuations', 'votes', 'payments', 'verdicts'] as const;
+const FILTER_TABS = ['all', 'valuations', 'votes', 'payments', 'verdicts', 'predictions'] as const;
 
 function matchesFilter(type: string, filter: string): boolean {
   if (filter === 'all') return true;
@@ -46,6 +46,7 @@ function matchesFilter(type: string, filter: string): boolean {
     case 'votes': return lower.includes('receipt') || lower.includes('juror');
     case 'payments': return lower.includes('payment') || lower.includes('x402');
     case 'verdicts': return lower.includes('verdict') || lower.includes('execute');
+    case 'predictions': return lower.includes('prediction');
     default: return lower.includes(filter);
   }
 }
@@ -56,10 +57,12 @@ const STATS = [
   { key: 'hmac' as const, label: 'HMAC', color: 'var(--red-600)', icon: Hash },
   { key: 'payments' as const, label: 'Payments', color: 'var(--text-tertiary)', icon: TrendingUp },
   { key: 'verdicts' as const, label: 'Verdicto', color: 'var(--text-secondary)', icon: Clock },
+  { key: 'predictions' as const, label: 'Predictions', color: 'var(--accent)', icon: TrendingUp },
 ];
 
 export const TransactionsView: React.FC = () => {
   const [transactions, setTransactions] = useState<TransactionEntry[]>([]);
+  const [predictions, setPredictions] = useState<PredictionEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [wsConnected, setWsConnected] = useState(false);
@@ -71,8 +74,12 @@ export const TransactionsView: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchTransactions();
-      setTransactions(data);
+      const [txData, predData] = await Promise.all([
+        fetchTransactions(),
+        fetchPredictions().catch(() => []), // Don't fail if predictions endpoint is unavailable
+      ]);
+      setTransactions(txData);
+      setPredictions(predData);
       setLastUpdate(new Date());
     } catch (err: any) {
       setError(err.message || 'Failed to load transactions');
@@ -135,14 +142,33 @@ export const TransactionsView: React.FC = () => {
   }, [loadTransactions]);
 
   const stats = {
-    total: transactions.length,
+    total: transactions.length + predictions.length,
     zkLite: transactions.filter(t => t.type === 'ZK-Lite Commitment').length,
     hmac: transactions.filter(t => t.type === 'HMAC Receipt Chain').length,
     payments: transactions.filter(t => t.type === 'x402 Payment').length,
     verdicts: transactions.filter(t => t.type === 'ExecuteVerdict').length,
+    predictions: predictions.length,
   };
 
-  const filtered = filterType === 'all' ? transactions : transactions.filter(t => matchesFilter(t.type, filterType));
+  // Merge predictions into a unified timeline for display
+  const predictionAsTx: TransactionEntry[] = predictions.map(p => ({
+    id: p.prediction_id,
+    type: 'SubmitAssessment' as const,
+    action: `Prediction: "${p.question.slice(0, 60)}${p.question.length > 60 ? '...' : ''}" → ${(p.probability * 100).toFixed(1)}%`,
+    hash: p.prediction_id,
+    contract: 'PredictionMarket',
+    blockHeight: 'latest',
+    timestamp: new Date(p.created_at).toISOString(),
+    explorerUrl: '',
+    onChain: false,
+    metadata: { question: p.question, timeframe: p.timeframe, probability: p.probability, confidence: p.confidence },
+  }));
+
+  const allItems = [...transactions, ...predictionAsTx].sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+
+  const filtered = filterType === 'all' ? allItems : allItems.filter(t => matchesFilter(t.type, filterType));
 
   return (
     <div>

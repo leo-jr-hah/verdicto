@@ -135,6 +135,15 @@ export async function getAssessment(assessmentId: string): Promise<DbAssessment 
   };
 }
 
+export async function getAssessmentsFromDb(limit = 100): Promise<DbAssessment[]> {
+  const rows = await select('assessments', {}, { column: 'created_at', ascending: false });
+  if (!rows) return [];
+  return rows.slice(0, limit).map(row => ({
+    ...row,
+    receipt_chain: typeof row.receipt_chain === 'string' ? JSON.parse(row.receipt_chain) : row.receipt_chain,
+  }));
+}
+
 // ─── Loans ──────────────────────────────────────────────────────────────────
 
 export interface DbLoan {
@@ -389,6 +398,111 @@ export async function getAllDisputes(): Promise<DbDispute[]> {
     retrial: row.retrial ? (typeof row.retrial === 'string' ? JSON.parse(row.retrial) : row.retrial) : undefined,
     stake_distribution: row.stake_distribution ? (typeof row.stake_distribution === 'string' ? JSON.parse(row.stake_distribution) : row.stake_distribution) : undefined,
   }));
+}
+
+// ─── Transactions ───────────────────────────────────────────────────────────
+
+export interface DbTransaction {
+  id: string;
+  type: string;
+  action: string;
+  hash: string;
+  contract: string;
+  block_height: string;
+  timestamp: number;
+  explorer_url: string;
+  on_chain: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export async function saveTransactionToDb(tx: DbTransaction) {
+  await upsert('transactions', {
+    id: tx.id,
+    type: tx.type,
+    action: tx.action,
+    hash: tx.hash,
+    contract: tx.contract,
+    block_height: tx.block_height,
+    timestamp: tx.timestamp,
+    explorer_url: tx.explorer_url,
+    on_chain: tx.on_chain,
+    metadata: tx.metadata ? JSON.stringify(tx.metadata) : '{}',
+  }, 'id');
+}
+
+export async function getTransactionsFromDb(limit = 200): Promise<DbTransaction[]> {
+  const client = await getClient();
+  if (!client) return [];
+  try {
+    const { data, error } = await client
+      .from('transactions')
+      .select('*')
+      .order('timestamp', { ascending: false })
+      .limit(limit);
+    if (error) {
+      console.error('  [DB] ❌ Select transactions failed:', error.message);
+      return [];
+    }
+    return (data || []).map(row => ({
+      ...row,
+      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
+    }));
+  } catch (err: any) {
+    console.error('  [DB] ❌ Select transactions exception:', err.message);
+    return [];
+  }
+}
+
+// ─── Predictions ───────────────────────────────────────────────────────────
+
+export interface DbPrediction {
+  prediction_id: string;
+  question: string;
+  timeframe: string;
+  asset_type: string;
+  probability: number;
+  confidence: number;
+  agents: any[];
+  risk_factors: string[];
+  created_at: number;
+}
+
+export async function savePrediction(pred: DbPrediction) {
+  await upsert('predictions', {
+    prediction_id: pred.prediction_id,
+    question: pred.question,
+    timeframe: pred.timeframe,
+    asset_type: pred.asset_type,
+    probability: pred.probability,
+    confidence: pred.confidence,
+    agents: JSON.stringify(pred.agents),
+    risk_factors: JSON.stringify(pred.risk_factors),
+    created_at: pred.created_at,
+  }, 'prediction_id');
+}
+
+export async function getPredictionsFromDb(limit = 100): Promise<DbPrediction[]> {
+  const client = await getClient();
+  if (!client) return [];
+  try {
+    const { data, error } = await client
+      .from('predictions')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) {
+      console.error('  [DB] ❌ Select predictions failed:', error.message);
+      return [];
+    }
+    return (data || []).map(row => ({
+      ...row,
+      agents: typeof row.agents === 'string' ? JSON.parse(row.agents) : row.agents,
+      risk_factors: typeof row.risk_factors === 'string' ? JSON.parse(row.risk_factors) : row.risk_factors,
+    }));
+  } catch (err: any) {
+    console.error('  [DB] ❌ Select predictions exception:', err.message);
+    return [];
+  }
 }
 
 // ─── Health Check ───────────────────────────────────────────────────────────

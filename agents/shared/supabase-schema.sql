@@ -111,5 +111,39 @@ CREATE INDEX IF NOT EXISTS idx_disputes_asset_id ON disputes(asset_id);
 CREATE INDEX IF NOT EXISTS idx_disputes_status ON disputes(status);
 CREATE INDEX IF NOT EXISTS idx_disputes_created_at ON disputes(created_at DESC);
 
+-- ─── 6. Transactions (all payment / on-chain / HMAC events) ──────────────────
+
+CREATE TABLE IF NOT EXISTS transactions (
+  id TEXT PRIMARY KEY,
+  type TEXT NOT NULL,
+  action TEXT NOT NULL,
+  hash TEXT NOT NULL,
+  contract TEXT NOT NULL,
+  block_height TEXT NOT NULL DEFAULT 'latest',
+  timestamp BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000,
+  explorer_url TEXT,
+  on_chain BOOLEAN NOT NULL DEFAULT false,
+  metadata JSONB DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(type);
+CREATE INDEX IF NOT EXISTS idx_transactions_timestamp ON transactions(timestamp DESC);
+
+-- ─── 7. Predictions (5-agent probability analyses) ──────────────────────────
+
+CREATE TABLE IF NOT EXISTS predictions (
+  prediction_id TEXT PRIMARY KEY,
+  question TEXT NOT NULL,
+  timeframe TEXT NOT NULL,
+  asset_type TEXT NOT NULL DEFAULT 'general',
+  probability NUMERIC NOT NULL,
+  confidence NUMERIC NOT NULL,
+  agents JSONB NOT NULL DEFAULT '[]',
+  risk_factors JSONB DEFAULT '[]',
+  created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000
+);
+
+CREATE INDEX IF NOT EXISTS idx_predictions_created_at ON predictions(created_at DESC);
+
 -- ─── Done! ───────────────────────────────────────────────────────────────────
--- All 5 tables created. The backend will start writing data once deployed.
+-- All 7 tables created. The backend will start writing data once deployed.
