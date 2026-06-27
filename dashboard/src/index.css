@@ -3023,31 +3023,31 @@ a:focus-visible {
 .oracle-stack-header__eyebrow {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
   color: #D4A853;
-  margin-bottom: var(--space-4);
-  border: 1px solid rgba(212, 168, 83, 0.25);
-  padding: var(--space-1) var(--space-3);
+  margin-bottom: var(--space-6);
+  border: 1px solid rgba(212, 168, 83, 0.35);
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-full);
 }
 
 .oracle-stack-header__title {
-  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: var(--weight-bold);
   color: #F0F0EE;
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-6);
   letter-spacing: var(--tracking-tight);
-  line-height: 1.1;
+  line-height: 1.05;
 }
 
 .oracle-stack-header__subtitle {
-  font-size: var(--text-lg);
-  color: #8A8A8C;
+  font-size: var(--text-xl);
+  color: #9A9A9C;
   line-height: var(--leading-relaxed);
-  max-width: 600px;
+  max-width: 640px;
   margin: 0;
 }
 
@@ -3114,7 +3114,7 @@ a:focus-visible {
 }
 
 .oracle-stack-card__title {
-  font-size: var(--text-xl);
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
   font-weight: var(--weight-bold);
   color: #F0F0EE;
   margin: 0;
@@ -3123,8 +3123,8 @@ a:focus-visible {
 }
 
 .oracle-stack-card__desc {
-  font-size: var(--text-base);
-  color: #8A8A8C;
+  font-size: var(--text-lg);
+  color: #A0A0A4;
   line-height: var(--leading-relaxed);
   margin: 0;
 }
