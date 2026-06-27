@@ -9,7 +9,7 @@ const CAPABILITIES = [
   {
     icon: <Scale size={20} />,
     title: 'HMAC Receipt Chains',
-    desc: 'Every juror deliberation round is signed with HMAC-SHA256. Receipts chain together — each links to the previous via `previousReceiptId`. Tamper with one and the entire chain breaks.',
+    desc: 'Every juror deliberation round is signed with HMAC-SHA256. Receipts chain together, each linking to the previous via `previousReceiptId`. Tamper with one and the entire chain breaks.',
   },
   {
     icon: <Shield size={20} />,
@@ -19,12 +19,12 @@ const CAPABILITIES = [
   {
     icon: <TrendingUp size={20} />,
     title: 'Adversarial Deliberation',
-    desc: 'Two analysts produce independent valuations. Three jurors evaluate credibility with peer review. Disagreements trigger multi-round deliberation — not a simple average.',
+    desc: 'Two analysts produce independent valuations. Three jurors evaluate credibility with peer review. Disagreements trigger multi-round deliberation, not a simple average.',
   },
   {
     icon: <Zap size={20} />,
     title: 'x402 Micropayments',
-    desc: 'Each product is gated by a native CSPR transfer signed by the user wallet. No API keys, no accounts — just cryptographic proof of payment.',
+    desc: 'Each product is gated by a native CSPR transfer signed by the user wallet. No API keys, no accounts, just cryptographic proof of payment.',
   },
 ];
 
@@ -59,7 +59,7 @@ export const TestnetProof: React.FC = () => {
               Every Assessment.<br/>Cryptographically Proven.
             </h2>
             <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '32px' }}>
-              Not "trust us" — verify it. Every AI assessment produces HMAC receipt chains
+              Not "trust us", verify it. Every AI assessment produces HMAC receipt chains
               and ZK-Lite commitments anchored to Casper L1. Tamper with any step and the
               cryptographic proof breaks. Four products, one verification layer.
             </p>

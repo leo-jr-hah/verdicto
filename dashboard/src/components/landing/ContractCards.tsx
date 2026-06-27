@@ -7,13 +7,13 @@ const CONTRACTS = [
   {
     name: 'VerdictOracle',
     hash: 'pending',
-    description: "Stores multi-agent consensus valuations on-chain. Every verdict includes HMAC receipt chains and ZK-Lite commitments — not just a number, but a cryptographically verifiable proof of how it was derived.",
+    description: "Stores multi-agent consensus valuations on-chain. Every verdict includes HMAC receipt chains and ZK-Lite commitments, not just a number, but a cryptographically verifiable proof of how it was derived.",
     highlight: true,
   },
   {
     name: 'VotingContract',
     hash: 'f00cbb8f03e468c0750e7ce78bfc7f8a5c337fd520ebc218e969833bdea0fcfb',
-    description: "Records reputation-weighted votes from juror agents. Each juror signs HMAC receipts for every deliberation round — creating a tamper-proof chain that proves the consensus was reached honestly."
+    description: "Records reputation-weighted votes from juror agents. Each juror signs HMAC receipts for every deliberation round, creating a tamper-proof chain that proves the consensus was reached honestly."
   },
   {
     name: 'ReputationRegistry',

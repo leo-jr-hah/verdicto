@@ -2923,7 +2923,7 @@ a:focus-visible {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .landing-section {
-  padding: 96px var(--page-padding-x);
+  padding: var(--space-16) var(--page-padding-x);
 }
 
 .landing-section--compact {
@@ -3170,7 +3170,7 @@ a:focus-visible {
 /* ── Oracle Section ────────────────────────────────────────────────────── */
 
 .oracle-section {
-  padding: var(--space-16) var(--space-8);
+  padding: var(--space-16) var(--page-padding-x);
   max-width: var(--container-max);
   margin: 0 auto;
 }
@@ -3446,7 +3446,7 @@ a:focus-visible {
 .x402-section {
   width: 100%;
   background: var(--bg-elevated);
-  padding: var(--space-16) var(--space-8);
+  padding: var(--space-16) var(--page-padding-x);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
@@ -3546,7 +3546,7 @@ a:focus-visible {
   width: 100%;
   max-width: var(--container-max);
   margin: 0 auto;
-  padding: var(--space-16) var(--space-8);
+  padding: var(--space-16) var(--page-padding-x);
 }
 
 .contracts-grid {
@@ -3609,7 +3609,7 @@ a:focus-visible {
   width: 100%;
   max-width: var(--container-max);
   margin: 0 auto;
-  padding: var(--space-16) var(--space-8);
+  padding: var(--space-16) var(--page-padding-x);
 }
 
 .testnet-layout {

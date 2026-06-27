@@ -105,7 +105,7 @@ export const X402PaymentFlow: React.FC = () => {
             </p>
             <div className="x402-check-list">
               {[
-                '2.5 CSPR per assessment — wallet-signed transfer',
+                '2.5 CSPR per assessment, wallet-signed transfer',
                 'HMAC receipt chain proves every deliberation step',
                 'ZK-Lite commitment anchors execution state on-chain',
                 'All deploys verifiable on cspr.live'

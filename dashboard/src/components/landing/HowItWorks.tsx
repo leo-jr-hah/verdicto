@@ -7,7 +7,7 @@ const STEPS = [
     num: '01',
     title: 'Connect & Pay',
     icon: Upload,
-    description: 'Connect your Casper Wallet. Pay 2.5 CSPR via a native transfer — the wallet signs it, producing a cryptographic payment proof. No accounts, no API keys.',
+    description: 'Connect your Casper Wallet. Pay 2.5 CSPR via a native transfer, the wallet signs it, producing a cryptographic payment proof. No accounts, no API keys.',
     detail: 'x402 micropayment with wallet signature',
   },
   {
@@ -21,8 +21,8 @@ const STEPS = [
     num: '03',
     title: 'Juror Deliberation',
     icon: Users,
-    description: 'Three specialized jurors evaluate which analysis is more credible. Every deliberation round is signed with HMAC-SHA256 — each receipt chains to the previous. If agents disagree, multi-round peer review kicks in.',
-    detail: 'HMAC receipt chains — tamper-proof audit trail',
+    description: 'Three specialized jurors evaluate which analysis is more credible. Every deliberation round is signed with HMAC-SHA256, each receipt chains to the previous. If agents disagree, multi-round peer review kicks in.',
+    detail: 'HMAC receipt chains, tamper-proof audit trail',
   },
   {
     num: '04',

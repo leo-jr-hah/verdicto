@@ -460,7 +460,7 @@ export const HeroSection: React.FC = () => {
           className="hero-tagline"
         >
           <TypewriterText
-            text="Multi-agent AI consensus valuations, stored on-chain as a composable primitive. Assess, Borrow, Insure — powered by verifiable AI."
+            text="Multi-agent AI consensus valuations, stored on-chain as a composable primitive. Assess, Borrow, Insure, powered by verifiable AI."
             delay={1200}
           />
         </motion.div>

@@ -6,7 +6,7 @@ const FEATURES = [
   {
     icon: <Radio size={20} />,
     title: 'HMAC Receipt Chains',
-    desc: 'Every juror signs each deliberation round with HMAC-SHA256. Receipts chain together — each links to the previous via `previousReceiptId`. Tamper with one receipt and the entire chain breaks.',
+    desc: 'Every juror signs each deliberation round with HMAC-SHA256. Receipts chain together, each linking to the previous via `previousReceiptId`. Tamper with one receipt and the entire chain breaks.',
   },
   {
     icon: <Zap size={20} />,
@@ -16,12 +16,12 @@ const FEATURES = [
   {
     icon: <Shield size={20} />,
     title: 'Adversarial Deliberation',
-    desc: 'Two analysts produce independent valuations. Three jurors evaluate credibility, weighted by on-chain trust scores. Disagreements trigger multi-round peer review — not a simple average.',
+    desc: 'Two analysts produce independent valuations. Three jurors evaluate credibility, weighted by on-chain trust scores. Disagreements trigger multi-round peer review, not a simple average.',
   },
   {
     icon: <Globe size={20} />,
     title: 'x402 Pay-Per-Query',
-    desc: 'Each oracle query is a native CSPR transfer signed by the user wallet. No API keys, no accounts — just a micropayment with cryptographic proof of authorization.',
+    desc: 'Each oracle query is a native CSPR transfer signed by the user wallet. No API keys, no accounts, just a micropayment with cryptographic proof of authorization.',
   },
 ];
 
@@ -29,13 +29,13 @@ const USE_CASES = [
   { label: 'Lending Protocols', desc: 'Query verified valuation → calculate LTV → disburse loan', icon: <TrendingUp size={16} /> },
   { label: 'DAO Treasuries', desc: 'Verify RWA collateral with tamper-proof receipts', icon: <Shield size={16} /> },
   { label: 'Insurance Contracts', desc: 'Price policies against cryptographically committed valuations', icon: <Shield size={16} /> },
-  { label: 'Dispute Resolution', desc: 'Challenge verdicts — re-trials produce new HMAC chains', icon: <TrendingUp size={16} /> },
+  { label: 'Dispute Resolution', desc: 'Challenge verdicts, re-trials produce new HMAC chains', icon: <TrendingUp size={16} /> },
 ];
 
 const CODE_SNIPPET = `// Every assessment produces a verifiable receipt chain
 let verdict = oracle.get_verdict("ASSESS-1719000000000");
 
-// Verify HMAC chain integrity — each receipt links to the previous
+// Verify HMAC chain integrity; each receipt links to the previous
 for receipt in verdict.receipts {
     assert(verify_hmac(receipt, juror_key));
     assert(receipt.prev == prev_receipt_id);
@@ -46,7 +46,7 @@ let commitment = sha256(verdict.input + verdict.agent_state
     + verdict.block_height + verdict.timestamp);
 assert(commitment == oracle.get_commitment(asset_id));
 
-// Now safe to use — agents ran correctly, nothing was altered
+// Now safe to use; agents ran correctly, nothing was altered
 let ltv = calculate_ltv(verdict.value, loan_amount);`;
 
 export const OracleSection: React.FC = () => {
@@ -69,7 +69,7 @@ export const OracleSection: React.FC = () => {
         <h2 className="landing-section__title">Cryptographically Verifiable AI</h2>
         <p className="landing-section__subtitle">
           Every assessment produces HMAC receipt chains and ZK-Lite commitments.
-          Not "trust us" — verify it yourself on Casper.
+          Not "trust us", verify it yourself on Casper.
         </p>
       </motion.div>
 
@@ -92,7 +92,7 @@ export const OracleSection: React.FC = () => {
         ))}
       </div>
 
-      {/* Use Cases + Code — side by side */}
+      {/* Use Cases + Code, side by side */}
       <div className="oracle-bottom-grid">
         {/* Use Cases */}
         <motion.div

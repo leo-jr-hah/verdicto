@@ -20,7 +20,7 @@ export const AgentGrid: React.FC = () => {
             </h2>
             <p className="landing-section__subtitle">
               Two valuation agents produce independent estimates using different methodologies.
-              Three specialized jurors then evaluate credibility, validate evidence, and reach consensus —
+              Three specialized jurors then evaluate credibility, validate evidence, and reach consensus,
               each signing HMAC receipts that chain together into a tamper-proof audit trail.
             </p>
           </div>

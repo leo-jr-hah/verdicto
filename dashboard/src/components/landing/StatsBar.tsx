@@ -2,10 +2,10 @@ import React from 'react';
 import { Reveal } from './UIComponents';
 
 const METRICS = [
-  { label: 'HMAC Receipt Chains', detail: 'Every AI deliberation step cryptographically signed — tamper-proof audit trail' },
-  { label: 'ZK-Lite Commitments', detail: 'Execution proofs anchored to Casper L1 — verify the agents ran correctly' },
-  { label: 'Multi-Agent Adversarial', detail: '2 analysts + 3 jurors with peer review — no single point of failure' },
-  { label: 'x402 Micropayments', detail: 'Pay-per-use with wallet-signed CSPR transfers — no accounts, no API keys' },
+  { label: 'HMAC Receipt Chains', detail: 'Every AI deliberation step cryptographically signed, tamper-proof audit trail' },
+  { label: 'ZK-Lite Commitments', detail: 'Execution proofs anchored to Casper L1, verify the agents ran correctly' },
+  { label: 'Multi-Agent Adversarial', detail: '2 analysts + 3 jurors with peer review, no single point of failure' },
+  { label: 'x402 Micropayments', detail: 'Pay-per-use with wallet-signed CSPR transfers, no accounts, no API keys' },
 ];
 
 export const StatsBar: React.FC = () => {

@@ -5,9 +5,9 @@ import { BarChart2, TrendingUp, FileText, Activity, Search } from 'lucide-react'
 export const AGENTS = [
   { name: 'Analyst Alpha', role: 'Valuation Agent #1', icon: BarChart2, description: 'Produces an independent asset valuation using comparable sales, market data, and LLM reasoning. Every input and output is recorded for the ZK-Lite commitment.' },
   { name: 'Analyst Beta', role: 'Valuation Agent #2', icon: TrendingUp, description: 'Produces a second independent valuation using a different methodology (DCF, precedent, or hybrid). Disagreement with Alpha triggers juror deliberation.' },
-  { name: 'Juror — Credibility', role: 'Peer Review', icon: FileText, description: 'Evaluates which analyst\'s methodology is more credible for this asset class. Signs an HMAC receipt for every deliberation round — creating a tamper-proof audit trail.' },
-  { name: 'Juror — Evidence', role: 'Data Validation', icon: Activity, description: 'Cross-references raw data points, flags inconsistencies, and assesses evidence quality. Each judgment is cryptographically chained to the previous receipt.' },
-  { name: 'Juror — Consensus', role: 'Arbiter', icon: Search, description: 'Weighs the credibility and evidence scores from the other two jurors. Produces the final consensus verdict with a confidence score. The full chain is anchored on-chain via ZK-Lite.' },
+  { name: 'Juror: Credibility', role: 'Peer Review', icon: FileText, description: 'Evaluates which analyst\'s methodology is more credible for this asset class. Signs an HMAC receipt for every deliberation round, creating a tamper-proof audit trail.' },
+  { name: 'Juror: Evidence', role: 'Data Validation', icon: Activity, description: 'Cross-references raw data points, flags inconsistencies, and assesses evidence quality. Each judgment is cryptographically chained to the previous receipt.' },
+  { name: 'Juror: Consensus', role: 'Arbiter', icon: Search, description: 'Weighs the credibility and evidence scores from the other two jurors. Produces the final consensus verdict with a confidence score. The full chain is anchored on-chain via ZK-Lite.' },
 ];
 
 export const AgentCard: React.FC<{ agent: typeof AGENTS[0]; index: number }> = ({ agent, index }) => {
