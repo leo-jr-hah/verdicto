@@ -17,6 +17,9 @@
 .disputes-how-banner {
   display: flex; align-items: flex-start; gap: 1rem;
   padding: 1.5rem; margin-bottom: 2rem;
+  background: var(--nm-base);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-extruded);
 }
 
 .disputes-how-banner__icon { flex-shrink: 0; }
@@ -30,11 +33,13 @@
 
 /* Verdict/dispute list items */
 .disputes-list-item {
-  padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color);
-  cursor: pointer; transition: background 0.15s ease;
+  padding: 1rem 1.5rem; border-bottom: none;
+  cursor: pointer; transition: all var(--duration-standard) var(--ease-out);
+  border-radius: var(--radius-lg);
+  margin-bottom: 0.5rem;
 }
 
-.disputes-list-item:hover { background: var(--bg-elevated); }
+.disputes-list-item:hover { box-shadow: var(--shadow-extruded-small); }
 
 .disputes-list-item__header {
   display: flex; justify-content: space-between; align-items: center;
@@ -48,7 +53,8 @@
 
 /* Expanded detail */
 .disputes-detail {
-  padding: 1.5rem; background: var(--bg-elevated); border-radius: 8px;
+  padding: 1.5rem; background: var(--nm-base); border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-inset);
   margin: 0.75rem 0;
 }
 
@@ -57,7 +63,7 @@
 }
 
 .disputes-detail__section-title {
-  font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);
+  font-size: 0.85rem; font-weight: 600; color: var(--nm-text-secondary);
   margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
 }
 
@@ -68,7 +74,7 @@
 }
 
 .disputes-retrial-grid__arrow {
-  font-size: 1.2rem; color: var(--text-tertiary); text-align: center;
+  font-size: 1.2rem; color: var(--nm-text-muted); text-align: center;
 }
 
 .disputes-retrial-grid__value { text-align: center; }
@@ -80,7 +86,8 @@
 
 .disputes-panel-vote {
   display: flex; align-items: center; gap: 0.75rem;
-  padding: 0.5rem 0.75rem; background: var(--bg-main); border-radius: 6px;
+  padding: 0.5rem 0.75rem; background: var(--nm-base); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-inset-small);
 }
 
 /* Reason modal */
@@ -91,16 +98,22 @@
 }
 
 .disputes-reason-modal {
-  background: var(--bg-surface); border: 1px solid var(--border-color);
-  border-radius: 12px; padding: 1.5rem; width: 100%; max-width: 480px;
+  background: var(--nm-base); border: none;
+  border-radius: var(--radius-xl); padding: 1.5rem; width: 100%; max-width: 480px;
+  box-shadow: var(--shadow-extruded);
 }
 
 .disputes-reason-modal textarea {
   width: 100%; min-height: 120px; padding: 0.75rem;
-  border-radius: 6px; border: 1px solid var(--border-color);
-  background: var(--bg-main); color: var(--text-primary);
-  font-size: 0.95rem; font-family: var(--font-sans);
-  resize: vertical; margin-bottom: 1rem;
+  border-radius: var(--radius-md); border: none;
+  background: var(--nm-base); color: var(--nm-text-primary);
+  box-shadow: var(--shadow-inset);
+  font-size: 0.95rem; font-family: var(--font-body);
+  resize: vertical; margin-bottom: 1rem; outline: none;
+}
+
+.disputes-reason-modal textarea:focus {
+  box-shadow: var(--shadow-inset-deep), var(--shadow-focus);
 }
 
 .disputes-reason-modal__actions { display: flex; gap: 0.75rem; }
@@ -122,37 +135,18 @@
   .disputes-filters {
     overflow-x: auto; flex-wrap: nowrap;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
     padding-bottom: 0.5rem;
   }
 
-  .disputes-filters .btn { white-space: nowrap; flex-shrink: 0; }
+  .disputes-filters::-webkit-scrollbar { display: none; }
 
-  .disputes-list-item { 
-    padding: 1rem;
-    background: var(--bg-surface-alt);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    margin: 0.75rem;
-  }
-
-  .disputes-list-item__header {
-    flex-direction: column; align-items: flex-start; gap: 0.75rem;
-  }
-
-  .disputes-list-item__right { width: 100%; justify-content: flex-end; }
-
-  /* Re-trial comparison: stack vertically */
   .disputes-retrial-grid {
-    grid-template-columns: 1fr; gap: 0.75rem; text-align: center;
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
   .disputes-retrial-grid__arrow {
     transform: rotate(90deg);
   }
-
-  .disputes-retrial-grid__value { text-align: center; }
-
-  .disputes-detail { padding: 1rem; }
-
-  .disputes-reason-modal { max-width: 100%; }
 }

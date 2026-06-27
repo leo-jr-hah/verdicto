@@ -1,69 +1,133 @@
-/* ============================================
-   VERDICTO DESIGN TOKENS
-   Single source of truth for all visual values
-   Based on verdicto_design_system_overhaul.md
-   ============================================ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   VERDICTO NEUMORPHISM DESIGN TOKENS
+   Red-brand warm neumorphic color system
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── Red Scale (Strictly Controlled) ─────────────────────────────────────── */
-  --red-50: #FFF1F1;
-  --red-100: #FFE1E1;
-  --red-200: #FFC7C7;
-  --red-500: #FF3B3B;
-  --red-600: #E62E2E;
-  --red-700: #CC1F1F;
-  --red-800: #A31515;
-  --red-900: #7A0F0F;
+  /* ── Base Surface (The Neumorphic Canvas) ─────────────────────────────────
+     Warm off-white with subtle pink/beige undertone.
+     This is the color EVERY surface shares — cards, buttons, inputs, background.
+     All depth comes from shadows, not color variation.
+     HSL: 24°, 18%, 91% — warm, slightly desaturated, light
+  ─────────────────────────────────────────────────────────────────────────── */
+  --nm-base: #EDE8E3;
+  --nm-base-rgb: 237, 232, 227;
 
-  /* ── Primary (brand shortcuts) ───────────────────────────────────────────── */
-  --primary: #FF3B3B;
-  --primary-hover: #E03333;
-  --primary-light: #FF6B6B;
-  --primary-bg: rgba(255, 59, 59, 0.06);
-  --primary-bg-strong: rgba(255, 59, 59, 0.12);
-  --primary-border: rgba(255, 59, 59, 0.20);
-  --accent: #FF3B3B;
+  /* ── Shadow Colors (Derived from base for physical accuracy) ──────────────
+     Dark shadow: base color darkened ~25%, desaturated
+     Light shadow: base color lightened toward pure white
+     Both use rgba() for smooth blending — NEVER solid hex
+  ─────────────────────────────────────────────────────────────────────────── */
+  --nm-shadow-dark: rgba(165, 150, 140, 0.55);
+  --nm-shadow-dark-rgb: 165, 150, 140;
+  --nm-shadow-light: rgba(255, 250, 245, 0.75);
+  --nm-shadow-light-rgb: 255, 250, 245;
 
-  /* ── Neutral — Light Mode ────────────────────────────────────────────────── */
-  --bg-canvas: #FFFFFF;
-  --bg-surface: #F9FAFB;
-  --bg-elevated: #FFFFFF;
-  --bg-inset: #F3F4F6;
-  --text-primary: #111827;
-  --text-secondary: #4B5563;
-  --text-tertiary: #9CA3AF;
-  --text-disabled: #D1D5DB;
-  --text-inverse: #FFFFFF;
-  --border-default: #E5E7EB;
-  --border-subtle: #F3F4F6;
-  --border-focus: #E62E2E;
+  /* Deeper shadows for hover/lifted states */
+  --nm-shadow-dark-deep: rgba(150, 135, 125, 0.65);
+  --nm-shadow-light-deep: rgba(255, 252, 248, 0.85);
 
-  /* ── Backward compat aliases ─────────────────────────────────────────────── */
-  --bg-main: var(--bg-canvas);
-  --bg-surface-alt: var(--bg-inset);
-  --border-color: var(--border-default);
-  --border-color-subtle: var(--border-subtle);
+  /* ── Text Colors (Warm charcoal family) ───────────────────────────────────
+     Pure black on warm base looks harsh. Warm charcoal feels premium.
+  ─────────────────────────────────────────────────────────────────────────── */
+  --nm-text-primary: #3A2F2A;
+  --nm-text-secondary: #6B5E56;
+  --nm-text-muted: #9A8E86;
+  --nm-text-placeholder: #B5AAA2;
 
-  /* ── RGB values for backdrop-filter rgba() ───────────────────────────────── */
-  --bg-main-rgb: 255, 255, 255;
+  /* ── Red Brand Accent ─────────────────────────────────────────────────────
+     Slightly deeper than current #FF3B3B for better neumorphic harmony.
+     The warm base makes this red feel intentional, not clashing.
+     Used sparingly: CTAs, active states, focus rings, primary buttons.
+  ─────────────────────────────────────────────────────────────────────────── */
+  --nm-accent: #E63946;
+  --nm-accent-hover: #D62836;
+  --nm-accent-light: #F06570;
+  --nm-accent-soft: rgba(230, 57, 70, 0.10);
+  --nm-accent-glow: rgba(230, 57, 70, 0.25);
 
-  /* ── Semantic Colors (functional only) ───────────────────────────────────── */
-  --success: #10B981;
-  --success-soft: rgba(16, 185, 129, 0.08);
-  --success-bg: var(--success-soft);
-  --warning: #F59E0B;
-  --warning-soft: rgba(245, 158, 11, 0.08);
-  --warning-bg: var(--warning-soft);
-  --error: #EF4444;
-  --error-soft: rgba(239, 68, 68, 0.08);
-  --error-bg: var(--error-soft);
-  --info: #3B82F6;
-  --info-soft: rgba(59, 130, 246, 0.08);
+  /* ── Functional Colors (Status indicators) ────────────────────────────────
+     Success, warning, error — kept functional but softened for neumorphism
+  ─────────────────────────────────────────────────────────────────────────── */
+  --nm-success: #2D9F5E;
+  --nm-success-soft: rgba(45, 159, 94, 0.12);
+  --nm-warning: #D4950C;
+  --nm-warning-soft: rgba(212, 149, 12, 0.12);
+  --nm-error: #DC3545;
+  --nm-error-soft: rgba(220, 53, 69, 0.12);
+  --nm-info: #3B7DD8;
+  --nm-info-soft: rgba(59, 125, 216, 0.12);
 
-  /* ── Typography ──────────────────────────────────────────────────────────── */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Geist', 'Inter', -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  /* ── Border ───────────────────────────────────────────────────────────────
+     Neumorphism rarely uses borders, but when needed:
+  ─────────────────────────────────────────────────────────────────────────── */
+  --nm-border: transparent;
+  --nm-border-subtle: rgba(165, 150, 140, 0.15);
+
+  /* ── Shadow Physics ───────────────────────────────────────────────────────
+     The core of the visual system — every shadow uses rgba() for smooth blending
+  ─────────────────────────────────────────────────────────────────────────── */
+
+  /* Extruded (Standard) — Default resting state */
+  --shadow-extruded:
+    9px 9px 18px var(--nm-shadow-dark),
+    -9px -9px 18px var(--nm-shadow-light);
+
+  /* Extruded Hover (Lifted) — Hover state */
+  --shadow-extruded-hover:
+    12px 12px 24px var(--nm-shadow-dark-deep),
+    -12px -12px 24px var(--nm-shadow-light-deep);
+
+  /* Extruded Small — For smaller elements (buttons, badges) */
+  --shadow-extruded-small:
+    5px 5px 10px var(--nm-shadow-dark),
+    -5px -5px 10px var(--nm-shadow-light);
+
+  /* Extruded Small Hover */
+  --shadow-extruded-small-hover:
+    7px 7px 14px var(--nm-shadow-dark-deep),
+    -7px -7px 14px var(--nm-shadow-light-deep);
+
+  /* Inset (Pressed) — Standard pressed/carved state */
+  --shadow-inset:
+    inset 6px 6px 12px var(--nm-shadow-dark),
+    inset -6px -6px 12px var(--nm-shadow-light);
+
+  /* Inset Deep — Deep carved elements */
+  --shadow-inset-deep:
+    inset 10px 10px 20px var(--nm-shadow-dark),
+    inset -10px -10px 20px var(--nm-shadow-light);
+
+  /* Inset Small — Subtle tracks, pills */
+  --shadow-inset-small:
+    inset 3px 3px 6px var(--nm-shadow-dark),
+    inset -3px -3px 6px var(--nm-shadow-light);
+
+  /* Primary Accent Shadow — For primary CTA buttons */
+  --shadow-extruded-primary:
+    9px 9px 18px var(--nm-shadow-dark),
+    -9px -9px 18px var(--nm-shadow-light),
+    0 0 0 1px var(--nm-accent-soft);
+
+  --shadow-extruded-primary-hover:
+    12px 12px 24px var(--nm-shadow-dark-deep),
+    -12px -12px 24px var(--nm-shadow-light-deep),
+    0 0 20px var(--nm-accent-glow);
+
+  /* Focus Ring — Accessible focus indicator */
+  --shadow-focus:
+    0 0 0 3px var(--nm-base),
+    0 0 0 5px var(--nm-accent-soft);
+
+  /* ── Radius Scale ─────────────────────────────────────────────────────────
+     Large, soft curves are essential for neumorphism's tactile feel.
+     Sharp corners break the illusion of molded surfaces.
+  ─────────────────────────────────────────────────────────────────────────── */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
 
   /* ── Spacing Scale (4px base) ────────────────────────────────────────────── */
   --sp-1: 4px;
@@ -85,13 +149,25 @@
   --content-gap: 24px;
   --section-gap: 32px;
   --card-padding: 20px;
-  --card-radius: 10px;
 
-  /* ── Shadows ─────────────────────────────────────────────────────────────── */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  /* ── Typography ────────────────────────────────────────────────────────────
+     Plus Jakarta Sans: Modern geometric, confident, excellent for headlines
+     DM Sans: Clean, highly legible, professional for body text
+  ─────────────────────────────────────────────────────────────────────────── */
+  --font-sans: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
 
   /* ── Animation Tokens ────────────────────────────────────────────────────── */
   --duration-micro: 150ms;
@@ -103,46 +179,149 @@
   --transition-fast: 0.12s ease;
   --transition-base: 0.2s ease;
   --transition-slow: 0.3s ease;
+
+  /* ── Legacy Shadow Tokens (kept for backward compat) ─────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: var(--shadow-extruded-small);
+  --shadow-md: var(--shadow-extruded);
+  --shadow-lg: var(--shadow-extruded-hover);
+
+  /* ── Backward Compatibility Aliases ────────────────────────────────────────
+     Map old token names to new neumorphic values so existing components
+     that reference --bg-main, --text-primary, etc. continue to work.
+  ─────────────────────────────────────────────────────────────────────────── */
+  --bg-main: var(--nm-base);
+  --bg-canvas: var(--nm-base);
+  --bg-surface: var(--nm-base);
+  --bg-elevated: var(--nm-base);
+  --bg-inset: var(--nm-base);
+  --bg-surface-alt: var(--nm-base);
+  --text-primary: var(--nm-text-primary);
+  --text-secondary: var(--nm-text-secondary);
+  --text-tertiary: var(--nm-text-muted);
+  --text-disabled: var(--nm-text-placeholder);
+  --text-inverse: #FFFFFF;
+  --primary: var(--nm-accent);
+  --primary-hover: var(--nm-accent-hover);
+  --primary-light: var(--nm-accent-light);
+  --primary-bg: var(--nm-accent-soft);
+  --primary-bg-strong: var(--nm-accent-glow);
+  --primary-border: var(--nm-accent-soft);
+  --accent: var(--nm-accent);
+  --border-default: var(--nm-border);
+  --border-subtle: var(--nm-border-subtle);
+  --border-focus: var(--nm-accent);
+  --border-color: var(--nm-border);
+  --border-color-subtle: var(--nm-border-subtle);
+  --bg-main-rgb: var(--nm-base-rgb);
+  --card-radius: var(--radius-lg);
+
+  /* Semantic colors → neumorphic functional */
+  --success: var(--nm-success);
+  --success-soft: var(--nm-success-soft);
+  --success-bg: var(--nm-success-soft);
+  --warning: var(--nm-warning);
+  --warning-soft: var(--nm-warning-soft);
+  --warning-bg: var(--nm-warning-soft);
+  --error: var(--nm-error);
+  --error-soft: var(--nm-error-soft);
+  --error-bg: var(--nm-error-soft);
+  --info: var(--nm-info);
+  --info-soft: var(--nm-info-soft);
+
+  /* Red scale (backward compat) */
+  --red-50: #FFF1F1;
+  --red-100: #FFE1E1;
+  --red-200: #FFC7C7;
+  --red-500: var(--nm-accent);
+  --red-600: var(--nm-accent-hover);
+  --red-700: #B02030;
+  --red-800: #8A1825;
+  --red-900: #6A101A;
 }
 
 /* ── Dark Mode ───────────────────────────────────────────────────────────── */
 [data-theme="dark"] {
-  --bg-canvas: #09090B;
-  --bg-surface: #18181B;
-  --bg-elevated: #27272A;
-  --bg-inset: #1C1C1E;
-  --text-primary: #FAFAFA;
-  --text-secondary: #A1A1AA;
-  --text-tertiary: #71717A;
-  --text-disabled: #52525B;
-  --text-inverse: #09090B;
-  --border-default: #27272A;
-  --border-subtle: #3F3F46;
-  --border-focus: #FF3B3B;
+  /* ── Dark Mode Base ───────────────────────────────────────────────────────
+     Warm dark grey — not pure black. Has subtle warmth to match light theme.
+     HSL: 24°, 8%, 14% — dark, very desaturated, faintly warm
+  ─────────────────────────────────────────────────────────────────────────── */
+  --nm-base: #242220;
+  --nm-base-rgb: 36, 34, 32;
 
-  /* Backward compat */
-  --bg-main: var(--bg-canvas);
-  --bg-surface-alt: var(--bg-inset);
-  --border-color: var(--border-default);
-  --border-color-subtle: var(--border-subtle);
+  /* ── Dark Mode Shadows ────────────────────────────────────────────────────
+     In dark neumorphism, the "light" shadow is a lighter version of the base
+     and the "dark" shadow is black with opacity.
+  ─────────────────────────────────────────────────────────────────────────── */
+  --nm-shadow-dark: rgba(0, 0, 0, 0.65);
+  --nm-shadow-light: rgba(80, 75, 70, 0.45);
+  --nm-shadow-dark-deep: rgba(0, 0, 0, 0.75);
+  --nm-shadow-light-deep: rgba(90, 85, 80, 0.55);
 
-  --bg-main-rgb: 9, 9, 11;
+  /* ── Dark Mode Text ───────────────────────────────────────────────────────
+     Warm off-white text on dark base — easier on eyes than pure white
+  ─────────────────────────────────────────────────────────────────────────── */
+  --nm-text-primary: #F0E8E0;
+  --nm-text-secondary: #B5AAA0;
+  --nm-text-muted: #7A726C;
+  --nm-text-placeholder: #5A534E;
 
-  --success-soft: rgba(16, 185, 129, 0.12);
-  --success-bg: var(--success-soft);
-  --warning-soft: rgba(245, 158, 11, 0.12);
-  --warning-bg: var(--warning-soft);
-  --error-soft: rgba(239, 68, 68, 0.12);
-  --error-bg: var(--error-soft);
-  --info-soft: rgba(59, 130, 246, 0.12);
-  --primary-bg: rgba(255, 59, 59, 0.08);
-  --primary-bg-strong: rgba(255, 59, 59, 0.16);
-  --primary-border: rgba(255, 59, 59, 0.25);
+  /* ── Dark Mode Accent ─────────────────────────────────────────────────────
+     Red accent slightly brighter in dark mode for visibility
+  ─────────────────────────────────────────────────────────────────────────── */
+  --nm-accent: #FF4D5A;
+  --nm-accent-hover: #FF6B75;
+  --nm-accent-light: #FF8A92;
+  --nm-accent-soft: rgba(255, 77, 90, 0.15);
+  --nm-accent-glow: rgba(255, 77, 90, 0.30);
 
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  /* ── Dark Mode Functional ───────────────────────────────────────────────── */
+  --nm-success: #3DBF70;
+  --nm-success-soft: rgba(61, 191, 112, 0.15);
+  --nm-warning: #F0B040;
+  --nm-warning-soft: rgba(240, 176, 64, 0.15);
+  --nm-error: #F05060;
+  --nm-error-soft: rgba(240, 80, 96, 0.15);
+  --nm-info: #5B9FE8;
+  --nm-info-soft: rgba(91, 159, 232, 0.15);
+
+  /* ── Dark Mode Backward Compat ──────────────────────────────────────────── */
+  --bg-main: var(--nm-base);
+  --bg-canvas: var(--nm-base);
+  --bg-surface: var(--nm-base);
+  --bg-elevated: var(--nm-base);
+  --bg-inset: var(--nm-base);
+  --bg-surface-alt: var(--nm-base);
+  --text-primary: var(--nm-text-primary);
+  --text-secondary: var(--nm-text-secondary);
+  --text-tertiary: var(--nm-text-muted);
+  --text-disabled: var(--nm-text-placeholder);
+  --text-inverse: #242220;
+  --primary: var(--nm-accent);
+  --primary-hover: var(--nm-accent-hover);
+  --primary-light: var(--nm-accent-light);
+  --primary-bg: var(--nm-accent-soft);
+  --primary-bg-strong: var(--nm-accent-glow);
+  --primary-border: var(--nm-accent-soft);
+  --accent: var(--nm-accent);
+  --border-default: transparent;
+  --border-subtle: rgba(80, 75, 70, 0.20);
+  --border-focus: var(--nm-accent);
+  --border-color: transparent;
+  --border-color-subtle: rgba(80, 75, 70, 0.20);
+  --bg-main-rgb: 36, 34, 32;
+
+  --success: var(--nm-success);
+  --success-soft: var(--nm-success-soft);
+  --success-bg: var(--nm-success-soft);
+  --warning: var(--nm-warning);
+  --warning-soft: var(--nm-warning-soft);
+  --warning-bg: var(--nm-warning-soft);
+  --error: var(--nm-error);
+  --error-soft: var(--nm-error-soft);
+  --error-bg: var(--nm-error-soft);
+  --info: var(--nm-info);
+  --info-soft: var(--nm-info-soft);
 }
 
 /* ── Mobile ──────────────────────────────────────────────────────────────── */
@@ -153,7 +332,27 @@
     --page-padding-y: 16px;
     --section-gap: 24px;
     --card-padding: 16px;
-    --card-radius: 8px;
+
+    /* Reduce shadow intensity for smaller screens */
+    --shadow-extruded:
+      6px 6px 12px var(--nm-shadow-dark),
+      -6px -6px 12px var(--nm-shadow-light);
+    --shadow-extruded-hover:
+      8px 8px 16px var(--nm-shadow-dark-deep),
+      -8px -8px 16px var(--nm-shadow-light-deep);
+    --shadow-extruded-small:
+      4px 4px 8px var(--nm-shadow-dark),
+      -4px -4px 8px var(--nm-shadow-light);
+    --shadow-inset:
+      inset 4px 4px 8px var(--nm-shadow-dark),
+      inset -4px -4px 8px var(--nm-shadow-light);
+    --shadow-inset-deep:
+      inset 8px 8px 16px var(--nm-shadow-dark),
+      inset -8px -8px 16px var(--nm-shadow-light);
+
+    /* Slightly smaller radius on mobile */
+    --radius-lg: 20px;
+    --radius-xl: 24px;
   }
 }
 
