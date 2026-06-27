@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import verdictLogo from '../../assets/logo.jpeg';
+import verdictLogo from '../../assets/newlogo.png';
 
 /* ── SVG Icons (inline, no deps) ──────────────────────────────────── */
 const XIcon: React.FC<{ size?: number }> = ({ size = 18 }) => (

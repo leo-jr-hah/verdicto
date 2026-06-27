@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Moon, Sun, Menu, X, LayoutDashboard, Users, Scale, History, Cpu, ChevronLeft, ChevronRight, Droplets, Target, Map, Landmark, Shield, GitBranch, Radio, Gavel } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import verdictLogo from '../assets/logo.jpeg';
+import verdictLogo from '../assets/newlogo.png';
 import { ConnectionStatus } from '../components/ConnectionStatus';
 import { WalletConnectButton } from '../components/WalletConnectButton';
 
