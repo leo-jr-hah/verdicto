@@ -16,7 +16,11 @@ export const Footer: React.FC = () => (
       </div>
       <div className="footer-meta">
         <span>Live on Casper Testnet</span>
-        <span>© 2026 Verdicto</span>
+        <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'center' }}>
+          <a href="https://x.com" target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>X</a>
+          <a href="https://github.com" target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>GitHub</a>
+          <span>© 2026 Verdicto</span>
+        </div>
       </div>
     </div>
   </footer>
