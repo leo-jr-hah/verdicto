@@ -2881,39 +2881,55 @@ a:focus-visible {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  margin-bottom: 3rem;
-}
-
-.oracle-code-pre {
-  margin: 0;
-  padding: 1rem;
-  border-radius: 8px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  font-size: 0.8rem;
-  line-height: 1.6;
-  overflow: auto;
-  color: var(--text-primary);
-  font-family: var(--font-mono);
+  margin-top: 3.5rem;
 }
 
 .oracle-use-cases {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+}
+
+.oracle-use-cases__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem;
+}
+
+.oracle-use-cases__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .oracle-use-case {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  padding: 0.75rem;
-  border-radius: 8px;
-  transition: background var(--transition-fast);
+  padding: 0.875rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
 .oracle-use-case:hover {
-  background: var(--bg-surface);
+  border-color: var(--border-hover);
+  background: var(--bg-elevated);
+}
+
+.oracle-use-case__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
 .oracle-use-case__label {
@@ -2925,6 +2941,52 @@ a:focus-visible {
 .oracle-use-case__desc {
   font-size: 0.8rem;
   color: var(--text-tertiary);
+  line-height: 1.45;
+  margin-top: 0.15rem;
+}
+
+/* ── Code Card ────────────────────────────────────────────────────────── */
+
+.oracle-code-card {
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.oracle-code-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-surface);
+}
+
+.oracle-code-card__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+}
+
+.oracle-code-card__filename {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  margin-left: 0.25rem;
+}
+
+.oracle-code-card__pre {
+  margin: 0;
+  padding: 1.25rem;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  overflow: auto;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
 }
 
 @media (max-width: 768px) {

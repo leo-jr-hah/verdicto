@@ -89,50 +89,53 @@ export const OracleSection: React.FC = () => {
         ))}
       </div>
 
-      {/* Use Cases */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6, delay: 0.4 }}
-        className="oracle-use-cases"
-      >
-        <h3 className="oracle-use-cases__title">Who Uses the Oracle?</h3>
-        <div className="oracle-use-cases__grid">
-          {USE_CASES.map((uc, i) => (
-            <motion.div
-              key={uc.label}
-              initial={{ opacity: 0, y: 10 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.4, delay: 0.5 + i * 0.08 }}
-              className="oracle-use-case"
-            >
-              <div className="oracle-use-case__icon">{uc.icon}</div>
-              <div>
-                <div className="oracle-use-case__label">{uc.label}</div>
-                <div className="oracle-use-case__desc">{uc.desc}</div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+      {/* Use Cases + Code — side by side */}
+      <div className="oracle-bottom-grid">
+        {/* Use Cases */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="oracle-use-cases"
+        >
+          <h3 className="oracle-use-cases__title">Who Uses the Oracle?</h3>
+          <div className="oracle-use-cases__grid">
+            {USE_CASES.map((uc, i) => (
+              <motion.div
+                key={uc.label}
+                initial={{ opacity: 0, y: 10 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.4, delay: 0.5 + i * 0.08 }}
+                className="oracle-use-case"
+              >
+                <div className="oracle-use-case__icon">{uc.icon}</div>
+                <div>
+                  <div className="oracle-use-case__label">{uc.label}</div>
+                  <div className="oracle-use-case__desc">{uc.desc}</div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
 
-      {/* Code Snippet */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6, delay: 0.6 }}
-        className="oracle-code-card"
-      >
-        <div className="oracle-code-card__header">
-          <span className="oracle-code-card__dot" />
-          <span className="oracle-code-card__dot" />
-          <span className="oracle-code-card__dot" />
-          <span className="oracle-code-card__filename">oracle_query.rs</span>
-        </div>
-        <pre className="oracle-code-card__pre">
-          <code>{CODE_SNIPPET}</code>
-        </pre>
-      </motion.div>
+        {/* Code Snippet */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="oracle-code-card"
+        >
+          <div className="oracle-code-card__header">
+            <span className="oracle-code-card__dot" />
+            <span className="oracle-code-card__dot" />
+            <span className="oracle-code-card__dot" />
+            <span className="oracle-code-card__filename">oracle_query.rs</span>
+          </div>
+          <pre className="oracle-code-card__pre">
+            <code>{CODE_SNIPPET}</code>
+          </pre>
+        </motion.div>
+      </div>
     </section>
   );
 };
