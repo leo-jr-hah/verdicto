@@ -1,4 +1,5 @@
 @import './styles/tokens.css';
+@import './styles/faceted.css';
 @import './styles/brutalism.css';
 @import './styles/mobile.css';
 @import './styles/landing-responsive.css';
@@ -80,8 +81,9 @@ button {
   top: 0;
   display: flex;
   flex-direction: column;
-  background: var(--bg-elevated);
-  border-right: 1px solid var(--border);
+  background: rgba(2, 10, 19, 0.85);
+  backdrop-filter: blur(12px);
+  border-right: 1px solid var(--border-dark);
   z-index: 40;
   transition: width var(--duration-base) var(--ease-out-expo), min-width var(--duration-base) var(--ease-out-expo);
   overflow: hidden;
@@ -2498,14 +2500,14 @@ a:focus-visible {
 
 .hero-facet--base {
   inset: 0;
-  background: #020a13;
+  background: var(--navy-950);
 }
 
 /* Large angular shard — sweeps from top-left through center */
 .hero-facet--1 {
   inset: 0;
   clip-path: polygon(0% 0%, 65% 0%, 45% 55%, 0% 100%);
-  background: linear-gradient(160deg, #0c2d48 0%, #061a2e 50%, #020a13 100%);
+  background: linear-gradient(160deg, var(--navy-400) 0%, var(--navy-800) 50%, var(--navy-950) 100%);
   opacity: 0.85;
 }
 
@@ -2513,7 +2515,7 @@ a:focus-visible {
 .hero-facet--2 {
   inset: 0;
   clip-path: polygon(55% 0%, 100% 0%, 100% 60%, 70% 45%, 50% 55%);
-  background: linear-gradient(200deg, #0e3d5c 0%, #082540 40%, #041422 100%);
+  background: linear-gradient(200deg, var(--navy-300) 0%, var(--navy-600) 40%, var(--navy-900) 100%);
   opacity: 0.7;
 }
 
@@ -2521,7 +2523,7 @@ a:focus-visible {
 .hero-facet--3 {
   inset: 0;
   clip-path: polygon(0% 70%, 35% 55%, 50% 80%, 30% 100%, 0% 100%);
-  background: linear-gradient(30deg, #0a3550 0%, #061e33 100%);
+  background: linear-gradient(30deg, var(--navy-500) 0%, var(--navy-700) 100%);
   opacity: 0.6;
 }
 
@@ -2529,7 +2531,7 @@ a:focus-visible {
 .hero-facet--4 {
   inset: 0;
   clip-path: polygon(60% 0%, 75% 0%, 55% 30%, 48% 20%);
-  background: linear-gradient(180deg, #1a5a7a 0%, #0c3d5c 100%);
+  background: linear-gradient(180deg, var(--navy-100) 0%, var(--navy-200) 100%);
   opacity: 0.35;
 }
 
@@ -2556,7 +2558,7 @@ a:focus-visible {
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -0.04em;
-  color: #ffffff;
+  color: var(--text-dark-primary);
   margin: 0 0 var(--space-10);
   text-wrap: balance;
 }
@@ -2569,13 +2571,13 @@ a:focus-visible {
   gap: var(--space-3);
   padding: var(--space-4) var(--space-8);
   font-size: var(--text-base);
-  font-weight: 500;
-  color: #ffffff;
+  font-weight: var(--weight-medium);
+  color: var(--text-dark-primary);
   background: transparent;
   border: 1.5px solid rgba(255, 255, 255, 0.35);
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
   text-decoration: none;
-  transition: all 200ms ease-out;
+  transition: all var(--duration-base) ease-out;
   cursor: pointer;
 }
 
@@ -2587,7 +2589,7 @@ a:focus-visible {
 
 .hero-cta-new__arrow {
   font-size: 1.2em;
-  transition: transform 200ms ease-out;
+  transition: transform var(--duration-base) ease-out;
 }
 
 .hero-cta-new:hover .hero-cta-new__arrow {
@@ -2621,7 +2623,7 @@ a:focus-visible {
 
 .landing-page-wrapper {
   min-height: 100vh;
-  background: var(--bg-base);
+  background: var(--bg-dark);
 }
 
 .landing-main {
@@ -2633,8 +2635,8 @@ a:focus-visible {
 .landing-footer {
   padding: var(--space-12) var(--space-8);
   text-align: left;
-  border-top: 1px solid var(--border);
-  color: var(--text-tertiary);
+  border-top: 1px solid var(--border-dark);
+  color: var(--text-dark-muted);
   font-size: var(--text-sm);
 }
 
@@ -2649,12 +2651,12 @@ a:focus-visible {
   font-family: var(--font-sans);
   font-weight: var(--weight-bold);
   font-size: var(--text-md);
-  color: var(--text-primary);
+  color: var(--text-dark-primary);
   letter-spacing: var(--tracking-tight);
 }
 
 .landing-footer-tagline {
-  color: var(--text-tertiary);
+  color: var(--text-dark-muted);
   margin: 0;
 }
 
@@ -2835,10 +2837,10 @@ a:focus-visible {
 /* ── StatsBar ──────────────────────────────────────────────────────────── */
 
 .stats-bar {
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--border-dark);
+  border-bottom: 1px solid var(--border-dark);
   padding: var(--space-10) var(--space-8);
-  background: var(--bg-elevated);
+  background: var(--bg-dark-elevated);
 }
 
 .stats-bar__grid {
@@ -2862,6 +2864,7 @@ a:focus-visible {
   font-family: var(--font-mono);
   letter-spacing: var(--tracking-tight);
   line-height: var(--leading-none);
+  color: var(--text-dark-primary);
 }
 
 .stats-bar__metric {
@@ -2871,7 +2874,7 @@ a:focus-visible {
 .stats-bar__detail {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  color: var(--text-dark-muted);
   margin-top: var(--space-1);
   line-height: var(--leading-relaxed);
 }
@@ -2879,7 +2882,7 @@ a:focus-visible {
 .stats-bar__label {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  color: var(--text-dark-muted);
   margin-top: var(--space-1);
   font-weight: var(--weight-medium);
   text-transform: uppercase;
@@ -2894,7 +2897,7 @@ a:focus-visible {
   gap: var(--space-12);
   align-items: center;
   padding: var(--space-12) 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-dark);
 }
 
 .hiw-step-row:first-of-type {
@@ -2911,17 +2914,20 @@ a:focus-visible {
   align-items: center;
   gap: var(--space-2);
   text-transform: uppercase;
+  color: var(--accent);
 }
 
 .hiw-step-num__value {
   font-size: var(--text-xl);
   font-weight: var(--weight-bold);
   font-family: var(--font-mono);
+  color: var(--accent);
 }
 
 .hiw-step-num__line {
   height: 1px;
   display: block;
+  background: var(--accent);
 }
 
 .hiw-step-title {
@@ -2930,12 +2936,12 @@ a:focus-visible {
   font-weight: var(--weight-bold);
   margin-bottom: var(--space-4);
   letter-spacing: var(--tracking-tight);
-  color: var(--text-primary);
+  color: var(--text-dark-primary);
 }
 
 .hiw-step-desc {
   font-size: var(--text-base);
-  color: var(--text-secondary);
+  color: var(--text-dark-secondary);
   line-height: var(--leading-relaxed);
   max-width: 480px;
 }
@@ -3045,7 +3051,7 @@ a:focus-visible {
 
 .oracle-stack-header__subtitle {
   font-size: var(--text-xl);
-  color: #9A9A9C;
+  color: var(--text-dark-secondary);
   line-height: var(--leading-relaxed);
   max-width: 640px;
   margin: 0;
@@ -3088,27 +3094,27 @@ a:focus-visible {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  border-top: 2px solid #D4A853;
+  border-top: 2px solid var(--accent);
   transition: border-color var(--duration-base) var(--ease-out-expo);
 }
 
 .oracle-stack-card--row1 {
-  background: #0C101C;
-  border: 1px solid #1E2A3A;
-  border-top: 2px solid #D4A853;
+  background: var(--bg-dark-elevated);
+  border: 1px solid var(--border-dark);
+  border-top: 2px solid var(--accent);
 }
 
 .oracle-stack-card--row2 {
-  background: #141A28;
-  border: 1px solid #2A3448;
-  border-top: 2px solid #D4A853;
+  background: var(--navy-800);
+  border: 1px solid var(--border-dark-strong);
+  border-top: 2px solid var(--accent);
 }
 
 .oracle-stack-card__num {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
-  color: #D4A853;
+  color: var(--accent);
   letter-spacing: var(--tracking-wide);
   margin-bottom: var(--space-1);
 }
@@ -3116,7 +3122,7 @@ a:focus-visible {
 .oracle-stack-card__title {
   font-size: clamp(1.25rem, 2vw, 1.5rem);
   font-weight: var(--weight-bold);
-  color: #F0F0EE;
+  color: var(--text-dark-primary);
   margin: 0;
   letter-spacing: var(--tracking-tight);
   line-height: 1.2;
@@ -3124,7 +3130,7 @@ a:focus-visible {
 
 .oracle-stack-card__desc {
   font-size: var(--text-lg);
-  color: #A0A0A4;
+  color: var(--text-dark-secondary);
   line-height: var(--leading-relaxed);
   margin: 0;
 }
@@ -3184,8 +3190,8 @@ a:focus-visible {
 }
 
 .agent-card {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: var(--bg-dark-elevated);
+  border: 1px solid var(--border-dark);
   border-radius: var(--radius-sm);
   padding: var(--space-6);
   position: relative;
@@ -3195,7 +3201,7 @@ a:focus-visible {
 }
 
 .agent-card:hover {
-  border-color: var(--card-accent, var(--border-strong));
+  border-color: var(--card-accent, var(--border-dark-strong));
 }
 
 .agent-card__accent-bar {
@@ -3234,7 +3240,7 @@ a:focus-visible {
 .agent-card__name {
   font-size: var(--text-base);
   font-weight: var(--weight-bold);
-  color: var(--text-primary);
+  color: var(--text-dark-primary);
 }
 
 .agent-card__role {
@@ -3243,11 +3249,12 @@ a:focus-visible {
   font-weight: var(--weight-medium);
   text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
+  color: var(--accent);
 }
 
 .agent-card__desc {
   font-size: var(--text-xs);
-  color: var(--text-secondary);
+  color: var(--text-dark-secondary);
   line-height: var(--leading-relaxed);
   margin: 0;
 }
@@ -3268,7 +3275,7 @@ a:focus-visible {
 .agent-card__dots-label {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  color: var(--text-dark-muted);
   margin-left: var(--space-1);
 }
 
@@ -3276,10 +3283,10 @@ a:focus-visible {
 
 .x402-section {
   width: 100%;
-  background: var(--bg-elevated);
+  background: var(--bg-dark-elevated);
   padding: var(--space-16) var(--page-padding-x);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--border-dark);
+  border-bottom: 1px solid var(--border-dark);
 }
 
 .x402-layout {
@@ -3312,7 +3319,7 @@ a:focus-visible {
   align-items: center;
   gap: var(--space-3);
   font-size: var(--text-md);
-  color: var(--text-primary);
+  color: var(--text-dark-primary);
   font-weight: var(--weight-medium);
 }
 
@@ -3321,8 +3328,9 @@ a:focus-visible {
   width: 320px;
   height: 440px;
   padding: var(--space-8);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-dark);
   border-radius: var(--radius-sm);
+  background: var(--bg-dark);
 }
 
 .x402-diagram-svg {
@@ -3355,13 +3363,14 @@ a:focus-visible {
   font-weight: var(--weight-semibold);
   min-width: 160px;
   text-align: center;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: var(--bg-dark-elevated);
+  border: 1px solid var(--border-dark);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
+  color: var(--text-dark-primary);
 }
 
 @media (max-width: 768px) {

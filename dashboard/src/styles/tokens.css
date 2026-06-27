@@ -1,66 +1,136 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   VERDICTO — Technical Brutalism Design Tokens
-   Engineered, schematic, high-contrast, asymmetric
+   VERDICTO — Faceted Geometric Design Tokens
+   Dark navy primary palette, extracted from hero reference
    ═══════════════════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap');
 
 :root {
-  /* ── Background Colors ──────────────────────────────────────────────────── */
-  --bg-base:        #F5F5F3;
-  --bg-elevated:    #FFFFFF;
-  --bg-sunken:      #EBEBE8;
-  --bg-inset:       #E5E5E0;
+  /* ═══════════════════════════════════════════════════════════════════════
+     NAVY COLOR SCALE
+     Extracted from hero facet CSS. 10 steps from near-black to bright teal.
+     ═══════════════════════════════════════════════════════════════════════ */
+  --navy-950: #020a13;   /* Deepest base — near black with navy cast */
+  --navy-900: #041422;   /* Deep navy */
+  --navy-800: #061a2e;   /* Dark navy */
+  --navy-700: #061e33;   /* Navy */
+  --navy-600: #082540;   /* Mid-dark navy */
+  --navy-500: #0a3550;   /* Medium navy */
+  --navy-400: #0c2d48;   /* Navy */
+  --navy-300: #0e3d5c;   /* Lighter navy */
+  --navy-200: #0c3d5c;   /* Light navy */
+  --navy-100: #1a5a7a;   /* Brightest facet highlight */
 
-  /* ── Text Colors ────────────────────────────────────────────────────────── */
-  --text-primary:   #0A0A0B;
-  --text-secondary: #4A4A4C;
-  --text-tertiary:  #8A8A8C;
-  --text-quaternary:#B5B5B8;
+  /* ═══════════════════════════════════════════════════════════════════════
+     SURFACE COLORS (Dark Mode Primary)
+     ═══════════════════════════════════════════════════════════════════════ */
+  --bg-dark:          var(--navy-950);     /* Primary dark background */
+  --bg-dark-elevated: var(--navy-900);     /* Cards, panels on dark */
+  --bg-dark-sunken:   #010508;             /* Code blocks, terminals */
+  --bg-dark-inset:    var(--navy-800);     /* Input fields, wells */
 
-  /* ── Accent: Deep Oxide Terracotta ─────────────────────────────────────── */
-  --accent:         #C45C3E;
-  --accent-hover:   #A84D32;
-  --accent-strong:  #9A3E24;   /* headlines/emphasis — passes 4.5:1 on #F5F5F3 */
-  --accent-light:   #D97A5F;   /* mid-tone — buttons, icons */
-  --accent-tint:    #F2D5CC;   /* light tint — badges, bg fills, hover states only */
-  --accent-soft:    rgba(196, 92, 62, 0.08);
-  --accent-glow:    rgba(196, 92, 62, 0.20);
+  /* ═══════════════════════════════════════════════════════════════════════
+     SURFACE COLORS (Light Variant)
+     For data-dense pages: dashboard, transactions, assessment results
+     ═══════════════════════════════════════════════════════════════════════ */
+  --bg-light:          #F0F2F5;            /* Cool off-white, blue-grey undertone */
+  --bg-light-elevated: #FFFFFF;            /* Cards on light background */
+  --bg-light-sunken:   #E8EAEE;            /* Code blocks, terminals on light */
+  --bg-light-inset:    #E0E3E8;            /* Input fields on light */
 
-  /* ── Structural Borders ────────────────────────────────────────────────── */
-  --border:         #E5E5E0;
-  --border-strong:  #D5D5D0;
-  --border-weak:    #EFEFEC;
+  /* ═══════════════════════════════════════════════════════════════════════
+     BACKWARD-COMPAT ALIASES (map old token names → new system)
+     Existing components use --bg-base, --bg-elevated, etc.
+     ═══════════════════════════════════════════════════════════════════════ */
+  --bg-base:        var(--bg-light);
+  --bg-elevated:    var(--bg-light-elevated);
+  --bg-sunken:      var(--bg-light-sunken);
+  --bg-inset:       var(--bg-light-inset);
 
-  /* ── Semantic Colors ───────────────────────────────────────────────────── */
-  --success:        #2D7A4E;
-  --success-soft:   rgba(45, 122, 78, 0.10);
-  --warning:        #B8860B;
-  --warning-soft:   rgba(184, 134, 11, 0.10);
-  --error:          #A63232;
-  --error-soft:     rgba(166, 50, 50, 0.10);
-  --red-600:        #A63232;
-  --info:           #3A5A7C;
-  --info-soft:      rgba(58, 90, 124, 0.10);
+  /* ═══════════════════════════════════════════════════════════════════════
+     TEXT COLORS (Dark Background)
+     ═══════════════════════════════════════════════════════════════════════ */
+  --text-dark-primary:   #FFFFFF;
+  --text-dark-secondary: rgba(255,255,255,0.65);
+  --text-dark-muted:     rgba(255,255,255,0.40);
+  --text-dark-subtle:    rgba(255,255,255,0.20);
 
-  /* ── Shadows (minimal, sharp, functional) ──────────────────────────────── */
-  --shadow-sm:      0 1px 0 rgba(0, 0, 0, 0.04);
-  --shadow-md:      0 1px 2px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-lg:      0 2px 4px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+  /* ═══════════════════════════════════════════════════════════════════════
+     TEXT COLORS (Light Background)
+     ═══════════════════════════════════════════════════════════════════════ */
+  --text-light-primary:   var(--navy-800);
+  --text-light-secondary: var(--navy-500);
+  --text-light-muted:     var(--navy-300);
+  --text-light-subtle:    var(--navy-200);
 
-  /* ── Radius (sharp, engineered) ────────────────────────────────────────── */
-  --radius-none:    0px;
-  --radius-sm:      2px;
-  --radius-md:      3px;
-  --radius-lg:      4px;
-  --radius-full:    9999px;
+  /* ═══════════════════════════════════════════════════════════════════════
+     BACKWARD-COMPAT TEXT ALIASES
+     ═══════════════════════════════════════════════════════════════════════ */
+  --text-primary:   var(--text-light-primary);
+  --text-secondary: var(--text-light-secondary);
+  --text-tertiary:  var(--text-light-muted);
+  --text-quaternary:var(--text-light-subtle);
 
-  /* ── RGB values ────────────────────────────────────────────────────────── */
-  --bg-base-rgb:    245, 245, 243;
-  --text-primary-rgb: 10, 10, 11;
-  --accent-rgb:     196, 92, 62;
+  /* ═══════════════════════════════════════════════════════════════════════
+     ACCENT: Deep Amber
+     Used sparingly: CTAs, status indicators, live data, key numbers
+     ═══════════════════════════════════════════════════════════════════════ */
+  --accent:         #C9A84C;
+  --accent-hover:   #D4B85E;
+  --accent-strong:  #E0C870;
+  --accent-dim:     #A08530;
+  --accent-soft:    rgba(201, 168, 76, 0.12);
+  --accent-glow:    rgba(201, 168, 76, 0.25);
 
-  /* ── Spacing Scale (4px base) ──────────────────────────────────────────── */
+  /* Backward-compat accent aliases */
+  --accent-light:   var(--accent-hover);
+  --accent-tint:    var(--accent-soft);
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     STRUCTURAL BORDERS
+     ═══════════════════════════════════════════════════════════════════════ */
+  --border-dark:         rgba(255, 255, 255, 0.08);
+  --border-dark-strong:  rgba(255, 255, 255, 0.15);
+  --border-light:        #D0D4DA;
+  --border-light-strong: #B0B8C2;
+
+  /* Backward-compat border aliases */
+  --border:         var(--border-light);
+  --border-strong:  var(--border-light-strong);
+  --border-weak:    #E0E3E8;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     SEMANTIC COLORS
+     ═══════════════════════════════════════════════════════════════════════ */
+  --success:        #4ADE80;
+  --success-soft:   rgba(74, 222, 128, 0.15);
+  --warning:        #FBBF24;
+  --warning-soft:   rgba(251, 191, 36, 0.15);
+  --error:          #F87171;
+  --error-soft:     rgba(248, 113, 113, 0.15);
+  --info:           #60A5FA;
+  --info-soft:      rgba(96, 165, 250, 0.15);
+  --red-600:        #F87171;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     SHADOWS
+     ═══════════════════════════════════════════════════════════════════════ */
+  --shadow-sm:  0 1px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md:  0 1px 2px rgba(0, 0, 0, 0.10), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg:  0 2px 4px rgba(0, 0, 0, 0.14), 0 4px 8px rgba(0, 0, 0, 0.08);
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     RADIUS
+     ═══════════════════════════════════════════════════════════════════════ */
+  --radius-none: 0px;
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   8px;
+  --radius-full: 9999px;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     SPACING SCALE (4px base)
+     ═══════════════════════════════════════════════════════════════════════ */
   --space-0:   0px;
   --space-1:   4px;
   --space-2:   8px;
@@ -76,7 +146,9 @@
   --space-24:  96px;
   --space-32:  128px;
 
-  /* ── Layout ────────────────────────────────────────────────────────────── */
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYOUT
+     ═══════════════════════════════════════════════════════════════════════ */
   --container-max: 1200px;
   --container-narrow: 720px;
   --page-padding-x: var(--space-8);
@@ -85,17 +157,18 @@
   --section-padding: var(--space-16);
   --section-padding-mobile: var(--space-8);
 
-  /* ── Font Families ──────────────────────────────────────────────────────── */
+  /* ═══════════════════════════════════════════════════════════════════════
+     TYPOGRAPHY
+     ═══════════════════════════════════════════════════════════════════════ */
   --font-sans:   'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono:   'Geist Mono', 'JetBrains Mono', 'SF Mono', monospace;
 
-  /* ── Font Weights ──────────────────────────────────────────────────────── */
   --weight-regular:   400;
   --weight-medium:    500;
   --weight-semibold:  600;
   --weight-bold:      700;
+  --weight-extrabold: 800;
 
-  /* ── Type Scale ────────────────────────────────────────────────────────── */
   --text-xs:     0.75rem;
   --text-sm:     0.8125rem;
   --text-base:   0.875rem;
@@ -108,72 +181,35 @@
   --text-5xl:    4.5rem;
   --text-6xl:    6rem;
 
-  /* ── Letter Spacing ────────────────────────────────────────────────────── */
   --tracking-tight:  -0.04em;
   --tracking-normal:  0;
   --tracking-wide:    0.04em;
   --tracking-mono:    0.02em;
 
-  /* ── Line Height ───────────────────────────────────────────────────────── */
   --leading-none:   1;
-  --leading-tight:  1.1;
+  --leading-tight:  1.05;
   --leading-snug:   1.25;
   --leading-normal: 1.5;
   --leading-relaxed:1.65;
 
-  /* ── Durations ─────────────────────────────────────────────────────────── */
+  /* ═══════════════════════════════════════════════════════════════════════
+     ANIMATION
+     ═══════════════════════════════════════════════════════════════════════ */
   --duration-instant:  0ms;
-  --duration-fast:     100ms;
-  --duration-base:     150ms;
-  --duration-medium:   250ms;
-  --duration-slow:     400ms;
-  --duration-scramble: 600ms;
+  --duration-fast:     150ms;
+  --duration-base:     200ms;
+  --duration-medium:   300ms;
+  --duration-slow:     500ms;
 
-  /* ── Easing Curves ─────────────────────────────────────────────────────── */
   --ease-out-expo:     cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-quart:    cubic-bezier(0.25, 1, 0.5, 1);
   --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
   --ease-spring:       cubic-bezier(0.34, 1.56, 0.64, 1);
-}
 
-/* ── Dark Mode ───────────────────────────────────────────────────────────── */
-[data-theme="dark"] {
-  --bg-base:        #0A0A0B;
-  --bg-elevated:    #141415;
-  --bg-sunken:      #060607;
-  --bg-inset:       #050506;
-
-  --text-primary:   #F0F0EE;
-  --text-secondary: #A0A09C;
-  --text-tertiary:  #6A6A68;
-  --text-quaternary:#3A3A38;
-
-  --accent:         #D96E4E;
-  --accent-hover:   #E07F60;
-  --accent-strong:  #F0A088;   /* headlines/emphasis — passes 4.5:1 on #0A0A0B */
-  --accent-light:   #E8A08A;   /* mid-tone — buttons, icons */
-  --accent-tint:    #2A1510;   /* dark tint — badges, bg fills, hover states only */
-  --accent-soft:    rgba(217, 110, 78, 0.12);
-  --accent-glow:    rgba(217, 110, 78, 0.25);
-
-  --border:         #2A2A2C;
-  --border-strong:  #3A3A3C;
-  --border-weak:    #1A1A1C;
-
-  --success:        #3DAA6A;
-  --success-soft:   rgba(61, 170, 106, 0.12);
-  --warning:        #D4A520;
-  --warning-soft:   rgba(212, 165, 32, 0.12);
-  --error:          #C84A4A;
-  --error-soft:     rgba(200, 74, 74, 0.12);
-  --info:           #5A8AB0;
-  --info-soft:      rgba(90, 138, 176, 0.12);
-
-  --shadow-sm:      0 1px 0 rgba(0, 0, 0, 0.20);
-  --shadow-md:      0 1px 2px rgba(0, 0, 0, 0.30), 0 2px 4px rgba(0, 0, 0, 0.20);
-  --shadow-lg:      0 2px 4px rgba(0, 0, 0, 0.40), 0 4px 8px rgba(0, 0, 0, 0.20);
-
-  --bg-base-rgb:    10, 10, 11;
-  --text-primary-rgb: 240, 240, 238;
-  --accent-rgb:     217, 110, 78;
+  /* ═══════════════════════════════════════════════════════════════════════
+     RGB VALUES (for rgba() usage in CSS)
+     ═══════════════════════════════════════════════════════════════════════ */
+  --bg-base-rgb:      240, 242, 245;
+  --text-primary-rgb: 6, 26, 46;
+  --accent-rgb:       201, 168, 76;
 }
