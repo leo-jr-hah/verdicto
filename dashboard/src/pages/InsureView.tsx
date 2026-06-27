@@ -776,7 +776,7 @@ export const InsureView: React.FC = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={cardStyle}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
             <CheckCircle2 size={20} color="var(--text-secondary)" />
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Insurance Policy Created</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Insurance Policy Created (Demo)</h3>
           </div>
 
           <div className="insure-claim-info-grid">
@@ -982,15 +982,18 @@ export const InsureView: React.FC = () => {
                     {claimResult.status === 'paid' ? (
                       <>
                         <CheckCircle2 size={48} color="var(--text-secondary)" style={{ marginBottom: '0.5rem' }} />
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Claim Approved!</h3>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Claim Approved! (Demo)</h3>
                         <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-secondary)', margin: '0.5rem 0' }}>
                           ${claimResult.amount.toLocaleString()}
+                        </p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', margin: 0 }}>
+                          Simulated payout — no real funds transferred
                         </p>
                       </>
                     ) : (
                       <>
                         <XCircle size={48} color="var(--error)" style={{ marginBottom: '0.5rem' }} />
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Claim Denied</h3>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Claim Denied (Demo)</h3>
                         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.5rem 0' }}>
                           Loss did not exceed the deductible threshold.
                         </p>

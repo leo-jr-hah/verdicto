@@ -882,7 +882,7 @@ export const BorrowView: React.FC = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
             <CheckCircle2 size={20} color="var(--text-secondary)" />
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Loan Created</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Loan Created (Demo)</h3>
           </div>
 
           <div className="borrow-offer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -965,7 +965,7 @@ export const BorrowView: React.FC = () => {
             color: 'var(--text-secondary)',
           }}>
             <Info size={14} style={{ verticalAlign: 'middle', marginRight: '0.4rem', color: 'var(--text-secondary)' }} />
-            Funds disbursed to your wallet. Monitor your health ratio to avoid liquidation.
+            <strong>Demo Mode</strong> — Simulated loan disbursed to your wallet. In production, real CSPR would be transferred on-chain. Monitor your health ratio to avoid liquidation.
             {currentLoan.disbursementTxHash && (
               <> Tx: <code style={{ fontSize: '0.75rem' }}>{currentLoan.disbursementTxHash.slice(0, 16)}...</code></>
             )}

@@ -430,8 +430,8 @@ export const DisputesView: React.FC = () => {
                         color: d.outcome === 'overturned' ? 'var(--red-600)' : 'var(--text-secondary)',
                       }}>
                         {d.outcome === 'overturned'
-                          ? 'Re-trial found the original verdict incorrect. Decision has been reversed.'
-                          : 'Re-trial confirmed the original verdict. Challenge was unsuccessful.'}
+                          ? 'Re-trial found the original verdict incorrect. Decision has been reversed. (Demo — simulated re-trial)'
+                          : 'Re-trial confirmed the original verdict. Challenge was unsuccessful. (Demo — simulated re-trial)'}
                       </div>
                     )}
                   </div>

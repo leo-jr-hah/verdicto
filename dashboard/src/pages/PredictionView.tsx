@@ -678,6 +678,12 @@ export const PredictionView: React.FC = () => {
                 }}>
                   {result.question}
                 </div>
+                <span style={{
+                  fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px',
+                  borderRadius: 6, background: 'rgba(245,158,11,0.12)',
+                  color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)',
+                  flexShrink: 0, letterSpacing: '0.05em',
+                }}>DEMO</span>
               </div>
               <button onClick={handleReset} style={{
                 display: 'flex', alignItems: 'center', gap: 6,

@@ -346,8 +346,14 @@ const ResultCard: React.FC<{ result: AssessmentResult }> = ({ result }) => {
         marginBottom: '1.5rem',
         textAlign: 'center',
       }}>
-        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
+        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
           Final Assessed Value
+          <span style={{
+            fontSize: '0.6rem', fontWeight: 700, padding: '2px 6px',
+            borderRadius: 6, background: 'rgba(245,158,11,0.12)',
+            color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)',
+            letterSpacing: '0.05em',
+          }}>DEMO</span>
         </div>
         <div style={{
           fontSize: '2.8rem',
