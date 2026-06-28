@@ -124,12 +124,12 @@ export const TechnologySection: React.FC = () => {
               className="tech-pillar"
             >
               <span className="tech-pillar__num">{pillar.num}</span>
-              <h3 className="tech-pillar__title">{pillar.title}</h3>
-              <p className="tech-pillar__body">
+              <h3 className="tech-pillar__name">{pillar.title}</h3>
+              <p className="tech-pillar__description">
                 {pillar.highlight ? (
                   <>
                     {pillar.body.split(pillar.highlight)[0]}
-                    <span className="tech-pillar__highlight">{pillar.highlight}</span>
+                    <span className="tech-pillar__highlight" style={{ color: 'var(--accent)' }}>{pillar.highlight}</span>
                     {pillar.body.split(pillar.highlight)[1]}
                   </>
                 ) : pillar.body}

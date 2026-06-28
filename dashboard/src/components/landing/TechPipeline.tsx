@@ -23,7 +23,7 @@ export const TechPipeline: React.FC = () => {
 
     const path = svgRef.current?.querySelector('.pipeline-path');
     if (path) {
-      const length = (path as SVGPathElement).getTotalLength();
+      const length = 900; // hardcoded path length
       gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
       tlSvg.to(path, {
         strokeDashoffset: 0,
@@ -84,7 +84,7 @@ export const TechPipeline: React.FC = () => {
         })}
       </svg>
 
-      <div className="pipeline-steps">
+      <div className="pipeline-steps" style={{ width: '100%' }}>
         {PIPELINE_STEPS.map((step, i) => (
           <div
             key={step.label}
