@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Gavel, RefreshCw, Scale, AlertTriangle, Shield, ChevronDown, ChevronUp, Activity, ArrowLeft, Loader2, ExternalLink } from 'lucide-react';
+import { Gavel, RefreshCw, Scale, AlertTriangle, Shield, ChevronDown, ChevronUp, Activity, ArrowLeft, ArrowRight, Loader2, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { fetchOracleVerdicts, fetchDisputes, fileDispute, triggerRetrial, type OracleVerdict, type Dispute } from '../services/api';
@@ -485,7 +485,7 @@ export const DisputesView: React.FC = () => {
                                     {d.retrial.originalVerdict.confidence}% conf
                                   </div>
                                 </div>
-                                <div style={{ fontSize: '1.2rem', color: 'var(--text-tertiary)' }}>→</div>
+                                <div style={{ fontSize: '1.2rem', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center' }}><ArrowRight size={20} /></div>
                                 <div style={{ textAlign: 'center' }}>
                                   <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', marginBottom: '2px' }}>New Verdict</div>
                                   <div style={{

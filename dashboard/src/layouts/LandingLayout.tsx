@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ArrowRight } from 'lucide-react';
 import verdictoLogo from '../assets/newlogo.png';
 import { HeroSection } from '../components/landing/HeroSection';
 
@@ -28,7 +28,7 @@ export const LandingLayout: React.FC = () => {
             <a href="#technology" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>Technology</a>
             <a href="#audience" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>Who It's For</a>
             <Link to="/dashboard" className="landing-cta-btn" onClick={() => setMobileMenuOpen(false)}>
-              Open App →
+              Open App <ArrowRight size={18} style={{ marginLeft: '4px' }} />
             </Link>
           </div>
 
