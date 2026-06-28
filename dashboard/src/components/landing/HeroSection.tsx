@@ -100,7 +100,7 @@ export const HeroSection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}
+          style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '2rem' }}
         >
           <HeroButton />
         </motion.div>
