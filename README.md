@@ -1,217 +1,174 @@
-# Verdicto ⚖️
+# Verdicto
 
-**An autonomous, multi-agent AI system that assesses, borrows against, insures, predicts, and resolves disputes for Real World Assets on the Casper blockchain.** Users pay in CSPR; independent AI agents analyze real market data, deliberate, and produce verdicts — with every execution step cryptographically receipted and every payment settled on-chain.
+Real World Asset valuation, lending, insurance, prediction markets, and dispute resolution. Powered by independent AI agents. Settled on Casper.
 
-**Live:** [verdicto.xyz](https://verdicto.xyz) · **Backend:** [verdicto-production.up.railway.app](https://verdicto-production.up.railway.app)
+**Live:** [verdicto.xyz](https://verdicto.xyz) | **Backend:** [verdicto-production.up.railway.app](https://verdicto-production.up.railway.app)
 
----
+## What It Does
+
+Verdicto is a platform where users submit real world assets (property, vehicles, art, commodities) and get back AI-generated valuations, loan offers, insurance policies, and prediction market resolutions. Every action costs CSPR. Every payment is verified on-chain. Every result is auditable.
+
+Six products, one platform:
+
+| Product | Route | Fee | What happens |
+|---------|-------|-----|-------------|
+| Assess | `/assess` | 2.5 CSPR | Two AI agents independently value your asset using different methodologies, then reconcile into a consensus valuation with risk flags |
+| Borrow | `/borrow` | 5 CSPR | Use an assessment as collateral. AI sets the LTV ratio, CSPR is disbursed, and a keeper monitors collateral health every 30 minutes |
+| Insure | `/insure` | 3 CSPR | Get a risk score, premium quote, and policy. File claims with automatic revaluation and on-chain payout |
+| Predict | `/predict` | 1 CSPR | Ask any yes/no question. Three AI jurors independently assess and reach a consensus |
+| Oracle | `/oracle` | Free | Dashboard of all verdicts, agent statistics, and valuation history |
+| Disputes | `/disputes` | 5 CSPR stake | Challenge any verdict. Triggers a re-trial with three adversarial jurors. Successful challenges return the stake |
+
+## How It Works
+
+**Wallet connection.** Users connect via the Casper Wallet browser extension. No accounts, no passwords. Your wallet address is your identity.
+
+**Payment.** Each product has a fixed fee in CSPR. The wallet signs a native transfer deploy. The backend verifies the payment on-chain before running any AI analysis.
+
+**AI analysis.** Independent agents with different specializations analyze the same asset. Agent A uses comparable sales data. Agent B uses discounted cash flow and income approaches. Three jurors review the evidence. Results are reconciled into a single verdict.
+
+**On-chain settlement.** Payment verification, reputation scores, and voting records live on Casper testnet. AI logic, loan state, and insurance policies run off-chain for speed.
+
+**Autonomous operation.** The borrow keeper checks collateral ratios every 30 minutes and triggers margin calls or liquidations. The insurance monitor tracks policy expiration and processes claims. Reputation scores update based on how close past predictions were to actual outcomes.
 
 ## Quick Start
 
 ### Prerequisites
 
-- **Node.js** ≥ 20
-- **Casper Wallet** Chrome extension ([install](https://chromewebstore.google.com/detail/casper-wallet/abkahkcbhngaebpcgfmhkoioedceoigp?hl=en))
-- **Testnet CSPR** — get free tokens from the [Casper Testnet Faucet](https://testnet.cspr.live/tools/faucet)
+- Node.js 20 or later
+- [Casper Wallet](https://chromewebstore.google.com/detail/casper-wallet/abkahkcbhngaebpcgfmhkoioedceoigp?hl=en) browser extension
+- Testnet CSPR from the [faucet](https://testnet.cspr.live/tools/faucet)
 
-### 1. Clone & Install
+### Install
 
 ```bash
-git clone https://github.com/leo-jr-hah/casper-rwa-court.git
-cd casper-rwa-court
+git clone https://github.com/leo-jr-hah/verdicto.git
+cd verdicto
 
-# Install frontend dependencies
 cd dashboard && npm install
-
-# Install backend dependencies
 cd ../agents && npm install
 ```
 
-### 2. Configure Environment
+### Configure
 
 ```bash
-# From the repo root
 cp .env.example .env
 ```
 
-Edit `.env` and fill in at minimum:
+Open `.env` and set these at minimum:
 
-| Variable | What it does | Example |
-|----------|-------------|---------|
-| `CASPER_RPC_URL` | Casper testnet RPC endpoint | `https://node.testnet.cspr.cloud/rpc` |
-| `DEPLOYER_PRIVATE_KEY` | Absolute path to your deployer `.pem` file | `/Users/you/.casper/keys/deployer.pem` |
-| `DEPLOYER_PUBLIC_KEY` | Hex public key of the deployer account | `01abcdef...` |
-| `ADMIN_SECRET` | Password for admin endpoints | `your-admin-secret-here` |
-| `VITE_ORCHESTRATOR_URL` | Where the backend runs | `http://localhost:3000` |
-| `VITE_WS_URL` | WebSocket URL for live updates | `ws://localhost:3010` |
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `CASPER_RPC_URL` | Casper testnet RPC endpoint | `https://node.testnet.casper.network:7777/rpc` |
+| `DEPLOYER_PRIVATE_KEY` | Path to your deployer `.pem` file | `/Users/you/.casper/keys/deployer.pem` |
+| `DEPLOYER_PUBLIC_KEY` | Hex public key of deployer account | `01abcdef...` |
+| `ADMIN_SECRET` | Password for admin endpoints | any string |
+| `VITE_ORCHESTRATOR_URL` | Backend URL | `http://localhost:3000` |
+| `VITE_WS_URL` | WebSocket URL | `ws://localhost:3010` |
 
-> You do NOT need API keys for the AI agents — they use a built-in fallback when no LLM key is configured.
+You do not need API keys for the AI agents. They use a built-in heuristic fallback when no LLM key is configured.
 
-### 3. Run the Backend
-
-```bash
-cd agents
-npm run dev
-# Starts orchestrator on :3000, WebSocket on :3011
-```
-
-### 4. Run the Frontend
+### Run
 
 ```bash
-# In a separate terminal
-cd dashboard
-npm run dev
-# Starts Vite dev server on http://localhost:5173
+# Terminal 1: backend
+cd agents && npm run dev
+
+# Terminal 2: frontend
+cd dashboard && npm run dev
 ```
 
-### 5. Run the Demo Flow
+Open `http://localhost:5173`. Connect your wallet. Pick a product. Pay in CSPR. Watch the AI work.
 
-1. Open `http://localhost:5173` — the landing page loads
-2. Click **Connect Wallet** in the sidebar - approve in Casper Wallet extension
-3. Navigate to **Value Asset** - select a demo asset (e.g., Manhattan Condo)
-4. Click **Pay & Assess** - approve the 2.5 CSPR payment in your wallet
-5. Watch 3 AI jurors analyze the asset in real time via WebSocket
-6. See the consensus valuation, risk flags, and methodology breakdown
-7. Navigate to **Borrow**, **Insure**, **Predict**, **Oracle**, or **Disputes**
-
-### 6. Run Tests
+### Test
 
 ```bash
-cd agents
-npm test
-# 55/61 tests passing — covers HMAC chain, trust scoring, agent orchestration
+cd agents && npm test
 ```
 
----
-
-## What This System Does
-
-### Six Products, One Platform
-
-| Product | Route | Fee | What happens |
-|---------|-------|-----|-------------|
-| **Assess** | `/assess` | 2.5 CSPR | 2 AI agents independently value an asset using different methodologies (Comparable Sales, DCF, Income Approach). Results are reconciled into a consensus valuation with risk flags. |
-| **Borrow** | `/borrow` | 5 CSPR | Use an assessment as collateral. AI determines Loan-to-Value ratio, CSPR is disbursed, and an autonomous keeper monitors collateral health every 30 minutes. |
-| **Insure** | `/insure` | 3 CSPR | Insure an asset against value loss. AI generates a risk score and premium. File claims with automatic AI revaluation and on-chain payout. |
-| **Predict** | `/predict` | 1 CSPR | Ask any yes/no question about future events. 3 agents independently estimate probability, weighted by reputation. |
-| **Oracle** | `/oracle` | — | Dashboard showing all verdicts, statistics, and oracle health. Query any asset's valuation history. |
-| **Disputes** | `/disputes` | 5 CSPR stake | Challenge any verdict with a 5 CSPR stake. Triggers a re-trial with 3 adversarial jurors. If the challenge succeeds, the stake is returned. |
-
-### What Makes It Autonomous
-
-This isn't a frontend that calls an API. The system runs **unattended**:
-
-- **Borrow Keeper** — checks collateral ratios every 30 minutes, triggers margin calls when LTV exceeds thresholds, liquidates when critical.
-- **Insurance Monitor** — tracks policy expiration, triggers claim reviews, processes payouts.
-- **Agent Self-Selection** — AI agents autonomously choose their valuation methodology based on data availability (not hardcoded). If comparable sales data is thin, the agent falls back to DCF.
-- **Reputation Updates** — after real market events, agents gain or lose reputation based on how close their predictions were to reality.
-- **Oracle Dispute Resolution** — anyone can challenge a verdict with a 5 CSPR stake. A re-trial panel of adversarial jurors re-examines the evidence.
-
-### What's On-Chain vs. Off-Chain
-
-| Layer | What's there | Why |
-|-------|-------------|-----|
-| **On-chain (Casper Testnet)** | Payment verification (x402), reputation scores, voting records | Cryptographic guarantees and economic finality |
-| **Off-chain (this repo)** | AI agent logic, collateral tracking, loan state, insurance policies, dispute resolution | Sub-second response times and complex computation |
-
-> **Honest scoping note:** Collateral tracking and loan state are currently managed off-chain in the orchestrator's in-memory store. In production, these would move to on-chain smart contracts or a persistent database.
-
----
+64 tests covering HMAC receipt chains, trust scoring, tier assignment, agent orchestration, insurance, predictions, oracle disputes, and the borrow audit.
 
 ## Architecture
 
+**Frontend** (`dashboard/`): React 19, Vite, Tailwind CSS, Casper Wallet SDK. Twelve views including a landing page with an interactive story explainer, product wizards, and real-time WebSocket updates.
+
+**Backend** (`agents/`): Express orchestrator serving all API endpoints. Three AI analyst engines. HMAC receipt chain for verifiable execution. Trust scoring system that ranks agent reliability. x402 middleware for payment-gated endpoints.
+
+**Smart contracts** (`contracts/`): Rust contracts built with the Odra framework. ReputationRegistry for on-chain agent reputation. VotingContract for verdict recording. Compiled to WASM and deployed on Casper testnet.
+
+**Data flow:**
 ```
-┌─────────────────────────────────────────────────────┐
-│                 React Dashboard                      │
-│  (Vite + Tailwind + Casper Wallet SDK)              │
-│  Landing · Assess · Borrow · Insure · Predict       │
-│  Oracle · Disputes · Agents · History               │
-└──────────────┬──────────────────────┬───────────────┘
-               │ HTTP                │ WebSocket
-               ▼                     ▼
-┌─────────────────────────────────────────────────────┐
-│                Orchestrator (:3000)                  │
-│  Assessment · Loans · Insurance · Predictions       │
-│  Oracle Verdicts · Dispute Resolution               │
-│  Autonomous Keepers (borrow + insurance monitors)   │
-│  HMAC Receipt Chain · Trust Scoring                 │
-└────────┬──────────┬──────────┬──────────────────────┘
-         │ x402     │ x402     │ x402
-         ▼          ▼          ▼
-┌────────────┐ ┌────────────┐ ┌────────────┐
-│  Agent A   │ │  Agent B   │ │  Agent C   │
-│ Comparable │ │    DCF     │ │  Income    │
-│   Sales    │ │  Method    │ │  Approach  │
-└────────────┘ └────────────┘ └────────────┘
-         │          │          │
-         ▼          ▼          ▼
-┌─────────────────────────────────────────────────────┐
-│              Casper Testnet (On-Chain)               │
-│  x402 Payment Verification · CSPR Transfers         │
-│  Reputation Registry · Verdict Oracle                │
-└─────────────────────────────────────────────────────┘
+Browser (React + Casper Wallet)
+  |
+  |-- HTTP requests --> Orchestrator (Express, port 3000)
+  |                       |
+  |                       |-- x402 payment verification
+  |                       |-- Agent A (Comparable Sales)
+  |                       |-- Agent B (DCF / Income)
+  |                       |-- Jurors (Evidence, Market, Precedent)
+  |                       |-- Supabase (persistent storage)
+  |                       |
+  |-- WebSocket ------> Orchestrator (port 3010)
+  |                       |
+  |                       |-- Real-time agent status
+  |                       |-- Live verdict updates
+  |
+  |-- On-chain ------> Casper Testnet
+                          |-- Payment verification
+                          |-- Reputation registry
+                          |-- Verdict oracle
 ```
-
----
-
-## Environment Variables
-
-See [`.env.example`](.env.example) for the full list with descriptions. Key groups:
-
-| Group | Variables | Required for |
-|-------|-----------|-------------|
-| **Blockchain** | `CASPER_RPC_URL`, `DEPLOYER_PRIVATE_KEY`, `DEPLOYER_PUBLIC_KEY` | On-chain payments, deploy relay |
-| **Backend** | `PORT`, `ADMIN_SECRET`, `GROQ_API_KEY`, `MIMO_API_KEY` | Server, auth, LLM fallbacks |
-| **Frontend** | `VITE_ORCHESTRATOR_URL`, `VITE_WS_URL`, `VITE_CASPER_RPC_URL` | API calls, WebSocket, wallet |
-| **Wallet** | `VITE_PLATFORM_WALLET`, `VITE_ASSESSMENT_FEE`, `VITE_PREDICTION_FEE` | Fee display, payment routing |
-
----
-
-## Project Structure
-
-```
-casper-rwa-court/
-├── agents/                    # Backend: orchestrator + AI jurors
-│   ├── orchestrator/          # Main API server (Express + WebSocket)
-│   ├── valuation-agent-a/     # Agent A: Comparable Sales
-│   ├── valuation-agent-b/     # Agent B: DCF / Income Approach
-│   ├── evidence-analyst/      # Juror: Evidence Reviewer
-│   ├── market-data-interpreter/ # Juror: Market Trend Analyst
-│   ├── precedent-researcher/  # Juror: Case Precedent Researcher
-│   ├── shared/                # Shared: trust scoring, HMAC chains, x402
-│   └── tests/                 # Unit tests (vitest)
-├── contracts/                 # Rust smart contracts (Odra framework)
-│   ├── reputation/            # ReputationRegistry
-│   └── voting/                # VotingContract
-├── dashboard/                 # React 19 frontend (Vite)
-│   └── src/
-│       ├── pages/             # 12 views (Landing, Assess, Borrow, etc.)
-│       ├── components/        # Shared UI + landing page components
-│       ├── contexts/          # CSPRClickContext (wallet provider)
-│       ├── hooks/             # useAssessment, useLoan, useInsurance
-│       ├── services/          # api.ts (all backend calls)
-│       ├── layouts/           # LandingLayout (top-nav), Layout (sidebar)
-│       └── config/            # casper.ts (fees, wallet address)
-├── .env.example               # Environment template
-├── ARCHITECTURE.md            # Technical deep-dive
-└── README.md                  # This file
-```
-
----
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Frontend** | React 19, Vite, Tailwind CSS v3, motion (NOT framer-motion), GSAP |
-| **Backend** | Node.js 20, Express, WebSocket (ws), TypeScript |
-| **Blockchain** | Casper Testnet, casper-js-sdk v5, x402 HTTP micropayments |
-| **AI Agents** | Groq llama-3.3-70b (primary), MiMo V2, heuristic fallback |
-| **Wallet** | Casper Wallet SDK (window.CasperWalletProvider) |
-| **Tests** | vitest, supertest |
-| **Deploy** | Railway (backend), Vercel (frontend) |
+| Frontend | React 19, Vite, Tailwind CSS v3, motion, GSAP |
+| Backend | Node.js 20, Express, WebSocket (ws), TypeScript |
+| Blockchain | Casper testnet, casper-js-sdk v5, x402 HTTP micropayments |
+| AI | Groq llama-3.3-70b, MiMo V2, heuristic fallback |
+| Wallet | Casper Wallet SDK (window.CasperWalletProvider) |
+| Database | Supabase (PostgreSQL) |
+| Smart Contracts | Rust, Odra framework, WASM |
+| Tests | vitest, supertest |
+| Deploy | Railway (backend), Vercel (frontend) |
 
----
+## Project Structure
+
+```
+verdicto/
+  agents/                        Backend
+    orchestrator/                  Main API server (Express + WebSocket)
+    valuation-agent-a/             Agent A: Comparable Sales methodology
+    valuation-agent-b/             Agent B: DCF and Income Approach
+    evidence-analyst/              Juror: Evidence Reviewer
+    market-data-interpreter/       Juror: Market Trend Analyst
+    precedent-researcher/          Juror: Case Precedent Researcher
+    shared/                        Trust scoring, HMAC chains, x402, DB layer
+    tests/                         Unit and integration tests
+  contracts/                     Smart contracts (Rust / Odra)
+    reputation/                    ReputationRegistry
+    voting/                        VotingContract
+    verdict-oracle/                VerdictOracle
+  dashboard/                     Frontend (React 19 + Vite)
+    src/
+      pages/                       Product views (Assess, Borrow, Insure, etc.)
+      components/                  Shared UI, PaymentModal, WalletConnectButton
+      contexts/                    CSPRClickContext (wallet provider)
+      hooks/                       useAssessment, useLoan, useInsurance
+      services/                    api.ts (all backend calls)
+      config/                      Fees, wallet address, Casper network config
+```
+
+## Environment Variables
+
+All variables are documented in `.env.example`. The main groups:
+
+- **Blockchain**: `CASPER_RPC_URL`, `DEPLOYER_PRIVATE_KEY`, `DEPLOYER_PUBLIC_KEY` for on-chain interaction
+- **Backend**: `PORT`, `ADMIN_SECRET`, `GROQ_API_KEY`, `MIMO_API_KEY` for server config and LLM access
+- **Frontend**: `VITE_ORCHESTRATOR_URL`, `VITE_WS_URL`, `VITE_PLATFORM_WALLET` for client-side config
+- **Database**: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` for persistent storage
+- **Payments**: `X402_REQUIRE_PAYMENT`, `X402_RECIPIENT_ADDRESS` for micropayment enforcement
 
 ## License
 
