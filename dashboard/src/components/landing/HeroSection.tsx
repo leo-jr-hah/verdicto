@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'motion/react';
 import { Link } from 'react-router-dom';
+import { HeroButton } from './HeroButton';
 
 /* ── Faceted Geometric Background ────────────────────────────────────────
    Multiple overlapping clip-path polygons with teal→navy gradients.
@@ -100,11 +101,9 @@ export const HeroSection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}
         >
-          <Link to="/oracle" className="hero-cta-new">
-            Explore the Oracle
-            <span className="hero-cta-new__arrow">→</span>
-          </Link>
+          <HeroButton />
         </motion.div>
       </div>
     </section>
