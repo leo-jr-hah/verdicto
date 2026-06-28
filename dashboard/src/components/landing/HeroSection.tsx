@@ -68,9 +68,12 @@ export const HeroSection: React.FC = () => {
               }}
               transition={{ 
                 delay: 1.0, 
-                duration: 0.8, 
+                duration: 1.2, 
                 times: [0, 0.5, 1], 
-                ease: [0.77, 0, 0.175, 1] 
+                ease: [0.77, 0, 0.175, 1],
+                repeat: Infinity,
+                repeatDelay: 4,
+                repeatType: 'loop'
               }}
               style={{
                 position: 'absolute',
