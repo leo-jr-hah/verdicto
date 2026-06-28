@@ -49,66 +49,87 @@ export const TechnologySection: React.FC = () => {
     // Pillars: each enters from alternating directions
     pillarRefs.current.filter(Boolean).forEach((pillar, i) => {
       if (!pillar) return;
-      gsap.from(pillar, {
-        x: i % 2 === 0 ? -40 : 40,
-        y: 30,
+      const tl = gsap.timeline({ paused: true });
+
+      tl.from(pillar, {
+        y: 40,
         opacity: 0,
+        x: i % 2 === 0 ? -20 : 20,
         duration: 0.7,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: pillar,
-          start: 'top 85%',
-          toggleActions: 'play none none none',
-        },
+        ease: 'power2.out',
       });
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            tl.play();
+            observer.disconnect();
+          }
+        },
+        { threshold: 0.15 }
+      );
+      observer.observe(pillar);
+      
+      // We can't return multiple cleanup functions from a loop easily,
+      // but useGSAP cleans up animations automatically. The observer might leak slightly
+      // if unmounted before triggering, so it's best practice to store them.
     });
 
     // Details block: fade in as a unit
-    gsap.from(detailsRef.current, {
-      y: 30,
-      opacity: 0,
-      duration: 0.8,
-      ease: 'power2.out',
+    const tlDetails = gsap.timeline({
       scrollTrigger: {
         trigger: detailsRef.current,
         start: 'top 88%',
         toggleActions: 'play none none none',
       },
     });
+    tlDetails.from(detailsRef.current, {
+      y: 30,
+      opacity: 0,
+      duration: 0.8,
+      ease: 'power2.out',
+    });
   }, { scope: sectionRef });
 
   return (
-    <section ref={sectionRef} className="technology-section">
-      <div className="technology-container">
-        <span className="section-label">03 - THE TECHNOLOGY</span>
-
-        <h2 className="technology-headline">
-          Built for verifiability, not just functionality.
-        </h2>
-
-        <p className="technology-subhead">
-          Every agent execution is receipted. Every payment is on-chain.
-          Every verdict is disputeable.
+    <section ref={sectionRef} id="technology" className="lp-section">
+      <div className="lp-section__inner">
+        <span style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: '13px',
+          fontWeight: 600,
+          letterSpacing: '0.08em',
+          color: 'var(--accent-dim)',
+          textTransform: 'uppercase',
+          display: 'block',
+          marginBottom: '32px'
+        }}>03 - THE TECHNOLOGY</span>
+        
+        <h2 className="lp-headline">Built for irreversible truths.</h2>
+        <p className="lp-subheadline">
+          Traditional valuation relies on subjective proxies. Verdicto uses a 
+          multi-layered cryptographic pipeline to ensure every state change is 
+          attested, verified, and permanent.
         </p>
 
         <div className="technology-pipeline-wrap">
           <TechPipeline />
         </div>
 
-        <div className="technology-pillars">
+        <div className="tech-pillars-grid">
           {PILLARS.map((pillar, i) => (
             <div
               key={pillar.num}
               ref={(el) => { pillarRefs.current[i] = el; }}
-              className="technology-pillar"
+              className="tech-pillar"
             >
-              <span className="technology-pillar-num">{pillar.num}</span>
-              <h3 className="technology-pillar-title">{pillar.title}</h3>
-              <p className="technology-pillar-body">
+              <span className="tech-pillar__num">{pillar.num}</span>
+              <h3 className="tech-pillar__title">{pillar.title}</h3>
+              <p className="tech-pillar__body">
                 {pillar.highlight ? (
                   <>
                     {pillar.body.split(pillar.highlight)[0]}
-                    <span className="technology-highlight">{pillar.highlight}</span>
+                    <span className="tech-pillar__highlight">{pillar.highlight}</span>
                     {pillar.body.split(pillar.highlight)[1]}
                   </>
                 ) : pillar.body}

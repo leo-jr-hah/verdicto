@@ -47,39 +47,59 @@ export const PlatformSection: React.FC = () => {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useGSAP(() => {
-    // Cards: staggered rise with slight rotation
+    const tl = gsap.timeline({ paused: true });
+
     const cards = cardRefs.current.filter(Boolean);
-    gsap.from(cards, {
+    tl.from(cards, {
       y: 80,
       opacity: 0,
       rotation: (i: number) => (i % 2 === 0 ? -1.5 : 1.5),
       duration: 0.9,
       stagger: 0.12,
       ease: 'power3.out',
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: 'top 72%',
-        toggleActions: 'play none none none',
-      },
     });
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        console.log('IntersectionObserver fired! isIntersecting:', entry.isIntersecting);
+        if (entry.isIntersecting) {
+          console.log('Playing timeline!');
+          tl.play();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+
+    return () => observer.disconnect();
   }, { scope: sectionRef });
 
   return (
-    <section ref={sectionRef} className="platform-section">
-      <div className="platform-container">
-        <span className="section-label-light">02 - THE PLATFORM</span>
+    <section ref={sectionRef} id="platform" className="lp-section">
+      <div className="lp-section__inner">
+        <span style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: '13px',
+          fontWeight: 600,
+          letterSpacing: '0.08em',
+          color: 'rgba(12, 45, 72, 0.35)',
+          textTransform: 'uppercase',
+          display: 'block',
+          marginBottom: '32px'
+        }}>02 - THE PLATFORM</span>
 
-        <h2 className="platform-headline">
+        <h2 className="lp-headline">
           Four products. One analytical engine.
         </h2>
 
-        <p className="platform-subhead">
+        <p className="lp-subheadline">
           Every product runs on the same multi-agent valuation and deliberation
           infrastructure. The process is identical across all four: agents analyze,
           a jury deliberates, the verdict is recorded on Casper.
         </p>
 
-        <div className="platform-cards">
+        <div className="platform-grid">
           {PRODUCTS.map((product, i) => {
             const Glyph = product.glyph;
             return (
@@ -90,11 +110,11 @@ export const PlatformSection: React.FC = () => {
                 className="platform-card"
                 style={{ flex: `1 1 ${product.width}` }}
               >
-                <Glyph className="platform-glyph" />
-                <span className="platform-name">{product.name}</span>
-                <span className="platform-tagline">{product.tagline}</span>
-                <p className="platform-desc">{product.description}</p>
-                <span className="platform-link">
+                <Glyph className="platform-card__glyph" />
+                <span className="platform-card__name">{product.name}</span>
+                <span className="platform-card__tagline">{product.tagline}</span>
+                <p className="platform-card__description">{product.description}</p>
+                <span className="platform-card__link">
                   Open {product.name}
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path d="M3 7H11M11 7L7.5 3.5M11 7L7.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>

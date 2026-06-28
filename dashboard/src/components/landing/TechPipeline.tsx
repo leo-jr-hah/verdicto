@@ -19,35 +19,41 @@ export const TechPipeline: React.FC = () => {
 
   useGSAP(() => {
     // SVG path: draw-in animation
+    const tlSvg = gsap.timeline({ paused: true });
+
     const path = svgRef.current?.querySelector('.pipeline-path');
     if (path) {
       const length = (path as SVGPathElement).getTotalLength();
       gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
-      gsap.to(path, {
+      tlSvg.to(path, {
         strokeDashoffset: 0,
         duration: 2,
         ease: 'power2.inOut',
-        scrollTrigger: {
-          trigger: svgRef.current,
-          start: 'top 80%',
-          toggleActions: 'play none none none',
-        },
       });
     }
 
     // Step nodes: staggered fade-up after path draws
-    gsap.from(stepRefs.current.filter(Boolean), {
+    const tlSteps = gsap.timeline({ paused: true });
+
+    tlSteps.from(stepRefs.current.filter(Boolean), {
       y: 20,
       opacity: 0,
       duration: 0.5,
       stagger: 0.15,
       ease: 'power2.out',
-      scrollTrigger: {
-        trigger: svgRef.current,
-        start: 'top 75%',
-        toggleActions: 'play none none none',
-      },
     });
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          tlSvg.play();
+          setTimeout(() => tlSteps.play(), 200); // Slight delay for steps
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+    if (svgRef.current) observer.observe(svgRef.current);
   });
 
   const stepWidth = 100 / PIPELINE_STEPS.length;

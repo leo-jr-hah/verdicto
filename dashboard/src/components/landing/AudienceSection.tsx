@@ -30,63 +30,95 @@ export const AudienceSection: React.FC = () => {
   const closingRef = useRef<HTMLParagraphElement>(null);
 
   useGSAP(() => {
-    // Each audience block: text lines reveal with stagger
     blockRefs.current.filter(Boolean).forEach((block) => {
       if (!block) return;
-      const title = block.querySelector('.audience-title');
-      const body = block.querySelector('.audience-body');
+      
+      const tl = gsap.timeline({ paused: true });
 
-      gsap.from([title, body], {
-        y: 30,
+      tl.from(block, {
+        x: -40,
         opacity: 0,
-        duration: 0.7,
-        stagger: 0.12,
+        duration: 0.8,
         ease: 'power3.out',
-        scrollTrigger: {
-          trigger: block,
-          start: 'top 85%',
-          toggleActions: 'play none none none',
-        },
       });
+
+      // Child elements stagger
+      const children = block.querySelectorAll('h3, p');
+      if (children.length) {
+        tl.from(children, {
+          y: 20,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: 'power2.out',
+        }, '-=0.4');
+      }
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            tl.play();
+            observer.disconnect();
+          }
+        },
+        { threshold: 0.15 }
+      );
+      observer.observe(block);
     });
 
-    // Closing line: simple fade
-    gsap.from(closingRef.current, {
+    // Closing line
+    const tlClosing = gsap.timeline({ paused: true });
+    tlClosing.from(closingRef.current, {
       y: 20,
       opacity: 0,
       duration: 0.8,
       ease: 'power2.out',
-      scrollTrigger: {
-        trigger: closingRef.current,
-        start: 'top 90%',
-        toggleActions: 'play none none none',
-      },
     });
+
+    const closingObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          tlClosing.play();
+          closingObserver.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+    if (closingRef.current) closingObserver.observe(closingRef.current);
   }, { scope: sectionRef });
 
   return (
-    <section ref={sectionRef} className="audience-section">
-      <div className="audience-container">
-        <span className="section-label-light">04 - WHO IT'S FOR</span>
+    <section ref={sectionRef} id="audience" className="lp-section">
+      <div className="lp-section__inner">
+        <span style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: '13px',
+          fontWeight: 600,
+          letterSpacing: '0.08em',
+          color: 'var(--accent-dim)',
+          textTransform: 'uppercase',
+          display: 'block',
+          marginBottom: '32px'
+        }}>04 - WHO IT'S FOR</span>
 
-        <h2 className="audience-headline">
-          For teams that need valuation they can defend.
+        <h2 className="lp-headline">
+          For protocols that demand absolute certainty.
         </h2>
 
-        <div className="audience-list">
+        <div className="audience-grid">
           {AUDIENCES.map((audience, i) => (
             <div
               key={audience.title}
               ref={(el) => { blockRefs.current[i] = el; }}
-              className="audience-block"
+              className="audience-card"
             >
-              <h3 className="audience-title">{audience.title}</h3>
-              <p className="audience-body">{audience.body}</p>
+              <h3 className="audience-card__name">{audience.title}</h3>
+              <p className="audience-card__description">{audience.body}</p>
             </div>
           ))}
         </div>
 
-        <p ref={closingRef} className="audience-closing">
+        <p ref={closingRef} className="audience-closing__text">
           Verdicto is live on Casper Testnet.
         </p>
       </div>

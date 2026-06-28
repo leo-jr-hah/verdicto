@@ -52,7 +52,7 @@ export const ProblemSection: React.FC = () => {
   }, { scope: sectionRef });
 
   return (
-    <section ref={sectionRef} className="problem-section">
+    <section ref={sectionRef} id="problem" className="problem-section">
       <div className="problem-grid">
         {/* Left: the old way (visual metaphor built from text) */}
         <div ref={leftRef} className="problem-left">
