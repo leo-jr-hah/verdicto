@@ -580,7 +580,8 @@ export const InsureView: React.FC = () => {
                   )}
                 </div>
               );
-            })
+            })}
+            </>
           )}
 
           {/* Claim modal */}

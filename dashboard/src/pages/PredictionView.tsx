@@ -468,7 +468,7 @@ export const PredictionView: React.FC = () => {
                       <div className="wave-line"></div>
                     </div>
                   ) : (
-                    <><Wallet size={16} /> Pay {PREDICTION_FEE_CSPR} CSPR & Run Analysis <ArrowRight size={16} /></>
+                    <><Wallet size={16} /> Pay {PREDICTION_FEE_CSPR} CSPR & Run Analysis</>
                   )}
                 </button>
 
