@@ -470,7 +470,7 @@ export const DisputesView: React.FC = () => {
                                     ? { background: 'rgba(239,68,68,0.15)', color: 'var(--error)' }
                                     : { background: 'rgba(16,185,129,0.15)', color: 'var(--text-secondary)' }),
                                 }}>
-                                  {d.outcome === 'overturned' ? '⚡ Overturned' : '✅ Upheld'}
+                                  {d.outcome === 'overturned' ? 'Overturned' : 'Upheld'}
                                 </span>
                               </div>
 

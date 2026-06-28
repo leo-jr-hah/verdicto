@@ -13,6 +13,9 @@ import {
   RefreshCw,
   ExternalLink,
   ArrowRight,
+  Building2,
+  Gem,
+  Palette,
 } from 'lucide-react';
 import { useWallet } from '../contexts/CSPRClickContext';
 import { PREDICTION_FEE_CSPR } from '../config/casper';
@@ -58,25 +61,25 @@ const DEMO_QUESTIONS = [
     question: 'Will the Miami Beachfront Condo at 123 Ocean Dr sell above $2.5M by December 2026?',
     assetType: 'real-estate',
     timeframe: '6 months',
-    icon: '🏠',
+    icon: 'real-estate',
   },
   {
     question: 'Will gold prices exceed $3,500/oz by end of Q3 2026?',
     assetType: 'commodity',
     timeframe: '3 months',
-    icon: '🥇',
+    icon: 'commodity',
   },
   {
     question: 'Will the Contemporary Oil Painting by Banksy appreciate more than 15% in the next auction?',
     assetType: 'art',
     timeframe: '12 months',
-    icon: '🎨',
+    icon: 'art',
   },
   {
     question: 'Will the average US mortgage rate drop below 5.5% by end of 2026?',
     assetType: 'macro',
     timeframe: '6 months',
-    icon: '📈',
+    icon: 'macro',
   },
 ];
 
@@ -554,8 +557,11 @@ export const PredictionView: React.FC = () => {
                             e.currentTarget.style.boxShadow = 'none';
                           }}
                         >
-                          <span style={{ fontSize: '1.2rem', lineHeight: 1, flexShrink: 0 }}>
-                            {demo.icon}
+                          <span style={{ fontSize: '1.2rem', lineHeight: 1, flexShrink: 0, color: 'var(--text-tertiary)' }}>
+                            {demo.icon === 'real-estate' ? <Building2 size={18} /> :
+                             demo.icon === 'art' ? <Palette size={18} /> :
+                             demo.icon === 'commodity' ? <Gem size={18} /> :
+                             <TrendingUp size={18} />}
                           </span>
                           <div style={{ minWidth: 0 }}>
                             <div style={{

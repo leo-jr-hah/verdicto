@@ -189,6 +189,9 @@ export const BorrowView: React.FC = () => {
   const [repayAmount, setRepayAmount] = useState('');
   const [repayLoanId, setRepayLoanId] = useState<string | null>(null);
 
+  // Derived: loan was rejected by backend validation (confidence, divergence, stale, etc.)
+  const loanRejected = !!loanError && !!assessmentResult;
+
   // Assessment payment flow
   const pendingAssessRequest = useRef<AssessmentRequest | null>(null);
   const assessPayment = usePaymentFlow(signPayment, ASSESSMENT_FEE_CSPR, async (paymentProof) => {
@@ -378,13 +381,13 @@ export const BorrowView: React.FC = () => {
         </div>
       )}
 
-      {/* ── Error Banner ─────────────────────────────────────────────────── */}
-      {(loanError || signError) && (
+      {/* ── Error Banner (hidden when loanRejected — verdict card shows it inline) ── */}
+      {(loanError || signError) && !loanRejected && (
         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="wizard-error">
           <AlertCircle size={18} color="var(--error)" style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ flex: 1 }}>
             <div className="wizard-error__msg">{loanError || signError}</div>
-            {loanErrorHint && <div className="wizard-error__hint">💡 {loanErrorHint}</div>}
+            {loanErrorHint && <div className="wizard-error__hint">{loanErrorHint}</div>}
           </div>
           <button onClick={() => { clearError(); setSignError(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: 4 }}>
             <XCircle size={16} />
@@ -515,70 +518,96 @@ export const BorrowView: React.FC = () => {
             </div>
           ) : assessmentResult ? (
             <div>
-              <div className="wizard-result-header">
-                <div className="wizard-result-header__icon">
-                  <CheckCircle2 size={20} />
-                </div>
-                <div className="wizard-result-header__title">Assessment Complete</div>
-              </div>
-
-              <div className="wizard-metrics">
-                <div className="wizard-metric">
-                  <div className="wizard-metric__label">Your Estimate</div>
-                  <div className="wizard-metric__value">{formatCurrency(assessmentResult.askingPrice)}</div>
-                </div>
-                <div className="wizard-metric">
-                  <div className="wizard-metric__label">AI Valuation</div>
-                  <div className="wizard-metric__value wizard-metric__value--accent">{formatCurrency(assessmentResult.assessedValue)}</div>
-                </div>
-                <div className="wizard-metric">
-                  <div className="wizard-metric__label"><LTVTooltip>Max Loan (75% LTV)</LTVTooltip></div>
-                  <div className="wizard-metric__value wizard-metric__value--secondary">{formatCurrency(assessmentResult.assessedValue * 0.75)}</div>
-                </div>
-                <div className="wizard-metric">
-                  <div className="wizard-metric__label">Confidence</div>
-                  <div className="wizard-metric__value" style={{
-                    color: Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) >= 0.85
-                      ? 'var(--success)'
-                      : Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) >= 0.65
-                        ? 'var(--warning)'
-                        : 'var(--error)',
-                  }}>
-                    {(Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) * 100).toFixed(0)}%
-                    <span style={{ fontSize: '0.75rem', marginLeft: '0.35rem', color: 'var(--text-tertiary)' }}>
-                      {Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) >= 0.85
-                        ? 'High'
-                        : Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) >= 0.65
-                          ? 'Moderate'
-                          : 'Low'}
-                    </span>
+              {/* ── Assessment Result ─────────────────────────────────────── */}
+              <div className="assessment-result">
+                <div className="assessment-result__header">
+                  <div className="assessment-result__icon assessment-result__icon--success">
+                    <CheckCircle2 size={20} />
+                  </div>
+                  <div>
+                    <div className="assessment-result__title">Assessment Complete</div>
+                    <div className="assessment-result__subtitle">{assessmentResult.name}</div>
                   </div>
                 </div>
-              </div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
-                <AgentExplainer assessment={assessmentResult} />
-              </div>
-
-              <div className="wizard-actions">
-                <button onClick={handleStartNew} className="btn" disabled={loanLoading || signing}>
-                  <RotateCcw size={16} /> Start Over
-                </button>
-                <button
-                  onClick={handleRequestLoan}
-                  className={`btn btn-primary ${(loanLoading || signing) ? 'btn-analysing' : ''}`}
-                  disabled={loanLoading || signing}
-                >
-                  {(loanLoading || signing) ? (
-                    <div className="wave-loader">
-                      <div className="wave-text"><span>Analysing</span></div>
-                      <div className="wave-line"></div>
+                <div className="assessment-result__grid">
+                  <div className="assessment-result__cell">
+                    <div className="assessment-result__cell-label">Your Estimate</div>
+                    <div className="assessment-result__cell-value">{formatCurrency(assessmentResult.askingPrice)}</div>
+                  </div>
+                  <div className="assessment-result__cell assessment-result__cell--highlight">
+                    <div className="assessment-result__cell-label">AI Valuation</div>
+                    <div className="assessment-result__cell-value assessment-result__cell-value--accent">{formatCurrency(assessmentResult.assessedValue)}</div>
+                  </div>
+                  <div className="assessment-result__cell">
+                    <div className="assessment-result__cell-label"><LTVTooltip>Max Loan (75% LTV)</LTVTooltip></div>
+                    <div className="assessment-result__cell-value assessment-result__cell-value--secondary">{formatCurrency(assessmentResult.assessedValue * 0.75)}</div>
+                  </div>
+                  <div className="assessment-result__cell">
+                    <div className="assessment-result__cell-label">Confidence</div>
+                    <div className="assessment-result__cell-value" style={{
+                      color: Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) >= 0.85
+                        ? 'var(--success)'
+                        : Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) >= 0.65
+                          ? 'var(--warning)'
+                          : 'var(--error)',
+                    }}>
+                      {(Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) * 100).toFixed(0)}%
+                      <span style={{ fontSize: '0.75rem', marginLeft: '0.35rem', color: 'var(--text-tertiary)' }}>
+                        {Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) >= 0.85
+                          ? 'High'
+                          : Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) >= 0.65
+                            ? 'Moderate'
+                            : 'Low'}
+                      </span>
                     </div>
-                  ) : (
-                    <><Landmark size={16} /> Request Loan</>
-                  )}
-                </button>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '1.25rem' }}>
+                  <AgentExplainer assessment={assessmentResult} />
+                </div>
               </div>
+
+              {/* ── Loan Rejected ─────────────────────────────────────────── */}
+              {loanRejected && (
+                <div className="assessment-verdict assessment-verdict--rejected">
+                  <div className="assessment-verdict__header">
+                    <XCircle size={20} />
+                    <span className="assessment-verdict__title">Loan Request Denied</span>
+                  </div>
+                  <div className="assessment-verdict__reason">{loanError}</div>
+                  {loanErrorHint && <div className="assessment-verdict__hint">{loanErrorHint}</div>}
+                  <div className="assessment-verdict__actions">
+                    <button onClick={handleStartNew} className="btn btn-primary">
+                      <RotateCcw size={16} /> Start Over
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Actions (only when not rejected) ──────────────────────── */}
+              {!loanRejected && (
+                <div className="wizard-actions">
+                  <button onClick={handleStartNew} className="btn" disabled={loanLoading || signing}>
+                    <RotateCcw size={16} /> Start Over
+                  </button>
+                  <button
+                    onClick={handleRequestLoan}
+                    className={`btn btn-primary ${(loanLoading || signing) ? 'btn-analysing' : ''}`}
+                    disabled={loanLoading || signing}
+                  >
+                    {(loanLoading || signing) ? (
+                      <div className="wave-loader">
+                        <div className="wave-text"><span>Analysing</span></div>
+                        <div className="wave-line"></div>
+                      </div>
+                    ) : (
+                      <><Landmark size={16} /> Request Loan</>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="wizard-loading">

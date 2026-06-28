@@ -228,7 +228,7 @@ export const InsureView: React.FC = () => {
           <AlertCircle size={18} color="var(--error)" style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ flex: 1 }}>
             <div className="wizard-error__msg">{insError || signError}</div>
-            {insErrorHint && <div className="wizard-error__hint">💡 {insErrorHint}</div>}
+            {insErrorHint && <div className="wizard-error__hint">{insErrorHint}</div>}
           </div>
           <button onClick={() => { clearError(); setSignError(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: 4 }}>
             <XCircle size={16} />

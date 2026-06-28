@@ -254,7 +254,7 @@ export const TransactionsView: React.FC = () => {
       {/* Error State */}
       {error && (
         <div className="enterprise-card tx-error-card">
-          <div className="tx-error-title">⚠️ Error Loading Transactions</div>
+          <div className="tx-error-title">Error Loading Transactions</div>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{error}</p>
           <button onClick={loadTransactions} className="tx-retry-btn">Retry</button>
         </div>

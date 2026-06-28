@@ -309,6 +309,143 @@ textarea.wizard-field__input {
   color: var(--text-secondary);
 }
 
+/* ── Assessment Result Card ─────────────────────────────────────────────── */
+.assessment-result {
+  margin-bottom: 1.5rem;
+}
+
+.assessment-result__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.assessment-result__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.assessment-result__icon--success {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.assessment-result__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.assessment-result__subtitle {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin-top: 0.15rem;
+}
+
+.assessment-result__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.assessment-result__cell {
+  padding: 0.85rem 1rem;
+  background: var(--bg-sunken);
+  border-radius: 10px;
+  border: 1px solid var(--border-weak);
+}
+
+.assessment-result__cell--highlight {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg-sunken));
+}
+
+.assessment-result__cell-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.3rem;
+}
+
+.assessment-result__cell-value {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.assessment-result__cell-value--accent {
+  color: var(--accent);
+}
+
+.assessment-result__cell-value--secondary {
+  color: var(--text-secondary);
+}
+
+/* ── Verdict Card (accepted / rejected) ─────────────────────────────────── */
+.assessment-verdict {
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-top: 1.25rem;
+}
+
+.assessment-verdict--rejected {
+  background: var(--error-soft);
+  border: 1px solid color-mix(in srgb, var(--error) 40%, transparent);
+}
+
+.assessment-verdict--accepted {
+  background: var(--success-soft);
+  border: 1px solid color-mix(in srgb, var(--success) 40%, transparent);
+}
+
+.assessment-verdict__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.assessment-verdict--rejected .assessment-verdict__header {
+  color: var(--error);
+}
+
+.assessment-verdict--accepted .assessment-verdict__header {
+  color: var(--success);
+}
+
+.assessment-verdict__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.assessment-verdict__reason {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.assessment-verdict__hint {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.assessment-verdict__actions {
+  margin-top: 1rem;
+}
+
 /* ── Info Panel (trust breakdown, escrow, etc.) ──────────────────────────── */
 .wizard-info-panel {
   padding: 1rem 1.25rem;

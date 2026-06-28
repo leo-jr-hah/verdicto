@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { BarChart3, Scale, Link2 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,7 +12,7 @@ const FEATURES = [
     title: 'Assess',
     body: 'Submit asset details. Two independent AI analysts evaluate using real-world data from RentCast, FRED, and proprietary models. Each produces a signed valuation with confidence bounds.',
     layout: 'image-left',
-    icon: '📊',
+    icon: <BarChart3 size={32} />,
     placeholder: { label: 'Asset Analysis', items: ['RentCast Data', 'FRED Economic', 'Market Comparables'] },
   },
   {
@@ -19,7 +20,7 @@ const FEATURES = [
     title: 'Deliberate',
     body: 'Three specialized jurors review the evidence and cast votes. Every deliberation round produces an HMAC-SHA256 receipt that chains to the previous. Tamper-proof by construction.',
     layout: 'image-right',
-    icon: '⚖️',
+    icon: <Scale size={32} />,
     placeholder: { label: 'Jury Deliberation', items: ['Juror A: Affirmed', 'Juror B: Affirmed', 'Juror C: Dissent'] },
   },
   {
@@ -27,7 +28,7 @@ const FEATURES = [
     title: 'Commit',
     body: 'A cryptographic commitment — SHA-256 of the full execution state plus the Casper block height — anchors the verdict on-chain. Any third party can independently verify.',
     layout: 'image-left',
-    icon: '🔗',
+    icon: <Link2 size={32} />,
     placeholder: { label: 'On-Chain Commit', items: ['Block #1,847,293', 'SHA-256: 0xa7f3...c9d1', 'Status: Finalized'] },
   },
 ];

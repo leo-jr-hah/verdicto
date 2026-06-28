@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Wallet, Loader2 } from 'lucide-react';
+import { Zap, Wallet, Loader2, Lightbulb } from 'lucide-react';
 
 /**
  * Shared payment confirmation modal used across all products.
@@ -104,8 +104,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               <div className="bg-error-soft border border-error rounded-sm p-3 mb-4">
                 <div className="text-sm text-error">{signError}</div>
                 {signErrorHint && (
-                  <div className="text-xs text-secondary mt-1">
-                    💡 {signErrorHint}
+                  <div className="text-xs text-secondary mt-1" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <Lightbulb size={12} /> {signErrorHint}
                   </div>
                 )}
               </div>
