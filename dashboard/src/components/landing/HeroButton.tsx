@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import '../styles/hero-button.css';
+import '../../styles/hero-button.css';
 
 const LETTERS = [
   { base: 'E', hover: 'V', dir: 1 },
