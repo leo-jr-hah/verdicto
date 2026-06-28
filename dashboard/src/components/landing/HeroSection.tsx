@@ -47,12 +47,12 @@ export const HeroSection: React.FC = () => {
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1.25, duration: 0.01 }}
+              transition={{ delay: 1.4, duration: 0.01 }}
               style={{
                 position: 'absolute',
                 top: 0,
                 left: 0,
-                color: 'var(--gold)',
+                color: 'var(--accent)',
                 zIndex: 1,
                 display: 'inline-block',
                 width: '100%'
@@ -62,22 +62,23 @@ export const HeroSection: React.FC = () => {
             </motion.span>
 
             <motion.div
-              initial={{ left: 0, width: '0%' }}
+              initial={{ clipPath: 'inset(0 100% 0 0)' }}
               animate={{ 
-                left: ['0%', '0%', '100%'], 
-                width: ['0%', '100%', '0%'] 
+                clipPath: ['inset(0 100% 0 0)', 'inset(0 0% 0 0)', 'inset(0 0% 0 100%)'] 
               }}
               transition={{ 
                 delay: 1.0, 
                 duration: 0.8, 
-                times: [0, 0.4, 1], 
+                times: [0, 0.5, 1], 
                 ease: [0.77, 0, 0.175, 1] 
               }}
               style={{
                 position: 'absolute',
                 top: '0.1em',
                 bottom: '0.1em',
-                backgroundColor: 'var(--gold)',
+                left: 0,
+                right: 0,
+                backgroundColor: 'var(--accent)',
                 zIndex: 2
               }}
             />
