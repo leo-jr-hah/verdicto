@@ -61,12 +61,12 @@ Every agent execution is receipted. Every payment is on-chain. Every verdict is 
 
 **Supporting details (small text or secondary row):**
 
-- **LLM Pipeline:** MiMo V2 (primary) → Groq Llama 3.3 70B (fallback) → deterministic heuristic (final fallback). Every fallback is flagged in the UI.
+- **LLM Pipeline:** MiMo V2 (primary) - Groq Llama 3.3 70B (fallback) - deterministic heuristic (final fallback). Every fallback is flagged in the UI.
 - **Data Sources:** RentCast (real estate comps), Met Museum API (fine art provenance), CoinGecko (commodity spot prices), FRED / Federal Reserve (macro context — interest rates, CPI).
-- **Trust Framework:** Five-dimension agent scoring — identity verification, execution consistency, output similarity, economic stake, challenge-response verification. Agents earn tiers: Bronze → Silver → Gold → Platinum.
+- **Trust Framework:** Five-dimension agent scoring — identity verification, execution consistency, output similarity, economic stake, challenge-response verification. Agents earn tiers: Bronze - Silver - Gold - Platinum.
 - **Persistence:** Supabase (PostgreSQL) for production data. Dual-write to local JSON for development. All tables indexed and schema-versioned.
 
-**Visual direction:** This section should feel technical and precise. Could use a layered architecture diagram (Frontend → Orchestrator → Agent Layer → Shared Layer → Casper Blockchain) or a horizontal pipeline showing the flow: Asset Submitted → Agents Analyze → Jury Deliberates → Verdict Recorded → Receipt Anchored. Keep it clean — no stock photos.
+**Visual direction:** This section should feel technical and precise. Could use a layered architecture diagram (Frontend - Orchestrator - Agent Layer - Shared Layer - Casper Blockchain) or a horizontal pipeline showing the flow: Asset Submitted - Agents Analyze - Jury Deliberates - Verdict Recorded - Receipt Anchored. Keep it clean — no stock photos.
 
 ---
 

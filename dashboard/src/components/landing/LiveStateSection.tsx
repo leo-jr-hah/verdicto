@@ -102,7 +102,7 @@ export const LiveStateSection: React.FC = () => {
     switch (type) {
       case 'cmd': return '>';
       case 'ok': return '[OK]';
-      case 'data': return '  →';
+      case 'data': return '  -';
       case 'success': return '  ✓';
       default: return '';
     }

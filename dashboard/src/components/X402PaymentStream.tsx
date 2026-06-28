@@ -75,7 +75,7 @@ const PaymentRow: React.FC<{ payment: PaymentEvent; index: number }> = ({ paymen
         flexShrink: 0,
       }} />
 
-      {/* From → To */}
+      {/* From - To */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
           <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{payment.from}</span>

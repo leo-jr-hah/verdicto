@@ -14,7 +14,7 @@ const LAYERS = [
     code: [
       'receipt[0] = HMAC-SHA256(input, state, timestamp)',
       'receipt[n] = HMAC-SHA256(data ‖ receipt[n-1])',
-      'break any link → chain invalidates',
+      'break any link - chain invalidates',
     ],
     description:
       'Every step the AI agents take — fetching data, running analysis, casting votes — is hashed and signed. Each receipt chains to the previous one. Modify any single receipt and every subsequent hash breaks.',
@@ -50,9 +50,9 @@ const LAYERS = [
     subtitle: 'Adversarial re-trial',
     code: [
       'dispute(stake: 5 CSPR, reason: string)',
-      '→ fresh jury, new evidence',
-      '→ if challenge succeeds: stake returned',
-      '→ if challenge fails: stake forfeited',
+      '- fresh jury, new evidence',
+      '- if challenge succeeds: stake returned',
+      '- if challenge fails: stake forfeited',
     ],
     description:
       'Anyone can challenge any verdict by staking 5 CSPR. The system triggers a completely fresh analysis with a new jury panel and allows new evidence. If the challenger is right, they get their stake back and the verdict is updated. A self-correcting system with no central authority.',

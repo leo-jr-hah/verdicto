@@ -2,9 +2,9 @@
  * x402 Integration Tests - Full payment flow simulation
  *
  * Tests the complete x402 protocol:
- *   1. Client requests resource without payment → 402 + paymentRequirements
- *   2. Client signs payment (wallet) → creates proof
- *   3. Client retries with proof → middleware verifies → 200
+ *   1. Client requests resource without payment - 402 + paymentRequirements
+ *   2. Client signs payment (wallet) - creates proof
+ *   3. Client retries with proof - middleware verifies - 200
  *
  * Also tests edge cases: invalid proofs, insufficient amounts, replay attacks.
  */
@@ -252,7 +252,7 @@ describe('x402 - Payment Proof Validation', () => {
   });
 });
 
-describe('x402 - Full Flow Simulation (402 → Sign → Retry)', () => {
+describe('x402 - Full Flow Simulation (402 - Sign - Retry)', () => {
   it('simulates complete client-side 402 flow', async () => {
     const app = createTestApp({ amountCSPR: '2.5' });
 

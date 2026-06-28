@@ -296,12 +296,12 @@ function buildDemoLLMResponse(systemPrompt: string, userPrompt: string): any {
   };
 }
 
-// ─── Main Export: askJuror (with MiMo → Groq → Fallback chain) ──────────────
+// ─── Main Export: askJuror (with MiMo - Groq - Fallback chain) ──────────────
 
 /**
  * Ask the LLM juror a question and get a structured JSON response.
  * 
- * Chain: MiMo → Groq → Heuristic Fallback
+ * Chain: MiMo - Groq - Heuristic Fallback
  * 
  * Each step has a 15s timeout. If MiMo fails, Groq is tried.
  * If Groq fails, a deterministic heuristic response is returned.
@@ -364,7 +364,7 @@ export async function askJuror(systemPrompt: string, userPrompt: string): Promis
 
 /**
  * Ask the LLM for a valuation analysis (used by agent-engine).
- * Same chain: MiMo → Groq → Fallback
+ * Same chain: MiMo - Groq - Fallback
  */
 export async function askValuationAgent(systemPrompt: string, userPrompt: string): Promise<JurorResponse> {
   return askJuror(systemPrompt, userPrompt);

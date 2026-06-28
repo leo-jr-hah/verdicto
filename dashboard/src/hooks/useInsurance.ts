@@ -22,7 +22,7 @@ interface UseInsuranceState {
 }
 
 interface UseInsuranceReturn extends UseInsuranceState {
-  /** Step 1: Submit insurance request (may trigger 402 → paymentRequired) */
+  /** Step 1: Submit insurance request (may trigger 402 - paymentRequired) */
   submitPolicy: (request: InsuranceCreateRequest) => Promise<void>;
   /** Step 2: After wallet signs, retry with payment proof */
   submitPolicyWithProof: (request: InsuranceCreateRequest, paymentProof: string) => Promise<void>;

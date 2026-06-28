@@ -3,7 +3,7 @@
  *
  * Each agent is a genuine AI agent that:
  *   1. Fetches real market data from APIs
- *   2. Reasons independently about the data using LLM (MiMo → Groq → fallback)
+ *   2. Reasons independently about the data using LLM (MiMo - Groq - fallback)
  *   3. Has a unique specialization that shapes its analysis
  *   4. Can genuinely disagree with the other agent
  *

@@ -1,10 +1,10 @@
 /**
  * WalletConnectButton - displays in the sidebar and mobile header.
  *
- * - If extension is NOT installed → shows "Install Wallet" → opens Chrome Web Store
- * - If extension IS installed → shows "Connect Wallet" → triggers Casper Wallet popup
+ * - If extension is NOT installed - shows "Install Wallet" - opens Chrome Web Store
+ * - If extension IS installed - shows "Connect Wallet" - triggers Casper Wallet popup
  *
- * When connected → truncated public key + dropdown with:
+ * When connected - truncated public key + dropdown with:
  *   - Copy Address
  *   - Get Testnet Tokens (faucet link)
  *   - Disconnect

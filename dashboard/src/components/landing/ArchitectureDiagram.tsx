@@ -10,7 +10,7 @@ import {
  * 
  * A clean, properly-connected vertical flow diagram showing the real pipeline:
  * 
- *   User → Orchestrator → Data Sources → x402 Payment
+ *   User - Orchestrator - Data Sources - x402 Payment
  *                                       ↓
  *                     ┌─────────────────┼─────────────────┐
  *                     ↓                 ↓                 ↓
@@ -22,7 +22,7 @@ import {
  *              Evidence Analyst  Market Interpreter  Precedent Researcher
  *                     └─────────────────┼─────────────────┘
  *                                       ↓
- *                    Trust Framework → HMAC Receipt Chain → Verdict Oracle
+ *                    Trust Framework - HMAC Receipt Chain - Verdict Oracle
  *                                                          ↓
  *                                                    Casper Blockchain
  */
@@ -77,16 +77,16 @@ const EDGES: FlowEdge[] = [
   // Row 0 connections
   { from: 'user', to: 'orchestrator', animated: true },
   
-  // Row 0 → Row 1
+  // Row 0 - Row 1
   { from: 'orchestrator', to: 'datasources', animated: true },
   { from: 'orchestrator', to: 'x402', animated: true },
   
-  // Row 1 → Row 2
+  // Row 1 - Row 2
   { from: 'datasources', to: 'comps', animated: true },
   { from: 'datasources', to: 'dcf', animated: true },
   { from: 'datasources', to: 'llm', animated: true },
   
-  // Row 2 → Row 3 (parallel flow)
+  // Row 2 - Row 3 (parallel flow)
   { from: 'comps', to: 'evidence', animated: true },
   { from: 'comps', to: 'market', animated: true },
   { from: 'comps', to: 'precedent', animated: true },
@@ -97,14 +97,14 @@ const EDGES: FlowEdge[] = [
   { from: 'llm', to: 'market', animated: true },
   { from: 'llm', to: 'precedent', animated: true },
   
-  // Row 3 → Row 4
+  // Row 3 - Row 4
   { from: 'evidence', to: 'trust', animated: true },
   { from: 'market', to: 'trust', animated: true },
   { from: 'precedent', to: 'trust', animated: true },
   { from: 'trust', to: 'hmac', animated: true },
   { from: 'hmac', to: 'verdict', animated: true },
   
-  // Row 4 → Row 5
+  // Row 4 - Row 5
   { from: 'verdict', to: 'blockchain', animated: true },
 ];
 

@@ -376,11 +376,11 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
     console.log('[signPayment] result.signature:', rawSig);
     console.log('[signPayment] result.signature length:', rawSig?.length);
     if (rawSig instanceof Uint8Array) {
-      console.log('[signPayment] → Signature is Uint8Array, length:', rawSig.length);
+      console.log('[signPayment] - Signature is Uint8Array, length:', rawSig.length);
     } else if (typeof rawSig === 'string') {
-      console.log('[signPayment] → Signature is string, first 40 chars:', rawSig.substring(0, 40));
+      console.log('[signPayment] - Signature is string, first 40 chars:', rawSig.substring(0, 40));
     } else if (Array.isArray(rawSig)) {
-      console.log('[signPayment] → Signature is Array, length:', rawSig.length);
+      console.log('[signPayment] - Signature is Array, length:', rawSig.length);
     }
 
     // Convert signature to Uint8Array regardless of input format
@@ -393,7 +393,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
     } else if (Array.isArray(sig)) {
       sigBytes = new Uint8Array(sig);
     } else if (typeof sig === 'string') {
-      // Hex string → Uint8Array
+      // Hex string - Uint8Array
       sigBytes = new Uint8Array(sig.length / 2);
       for (let i = 0; i < sig.length; i += 2) {
         sigBytes[i / 2] = parseInt(sig.substring(i, i + 2), 16);
@@ -416,7 +416,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
       taggedSigBytes = new Uint8Array(65);
       taggedSigBytes[0] = keyTypeTag;
       taggedSigBytes.set(sigBytes, 1);
-      console.log('[signPayment] Prepended key-type tag:', keyTypeTag.toString(16), '→ 65 bytes');
+      console.log('[signPayment] Prepended key-type tag:', keyTypeTag.toString(16), '- 65 bytes');
     } else if (sigBytes.length === 65 && (sigBytes[0] === 0x01 || sigBytes[0] === 0x02)) {
       // Already has the tag
       taggedSigBytes = sigBytes;
@@ -434,7 +434,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
     const deployHash = (signedDeployJson as any).hash || (signedDeployJson as any).deploy?.hash || '';
 
     // ── Broadcast the signed deploy via backend relay ──
-    // Direct browser → RPC calls fail due to CORS, so we relay through the backend.
+    // Direct browser - RPC calls fail due to CORS, so we relay through the backend.
     let confirmedHash = deployHash;
     let broadcastSuccess = false;
 

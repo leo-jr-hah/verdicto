@@ -132,7 +132,7 @@ describe('computeAggregateTrust', () => {
   it('caps stake score at 100 (1000 CSPR max)', () => {
     const lowStake = computeAggregateTrust({ ...baseScore, economicStake: 500 });
     const highStake = computeAggregateTrust({ ...baseScore, economicStake: 5000 });
-    // Stake is capped at 1000 CSPR → 100 score, so 5000 CSPR doesn't go higher
+    // Stake is capped at 1000 CSPR - 100 score, so 5000 CSPR doesn't go higher
     // But 500 CSPR = 50 score vs 1000+ CSPR = 100 score, so difference is bounded
     const stakeDiff = Math.abs(lowStake.aggregateScore - highStake.aggregateScore);
     // Max possible difference: (100-50)*0.3*10 = 150

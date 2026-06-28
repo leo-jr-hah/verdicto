@@ -2,7 +2,7 @@
 
 ## Phase 1: Foundation
 - [x] 1.1 Rewrite `tokens.css` — new brutalism tokens (colors, spacing, typography, shadows, radius, animation)
-- [x] 1.2 Rewrite `neumorphism.css` → `brutalism.css` — new utility classes (grid, data-panel, buttons, LED indicators, border-trace, 200+ utility classes)
+- [x] 1.2 Rewrite `neumorphism.css` - `brutalism.css` — new utility classes (grid, data-panel, buttons, LED indicators, border-trace, 200+ utility classes)
 - [x] 1.3 Update `index.css` — import new fonts (Geist), remove old neumorphism imports, add component classes
 - [x] 1.4 Font import via tokens.css (Google Fonts Geist + Geist Mono)
 

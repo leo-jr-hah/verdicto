@@ -67,9 +67,9 @@ npm run dev
 ### 5. Run the Demo Flow
 
 1. Open `http://localhost:5173` — the landing page loads
-2. Click **Connect Wallet** in the sidebar → approve in Casper Wallet extension
-3. Navigate to **Value Asset** → select a demo asset (e.g., Manhattan Condo)
-4. Click **Pay & Assess** → approve the 2.5 CSPR payment in your wallet
+2. Click **Connect Wallet** in the sidebar - approve in Casper Wallet extension
+3. Navigate to **Value Asset** - select a demo asset (e.g., Manhattan Condo)
+4. Click **Pay & Assess** - approve the 2.5 CSPR payment in your wallet
 5. Watch 3 AI jurors analyze the asset in real time via WebSocket
 6. See the consensus valuation, risk flags, and methodology breakdown
 7. Navigate to **Borrow**, **Insure**, **Predict**, **Oracle**, or **Disputes**

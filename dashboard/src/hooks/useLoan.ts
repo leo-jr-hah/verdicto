@@ -23,7 +23,7 @@ interface UseLoanState {
 }
 
 interface UseLoanReturn extends UseLoanState {
-  /** Step 1: Submit loan request (may trigger 402 → paymentRequired) */
+  /** Step 1: Submit loan request (may trigger 402 - paymentRequired) */
   submitLoan: (request: LoanCreateRequest) => Promise<void>;
   /** Step 2: After wallet signs, retry with payment proof */
   submitLoanWithProof: (request: LoanCreateRequest, paymentProof: string) => Promise<void>;

@@ -144,7 +144,7 @@ export async function castVoteOnChain(
     const deployId = Date.now() + Math.floor(Math.random() * 1000);
     const txHash = await executeContractCall(VOTING_CONTRACT_HASH, 'cast_vote', sessionArgs, deployId);
 
-    console.log(`  📝 VotingContract ✅ cast_vote → ${txHash.slice(0, 16)}...`);
+    console.log(`  📝 VotingContract ✅ cast_vote - ${txHash.slice(0, 16)}...`);
     return { success: true, txHash, assessmentId, verdictIndex, weight };
   } catch (err: any) {
     console.warn(`  ⚠️ VotingContract cast_vote failed: ${err.message}`);
@@ -218,7 +218,7 @@ export async function updateReputationOnChain(
     const deployId = Date.now() + Math.floor(Math.random() * 1000);
     const txHash = await executeContractCall(REPUTATION_CONTRACT_HASH, entryPoint, sessionArgs, deployId);
 
-    console.log(`  🏆 ReputationRegistry ✅ ${entryPoint} → ${txHash.slice(0, 16)}...`);
+    console.log(`  🏆 ReputationRegistry ✅ ${entryPoint} - ${txHash.slice(0, 16)}...`);
     return { success: true, txHash };
   } catch (err: any) {
     console.warn(`  ⚠️ ReputationRegistry update failed: ${err.message}`);
@@ -391,7 +391,7 @@ export async function storeVerdictOnChain(verdict: OracleVerdict): Promise<{ suc
     const deployId = Date.now() + Math.floor(Math.random() * 1000);
     const txHash = await executeContractCall(VERDICT_ORACLE_CONTRACT_HASH, 'store_verdict', sessionArgs, deployId);
 
-    console.log(`  📡 VerdictOracle ✅ store_verdict → ${txHash.slice(0, 16)}...`);
+    console.log(`  📡 VerdictOracle ✅ store_verdict - ${txHash.slice(0, 16)}...`);
     // Also keep in memory for fast reads
     oracleVerdictStore.set(verdict.assetId, verdict);
     // ── DB: Persist verdict to Supabase ──
@@ -890,7 +890,7 @@ export async function runRetrial(disputeId: string): Promise<Dispute | { error: 
       agentWeights: retrialPanel.map(j => `${j.methodology}:${j.reputation}`).join(','),
     };
     oracleVerdictStore.set(assetId, updatedVerdict);
-    console.log(`    📡 VerdictOracle: verdict UPDATED after overturned dispute → ${newValue.toLocaleString()} (was ${original.value.toLocaleString()})`);
+    console.log(`    📡 VerdictOracle: verdict UPDATED after overturned dispute - ${newValue.toLocaleString()} (was ${original.value.toLocaleString()})`);
   }
 
   console.log(`  ⚖️  [RETRIAL] Complete: dispute=${disputeId} outcome=${dispute.outcome} delta=${valueDelta.toFixed(1)}%`);

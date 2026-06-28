@@ -381,9 +381,9 @@ export const AgentExplainer: React.FC<AgentExplainerProps> = ({ assessment, insu
           <div className="text-xs leading-relaxed text-secondary bg-sunken rounded-sm p-3 mb-3">
             Risk is calculated from <strong>assessment confidence</strong> ({(assessment.valuationA.confidence * 100).toFixed(0)}% &times; {(assessment.valuationB.confidence * 100).toFixed(0)}%)
             and <strong>value-to-asking ratio</strong> ({((assessment.assessedValue / assessment.askingPrice) * 100).toFixed(0)}%).
-            {insurance.riskScore <= 30 && ' Both signals are strong → low risk → lower premium.'}
-            {insurance.riskScore > 30 && insurance.riskScore <= 55 && ' Moderate signals → standard risk → standard premium.'}
-            {insurance.riskScore > 55 && ' Weak signals detected → elevated risk → higher premium to compensate.'}
+            {insurance.riskScore <= 30 && ' Both signals are strong - low risk - lower premium.'}
+            {insurance.riskScore > 30 && insurance.riskScore <= 55 && ' Moderate signals - standard risk - standard premium.'}
+            {insurance.riskScore > 55 && ' Weak signals detected - elevated risk - higher premium to compensate.'}
           </div>
 
           {/* Coverage & Premium breakdown */}

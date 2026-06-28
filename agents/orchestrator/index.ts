@@ -156,7 +156,7 @@ function sanitizeError(err: any): string {
 }
 
 // ─── In-memory receipt chain store (per assessment) ──────────────────────────
-// Keyed by assessmentId → full DeliberationReceipt[] for that session.
+// Keyed by assessmentId - full DeliberationReceipt[] for that session.
 const receiptChainStore = new Map<string, DeliberationReceipt[]>();
 
 // ─── Per-agent stats tracker ────────────────────────────────────────────────
@@ -270,7 +270,7 @@ async function executeCasperTransfer(targetPublicKeyHex: string, amountMotes: nu
   // Demo mode: return a fake deploy hash without touching blockchain
   if (process.env.DEMO_MODE === 'true') {
     const fakeHash = 'demo_' + crypto.randomBytes(32).toString('hex');
-    console.log(`  [DEMO] 🎭 Simulated transfer: ${amountMotes} motes → ${targetPublicKeyHex.slice(0, 16)}... (hash: ${fakeHash.slice(0, 16)}...)`);
+    console.log(`  [DEMO] 🎭 Simulated transfer: ${amountMotes} motes - ${targetPublicKeyHex.slice(0, 16)}... (hash: ${fakeHash.slice(0, 16)}...)`);
     return fakeHash;
   }
 
@@ -357,7 +357,7 @@ async function fetchWithX402(url: string, payload: any, agentLabel: string) {
     if (error.response?.status === 402) {
       const reqs = error.response.data.paymentRequirements;
       console.log(`  [x402] 🛑 402 Payment Required from ${agentLabel}`);
-      console.log(`  [x402]    Fee: ${reqs.maxAmountRequired} CSPR → ${reqs.payTo.slice(0, 16)}...`);
+      console.log(`  [x402]    Fee: ${reqs.maxAmountRequired} CSPR - ${reqs.payTo.slice(0, 16)}...`);
 
       const transferId = Date.now() + Math.floor(Math.random() * 1000);
       let txHash = `cspr-tx-${transferId}`;
@@ -624,7 +624,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
       );
       receiptChain.push(receipt);
       previousReceiptId = receipt.receiptId;
-      console.log(`  📜 [Audit] Receipt: ${receipt.receiptId.slice(0, 8)}... → Hash: ${receipt.signature.slice(0, 16)}...`);
+      console.log(`  📜 [Audit] Receipt: ${receipt.receiptId.slice(0, 8)}... - Hash: ${receipt.signature.slice(0, 16)}...`);
 
       emitEvent('receipt_created', { receipt, juror: juror.name, round: 1 });
 
@@ -675,7 +675,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
       );
       receiptChain.push(receipt);
       previousReceiptId = receipt.receiptId;
-      console.log(`  📜 [Audit] Receipt: ${receipt.receiptId.slice(0, 8)}... → Hash: ${receipt.signature.slice(0, 16)}...`);
+      console.log(`  📜 [Audit] Receipt: ${receipt.receiptId.slice(0, 8)}... - Hash: ${receipt.signature.slice(0, 16)}...`);
 
       emitEvent('receipt_created', { receipt, juror: juror.name, round: 2 });
 
@@ -2350,7 +2350,7 @@ Respond in JSON format:
       // Log as transaction
       const predTx = createTransactionEntry(
         'SubmitAssessment',
-        `Prediction: "${question.slice(0, 60)}..." → ${(consensusProbability * 100).toFixed(1)}%`,
+        `Prediction: "${question.slice(0, 60)}..." - ${(consensusProbability * 100).toFixed(1)}%`,
         predictionId,
         'Orchestrator',
         'latest',
@@ -2521,7 +2521,7 @@ Respond in JSON format:
    * Calculate LTV using a continuous formula tied to assessment confidence.
    *
    * This is the core differentiator: low-confidence valuations produce visibly
-   * lower LTV. A high-divergence juror path (agents disagree → low confidence)
+   * lower LTV. A high-divergence juror path (agents disagree - low confidence)
    * directly reduces borrowing power. This is what makes the trust framework
    * matter - it's not just a display number, it changes the economics.
    *
@@ -2530,10 +2530,10 @@ Respond in JSON format:
    *   where valueRatio = min(assessedValue / askingPrice, 1.0)
    *
    * Examples (real-estate, base=60, max=75):
-   *   confidence=0.95, valueRatio=1.0 → LTV = 60 + 15×0.95×1.0 = 74.25 → 74%
-   *   confidence=0.70, valueRatio=0.9 → LTV = 60 + 15×0.70×0.9 = 69.45 → 69%
-   *   confidence=0.40, valueRatio=0.7 → LTV = 60 + 15×0.40×0.7 = 64.20 → 64%
-   *   confidence=0.20, valueRatio=0.5 → LTV = 60 + 15×0.20×0.5 = 61.50 → 61%
+   *   confidence=0.95, valueRatio=1.0 - LTV = 60 + 15×0.95×1.0 = 74.25 - 74%
+   *   confidence=0.70, valueRatio=0.9 - LTV = 60 + 15×0.70×0.9 = 69.45 - 69%
+   *   confidence=0.40, valueRatio=0.7 - LTV = 60 + 15×0.40×0.7 = 64.20 - 64%
+   *   confidence=0.20, valueRatio=0.5 - LTV = 60 + 15×0.20×0.5 = 61.50 - 61%
    */
   function calculateLTV(
     assetType: AssetType,
@@ -2545,7 +2545,7 @@ Respond in JSON format:
     const valueRatio = Math.min(assessedValue / askingPrice, 1.0);
     const ltvSpread = tiers.max - tiers.base;
 
-    // Continuous LTV: higher confidence + higher value ratio → closer to max LTV
+    // Continuous LTV: higher confidence + higher value ratio - closer to max LTV
     const rawLtv = tiers.base + ltvSpread * confidence * valueRatio;
     const ltv = Math.round(rawLtv);
     const loanAmount = Math.round((assessedValue * ltv / 100) * 100) / 100;
@@ -2567,7 +2567,7 @@ Respond in JSON format:
   /**
    * POST /api/loans/create
    * Create a loan against a previously assessed asset.
-   * Flow: validate assessment → calculate LTV → disburse CSPR via wallet transfer → store loan.
+   * Flow: validate assessment - calculate LTV - disburse CSPR via wallet transfer - store loan.
    * x402-gated: returns HTTP 402 with payment requirements if no valid payment proof is provided.
    */
   app.post('/api/loans/create',
@@ -3459,7 +3459,7 @@ Respond in JSON format:
   /**
    * POST /api/insurance/create
    * Create an insurance policy for a previously assessed asset.
-   * Flow: validate assessment → calculate risk/premium → store policy.
+   * Flow: validate assessment - calculate risk/premium - store policy.
    * x402-gated: returns HTTP 402 with payment requirements if no valid payment proof is provided.
    */
   app.post('/api/insurance/create',
@@ -4010,7 +4010,7 @@ Respond in JSON format:
       loan.healthRatio = newHealthRatio;
       loan.status = newStatus;
 
-      console.log(`[Force-Revalue] ${loanId}: ${loan.assessedValue.toLocaleString()} → ${newValue.toLocaleString()} health=${newHealthRatio}`);
+      console.log(`[Force-Revalue] ${loanId}: ${loan.assessedValue.toLocaleString()} - ${newValue.toLocaleString()} health=${newHealthRatio}`);
 
       res.json({
         success: true,
@@ -4147,7 +4147,7 @@ Respond in JSON format:
           loan.healthRatio = newHealthRatio;
           loan.status = newStatus;
 
-          console.log(`[Auto-Revalue] ${loan.loanId}: ${loan.assessedValue.toLocaleString()} → ${newValue.toLocaleString()} health=${newHealthRatio}`);
+          console.log(`[Auto-Revalue] ${loan.loanId}: ${loan.assessedValue.toLocaleString()} - ${newValue.toLocaleString()} health=${newHealthRatio}`);
         } catch (err: any) {
           console.error(`[Auto-Revalue] Failed for ${loan.loanId}:`, err.message);
         }

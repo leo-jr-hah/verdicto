@@ -28,7 +28,7 @@ describe('createExecutionCommitment', () => {
     const a = createExecutionCommitment(input, state, block);
     const b = createExecutionCommitment(input, state, block);
 
-    // Same input → same hashes (timestamps differ, so commitment differs)
+    // Same input - same hashes (timestamps differ, so commitment differs)
     expect(a.inputHash).toBe(b.inputHash);
     expect(a.agentStateHash).toBe(b.agentStateHash);
   });

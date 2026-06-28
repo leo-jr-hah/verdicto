@@ -51,8 +51,8 @@ React 19 frontend for the Verdicto platform — AI-powered RWA valuation, lendin
 ### App Pages
 - **DashboardView** — Portfolio overview, stats grid
 - **AssessView** — Multi-methodology dashboard, agent cards, divergence range, risk flags
-- **BorrowView** — 6-step loan wizard (select assessment → configure LTV → sign → disburse → monitor)
-- **InsureView** — 6-step insurance wizard (select asset → risk score → premium → sign → policy → monitor)
+- **BorrowView** — 6-step loan wizard (select assessment - configure LTV - sign - disburse - monitor)
+- **InsureView** — 6-step insurance wizard (select asset - risk score - premium - sign - policy - monitor)
 - **PredictionView** — Yes/No questions, 3-agent consensus, probability cards
 - **OracleView** — Verdict list, stats, oracle health
 - **DisputesView** — Challenge verdicts, re-trial results, stake distribution
@@ -95,7 +95,7 @@ npm install
 
 # Start dev server
 npm run dev
-# → http://localhost:5173
+# - http://localhost:5173
 
 # Build for production
 npm run build

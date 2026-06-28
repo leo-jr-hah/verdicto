@@ -31,7 +31,7 @@ const ASSET_TYPES: Array<{
   },
   {
     id: 'art', label: 'Fine Art', sub: '3.5–5% premium', icon: <Palette size={20} />,
-    demo: { name: 'Basquiat Untitled (Skull), 1981', description: 'Acrylic and oilstick on canvas, 72×68 in. Provenance: Galerie Thaddeus Ropac → Private European collection. Authenticated by Basquiat Authentication Committee.', value: '120000000', coveragePercent: '50', artistOrMedium: 'Jean-Michel Basquiat, Acrylic and oilstick on canvas' },
+    demo: { name: 'Basquiat Untitled (Skull), 1981', description: 'Acrylic and oilstick on canvas, 72×68 in. Provenance: Galerie Thaddeus Ropac - Private European collection. Authenticated by Basquiat Authentication Committee.', value: '120000000', coveragePercent: '50', artistOrMedium: 'Jean-Michel Basquiat, Acrylic and oilstick on canvas' },
   },
   {
     id: 'commodity', label: 'Commodity', sub: '1.5–2.5% premium', icon: <Gem size={20} />,

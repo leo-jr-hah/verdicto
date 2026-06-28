@@ -6,7 +6,7 @@ const CSPR_CLOUD_KEY = process.env.CSPRCLOUD_API_KEY || '';
 const DEMO_MODE = process.env.DEMO_MODE === 'true';
 
 // ─── Allowed internal IPs for localhost bypass ──────────────────────────────
-// Only the loopback addresses trusted for orchestrator→agent calls.
+// Only the loopback addresses trusted for orchestrator-agent calls.
 // Headers like Origin/Referer are client-controlled and NEVER trusted.
 const TRUSTED_LOCAL_IPS = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 

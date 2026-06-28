@@ -3,7 +3,7 @@ import { motion, useMotionValue, useSpring, useTransform, useMotionTemplate } fr
 import { HeroButton } from './HeroButton';
 
 /* ── Faceted Geometric Background ────────────────────────────────────────
-   Multiple overlapping clip-path polygons with teal→navy gradients.
+   Multiple overlapping clip-path polygons with teal-navy gradients.
    Pure CSS, no images needed. ─────────────────────────────────────────── */
 const FacetedBackground: React.FC = () => (
   <div className="hero-facets" aria-hidden="true">

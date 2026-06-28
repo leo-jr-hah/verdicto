@@ -20,7 +20,7 @@ interface UseAssessmentState {
 }
 
 interface UseAssessmentReturn extends UseAssessmentState {
-  /** Step 1: Submit assessment (may trigger 402 → paymentRequired) */
+  /** Step 1: Submit assessment (may trigger 402 - paymentRequired) */
   assess: (request: AssessmentRequest) => Promise<void>;
   /** Step 2: After wallet signs, retry with payment proof */
   submitWithPaymentProof: (request: AssessmentRequest, paymentProof: string) => Promise<void>;

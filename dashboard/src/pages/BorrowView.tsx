@@ -69,7 +69,7 @@ const ASSET_TYPES: Array<{
     icon: <Palette size={20} />,
     demo: {
       name: 'Basquiat Untitled (Skull), 1981',
-      description: 'Acrylic and oilstick on canvas, 72×68 in. Provenance: Galerie Thaddeus Ropac → Private European collection → Current owner. Authenticated by Basquiat Authentication Committee. Last sold at Sotheby\'s 2017 for $110.5M.',
+      description: 'Acrylic and oilstick on canvas, 72×68 in. Provenance: Galerie Thaddeus Ropac - Private European collection - Current owner. Authenticated by Basquiat Authentication Committee. Last sold at Sotheby\'s 2017 for $110.5M.',
       value: '120000000',
       ltv: '35',
       artistOrMedium: 'Jean-Michel Basquiat, Acrylic and oilstick on canvas',

@@ -154,7 +154,7 @@ export const TransactionsView: React.FC = () => {
   const predictionAsTx: TransactionEntry[] = predictions.map(p => ({
     id: p.prediction_id,
     type: 'SubmitAssessment' as const,
-    action: `Prediction: "${p.question.slice(0, 60)}${p.question.length > 60 ? '...' : ''}" → ${(p.probability * 100).toFixed(1)}%`,
+    action: `Prediction: "${p.question.slice(0, 60)}${p.question.length > 60 ? '...' : ''}" - ${(p.probability * 100).toFixed(1)}%`,
     hash: p.prediction_id,
     contract: 'PredictionMarket',
     blockHeight: 'latest',

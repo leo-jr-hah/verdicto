@@ -199,7 +199,7 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
   {
     id: 'a4',
     title: 'Deterministic Valuation Pipeline',
-    description: 'Replace parallel agent races with a staged pipeline: Data Collection → Analysis → Cross-Validation → Deliberation. Each stage must complete before the next begins. Eliminates non-deterministic ordering bugs.',
+    description: 'Replace parallel agent races with a staged pipeline: Data Collection - Analysis - Cross-Validation - Deliberation. Each stage must complete before the next begins. Eliminates non-deterministic ordering bugs.',
     category: 'verifiable',
     status: 'planned',
     icon: <GitBranch size={18} />,

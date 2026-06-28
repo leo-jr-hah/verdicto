@@ -2,7 +2,7 @@
  * API service for fetching real data from the orchestrator backend.
  */
 
-// In dev, empty string uses Vite proxy (/api/* → localhost:3011)
+// In dev, empty string uses Vite proxy (/api/* - localhost:3011)
 // In production, set VITE_ORCHESTRATOR_URL to the deployed backend URL
 export const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || (import.meta.env.PROD ? 'https://verdicto-production.up.railway.app' : '');
 const WS_URL = import.meta.env.VITE_WS_URL || (import.meta.env.PROD ? 'wss://verdicto-production.up.railway.app/ws' : '');
@@ -319,10 +319,10 @@ export type AssessmentResponse =
  * Submit an assessment request to the orchestrator.
  *
  * x402 flow:
- *   1. First call: no paymentProof → backend may return 402 with payment requirements
+ *   1. First call: no paymentProof - backend may return 402 with payment requirements
  *   2. If 402: return payment requirements to the caller (UI shows payment modal)
- *   3. User signs payment via wallet → caller retries with paymentProof
- *   4. Second call: includes x-payment-proof header → backend verifies and proceeds
+ *   3. User signs payment via wallet - caller retries with paymentProof
+ *   4. Second call: includes x-payment-proof header - backend verifies and proceeds
  */
 export async function submitAssessment(
   request: AssessmentRequest,
