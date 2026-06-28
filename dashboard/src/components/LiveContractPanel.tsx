@@ -22,7 +22,8 @@ function formatNumber(n: number): string {
 }
 
 function formatCSPR(motes: number): string {
-  return `${(motes / 1_000_000_000).toFixed(2)} CSPR`;
+  const n = typeof motes === 'number' && !isNaN(motes) ? motes : 0;
+  return `${(n / 1_000_000_000).toFixed(2)} CSPR`;
 }
 
 function formatTimeAgo(timestamp: number): string {

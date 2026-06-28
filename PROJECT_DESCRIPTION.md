@@ -140,7 +140,7 @@ Graceful degradation — works with zero API keys, falls back to deterministic c
 | Blockchain | Casper Testnet, casper-js-sdk |
 | Data APIs | RentCast, Met Museum, CoinGecko, FRED |
 | Payments | x402 via CSPR.cloud |
-| Database | SQLite |
+| Database | Supabase (persistent) + JSON file fallback |
 | Smart Contracts | Odra (Rust) |
 | Hosting | Railway (backend), Vercel (frontend) |
 

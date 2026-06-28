@@ -1064,22 +1064,32 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const totalAssessments = assessmentIds.length;
       const totalReceipts = Array.from(receiptChainStore.values()).reduce((sum, chain) => sum + chain.length, 0);
 
-      // Count loans by status
+      // Count loans by status (only count items from the last 24h as "active" to avoid
+      // stale in-memory entries from previous sessions inflating the count)
+      const cutoff24h = Date.now() - 24 * 60 * 60 * 1000;
       const allLoans = Array.from(loanStore.values());
-      const activeLoans = allLoans.filter(l => l.status === 'active' || l.status === 'warning');
+      const activeLoans = allLoans.filter(l =>
+        (l.status === 'active' || l.status === 'warning') &&
+        (l.createdAt ?? 0) > cutoff24h
+      );
       const repaidLoans = allLoans.filter(l => l.status === 'repaid');
       const liquidatedLoans = allLoans.filter(l => l.status === 'liquidated');
 
-      // Count insurance policies by status
+      // Count insurance policies by status (same 24h freshness filter)
       const allPolicies = Array.from(insuranceStore.values());
-      const activePolicies = allPolicies.filter(p => p.status === 'active');
+      const activePolicies = allPolicies.filter(p =>
+        p.status === 'active' && (p.createdAt ?? 0) > cutoff24h
+      );
       const claimedPolicies = allPolicies.filter(p => p.status === 'claimed' || p.status === 'paid');
 
       // Compute payment totals from transactions
+      // amount can be a number (2.5) or a string ("2.5") depending on the source.
+      // Parse it safely to avoid NaN in the dashboard.
       const paymentTxs = transactions.filter(t => t.type === 'x402 Payment');
       const totalCollectedMotes = paymentTxs.reduce((sum, t) => {
-        const amount = (t.metadata?.amount as number) || 0;
-        return sum + amount;
+        const raw = t.metadata?.amount;
+        const parsed = typeof raw === 'number' ? raw : parseFloat(String(raw ?? 0));
+        return sum + (isNaN(parsed) ? 0 : parsed);
       }, 0);
 
       res.json({
