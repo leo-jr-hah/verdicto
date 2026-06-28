@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useRef } from 'react';
+import { motion, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'motion/react';
 import { Link } from 'react-router-dom';
 
 /* ── Faceted Geometric Background ────────────────────────────────────────
@@ -29,64 +29,72 @@ const FacetedBackground: React.FC = () => (
 
 /* ── Hero Section ─────────────────────────────────────────────────────── */
 export const HeroSection: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Interactive Mouse Parallax Values
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  // Smooth springs for high-end feel
+  const smoothX = useSpring(mouseX, { stiffness: 150, damping: 25, mass: 0.5 });
+  const smoothY = useSpring(mouseY, { stiffness: 150, damping: 25, mass: 0.5 });
+
+  // Map mouse movement to physical tilt and brutalist text shadow
+  const rotateX = useTransform(smoothY, [-1, 1], [8, -8]);
+  const rotateY = useTransform(smoothX, [-1, 1], [-8, 8]);
+  
+  const shadowX = useTransform(smoothX, [-1, 1], [-12, 12]);
+  const shadowY = useTransform(smoothY, [-1, 1], [-12, 12]);
+  const textShadow = useMotionTemplate`${shadowX}px ${shadowY}px 0px rgba(212, 175, 55, 0.25)`;
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    mouseX.set((e.clientX - centerX) / (rect.width / 2));
+    mouseY.set((e.clientY - centerY) / (rect.height / 2));
+  };
+  
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
   return (
     <section className="hero-section-new">
       <FacetedBackground />
 
       <div className="hero-content-new">
-        <motion.h1
-          className="hero-headline-new"
+        {/* Intro Animation Wrapper */}
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          style={{ perspective: 1000 }}
         >
-          Verdicts you can{' '}
-          <motion.span style={{ position: 'relative', display: 'inline-block' }}>
-            <span style={{ opacity: 0 }}>verify.</span>
-            
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.4, duration: 0.01 }}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                color: 'var(--accent)',
-                zIndex: 1,
-                display: 'inline-block',
-                width: '100%'
-              }}
-            >
-              verify.
-            </motion.span>
-
-            <motion.div
-              initial={{ clipPath: 'inset(0 100% 0 0)' }}
-              animate={{ 
-                clipPath: ['inset(0 100% 0 0)', 'inset(0 0% 0 0)', 'inset(0 0% 0 100%)'] 
-              }}
-              transition={{ 
-                delay: 1.0, 
-                duration: 1.2, 
-                times: [0, 0.5, 1], 
-                ease: [0.77, 0, 0.175, 1],
-                repeat: Infinity,
-                repeatDelay: 4,
-                repeatType: 'loop'
-              }}
-              style={{
-                position: 'absolute',
-                top: '0.1em',
-                bottom: '0.1em',
-                left: 0,
-                right: 0,
-                backgroundColor: 'var(--accent)',
-                zIndex: 2
-              }}
-            />
-          </motion.span>
-        </motion.h1>
+          {/* Interactive Hover Target */}
+          <motion.div
+            ref={containerRef}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            style={{ 
+              rotateX, 
+              rotateY,
+              textShadow,
+              display: 'inline-block',
+              cursor: 'default',
+              transformStyle: 'preserve-3d'
+            }}
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          >
+            <h1 className="hero-headline-new" style={{ margin: 0 }}>
+              Verdicts you can <span style={{ color: 'var(--accent)' }}>verify.</span>
+            </h1>
+          </motion.div>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
