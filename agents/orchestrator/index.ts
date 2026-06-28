@@ -1020,6 +1020,27 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     res.json({ status: 'ok', service: 'verdicto-orchestrator' });
   });
 
+  // Health endpoint — reports Supabase connectivity
+  app.get('/api/health', async (_, res) => {
+    const hasSupabase = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+    let supabaseOk = false;
+    if (hasSupabase) {
+      try {
+        await db.getTransactionsFromDb(1);
+        supabaseOk = true;
+      } catch { /* not connected */ }
+    }
+    res.json({
+      status: 'ok',
+      persistentStorage: supabaseOk,
+      message: supabaseOk
+        ? 'Supabase connected — data persists across deploys'
+        : hasSupabase
+          ? 'Supabase configured but not reachable — data stored in local file only'
+          : 'No Supabase configured — ALL DATA IS LOST on every deploy/restart. Set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY.',
+    });
+  });
+
   app.get('/api/transactions', async (_, res) => {
     try {
       const transactions = await loadTransactions();

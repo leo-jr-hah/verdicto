@@ -24,7 +24,20 @@ let _client: SupabaseClient | null = null;
 async function getClient(): Promise<SupabaseClient | null> {
   if (_client) return _client;
   if (!SUPABASE_URL || !SUPABASE_KEY) {
-    console.log('  [DB] ⚠️  SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set — DB writes disabled');
+    console.log('');
+    console.log('  ╔══════════════════════════════════════════════════════════════╗');
+    console.log('  ║  ⚠️  SUPABASE NOT CONFIGURED                                ║');
+    console.log('  ║                                                              ║');
+    console.log('  ║  All data (transactions, assessments, loans, insurance,     ║');
+    console.log('  ║  verdicts, disputes) is stored in a LOCAL JSON file that    ║');
+    console.log('  ║  is WIPED on every deploy/restart.                          ║');
+    console.log('  ║                                                              ║');
+    console.log('  ║  To fix:                                                     ║');
+    console.log('  ║  1. Create a project at https://supabase.com                 ║');
+    console.log('  ║  2. Run agents/shared/supabase-schema.sql in SQL Editor      ║');
+    console.log('  ║  3. Add SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY to env      ║');
+    console.log('  ╚══════════════════════════════════════════════════════════════╝');
+    console.log('');
     return null;
   }
 
