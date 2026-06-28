@@ -2436,11 +2436,47 @@ a:focus-visible {
   font-weight: var(--weight-medium);
   color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
-  transition: color var(--duration-fast) var(--ease-out-expo);
+  position: relative;
+  transition: 0.5s ease;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.landing-nav-link::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0;
+  background-color: var(--accent);
+  transition: 0.5s ease;
 }
 
 .landing-nav-link:hover {
-  color: #FFFFFF;
+  color: var(--bg-dark);
+  transition-delay: 0.5s;
+}
+
+.landing-nav-link:hover::before {
+  width: 100%;
+}
+
+.landing-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 0;
+  width: 100%;
+  background-color: var(--accent);
+  transition: 0.4s ease;
+  z-index: -1;
+}
+
+.landing-nav-link:hover::after {
+  height: 100%;
+  transition-delay: 0.4s;
 }
 
 .landing-cta-btn {

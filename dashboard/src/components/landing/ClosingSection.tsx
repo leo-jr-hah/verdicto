@@ -12,14 +12,15 @@ export const ClosingSection: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    gsap.from(contentRef.current, {
-      y: 50,
-      opacity: 0,
+    gsap.set(contentRef.current, { y: 50, opacity: 0 });
+    gsap.to(contentRef.current, {
+      y: 0,
+      opacity: 1,
       duration: 1,
       ease: 'power3.out',
       scrollTrigger: {
         trigger: sectionRef.current,
-        start: 'top 70%',
+        start: 'top 75%',
         toggleActions: 'play none none none',
       },
     });

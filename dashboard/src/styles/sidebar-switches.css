@@ -1,0 +1,415 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sidebar Switch Animations
+   1. Theme Switch — Sun/Moon toggle (interactive)
+   2. Network Switch — Plane/day-night indicator (auto state)
+   Uses project CSS variables from tokens.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Theme Switch (Sun/Moon) ──────────────────────────────────────────── */
+/* Based on Uiverse.io by andrew-demchenk0 */
+
+.theme-switch {
+  font-size: 17px;
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.theme-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--navy-300);
+  transition: 0.4s;
+  border-radius: 30px;
+}
+
+.theme-switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  left: 2px;
+  bottom: 2px;
+  z-index: 2;
+  background-color: var(--bg-elevated, #fff);
+  transition: 0.4s;
+}
+
+.theme-switch .sun svg {
+  position: absolute;
+  top: 4px;
+  left: 28px;
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
+.theme-switch .moon svg {
+  fill: var(--navy-300);
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  color: var(--navy-300);
+}
+
+.theme-switch .sun svg {
+  animation: theme-rotate 15s linear infinite;
+}
+
+@keyframes theme-rotate {
+  0% { transform: rotate(0); }
+  100% { transform: rotate(360deg); }
+}
+
+.theme-switch .moon svg {
+  animation: theme-tilt 5s linear infinite;
+}
+
+@keyframes theme-tilt {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.theme-switch input:checked + .slider {
+  background-color: var(--navy-700);
+}
+
+.theme-switch input:focus + .slider {
+  box-shadow: 0 0 1px var(--navy-700);
+}
+
+.theme-switch input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* ── 2. Network Switch (Plane/Day-Night) ────────────────────────────────── */
+/* Based on Uiverse.io by Nawsome — adapted for auto state */
+
+.network-switch {
+  --dot: var(--bg-elevated, #fff);
+  --street: var(--navy-600);
+  --street-line: var(--navy-400);
+  --street-line-mid: var(--navy-300);
+  --sky-1: var(--accent);
+  --sky-2: var(--accent-hover);
+  --light-1: var(--accent);
+  --light-2: var(--accent-glow);
+  position: relative;
+  display: inline-block;
+  cursor: default;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.network-switch input {
+  display: none;
+}
+
+.network-switch .network-switch-track {
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  position: relative;
+  overflow: hidden;
+  width: 46px;
+  height: 23px;
+  padding: 1px;
+  border-radius: 12px;
+  background: linear-gradient(
+    90deg,
+    var(--street) 0%,
+    var(--street) 25%,
+    var(--sky-1) 75%,
+    var(--sky-2) 100%
+  ) left var(--p, 0%) top 0;
+  background-position-x: var(--p, 0%);
+  background-size: 400% auto;
+  transition: background-position 0.6s;
+}
+
+.network-switch .network-switch-track:before,
+.network-switch .network-switch-track:after {
+  content: "";
+  display: block;
+  position: absolute;
+  transform: translateX(var(--s, 0));
+  transition: transform 0.3s;
+}
+
+.network-switch .network-switch-track:before {
+  width: 38px;
+  right: 2px;
+  top: 4px;
+  height: 1px;
+  background: var(--street-line);
+  box-shadow: 0 14px 0 0 var(--street-line);
+}
+
+.network-switch .network-switch-track:after {
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  left: 21px;
+  top: 1px;
+  animation: net-lights 2s linear infinite;
+  box-shadow:
+    inset 0 0 0 2px var(--light-1),
+    0 19px 0 var(--light-1),
+    8px 0 0 var(--light-2),
+    8px 19px 0 var(--light-2),
+    16px 0 0 var(--light-2),
+    16px 19px 0 var(--light-2);
+}
+
+.network-switch .network-switch-track .street-middle {
+  display: block;
+  position: absolute;
+  top: 11px;
+  left: 19px;
+  width: 3px;
+  height: 1px;
+  transform: translateX(var(--s, 0));
+  background: var(--street-line-mid);
+  box-shadow:
+    5px 0 0 var(--street-line-mid),
+    10px 0 0 var(--street-line-mid),
+    15px 0 0 var(--street-line-mid),
+    20px 0 0 var(--street-line-mid),
+    25px 0 0 var(--street-line-mid);
+  transition: transform 0.3s;
+}
+
+.network-switch .network-switch-track .cloud {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg-elevated, #fff);
+  position: absolute;
+  top: var(--ct, 7px);
+  left: 100%;
+  opacity: var(--co, 0);
+  transition: opacity 0.3s;
+  animation: net-clouds 2s linear infinite var(--cd, 0s);
+}
+
+.network-switch .network-switch-track .cloud:before,
+.network-switch .network-switch-track .cloud:after {
+  content: "";
+  position: absolute;
+  transform: translateX(var(--cx, 0));
+  border-radius: 50%;
+  width: var(--cs, 5px);
+  height: var(--cs, 5px);
+  background: var(--bg-elevated, #fff);
+  bottom: 1px;
+  left: 1px;
+}
+
+.network-switch .network-switch-track .cloud:after {
+  --cs: 6px;
+  --cx: 4px;
+}
+
+.network-switch .network-switch-track .cloud.two {
+  --ct: 17px;
+  --cd: 1s;
+  opacity: var(--co-2, 0);
+}
+
+.network-switch .network-switch-track .knob {
+  display: table;
+  position: relative;
+  z-index: 1;
+  padding: 4px;
+  border-radius: 50%;
+  background: var(--dot);
+  transform: translateX(var(--x, 0));
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.35, 1.2);
+}
+
+.network-switch .network-switch-track .knob svg {
+  width: 11px;
+  height: 11px;
+  display: block;
+  color: var(--c, var(--street));
+  transition: color 0.6s;
+}
+
+/* Online state (checked) */
+.network-switch input:checked + .network-switch-track {
+  --p: 100%;
+  --x: 23px;
+  --s: -50px;
+  --c: var(--accent);
+  --co: 0.8;
+  --co-2: 0.6;
+}
+
+@keyframes net-lights {
+  20%, 30% {
+    box-shadow:
+      inset 0 0 0 2px var(--light-2),
+      0 19px 0 var(--light-2),
+      8px 0 0 var(--light-1),
+      8px 19px 0 var(--light-1),
+      16px 0 0 var(--light-2),
+      16px 19px 0 var(--light-2);
+  }
+  55%, 65% {
+    box-shadow:
+      inset 0 0 0 2px var(--light-2),
+      0 19px 0 var(--light-2),
+      8px 0 0 var(--light-2),
+      8px 19px 0 var(--light-2),
+      16px 0 0 var(--light-1),
+      16px 19px 0 var(--light-1);
+  }
+  90%, 100% {
+    box-shadow:
+      inset 0 0 0 2px var(--light-1),
+      0 19px 0 var(--light-1),
+      8px 0 0 var(--light-2),
+      8px 19px 0 var(--light-2),
+      16px 0 0 var(--light-2),
+      16px 19px 0 var(--light-2);
+  }
+}
+
+@keyframes net-clouds {
+  97% {
+    transform: translateX(-72px);
+    visibility: visible;
+  }
+  98%, 100% {
+    visibility: hidden;
+  }
+  99% {
+    transform: translateX(-72px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* ── Shared wrapper ─────────────────────────────────────────────────────── */
+
+.sidebar-switch-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  position: relative;
+}
+
+/* Hover tooltip */
+.sidebar-switch-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-dark-inset, var(--navy-800));
+  color: var(--text-dark-secondary, rgba(255,255,255,0.65));
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  border: 1px solid var(--border-dark);
+  z-index: 100;
+}
+
+.sidebar-switch-row:hover .sidebar-switch-tooltip {
+  opacity: 1;
+}
+
+/* ── Sidebar toggle container overrides ─────────────────────────────────── */
+
+.sidebar-theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2);
+}
+
+.sidebar[data-collapsed="true"] .sidebar-theme-toggle {
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.sidebar[data-collapsed="true"] .sidebar-switch-tooltip {
+  left: calc(100% + 8px);
+  bottom: auto;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ── Mobile adjustments ─────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .theme-switch {
+    width: 44px;
+    height: 24px;
+  }
+
+  .theme-switch .slider:before {
+    height: 20px;
+    width: 20px;
+  }
+
+  .theme-switch input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+
+  .theme-switch .sun svg,
+  .theme-switch .moon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .theme-switch .sun svg {
+    top: 4px;
+    left: 24px;
+  }
+
+  .theme-switch .moon svg {
+    top: 4px;
+    left: 4px;
+  }
+
+  .network-switch .network-switch-track {
+    width: 40px;
+    height: 20px;
+  }
+
+  .network-switch .network-switch-track .knob {
+    padding: 3px;
+  }
+
+  .network-switch .network-switch-track .knob svg {
+    width: 10px;
+    height: 10px;
+  }
+}

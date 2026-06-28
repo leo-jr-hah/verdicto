@@ -14,15 +14,16 @@ export const ProductShowcase: React.FC = () => {
     // Text: staggered reveal — words fade in with slight Y offset
     const words = textRef.current?.querySelectorAll('.reveal-word');
     if (words) {
-      gsap.from(words, {
-        y: 40,
-        opacity: 0,
+      gsap.set(words, { opacity: 0, y: 40 });
+      gsap.to(words, {
+        y: 0,
+        opacity: 1,
         duration: 0.7,
         stagger: 0.06,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: 'top 75%',
+          start: 'top 80%',
           toggleActions: 'play none none none',
         },
       });
@@ -82,11 +83,46 @@ export const ProductShowcase: React.FC = () => {
 
         <div className="showcase-visual">
           <div ref={mockupRef} className="showcase-mockup">
-            <img
-              src="/assets/verdicto-dashboard-screenshot.jpg"
-              alt="Verdicto valuation dashboard showing a real estate assessment with confidence across three methodologies"
-              className="showcase-mockup__img"
-            />
+            <div className="showcase-mockup__placeholder">
+              <div className="mockup-ui">
+                <div className="mockup-ui__header">
+                  <div className="mockup-ui__dot" />
+                  <div className="mockup-ui__dot" />
+                  <div className="mockup-ui__dot" />
+                  <span className="mockup-ui__title">Verdicto — Asset Assessment</span>
+                </div>
+                <div className="mockup-ui__body">
+                  <div className="mockup-ui__card">
+                    <div className="mockup-ui__label">Asset</div>
+                    <div className="mockup-ui__value">2BR Condo — Miami Beach</div>
+                  </div>
+                  <div className="mockup-ui__row">
+                    <div className="mockup-ui__metric">
+                      <div className="mockup-ui__metric-label">Analyst A</div>
+                      <div className="mockup-ui__metric-value">$485,000</div>
+                      <div className="mockup-ui__confidence">92% confidence</div>
+                    </div>
+                    <div className="mockup-ui__metric">
+                      <div className="mockup-ui__metric-label">Analyst B</div>
+                      <div className="mockup-ui__metric-value">$472,000</div>
+                      <div className="mockup-ui__confidence">88% confidence</div>
+                    </div>
+                    <div className="mockup-ui__metric mockup-ui__metric--gold">
+                      <div className="mockup-ui__metric-label">Consensus</div>
+                      <div className="mockup-ui__metric-value">$478,500</div>
+                      <div className="mockup-ui__confidence">90% confidence</div>
+                    </div>
+                  </div>
+                  <div className="mockup-ui__bar">
+                    <div className="mockup-ui__bar-fill" />
+                  </div>
+                  <div className="mockup-ui__footer">
+                    <span className="mockup-ui__badge">HMAC Verified</span>
+                    <span className="mockup-ui__badge mockup-ui__badge--green">On-Chain Anchored</span>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="showcase-mockup__glow" />
           </div>
         </div>

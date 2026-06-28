@@ -55,13 +55,14 @@ export const StatsSection: React.FC = () => {
 
   useGSAP(() => {
     // Headline: clip-path reveal from left
-    gsap.from(headlineRef.current, {
-      clipPath: 'inset(0 100% 0 0)',
+    gsap.set(headlineRef.current, { clipPath: 'inset(0 100% 0 0)' });
+    gsap.to(headlineRef.current, {
+      clipPath: 'inset(0 0% 0 0)',
       duration: 0.9,
       ease: 'power3.inOut',
       scrollTrigger: {
         trigger: sectionRef.current,
-        start: 'top 75%',
+        start: 'top 80%',
         toggleActions: 'play none none none',
       },
     });
@@ -69,16 +70,17 @@ export const StatsSection: React.FC = () => {
     // Stat columns: staggered scale-in from below
     const cols = gridRef.current?.querySelectorAll('.stat-col');
     if (cols) {
-      gsap.from(cols, {
-        y: 60,
-        scale: 0.92,
-        opacity: 0,
+      gsap.set(cols, { y: 60, scale: 0.92, opacity: 0 });
+      gsap.to(cols, {
+        y: 0,
+        scale: 1,
+        opacity: 1,
         duration: 0.8,
         stagger: 0.12,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: gridRef.current,
-          start: 'top 80%',
+          start: 'top 85%',
           toggleActions: 'play none none none',
         },
       });

@@ -14,7 +14,7 @@ const LETTERS = [
 
 export const HeroButton: React.FC = () => {
   return (
-    <Link to="/oracle" className="uiverse">
+    <Link to="/dashboard" className="uiverse">
       <div className="wrapper">
         {/* Animated Background Circles */}
         <div className="circle circle-1"></div>

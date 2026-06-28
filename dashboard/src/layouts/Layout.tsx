@@ -1,12 +1,12 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Menu, X, LayoutDashboard, Users, Scale, History, Cpu, ChevronLeft, ChevronRight, Droplets, Target, Map, Landmark, Shield, GitBranch, Radio, Gavel } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Users, Scale, History, Cpu, ChevronLeft, ChevronRight, Droplets, Target, Map, Landmark, Shield, GitBranch, Radio, Gavel, Wifi, WifiOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import verdictLogo from '../assets/newlogo.png';
-import { ConnectionStatus } from '../components/ConnectionStatus';
 import { WalletConnectButton } from '../components/WalletConnectButton';
-
 import { DemoModeBanner } from '../components/DemoModeBanner';
+import { ORCHESTRATOR_URL } from '../services/api';
+import '../styles/sidebar-switches.css';
 
 const NAV_SECTIONS = [
   {
@@ -46,6 +46,25 @@ export const Layout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+  const [networkOnline, setNetworkOnline] = React.useState<boolean | null>(null);
+
+  // Network status polling
+  React.useEffect(() => {
+    const checkNetwork = async () => {
+      try {
+        const res = await fetch(`${ORCHESTRATOR_URL}/api/contract-state`, {
+          method: 'GET',
+          signal: AbortSignal.timeout(8000),
+        });
+        setNetworkOnline(res.ok);
+      } catch {
+        setNetworkOnline(false);
+      }
+    };
+    checkNetwork();
+    const interval = setInterval(checkNetwork, 30_000);
+    return () => clearInterval(interval);
+  }, []);
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -158,14 +177,45 @@ export const Layout: React.FC = () => {
             </div>
           )}
           <div className="sidebar-theme-toggle">
-            <button
-              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-              className="sidebar-icon-btn"
-              title={theme === 'light' ? 'Dark mode' : 'Light mode'}
-            >
-              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-            </button>
-            {!sidebarCollapsed && <ConnectionStatus />}
+            {/* Theme Toggle — Sun/Moon switch */}
+            <label className="theme-switch" title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
+              <input
+                type="checkbox"
+                checked={theme === 'dark'}
+                onChange={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              />
+              <span className="slider">
+                <span className="sun">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                  </svg>
+                </span>
+                <span className="moon">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+                </span>
+              </span>
+            </label>
+
+            {/* Network Status — Plane switch (auto, not interactive) */}
+            <div className="sidebar-switch-row">
+              <div className="network-switch">
+                <input type="checkbox" checked={networkOnline === true} readOnly tabIndex={-1} />
+                <div className="network-switch-track">
+                  <span className="street-middle" />
+                  <span className="cloud" />
+                  <span className="cloud two" />
+                  <div className="knob">
+                    {networkOnline === true
+                      ? <Wifi size={11} />
+                      : <WifiOff size={11} />
+                    }
+                  </div>
+                </div>
+              </div>
+              <span className="sidebar-switch-tooltip">
+                {networkOnline === null ? 'Checking…' : networkOnline ? 'Network Online' : 'Network Offline'}
+              </span>
+            </div>
           </div>
         </div>
       </aside>
@@ -199,12 +249,23 @@ export const Layout: React.FC = () => {
         </Link>
         <div className="flex items-center gap-2">
           <WalletConnectButton />
-          <button
-            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            className="sidebar-icon-btn"
-          >
-            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-          </button>
+          <label className="theme-switch" title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
+            <input
+              type="checkbox"
+              checked={theme === 'dark'}
+              onChange={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            />
+            <span className="slider">
+              <span className="sun">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+              </span>
+              <span className="moon">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+              </span>
+            </span>
+          </label>
         </div>
       </header>
 

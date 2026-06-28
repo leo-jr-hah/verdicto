@@ -10,22 +10,25 @@ const FEATURES = [
     num: '01',
     title: 'Assess',
     body: 'Submit asset details. Two independent AI analysts evaluate using real-world data from RentCast, FRED, and proprietary models. Each produces a signed valuation with confidence bounds.',
-    image: '/assets/feature-assess.jpg',
     layout: 'image-left',
+    icon: '📊',
+    placeholder: { label: 'Asset Analysis', items: ['RentCast Data', 'FRED Economic', 'Market Comparables'] },
   },
   {
     num: '02',
     title: 'Deliberate',
     body: 'Three specialized jurors review the evidence and cast votes. Every deliberation round produces an HMAC-SHA256 receipt that chains to the previous. Tamper-proof by construction.',
-    image: '/assets/feature-deliberate.jpg',
     layout: 'image-right',
+    icon: '⚖️',
+    placeholder: { label: 'Jury Deliberation', items: ['Juror A: Affirmed', 'Juror B: Affirmed', 'Juror C: Dissent'] },
   },
   {
     num: '03',
     title: 'Commit',
     body: 'A cryptographic commitment — SHA-256 of the full execution state plus the Casper block height — anchors the verdict on-chain. Any third party can independently verify.',
-    image: '/assets/feature-commit.jpg',
     layout: 'image-left',
+    icon: '🔗',
+    placeholder: { label: 'On-Chain Commit', items: ['Block #1,847,293', 'SHA-256: 0xa7f3...c9d1', 'Status: Finalized'] },
   },
 ];
 
@@ -42,15 +45,16 @@ export const FeaturesSection: React.FC = () => {
       const isLeft = i % 2 === 0;
 
       // Image: enters from its side with 3D rotation
-      gsap.from(image, {
-        x: isLeft ? -100 : 100,
-        rotateY: isLeft ? 15 : -15,
-        opacity: 0,
+      gsap.set(image, { x: isLeft ? -100 : 100, rotateY: isLeft ? 15 : -15, opacity: 0 });
+      gsap.to(image, {
+        x: 0,
+        rotateY: 0,
+        opacity: 1,
         duration: 1,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: item,
-          start: 'top 80%',
+          start: 'top 85%',
           toggleActions: 'play none none none',
         },
       });
@@ -58,15 +62,16 @@ export const FeaturesSection: React.FC = () => {
       // Text: staggered line reveal
       const lines = text?.querySelectorAll('.feature-reveal');
       if (lines) {
-        gsap.from(lines, {
-          y: 30,
-          opacity: 0,
+        gsap.set(lines, { y: 30, opacity: 0 });
+        gsap.to(lines, {
+          y: 0,
+          opacity: 1,
           duration: 0.6,
           stagger: 0.1,
           ease: 'power3.out',
           scrollTrigger: {
             trigger: item,
-            start: 'top 75%',
+            start: 'top 80%',
             toggleActions: 'play none none none',
           },
         });
@@ -86,12 +91,18 @@ export const FeaturesSection: React.FC = () => {
               className={`feature-item feature-item--${feat.layout}`}
             >
               <div className="feature-image-wrap">
-                <img
-                  src={feat.image}
-                  alt={`${feat.title} feature`}
-                  className="feature-image"
-                  loading="lazy"
-                />
+                <div className="feature-image-placeholder">
+                  <div className="feature-placeholder__icon">{feat.icon}</div>
+                  <div className="feature-placeholder__label">{feat.placeholder.label}</div>
+                  <div className="feature-placeholder__items">
+                    {feat.placeholder.items.map((item, j) => (
+                      <div key={j} className="feature-placeholder__item">
+                        <span className="feature-placeholder__dot" />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
               <div className="feature-text">
                 <span className="feature-reveal feature-num">{feat.num}</span>
