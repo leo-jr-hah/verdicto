@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'motion/react';
-import { Link } from 'react-router-dom';
 import { HeroButton } from './HeroButton';
 
 /* ── Faceted Geometric Background ────────────────────────────────────────
