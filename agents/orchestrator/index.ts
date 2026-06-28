@@ -3389,6 +3389,7 @@ Respond in JSON format:
     platformFeeCSPR: number;
     expiresAt: number;
     createdAt: number;
+    coolingOffEnd: number;       // 7 days after creation
     claimHistory: Array<{
       claimId: string;
       amount: number;
@@ -3400,6 +3401,13 @@ Respond in JSON format:
   }
 
   const insuranceStore = new Map<string, InsurancePolicy>();
+
+  // ── Insurance: Security Controls ──────────────────────────────────────────────
+  const COOLING_OFF_DAYS = 7;
+  const MIN_HOLDING_DAYS = 14;
+  const MIN_CLAIM_CONFIDENCE = 0.7;
+  const claimLocks = new Set<string>();
+  let capitalPoolCSPR = 0; // Track premium inflows for solvency
 
   // Risk tiers based on asset type + confidence
   const RISK_TIERS: Record<string, { basePremium: number; maxCoverage: number; deductible: number }> = {
@@ -3445,7 +3453,7 @@ Respond in JSON format:
     if (assetType === 'commodity') riskFactors.push('Commodity price volatility');
     if (riskScore > 60) riskFactors.push('Elevated overall risk profile');
 
-    return { coverage, coverageAmount, premiumCSPR, deductible: tiers.deductible, riskScore, riskFactors, tier };
+    return { coverage, coverageAmount, premiumCSPR, deductible: tiers.deductible, riskScore, riskFactors, tier, coolingOffEnd: Date.now() + COOLING_OFF_DAYS * 24 * 60 * 60 * 1000 };
   }
 
   /**
@@ -3498,7 +3506,7 @@ Respond in JSON format:
       }
 
       // ── Calculate Insurance ────────────────────────────────────────────
-      const { coverage, coverageAmount, premiumCSPR, deductible, riskScore, riskFactors, tier } =
+      const { coverage, coverageAmount, premiumCSPR, deductible, riskScore, riskFactors, tier, coolingOffEnd } =
         calculateInsurance(assetType, assessedValue, confidence, askingPrice, coveragePercent);
       const platformFee = 3; // INSURANCE_FEE_CSPR
 
@@ -3550,9 +3558,11 @@ Respond in JSON format:
         platformFeeCSPR: platformFee,
         expiresAt: now + 365 * 24 * 60 * 60 * 1000, // 1 year
         createdAt: now,
+        coolingOffEnd,
         claimHistory: [],
       };
       insuranceStore.set(policyId, policy);
+      capitalPoolCSPR += platformFee; // Track capital inflow
 
       // ── DB: Persist insurance policy to Supabase ──
       db.saveInsurance({
@@ -3608,6 +3618,7 @@ Respond in JSON format:
           status: 'active',
           expiresAt: policy.expiresAt,
           createdAt: policy.createdAt,
+          coolingOffEnd: policy.coolingOffEnd,
         },
       });
     } catch (err: any) {
@@ -3646,6 +3657,7 @@ Respond in JSON format:
           platformFeeCSPR: r.platform_fee_cspr,
           expiresAt: r.expires_at,
           createdAt: r.created_at,
+          coolingOffEnd: r.created_at + COOLING_OFF_DAYS * 24 * 60 * 60 * 1000,
           claimHistory: r.claim_history,
         }));
       } else if (owner) {
@@ -3665,6 +3677,7 @@ Respond in JSON format:
         riskFactors: p.riskFactors,
         expiresAt: p.expiresAt,
         createdAt: p.createdAt,
+        coolingOffEnd: p.coolingOffEnd,
         claimHistory: p.claimHistory,
       }));
       res.json({ success: true, policies: summaries });
@@ -3700,6 +3713,7 @@ Respond in JSON format:
         platformFeeCSPR: row.platform_fee_cspr,
         expiresAt: row.expires_at,
         createdAt: row.created_at,
+        coolingOffEnd: row.created_at + COOLING_OFF_DAYS * 24 * 60 * 60 * 1000,
         claimHistory: row.claim_history,
       } as any;
     }
@@ -3709,23 +3723,58 @@ Respond in JSON format:
   /**
    * POST /api/insurance/:policyId/claim
    * File a claim against an insurance policy.
-   * Triggers revaluation to determine actual loss, then approves/denies/pays.
+   * Security: ownership check, cooling-off, holding period, confidence gate, claim lock, solvency check.
    * x402-gated: returns HTTP 402 with payment requirements if no valid payment proof is provided.
    */
   app.post('/api/insurance/:policyId/claim',
     casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(INSURANCE_FEE_CSPR) }),
     async (req, res) => {
+    const policyId = req.params.policyId as string;
+
+    // ── Claim lock: prevent concurrent claims on same policy ──
+    if (claimLocks.has(policyId)) {
+      return res.status(423).json({ success: false, error: 'A claim is already being processed for this policy. Please wait.' });
+    }
+    claimLocks.add(policyId);
+
     try {
-      const policy = insuranceStore.get(req.params.policyId as string);
+      const policy = insuranceStore.get(policyId);
       if (!policy) {
         return res.status(404).json({ success: false, error: 'Insurance policy not found' });
       }
+
+      // ── Ownership verification ──
+      const claimantKey = req.body.ownerPublicKey as string | undefined;
+      if (!claimantKey || claimantKey !== policy.ownerPublicKey) {
+        return res.status(403).json({ success: false, error: 'Only the policy owner can file a claim' });
+      }
+
       if (policy.status !== 'active') {
-        return res.status(400).json({ success: false, error: `Policy is ${policy.status} - cannot file claim` });
+        return res.status(400).json({ success: false, error: `Policy is ${policy.status} and cannot accept new claims` });
       }
       if (Date.now() > policy.expiresAt) {
         policy.status = 'expired';
         return res.status(400).json({ success: false, error: 'Policy has expired' });
+      }
+
+      // ── Cooling-off period check ──
+      const coolingOffEnd = policy.coolingOffEnd || (policy.createdAt + COOLING_OFF_DAYS * 24 * 60 * 60 * 1000);
+      if (Date.now() < coolingOffEnd) {
+        const daysRemaining = Math.ceil((coolingOffEnd - Date.now()) / (24 * 60 * 60 * 1000));
+        return res.status(400).json({
+          success: false,
+          error: `Policy is in the ${COOLING_OFF_DAYS}-day cooling-off period. Claims can be filed in ${daysRemaining} day${daysRemaining > 1 ? 's' : ''}.`,
+        });
+      }
+
+      // ── Minimum holding period check ──
+      const holdingDays = (Date.now() - policy.createdAt) / (24 * 60 * 60 * 1000);
+      if (holdingDays < MIN_HOLDING_DAYS) {
+        const daysRemaining = Math.ceil(MIN_HOLDING_DAYS - holdingDays);
+        return res.status(400).json({
+          success: false,
+          error: `Policy must be held for ${MIN_HOLDING_DAYS} days before filing a claim. ${daysRemaining} day${daysRemaining > 1 ? 's' : ''} remaining.`,
+        });
       }
 
       const { reason, requestedAmount } = req.body;
@@ -3737,11 +3786,14 @@ Respond in JSON format:
       }
 
       console.log(`\n📋 Insurance claim filed: ${policy.policyId}`);
+      console.log(`   Claimant: ${claimantKey.slice(0, 12)}...`);
       console.log(`   Reason: ${reason}`);
 
-      // Revaluate the asset to determine current value
+      // ── Revaluate the asset to determine current value ──
       let currentValue = policy.assessedValue;
       let lossPercent = 0;
+      let valuationAConfidence = 0;
+      let valuationBConfidence = 0;
 
       try {
         const valuationReq: ValuationRequest = {
@@ -3752,23 +3804,43 @@ Respond in JSON format:
         const [valuationA, valuationB] = await runDualValuation(valuationReq);
         currentValue = Math.round((valuationA.estimated_value + valuationB.estimated_value) / 2);
         lossPercent = Math.max(0, ((policy.assessedValue - currentValue) / policy.assessedValue) * 100);
+        valuationAConfidence = valuationA.confidence;
+        valuationBConfidence = valuationB.confidence;
 
         console.log(`   Previous value: ${policy.assessedValue.toLocaleString()}`);
         console.log(`   Current value:  ${currentValue.toLocaleString()}`);
         console.log(`   Loss: ${lossPercent.toFixed(1)}%`);
+        console.log(`   Agent confidence: A=${valuationAConfidence.toFixed(2)}, B=${valuationBConfidence.toFixed(2)}`);
+
+        // ── Confidence threshold gating ──
+        if (valuationAConfidence < MIN_CLAIM_CONFIDENCE || valuationBConfidence < MIN_CLAIM_CONFIDENCE) {
+          return res.status(400).json({
+            success: false,
+            error: `Agent confidence too low for claim adjudication (A: ${(valuationAConfidence * 100).toFixed(0)}%, B: ${(valuationBConfidence * 100).toFixed(0)}%). Minimum required: ${(MIN_CLAIM_CONFIDENCE * 100).toFixed(0)}%. Please try again later when market data is more reliable.`,
+          });
+        }
+
+        // ── Split verdict detection: agents disagree on direction ──
+        const valueChangeA = (policy.assessedValue - valuationA.estimated_value) / policy.assessedValue;
+        const valueChangeB = (policy.assessedValue - valuationB.estimated_value) / policy.assessedValue;
+        if ((valueChangeA > 0 && valueChangeB < -0.02) || (valueChangeA < 0 && valueChangeB > 0.02) || (valueChangeA < -0.02 && valueChangeB > 0)) {
+          console.log(`   ⚠️ Split verdict: Agent A says ${valueChangeA > 0 ? 'loss' : 'gain'}, Agent B says ${valueChangeB > 0 ? 'loss' : 'gain'}`);
+          return res.status(400).json({
+            success: false,
+            error: 'The AI agents disagree on the direction of value change. This claim requires manual review. Our oracle jurors will evaluate the evidence and render a verdict within 48 hours.',
+          });
+        }
       } catch (err: any) {
         console.log(`   ⚠️ Revaluation failed, using original value: ${err.message}`);
       }
 
       const claimId = `CLM-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-      const deductibleAmount = policy.assessedValue * (policy.deductiblePercent / 100);
 
       // Determine claim outcome
       let claimStatus: 'approved' | 'denied' | 'paid';
       let claimAmount = 0;
 
       if (lossPercent < policy.deductiblePercent) {
-        // Loss is below deductible - denied
         claimStatus = 'denied';
         console.log(`   ❌ Claim denied: loss ${lossPercent.toFixed(1)}% < deductible ${policy.deductiblePercent}%`);
       } else {
@@ -3783,8 +3855,16 @@ Respond in JSON format:
           claimAmount = requestedAmount;
         }
 
+        // ── Capital pool solvency check ──
+        const maxPayoutFromPool = capitalPoolCSPR * 0.5;
+        if (claimAmount > maxPayoutFromPool && maxPayoutFromPool > 0) {
+          claimAmount = Math.round(maxPayoutFromPool * 100) / 100;
+          console.log(`   ⚠️ Payout capped by capital pool: ${claimAmount.toLocaleString()} CSPR (pool: ${capitalPoolCSPR.toLocaleString()})`);
+        }
+
         claimStatus = 'paid';
-        console.log(`   ✅ Claim approved: payout ${claimAmount.toLocaleString()}`);
+        capitalPoolCSPR -= claimAmount; // Deduct from pool
+        console.log(`   ✅ Claim approved: payout ${claimAmount.toLocaleString()} CSPR (pool remaining: ${capitalPoolCSPR.toLocaleString()})`);
 
         // Log payout transaction
         const payoutTx = createTransactionEntry(
@@ -3848,12 +3928,39 @@ Respond in JSON format:
             newValue: currentValue,
             lossPercent,
           },
+          confidence: {
+            agentA: valuationAConfidence,
+            agentB: valuationBConfidence,
+          },
         },
       });
     } catch (err: any) {
       console.error('[Insurance Claim] Error:', err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
+    } finally {
+      claimLocks.delete(policyId); // Always release lock
     }
+  });
+
+  /**
+   * GET /api/insurance/pool-stats
+   * Returns capital pool health for display on the frontend.
+   */
+  app.get('/api/insurance/pool-stats', async (_, res) => {
+    const allPolicies = Array.from(insuranceStore.values());
+    const activePolicies = allPolicies.filter(p => p.status === 'active');
+    const totalCoverage = activePolicies.reduce((sum, p) => sum + p.coverageAmount, 0);
+    const totalPremiums = allPolicies.reduce((sum, p) => sum + (p.platformFeeCSPR || 0), 0);
+    res.json({
+      success: true,
+      pool: {
+        capitalCSPR: capitalPoolCSPR,
+        totalPremiumsCollected: totalPremiums,
+        activePolicies: activePolicies.length,
+        totalCoverageExposure: totalCoverage,
+        solvencyRatio: totalCoverage > 0 ? Math.round((capitalPoolCSPR / totalCoverage) * 10000) / 100 : 0,
+      },
+    });
   });
 
   // ─── Admin: Force-trigger revaluation (demo/testing aid) ──────────────────

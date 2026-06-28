@@ -31,7 +31,7 @@ interface UseInsuranceReturn extends UseInsuranceState {
   /** Load a single policy by ID */
   loadPolicy: (policyId: string) => Promise<void>;
   /** File a claim */
-  claim: (policyId: string, reason: string, requestedAmount?: number) => Promise<boolean>;
+  claim: (policyId: string, reason: string, ownerPublicKey: string, requestedAmount?: number) => Promise<boolean>;
   /** Reset state */
   reset: () => void;
   clearError: () => void;
@@ -150,10 +150,10 @@ export function useInsurance(): UseInsuranceReturn {
     }
   }, []);
 
-  const claim = useCallback(async (policyId: string, reason: string, requestedAmount?: number): Promise<boolean> => {
+  const claim = useCallback(async (policyId: string, reason: string, ownerPublicKey: string, requestedAmount?: number): Promise<boolean> => {
     setState(prev => ({ ...prev, loading: true, error: null, errorHint: null }));
     try {
-      const result = await fileInsuranceClaim(policyId, reason, requestedAmount);
+      const result = await fileInsuranceClaim(policyId, reason, ownerPublicKey, requestedAmount);
       if (result.success) {
         setState(prev => ({ ...prev, loading: false, claimResult: result.claim ?? null }));
         return true;

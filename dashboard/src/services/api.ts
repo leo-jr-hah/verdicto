@@ -728,6 +728,7 @@ export interface InsurancePolicy {
   tier: string;
   expiresAt: number;
   createdAt: number;
+  coolingOffEnd: number;
   claimHistory: Array<{
     claimId: string;
     amount: number;
@@ -766,6 +767,7 @@ export interface InsuranceCreateResponse {
   status: string;
   expiresAt: number;
   createdAt: number;
+  coolingOffEnd: number;
 }
 
 export interface ClaimResult {
@@ -778,6 +780,10 @@ export interface ClaimResult {
     previousValue: number;
     newValue: number;
     lossPercent: number;
+  };
+  confidence?: {
+    agentA: number;
+    agentB: number;
   };
 }
 
@@ -852,18 +858,41 @@ export async function fetchInsurancePolicy(policyId: string): Promise<InsuranceP
 export async function fileInsuranceClaim(
   policyId: string,
   reason: string,
+  ownerPublicKey: string,
   requestedAmount?: number,
 ): Promise<{ success: boolean; claim?: ClaimResult; error?: string }> {
   try {
     const res = await fetch(`${ORCHESTRATOR_URL}/api/insurance/${policyId}/claim`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reason, requestedAmount }),
+      body: JSON.stringify({ reason, ownerPublicKey, requestedAmount }),
     });
     const data = await res.json();
     return data;
   } catch (err: any) {
     return { success: false, error: err.message };
+  }
+}
+
+export interface InsurancePoolStats {
+  capitalCSPR: number;
+  totalPremiumsCollected: number;
+  activePolicies: number;
+  totalCoverageExposure: number;
+  solvencyRatio: number;
+}
+
+/**
+ * Fetch insurance capital pool health stats.
+ */
+export async function fetchInsurancePoolStats(): Promise<InsurancePoolStats | null> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/insurance/pool-stats`);
+    const data = await handleResponse<{ success: boolean; pool: InsurancePoolStats }>(res);
+    return data.pool || null;
+  } catch (err) {
+    console.error('[API] Failed to fetch insurance pool stats:', err);
+    return null;
   }
 }
 

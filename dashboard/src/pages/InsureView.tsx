@@ -3,13 +3,15 @@ import { motion } from 'framer-motion';
 import {
   Shield, ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle,
   Loader2, RotateCcw, RefreshCw, AlertCircle, XCircle,
-  FileText, Building2, Palette, Gem, TrendingDown,
+  FileText, Building2, Palette, Gem, TrendingDown, Clock, Lock,
+  TrendingUp, CircleDollarSign,
 } from 'lucide-react';
 import { useWallet } from '../contexts/CSPRClickContext';
 import { useInsurance } from '../hooks/useInsurance';
 import { useAssessment } from '../hooks/useAssessment';
 import {
   type AssetType, type InsuranceCreateRequest, type AssessmentRequest,
+  fetchInsurancePoolStats, type InsurancePoolStats,
 } from '../services/api';
 import { INSURANCE_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
 import { AgentExplainer } from '../components/AgentExplainer';
@@ -64,6 +66,30 @@ function daysUntilExpiry(expiresAt: number): number {
   return Math.max(0, Math.ceil((expiresAt - Date.now()) / (24 * 60 * 60 * 1000)));
 }
 
+function daysUntilClaimable(createdAt: number, coolingOffEnd: number): number {
+  const now = Date.now();
+  // Cooling-off period (7 days)
+  if (now < coolingOffEnd) {
+    return Math.ceil((coolingOffEnd - now) / (24 * 60 * 60 * 1000));
+  }
+  // Minimum holding period (14 days from creation)
+  const holdingEnd = createdAt + 14 * 24 * 60 * 60 * 1000;
+  if (now < holdingEnd) {
+    return Math.ceil((holdingEnd - now) / (24 * 60 * 60 * 1000));
+  }
+  return 0; // claimable now
+}
+
+function formatConfidence(value: number): string {
+  return `${(value * 100).toFixed(0)}%`;
+}
+
+function confidenceColor(value: number): string {
+  if (value >= 0.8) return 'var(--success)';
+  if (value >= 0.6) return 'var(--warning)';
+  return 'var(--error)';
+}
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export const InsureView: React.FC = () => {
@@ -91,6 +117,7 @@ export const InsureView: React.FC = () => {
   const [weightOz, setWeightOz] = useState('');
   const [claimPolicyId, setClaimPolicyId] = useState<string | null>(null);
   const [claimReason, setClaimReason] = useState('');
+  const [poolStats, setPoolStats] = useState<InsurancePoolStats | null>(null);
 
   const assessPayment = usePaymentFlow(signPayment, ASSESSMENT_FEE_CSPR, async (paymentProof) => {
     if (!assessPayment.pendingPayloadRef.current) return;
@@ -106,7 +133,12 @@ export const InsureView: React.FC = () => {
     await submitPolicyWithProof(request, paymentProof);
   });
 
-  useEffect(() => { if (connected && publicKey) loadPolicies(publicKey); }, [connected, publicKey, loadPolicies]);
+  useEffect(() => {
+    if (connected && publicKey) {
+      loadPolicies(publicKey);
+      fetchInsurancePoolStats().then(setPoolStats);
+    }
+  }, [connected, publicKey, loadPolicies]);
 
   const handleSubmitAsset = useCallback(async () => {
     if (!assetName || !assetValue) return;
@@ -139,8 +171,8 @@ export const InsureView: React.FC = () => {
   const handleClaim = useCallback((policyId: string) => { setClaimPolicyId(policyId); setClaimReason(''); }, []);
 
   const handleConfirmClaim = useCallback(async () => {
-    if (!claimPolicyId || !claimReason) return;
-    const success = await claim(claimPolicyId, claimReason);
+    if (!claimPolicyId || !claimReason || !publicKey) return;
+    const success = await claim(claimPolicyId, claimReason, publicKey);
     if (success) { setClaimPolicyId(null); setClaimReason(''); if (publicKey) loadPolicies(publicKey); }
   }, [claimPolicyId, claimReason, claim, publicKey, loadPolicies]);
 
@@ -466,8 +498,28 @@ export const InsureView: React.FC = () => {
               <div className="wizard-empty__text">Submit an asset for assessment to create your first policy.</div>
             </div>
           ) : (
-            policies.map((policy) => {
+            <>
+              {/* Capital pool health banner */}
+              {poolStats && (
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: '140px', padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-weak)' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><CircleDollarSign size={12} /> Capital Pool</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{poolStats.capitalCSPR.toFixed(1)} CSPR</div>
+                  </div>
+                  <div style={{ flex: 1, minWidth: '140px', padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-weak)' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><TrendingUp size={12} /> Active Policies</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{poolStats.activePolicies}</div>
+                  </div>
+                  <div style={{ flex: 1, minWidth: '140px', padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-weak)' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Shield size={12} /> Coverage Exposure</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(poolStats.totalCoverageExposure)}</div>
+                  </div>
+                </div>
+              )}
+              {policies.map((policy) => {
               const daysLeft = daysUntilExpiry(policy.expiresAt);
+              const claimableIn = daysUntilClaimable(policy.createdAt, policy.coolingOffEnd || (policy.createdAt + 7 * 24 * 60 * 60 * 1000));
+              const isClaimable = policy.status === 'active' && claimableIn === 0;
               return (
                 <div key={policy.policyId} className="wizard-list-card">
                   <div className="wizard-list-card__header">
@@ -495,9 +547,22 @@ export const InsureView: React.FC = () => {
                     <motion.div initial={{ width: 0 }} animate={{ width: `${policy.riskScore}%` }} transition={{ duration: 0.5 }}
                       className="wizard-health-bar__fill" style={{ background: riskColor(policy.riskScore) }} />
                   </div>
+                  {/* Claim eligibility indicator */}
+                  {policy.status === 'active' && claimableIn > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 0.75rem', background: 'var(--warning-soft)', borderRadius: '8px', marginBottom: '0.5rem', fontSize: '0.8rem', color: 'var(--warning)' }}>
+                      <Clock size={14} />
+                      <span>Claim eligible in {claimableIn} day{claimableIn > 1 ? 's' : ''} (cooling-off + holding period)</span>
+                    </div>
+                  )}
                   {policy.status === 'active' && (
-                    <button onClick={() => handleClaim(policy.policyId)} disabled={insLoading} className="btn btn-primary" style={{ width: '100%', fontSize: '0.8rem', padding: '0.5rem' }}>
-                      <TrendingDown size={14} /> File Claim
+                    <button
+                      onClick={() => handleClaim(policy.policyId)}
+                      disabled={insLoading || !isClaimable}
+                      className="btn btn-primary"
+                      style={{ width: '100%', fontSize: '0.8rem', padding: '0.5rem', opacity: isClaimable ? 1 : 0.5 }}
+                      title={!isClaimable ? `Claim available in ${claimableIn} days` : 'File a claim'}
+                    >
+                      {!isClaimable ? <><Lock size={14} /> Claim Locked ({claimableIn}d)</> : <><TrendingDown size={14} /> File Claim</>}
                     </button>
                   )}
                   {policy.claimHistory.length > 0 && (
@@ -556,6 +621,18 @@ export const InsureView: React.FC = () => {
                 <div className="wizard-metric">
                   <div className="wizard-metric__label">Current Value</div>
                   <div className="wizard-metric__value" style={{ color: 'var(--error)' }}>{formatCurrency(claimResult.revaluation.newValue)}</div>
+                </div>
+              </div>
+            )}
+            {claimResult?.confidence && (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginBottom: '1rem', padding: '0.6rem', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginBottom: '0.2rem' }}>Agent A Confidence</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, color: confidenceColor(claimResult.confidence.agentA) }}>{formatConfidence(claimResult.confidence.agentA)}</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginBottom: '0.2rem' }}>Agent B Confidence</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, color: confidenceColor(claimResult.confidence.agentB) }}>{formatConfidence(claimResult.confidence.agentB)}</div>
                 </div>
               </div>
             )}

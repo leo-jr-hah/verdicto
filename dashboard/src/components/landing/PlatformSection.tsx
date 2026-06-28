@@ -108,6 +108,7 @@ export const PlatformSection: React.FC = () => {
               className="platform-card"
             >
               <div className="platform-card__bg-glow" />
+              {React.createElement(product.glyph, { className: "platform-card__glyph" })}
               <div className="platform-card__content">
                 <span className="platform-card__tagline">PRODUCT: {product.name}</span>
                 <span className="platform-card__name">{product.tagline}</span>

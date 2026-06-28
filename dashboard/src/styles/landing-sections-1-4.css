@@ -108,6 +108,23 @@
   flex-direction: column;
 }
 
+.platform-card__glyph {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  width: 48px;
+  height: 48px;
+  color: rgba(255, 255, 255, 0.2);
+  z-index: 1;
+  pointer-events: none;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.platform-card:hover .platform-card__glyph {
+  transform: scale(1.05);
+  color: rgba(255, 255, 255, 0.4);
+}
+
 .platform-card__tagline {
   font-family: monospace;
   font-size: 0.75rem;
