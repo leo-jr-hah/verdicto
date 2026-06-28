@@ -10,7 +10,7 @@
  *   - Disconnect
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Wallet, ChevronDown, LogOut, Copy, Check } from 'lucide-react';
 import { useWallet } from '../contexts/CSPRClickContext';
 
@@ -19,6 +19,33 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 0 });
+
+  // Calculate fixed dropdown position when opened
+  const updateDropdownPos = useCallback(() => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.top - 8, // 8px gap above button
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (dropdownOpen) {
+      updateDropdownPos();
+      // Recalc on scroll/resize
+      window.addEventListener('scroll', updateDropdownPos, true);
+      window.addEventListener('resize', updateDropdownPos);
+      return () => {
+        window.removeEventListener('scroll', updateDropdownPos, true);
+        window.removeEventListener('resize', updateDropdownPos);
+      };
+    }
+  }, [dropdownOpen, updateDropdownPos]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -47,9 +74,10 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
   // ─── Connected + Collapsed sidebar: golden dot icon ──────────────────────
   if (connected && publicKey && collapsed) {
     return (
-      <div ref={dropdownRef} className="relative">
+      <div ref={dropdownRef}>
         <button
-          onClick={() => setDropdownOpen(!dropdownOpen)}
+          ref={buttonRef}
+          onClick={() => { updateDropdownPos(); setDropdownOpen(!dropdownOpen); }}
           title={publicKey}
           className="flex items-center justify-center rounded-full cursor-pointer transition-colors"
           style={{ width: 36, height: 36, padding: 0, position: 'relative', border: '1.5px solid var(--border-color)', background: 'var(--bg-inset)' }}
@@ -63,19 +91,23 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
 
         {dropdownOpen && (
           <div
-            className="absolute bg-elevated border rounded-sm p-2"
+            className="wallet-dropdown"
             style={{
-              bottom: 'calc(100% + 8px)',
-              left: '50%',
-              transform: 'translateX(-50%)',
+              position: 'fixed',
+              bottom: `calc(100vh - ${dropdownPos.top}px)`,
+              left: dropdownPos.left,
               minWidth: 220,
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border)',
+              borderRadius: 6,
+              padding: 8,
               boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-              zIndex: 1000,
+              zIndex: 10000,
             }}
           >
             {/* Connected account info */}
-            <div className="p-3 border-b mb-1">
-              <div className="mono-xs uppercase mb-1" style={{ color: 'var(--text-primary)' }}>Connected</div>
+            <div style={{ padding: 12, borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
+              <div className="mono-xs uppercase" style={{ marginBottom: 4, color: 'var(--text-secondary)' }}>Connected</div>
               <div className="mono-sm" style={{ color: 'var(--text-primary)', wordBreak: 'break-all', lineHeight: 1.4 }}>
                 {publicKey}
               </div>
@@ -84,8 +116,8 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             {/* Copy Address */}
             <button
               onClick={() => { copyKey(); }}
-              className="flex items-center gap-2 w-full p-2 text-sm bg-transparent border-none rounded-sm cursor-pointer transition-colors"
-              style={{ color: 'var(--text-primary)' }}
+              className="flex items-center gap-2 w-full text-sm cursor-pointer transition-colors"
+              style={{ padding: '8px', background: 'transparent', border: 'none', borderRadius: 4, color: 'var(--text-primary)' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-inset)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
@@ -96,10 +128,10 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             {/* Disconnect */}
             <button
               onClick={() => { disconnect(); setDropdownOpen(false); }}
-              className="flex items-center gap-2 w-full p-2 text-sm bg-transparent border-none rounded-sm cursor-pointer transition-colors"
-              style={{ color: 'var(--text-dark-secondary)' }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-inset)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              className="flex items-center gap-2 w-full text-sm cursor-pointer transition-colors"
+              style={{ padding: '8px', background: 'transparent', border: 'none', borderRadius: 4, color: 'var(--text-primary)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(220, 50, 50, 0.15)'; e.currentTarget.style.color = '#f87171'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-primary)'; }}
             >
               <LogOut size={14} />
               Disconnect
@@ -113,9 +145,10 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
   // ─── Connected + Expanded sidebar: key + dropdown ────────────────────────
   if (connected && publicKey) {
     return (
-      <div ref={dropdownRef} className="relative">
+      <div ref={dropdownRef}>
         <button
-          onClick={() => setDropdownOpen(!dropdownOpen)}
+          ref={buttonRef}
+          onClick={() => { updateDropdownPos(); setDropdownOpen(!dropdownOpen); }}
           className="flex items-center gap-2 p-2 text-sm font-semibold rounded-full cursor-pointer transition-colors w-full justify-center"
           style={{ color: 'var(--text-primary)', background: 'var(--bg-inset)', border: '1.5px solid var(--border-color)' }}
         >
@@ -126,16 +159,23 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
 
         {dropdownOpen && (
           <div
-            className="absolute bg-elevated border rounded-sm p-2 w-full"
+            className="wallet-dropdown"
             style={{
-              bottom: 'calc(100% + 8px)',
+              position: 'fixed',
+              bottom: `calc(100vh - ${dropdownPos.top}px)`,
+              left: dropdownPos.left,
+              width: dropdownPos.width,
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border)',
+              borderRadius: 6,
+              padding: 8,
               boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-              zIndex: 1000,
+              zIndex: 10000,
             }}
           >
             {/* Full key */}
-            <div className="p-3 border-b mb-1">
-              <div className="mono-xs uppercase mb-1" style={{ color: 'var(--text-primary)' }}>Connected</div>
+            <div style={{ padding: 12, borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
+              <div className="mono-xs uppercase" style={{ marginBottom: 4, color: 'var(--text-secondary)' }}>Connected</div>
               <div className="mono-sm" style={{ color: 'var(--text-primary)', wordBreak: 'break-all', lineHeight: 1.4 }}>
                 {publicKey}
               </div>
@@ -144,8 +184,8 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             {/* Copy Address */}
             <button
               onClick={() => { copyKey(); }}
-              className="flex items-center gap-2 w-full p-2 text-sm bg-transparent border-none rounded-sm cursor-pointer transition-colors"
-              style={{ color: 'var(--text-primary)' }}
+              className="flex items-center gap-2 w-full text-sm cursor-pointer transition-colors"
+              style={{ padding: '8px', background: 'transparent', border: 'none', borderRadius: 4, color: 'var(--text-primary)' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-inset)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
@@ -156,10 +196,10 @@ export const WalletConnectButton: React.FC<{ collapsed?: boolean }> = ({ collaps
             {/* Disconnect */}
             <button
               onClick={() => { disconnect(); setDropdownOpen(false); }}
-              className="flex items-center gap-2 w-full p-2 text-sm bg-transparent border-none rounded-sm cursor-pointer transition-colors"
-              style={{ color: 'var(--text-dark-secondary)' }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-inset)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              className="flex items-center gap-2 w-full text-sm cursor-pointer transition-colors"
+              style={{ padding: '8px', background: 'transparent', border: 'none', borderRadius: 4, color: 'var(--text-primary)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(220, 50, 50, 0.15)'; e.currentTarget.style.color = '#f87171'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-primary)'; }}
             >
               <LogOut size={14} />
               Disconnect

@@ -2193,6 +2193,8 @@ button {
   gap: var(--space-3);
 }
 
+
+
 .hiw-detail-card {
   background: var(--bg-elevated);
   border: none;
@@ -2482,24 +2484,53 @@ a:focus-visible {
 .landing-cta-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
-  background: var(--accent);
+  position: relative;
+  border: 2px ridge var(--accent);
+  outline: none;
+  background-color: transparent;
   color: var(--text-inverse);
-  padding: var(--space-2) var(--space-5);
+  transition: 1s;
   border-radius: var(--radius-sm);
   font-weight: var(--weight-bold);
   font-size: var(--text-base);
   text-decoration: none;
-  box-shadow: var(--shadow-sm);
-  transition: all var(--duration-base) var(--ease-out-expo);
-  border: none;
+  padding: 0.5rem 1.25rem;
   cursor: pointer;
 }
 
+.landing-cta-btn::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 3%;
+  width: 95%;
+  height: 40%;
+  background-color: #041422;
+  transition: 0.5s;
+  transform-origin: center;
+}
+
+.landing-cta-btn::before {
+  content: "";
+  transform-origin: center;
+  position: absolute;
+  top: 80%;
+  left: 3%;
+  width: 95%;
+  height: 40%;
+  background-color: #041422;
+  transition: 0.5s;
+}
+
+.landing-cta-btn:hover::before, .landing-cta-btn:hover::after {
+  transform: scale(0);
+}
+
 .landing-cta-btn:hover {
-  transform: translateY(-2px);
-  background: var(--accent-hover);
-  box-shadow: 8px 8px 16px rgba(150, 135, 125, 0.55), -8px -8px 16px rgba(255, 252, 248, 0.7), 0 0 20px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0px 0px 25px rgba(212, 175, 55, 0.4);
+  color: var(--accent);
 }
 
 /* ── Faucet Link ────────────────────────────────────────────────────────── */

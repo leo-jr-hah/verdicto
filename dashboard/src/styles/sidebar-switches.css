@@ -348,7 +348,7 @@
 .sidebar-theme-toggle {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: var(--space-3);
   padding: var(--space-2);
 }
