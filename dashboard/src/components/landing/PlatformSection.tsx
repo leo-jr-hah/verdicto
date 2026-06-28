@@ -1,0 +1,110 @@
+import React, { useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { AssessGlyph, BorrowGlyph, InsureGlyph, PredictGlyph } from './ProductGlyphs';
+
+gsap.registerPlugin(ScrollTrigger);
+
+const PRODUCTS = [
+  {
+    name: 'Assess',
+    glyph: AssessGlyph,
+    tagline: 'Multi-agent asset valuation',
+    description: 'Two independent AI analysts value the same asset using different methodologies. A three-juror panel deliberates and votes. Every step is HMAC-signed and chained.',
+    route: '/assess',
+    width: '28%',
+  },
+  {
+    name: 'Borrow',
+    glyph: BorrowGlyph,
+    tagline: 'Collateralized lending',
+    description: 'Use an assessment as collateral. AI determines LTV ratio based on agent confidence. Real CSPR disbursement. Autonomous keeper monitors health.',
+    route: '/borrow',
+    width: '24%',
+  },
+  {
+    name: 'Insure',
+    glyph: InsureGlyph,
+    tagline: 'AI-underwritten insurance',
+    description: 'AI generates risk score, premium, and coverage terms from valuation data. Claims trigger automatic revaluation. If value has dropped, the system pays out.',
+    route: '/insure',
+    width: '24%',
+  },
+  {
+    name: 'Predict',
+    glyph: PredictGlyph,
+    tagline: 'Event-driven oracle',
+    description: 'Ask any yes/no question about future outcomes. Independent AI analysts research and forecast. Oracle resolves on-chain. Disputable through jury.',
+    route: '/confidence',
+    width: '24%',
+  },
+];
+
+export const PlatformSection: React.FC = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useGSAP(() => {
+    // Cards: staggered rise with slight rotation
+    const cards = cardRefs.current.filter(Boolean);
+    gsap.from(cards, {
+      y: 80,
+      opacity: 0,
+      rotation: (i: number) => (i % 2 === 0 ? -1.5 : 1.5),
+      duration: 0.9,
+      stagger: 0.12,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: 'top 72%',
+        toggleActions: 'play none none none',
+      },
+    });
+  }, { scope: sectionRef });
+
+  return (
+    <section ref={sectionRef} className="platform-section">
+      <div className="platform-container">
+        <span className="section-label-light">02 - THE PLATFORM</span>
+
+        <h2 className="platform-headline">
+          Four products. One analytical engine.
+        </h2>
+
+        <p className="platform-subhead">
+          Every product runs on the same multi-agent valuation and deliberation
+          infrastructure. The process is identical across all four: agents analyze,
+          a jury deliberates, the verdict is recorded on Casper.
+        </p>
+
+        <div className="platform-cards">
+          {PRODUCTS.map((product, i) => {
+            const Glyph = product.glyph;
+            return (
+              <Link
+                key={product.name}
+                to={product.route}
+                ref={(el) => { cardRefs.current[i] = el as unknown as HTMLDivElement; }}
+                className="platform-card"
+                style={{ flex: `1 1 ${product.width}` }}
+              >
+                <Glyph className="platform-glyph" />
+                <span className="platform-name">{product.name}</span>
+                <span className="platform-tagline">{product.tagline}</span>
+                <p className="platform-desc">{product.description}</p>
+                <span className="platform-link">
+                  Open {product.name}
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M3 7H11M11 7L7.5 3.5M11 7L7.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};

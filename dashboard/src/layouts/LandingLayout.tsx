@@ -23,10 +23,10 @@ export const LandingLayout: React.FC = () => {
 
           {/* Nav links (desktop + mobile) */}
           <div className={`landing-nav-links${mobileMenuOpen ? ' landing-nav-links--open' : ''}`}>
-            <a href="#how-it-works" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
-            <a href="#agents" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>Agents</a>
-            <a href="#oracle" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>Oracle</a>
-            <a href="#security" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>Security</a>
+            <a href="#problem" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>The Problem</a>
+            <a href="#platform" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>Products</a>
+            <a href="#technology" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>Technology</a>
+            <a href="#audience" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>Who It's For</a>
             <Link to="/dashboard" className="landing-cta-btn" onClick={() => setMobileMenuOpen(false)}>
               Open App →
             </Link>
