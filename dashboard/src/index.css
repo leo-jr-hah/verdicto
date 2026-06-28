@@ -143,7 +143,7 @@ button {
 }
 
 .sidebar-logo:hover {
-  background: var(--bg-sunken);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .sidebar-logo-text {
