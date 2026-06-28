@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   Shield, ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle,
@@ -11,7 +11,7 @@ import { useAssessment } from '../hooks/useAssessment';
 import {
   type AssetType, type InsuranceCreateRequest, type AssessmentRequest,
 } from '../services/api';
-import { PLATFORM_WALLET, INSURANCE_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
+import { INSURANCE_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
 import { AgentExplainer } from '../components/AgentExplainer';
 import PaymentModal from '../components/PaymentModal';
 import { AppModal, AppModalActions } from '../components/AppModal';
@@ -71,8 +71,8 @@ export const InsureView: React.FC = () => {
   const { publicKey, connected, signPayment } = wallet;
   const {
     loading: insLoading, error: insError, errorHint: insErrorHint,
-    policies, currentPolicy, claimResult, paymentRequired,
-    submitPolicy, submitPolicyWithProof, loadPolicies, claim, reset, clearError,
+    policies, currentPolicy, claimResult,
+    submitPolicyWithProof, loadPolicies, claim, reset, clearError,
   } = useInsurance();
 
   const {
@@ -89,8 +89,6 @@ export const InsureView: React.FC = () => {
   const [location, setLocation] = useState('');
   const [artistOrMedium, setArtistOrMedium] = useState('');
   const [weightOz, setWeightOz] = useState('');
-  const [signing, setSigning] = useState(false);
-  const [signError, setSignError] = useState<string | null>(null);
   const [claimPolicyId, setClaimPolicyId] = useState<string | null>(null);
   const [claimReason, setClaimReason] = useState('');
 
@@ -98,6 +96,14 @@ export const InsureView: React.FC = () => {
     if (!assessPayment.pendingPayloadRef.current) return;
     await submitAssessmentWithProof(assessPayment.pendingPayloadRef.current, paymentProof);
     setStep(2);
+  });
+
+  // Policy creation payment flow (replaces buggy useEffect auto-trigger pattern)
+  const pendingPolicyRequest = useRef<InsuranceCreateRequest | null>(null);
+  const policyPayment = usePaymentFlow(signPayment, INSURANCE_FEE_CSPR, async (paymentProof) => {
+    const request = pendingPolicyRequest.current;
+    if (!request || !publicKey) return;
+    await submitPolicyWithProof(request, paymentProof);
   });
 
   useEffect(() => { if (connected && publicKey) loadPolicies(publicKey); }, [connected, publicKey, loadPolicies]);
@@ -112,7 +118,7 @@ export const InsureView: React.FC = () => {
     assessPayment.openModal(request);
   }, [assetType, assetName, assetDescription, assetValue, location, artistOrMedium, weightOz, assessPayment]);
 
-  useEffect(() => {
+  const handleRequestPolicy = useCallback(() => {
     if (!assessmentResult || !publicKey) return;
     const request: InsuranceCreateRequest = {
       ownerPublicKey: publicKey, assetId: assessmentResult.assetId,
@@ -122,28 +128,9 @@ export const InsureView: React.FC = () => {
       coveragePercent: coveragePercent ? parseFloat(coveragePercent) : undefined,
       assessmentId: assessmentResult.assetId,
     };
-    submitPolicy(request);
-  }, [assessmentResult, publicKey, coveragePercent, submitPolicy]);
-
-  useEffect(() => {
-    if (paymentRequired && signPayment && !signing) {
-      setSigning(true); setSignError(null);
-      signPayment(PLATFORM_WALLET, INSURANCE_FEE_CSPR)
-        .then(({ paymentProof }) => {
-          if (!assessmentResult || !publicKey) return;
-          submitPolicyWithProof({
-            ownerPublicKey: publicKey, assetId: assessmentResult.assetId,
-            assetType: assessmentResult.assetType, assetName: assessmentResult.name,
-            assessedValue: assessmentResult.assessedValue, askingPrice: assessmentResult.askingPrice,
-            confidence: Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence),
-            coveragePercent: coveragePercent ? parseFloat(coveragePercent) : undefined,
-            assessmentId: assessmentResult.assetId,
-          }, paymentProof);
-        })
-        .catch((err) => setSignError(err.message || 'Payment signing failed'))
-        .finally(() => setSigning(false));
-    }
-  }, [paymentRequired, signPayment, signing, submitPolicyWithProof, assessmentResult, publicKey, coveragePercent]);
+    pendingPolicyRequest.current = request;
+    policyPayment.openModal();
+  }, [assessmentResult, publicKey, coveragePercent, policyPayment]);
 
   useEffect(() => {
     if (currentPolicy) { setStep(3); if (publicKey) loadPolicies(publicKey); }
@@ -187,6 +174,17 @@ export const InsureView: React.FC = () => {
         onConfirm={assessPayment.confirm} onCancel={assessPayment.cancel}
       />
 
+      {/* Policy Payment Modal */}
+      <PaymentModal
+        open={policyPayment.showModal}
+        title="Confirm Insurance Payment"
+        description={`A fee of ${INSURANCE_FEE_CSPR} CSPR is required to create your insurance policy.`}
+        feeLabel="Insurance Fee" feeAmount={INSURANCE_FEE_CSPR}
+        features={['AI risk scoring & premium calculation', 'On-chain policy with claim support', 'Revaluation on claim filing']}
+        signing={policyPayment.signing} signError={policyPayment.signError} signErrorHint={policyPayment.signErrorHint}
+        onConfirm={policyPayment.confirm} onCancel={policyPayment.cancel}
+      />
+
       {/* Header */}
       <div className="wizard-header">
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
@@ -223,14 +221,14 @@ export const InsureView: React.FC = () => {
       )}
 
       {/* Error Banner */}
-      {(insError || signError) && (
+      {(insError || policyPayment.signError) && (
         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="wizard-error">
           <AlertCircle size={18} color="var(--error)" style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ flex: 1 }}>
-            <div className="wizard-error__msg">{insError || signError}</div>
+            <div className="wizard-error__msg">{insError || policyPayment.signError}</div>
             {insErrorHint && <div className="wizard-error__hint">{insErrorHint}</div>}
           </div>
-          <button onClick={() => { clearError(); setSignError(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: 4 }}>
+          <button onClick={() => { clearError(); policyPayment.setSignError(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: 4 }}>
             <XCircle size={16} />
           </button>
         </motion.div>
@@ -358,6 +356,25 @@ export const InsureView: React.FC = () => {
                 </div>
               </div>
               <div style={{ marginBottom: '1.5rem' }}><AgentExplainer assessment={assessmentResult} /></div>
+              <div className="wizard-actions">
+                <button onClick={handleStartNew} className="btn" disabled={policyPayment.signing}>
+                  <RotateCcw size={16} /> Start Over
+                </button>
+                <button
+                  onClick={handleRequestPolicy}
+                  className={`btn btn-primary ${policyPayment.signing ? 'btn-analysing' : ''}`}
+                  disabled={policyPayment.signing}
+                >
+                  {policyPayment.signing ? (
+                    <div className="wave-loader">
+                      <div className="wave-text"><span>Processing</span></div>
+                      <div className="wave-line"></div>
+                    </div>
+                  ) : (
+                    <><Shield size={16} /> Get Insurance</>
+                  )}
+                </button>
+              </div>
             </div>
           ) : (
             <div className="wizard-loading">

@@ -26,7 +26,7 @@ import {
   type LoanCreateRequest,
   type AssessmentRequest,
 } from '../services/api';
-import { PLATFORM_WALLET, LOAN_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
+import { LOAN_FEE_CSPR, ASSESSMENT_FEE_CSPR } from '../config/casper';
 import { AgentExplainer } from '../components/AgentExplainer';
 import PaymentModal from '../components/PaymentModal';
 import { AppModal, AppModalActions } from '../components/AppModal';
@@ -157,8 +157,6 @@ export const BorrowView: React.FC = () => {
     errorHint: loanErrorHint,
     loans,
     currentLoan,
-    paymentRequired,
-    submitLoan,
     submitLoanWithProof,
     loadLoans,
     repay,
@@ -184,8 +182,6 @@ export const BorrowView: React.FC = () => {
   const [location, setLocation] = useState('');
   const [artistOrMedium, setArtistOrMedium] = useState('');
   const [weightOz, setWeightOz] = useState('');
-  const [signing, setSigning] = useState(false);
-  const [signError, setSignError] = useState<string | null>(null);
   const [repayAmount, setRepayAmount] = useState('');
   const [repayLoanId, setRepayLoanId] = useState<string | null>(null);
 
@@ -198,6 +194,14 @@ export const BorrowView: React.FC = () => {
     const request = pendingAssessRequest.current;
     if (!request) return;
     await submitAssessmentWithProof(request, paymentProof);
+  });
+
+  // Loan creation payment flow (replaces buggy useEffect auto-trigger pattern)
+  const pendingLoanRequest = useRef<LoanCreateRequest | null>(null);
+  const loanPayment = usePaymentFlow(signPayment, LOAN_FEE_CSPR, async (paymentProof) => {
+    const request = pendingLoanRequest.current;
+    if (!request || !publicKey) return;
+    await submitLoanWithProof(request, paymentProof);
   });
 
   // Load existing loans on mount
@@ -239,34 +243,9 @@ export const BorrowView: React.FC = () => {
       assessmentTimestamp: assessmentResult.timestamp,
       divergence: assessmentResult.divergence,
     };
-    await submitLoan(request);
-  }, [assessmentResult, publicKey, submitLoan]);
-
-  // When payment is required, trigger wallet signing
-  useEffect(() => {
-    if (paymentRequired && signPayment && !signing) {
-      setSigning(true);
-      setSignError(null);
-      signPayment(PLATFORM_WALLET, LOAN_FEE_CSPR)
-        .then(({ paymentProof }) => {
-          if (!assessmentResult || !publicKey) return;
-          submitLoanWithProof({
-            borrowerPublicKey: publicKey,
-            assetId: assessmentResult.assetId,
-            assetType: assessmentResult.assetType,
-            assetName: assessmentResult.name,
-            assessedValue: assessmentResult.assessedValue,
-            askingPrice: assessmentResult.askingPrice,
-            confidence: Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence),
-            assessmentId: assessmentResult.assetId,
-            assessmentTimestamp: assessmentResult.timestamp,
-            divergence: assessmentResult.divergence,
-          }, paymentProof);
-        })
-        .catch((err) => setSignError(err.message || 'Payment signing failed'))
-        .finally(() => setSigning(false));
-    }
-  }, [paymentRequired, signPayment, signing, submitLoanWithProof, assessmentResult, publicKey]);
+    pendingLoanRequest.current = request;
+    loanPayment.openModal();
+  }, [assessmentResult, publicKey, loanPayment]);
 
   // When loan is created, move to step 3
   useEffect(() => {
@@ -340,6 +319,25 @@ export const BorrowView: React.FC = () => {
         onCancel={assessPayment.cancel}
       />
 
+      {/* Loan Payment Modal */}
+      <PaymentModal
+        open={loanPayment.showModal}
+        title="Confirm Loan Payment"
+        description="A micropayment is required to create the loan against your assessed asset."
+        feeLabel="Loan Origination Fee"
+        feeAmount={LOAN_FEE_CSPR}
+        features={[
+          'AI-determined loan-to-value ratio',
+          'Real CSPR disbursement to your wallet',
+          'Collateral locked until repayment',
+        ]}
+        signing={loanPayment.signing}
+        signError={loanPayment.signError}
+        signErrorHint={loanPayment.signErrorHint}
+        onConfirm={loanPayment.confirm}
+        onCancel={loanPayment.cancel}
+      />
+
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="wizard-header">
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
@@ -382,14 +380,14 @@ export const BorrowView: React.FC = () => {
       )}
 
       {/* ── Error Banner (hidden when loanRejected — verdict card shows it inline) ── */}
-      {(loanError || signError) && !loanRejected && (
+      {(loanError || loanPayment.signError) && !loanRejected && (
         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="wizard-error">
           <AlertCircle size={18} color="var(--error)" style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ flex: 1 }}>
-            <div className="wizard-error__msg">{loanError || signError}</div>
+            <div className="wizard-error__msg">{loanError || loanPayment.signError}</div>
             {loanErrorHint && <div className="wizard-error__hint">{loanErrorHint}</div>}
           </div>
-          <button onClick={() => { clearError(); setSignError(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: 4 }}>
+          <button onClick={() => { clearError(); loanPayment.setSignError(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', padding: 4 }}>
             <XCircle size={16} />
           </button>
         </motion.div>
@@ -589,15 +587,15 @@ export const BorrowView: React.FC = () => {
               {/* ── Actions (only when not rejected) ──────────────────────── */}
               {!loanRejected && (
                 <div className="wizard-actions">
-                  <button onClick={handleStartNew} className="btn" disabled={loanLoading || signing}>
+                  <button onClick={handleStartNew} className="btn" disabled={loanLoading || loanPayment.signing}>
                     <RotateCcw size={16} /> Start Over
                   </button>
                   <button
                     onClick={handleRequestLoan}
-                    className={`btn btn-primary ${(loanLoading || signing) ? 'btn-analysing' : ''}`}
-                    disabled={loanLoading || signing}
+                    className={`btn btn-primary ${(loanLoading || loanPayment.signing) ? 'btn-analysing' : ''}`}
+                    disabled={loanLoading || loanPayment.signing}
                   >
-                    {(loanLoading || signing) ? (
+                    {(loanLoading || loanPayment.signing) ? (
                       <div className="wave-loader">
                         <div className="wave-text"><span>Analysing</span></div>
                         <div className="wave-line"></div>
