@@ -155,7 +155,7 @@ export const DisputesView: React.FC = () => {
             <button
               onClick={loadData}
               disabled={loading}
-              className="dispute-refresh-btn"
+              className="btn btn-ghost btn-sm"
             >
               <RefreshCw size={14} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
               Refresh
@@ -318,7 +318,7 @@ export const DisputesView: React.FC = () => {
                       }
                       setShowReasonModal(v.assetId);
                     }}
-                    className="dispute-challenge-btn"
+                    className="btn btn-sm" style={{ padding: '0.4rem 0.8rem' }}
                   >
                     <Scale size={13} />
                     Challenge
@@ -350,12 +350,12 @@ export const DisputesView: React.FC = () => {
               Active Disputes
             </span>
           </div>
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div className="filter-tabs" style={{ margin: 0 }}>
             {(['active', 'pending', 'under_retrial', 'resolved'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`dispute-filter-tab ${filter === f ? 'dispute-filter-tab--active' : ''}`}
+                className={`filter-tab ${filter === f ? 'active' : ''}`}
               >
                 {f === 'active' ? `Active (${disputes.filter(d => d.status !== 'resolved').length})` : f === 'under_retrial' ? 'Re-trial' : f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
