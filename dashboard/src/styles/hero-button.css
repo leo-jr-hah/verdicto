@@ -2,9 +2,9 @@
 .uiverse {
   --duration: 7s;
   --easing: linear;
-  --c-color-1: rgba(255, 163, 26, 0.4);
-  --c-color-2: rgba(26, 35, 255, 0.4);
-  --c-color-3: rgba(226, 27, 218, 0.4);
+  --c-color-1: rgba(255, 215, 0, 0.4);
+  --c-color-2: rgba(212, 175, 55, 0.4);
+  --c-color-3: rgba(230, 190, 80, 0.4);
   --c-color-4: rgba(255, 232, 26, 0.4);
   --c-color: #fff;
   -webkit-tap-highlight-color: transparent;

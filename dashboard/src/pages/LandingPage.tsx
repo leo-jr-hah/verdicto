@@ -1,23 +1,21 @@
 import React from 'react';
-import { TrustSection } from '../components/landing/TrustSection';
-import { ProcessSection } from '../components/landing/ProcessSection';
-import { LiveStateSection } from '../components/landing/LiveStateSection';
-import { SecurityAuditSection } from '../components/landing/SecurityAuditSection';
-import { ClosingCTA } from '../components/landing/ClosingCTA';
+import { ProductShowcase } from '../components/landing/ProductShowcase';
+import { StatsSection } from '../components/landing/StatsSection';
+import { FeaturesSection } from '../components/landing/FeaturesSection';
+import { ClosingSection } from '../components/landing/ClosingSection';
 import { Footer } from '../components/landing/Footer';
 
 export const LandingPage: React.FC = () => {
   return (
-    <div style={{ position: 'relative', overflowX: 'hidden', background: 'var(--navy-950)' }}>
+    <div style={{ position: 'relative', overflowX: 'hidden', background: '#020a13' }}>
       {/* HERO — UNTOUCHED */}
       {/* <HeroSection /> is rendered by the router/layout, not here */}
 
       <main>
-        <TrustSection />
-        <ProcessSection />
-        <LiveStateSection />
-        <SecurityAuditSection />
-        <ClosingCTA />
+        <ProductShowcase />
+        <StatsSection />
+        <FeaturesSection />
+        <ClosingSection />
       </main>
 
       <Footer />
