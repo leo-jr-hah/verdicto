@@ -368,39 +368,6 @@ export const ArchitectureDiagram: React.FC = () => {
           </svg>
         </div>
 
-        {/* Legend */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          viewport={{ once: true }}
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: 24,
-            marginTop: 32,
-            flexWrap: 'wrap',
-          }}
-        >
-          {[
-            { color: 'var(--text-secondary)', label: 'AI Agents' },
-            { color: 'var(--red-600)', label: 'Jurors' },
-            { color: 'var(--text-tertiary)', label: 'Trust & Payment' },
-            { color: 'var(--text-secondary)', label: 'Blockchain' },
-          ].map((item) => (
-            <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{
-                width: 12,
-                height: 12,
-                borderRadius: 3,
-                background: item.color,
-              }} />
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                {item.label}
-              </span>
-            </div>
-          ))}
-        </motion.div>
       </div>
     </section>
   );
