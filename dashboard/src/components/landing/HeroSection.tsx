@@ -40,7 +40,48 @@ export const HeroSection: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          Verdicts you can verify.
+          Verdicts you can{' '}
+          <motion.span style={{ position: 'relative', display: 'inline-block' }}>
+            <span style={{ opacity: 0 }}>verify.</span>
+            
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.25, duration: 0.01 }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                color: 'var(--gold)',
+                zIndex: 1,
+                display: 'inline-block',
+                width: '100%'
+              }}
+            >
+              verify.
+            </motion.span>
+
+            <motion.div
+              initial={{ left: 0, width: '0%' }}
+              animate={{ 
+                left: ['0%', '0%', '100%'], 
+                width: ['0%', '100%', '0%'] 
+              }}
+              transition={{ 
+                delay: 1.0, 
+                duration: 0.8, 
+                times: [0, 0.4, 1], 
+                ease: [0.77, 0, 0.175, 1] 
+              }}
+              style={{
+                position: 'absolute',
+                top: '0.1em',
+                bottom: '0.1em',
+                backgroundColor: 'var(--gold)',
+                zIndex: 2
+              }}
+            />
+          </motion.span>
         </motion.h1>
 
         <motion.div
