@@ -233,6 +233,8 @@ export const BorrowView: React.FC = () => {
       askingPrice: assessmentResult.askingPrice,
       confidence: Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence),
       assessmentId: assessmentResult.assetId,
+      assessmentTimestamp: assessmentResult.timestamp,
+      divergence: assessmentResult.divergence,
     };
     await submitLoan(request);
   }, [assessmentResult, publicKey, submitLoan]);
@@ -254,6 +256,8 @@ export const BorrowView: React.FC = () => {
             askingPrice: assessmentResult.askingPrice,
             confidence: Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence),
             assessmentId: assessmentResult.assetId,
+            assessmentTimestamp: assessmentResult.timestamp,
+            divergence: assessmentResult.divergence,
           }, paymentProof);
         })
         .catch((err) => setSignError(err.message || 'Payment signing failed'))
@@ -530,6 +534,25 @@ export const BorrowView: React.FC = () => {
                 <div className="wizard-metric">
                   <div className="wizard-metric__label"><LTVTooltip>Max Loan (75% LTV)</LTVTooltip></div>
                   <div className="wizard-metric__value wizard-metric__value--secondary">{formatCurrency(assessmentResult.assessedValue * 0.75)}</div>
+                </div>
+                <div className="wizard-metric">
+                  <div className="wizard-metric__label">Confidence</div>
+                  <div className="wizard-metric__value" style={{
+                    color: Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) >= 0.85
+                      ? 'var(--success)'
+                      : Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) >= 0.65
+                        ? 'var(--warning)'
+                        : 'var(--error)',
+                  }}>
+                    {(Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) * 100).toFixed(0)}%
+                    <span style={{ fontSize: '0.75rem', marginLeft: '0.35rem', color: 'var(--text-tertiary)' }}>
+                      {Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) >= 0.85
+                        ? 'High'
+                        : Math.max(assessmentResult.valuationA.confidence, assessmentResult.valuationB.confidence) >= 0.65
+                          ? 'Moderate'
+                          : 'Low'}
+                    </span>
+                  </div>
                 </div>
               </div>
 

@@ -2503,6 +2503,9 @@ Respond in JSON format:
       valuationB: { value: number; method: string; confidence: number; reasoning: string };
       deliberationReceiptHash?: string;
     }>;
+    // Security: valuation freshness and divergence tracking
+    assessmentTimestamp?: number;
+    divergence?: number;
   }
 
   const loanStore = new Map<string, Loan>();
@@ -2607,6 +2610,45 @@ Respond in JSON format:
       const validTypes: AssetType[] = ['real-estate', 'art', 'commodity'];
       if (!validTypes.includes(assetType)) {
         return res.status(400).json({ success: false, error: `assetType must be one of: ${validTypes.join(', ')}` });
+      }
+
+      // ── Security: additional validation checks ────────────────────────
+
+      // A1: Minimum confidence threshold — low-confidence valuations are too unreliable for lending
+      if (confidence < 0.65) {
+        return res.status(400).json({
+          success: false,
+          error: 'Valuation confidence too low for lending',
+          hint: 'The AI agents could not reach sufficient consensus on this asset. Try a different asset or wait for market conditions to stabilize.',
+        });
+      }
+
+      // A2: Minimum collateral amount — prevent dust loans
+      if (assessedValue < 100) {
+        return res.status(400).json({
+          success: false,
+          error: 'Minimum assessed value is $100',
+          hint: 'Loans require a minimum collateral value of $100 USD equivalent.',
+        });
+      }
+
+      // A3: Valuation freshness — reject stale assessments (optional field, enforced if present)
+      const { assessmentTimestamp, divergence } = req.body;
+      if (assessmentTimestamp && (Date.now() - assessmentTimestamp) > 24 * 60 * 60 * 1000) {
+        return res.status(400).json({
+          success: false,
+          error: 'Assessment is too old',
+          hint: 'Valuations expire after 24 hours. Please run a new assessment before requesting a loan.',
+        });
+      }
+
+      // A4: Divergence check — reject when agents disagree too much (optional field, enforced if present)
+      if (typeof divergence === 'number' && divergence > 0.30) {
+        return res.status(400).json({
+          success: false,
+          error: 'Agent valuation divergence too high',
+          hint: 'The AI agents disagree significantly on this asset\'s value. Please try a different asset or wait for market stabilization.',
+        });
       }
 
       // ── Calculate LTV (trust-score-aware) ──────────────────────────────
@@ -2761,6 +2803,8 @@ Respond in JSON format:
         trustBreakdown,
         escrowLockTxHash: escrowLockHash,
         revaluationHistory: [],
+        assessmentTimestamp: assessmentTimestamp || Date.now(),
+        divergence: typeof divergence === 'number' ? divergence : undefined,
       };
       loanStore.set(loanId, loan);
 
@@ -2786,6 +2830,8 @@ Respond in JSON format:
         trust_breakdown: trustBreakdown,
         escrow_lock_tx_hash: escrowLockHash,
         revaluation_history: [],
+        assessment_timestamp: assessmentTimestamp || Date.now(),
+        divergence: typeof divergence === 'number' ? divergence : undefined,
       }).catch(err => console.warn(`  [DB] ⚠️ Failed to save loan: ${err.message}`));
 
       // Log disbursement as transaction

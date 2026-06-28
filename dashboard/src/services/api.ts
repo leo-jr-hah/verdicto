@@ -155,6 +155,8 @@ export interface LoanCreateRequest {
   askingPrice: number;
   confidence: number;
   assessmentId?: string;
+  assessmentTimestamp?: number;
+  divergence?: number;
 }
 
 export interface LoanCreateResponse {

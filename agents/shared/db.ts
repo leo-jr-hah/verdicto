@@ -181,6 +181,8 @@ export interface DbLoan {
   escrow_lock_tx_hash?: string;
   escrow_release_tx_hash?: string;
   revaluation_history: any[];
+  assessment_timestamp?: number;
+  divergence?: number;
 }
 
 export async function saveLoan(loan: DbLoan) {
@@ -206,6 +208,8 @@ export async function saveLoan(loan: DbLoan) {
     escrow_lock_tx_hash: loan.escrow_lock_tx_hash,
     escrow_release_tx_hash: loan.escrow_release_tx_hash,
     revaluation_history: JSON.stringify(loan.revaluation_history),
+    assessment_timestamp: loan.assessment_timestamp,
+    divergence: loan.divergence,
   }, 'loan_id');
 }
 
