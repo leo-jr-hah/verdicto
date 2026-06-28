@@ -214,3 +214,30 @@
   --text-primary-rgb: 6, 26, 46;
   --accent-rgb:       201, 168, 76;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK THEME OVERRIDES
+   Maps backward-compat aliases to dark navy variables
+   ═══════════════════════════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  /* Surfaces */
+  --bg-base:        var(--bg-dark);
+  --bg-elevated:    var(--bg-dark-elevated);
+  --bg-sunken:      var(--bg-dark-sunken);
+  --bg-inset:       var(--bg-dark-inset);
+
+  /* Text */
+  --text-primary:   var(--text-dark-primary);
+  --text-secondary: var(--text-dark-secondary);
+  --text-tertiary:  var(--text-dark-muted);
+  --text-quaternary:var(--text-dark-subtle);
+
+  /* Borders */
+  --border:         var(--border-dark);
+  --border-strong:  var(--border-dark-strong);
+  --border-weak:    rgba(255, 255, 255, 0.04);
+  
+  /* RGB values for rgba() opacity tricks */
+  --bg-base-rgb:      2, 10, 19;
+  --text-primary-rgb: 255, 255, 255;
+}

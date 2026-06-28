@@ -169,11 +169,43 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // PLANNED: Next phase
+  // PLANNED: Next phase — Stable Agent Architecture + Core Upgrades
   // ═══════════════════════════════════════════════════════════════════════════
 
   {
     id: 'a1',
+    title: 'Stable Agent Orchestrator',
+    description: 'Replace the 5-agent swarm with a deterministic orchestrator. A single coordinator routes tasks to specialized sub-agents with retry logic, circuit breakers, and graceful degradation. No more race conditions or flaky inter-agent HTTP calls.',
+    category: 'verifiable',
+    status: 'planned',
+    icon: <Cpu size={18} />,
+  },
+  {
+    id: 'a2',
+    title: 'Specialized Sub-Agent Pool',
+    description: 'Instead of 5 identical generalist agents, deploy purpose-built specialists: Comparable Sales Analyst, DCF Modeler, Evidence Verifier, Market Context Interpreter, and Precedent Researcher. Each has a focused prompt, curated data sources, and validated output schema.',
+    category: 'verifiable',
+    status: 'planned',
+    icon: <Layers size={18} />,
+  },
+  {
+    id: 'a3',
+    title: 'Agent Health Monitoring',
+    description: 'Real-time health checks for every sub-agent: latency tracking, error rate dashboards, automatic restart on failure, and fallback to cached responses when an agent is degraded.',
+    category: 'enhancement',
+    status: 'planned',
+    icon: <Activity size={18} />,
+  },
+  {
+    id: 'a4',
+    title: 'Deterministic Valuation Pipeline',
+    description: 'Replace parallel agent races with a staged pipeline: Data Collection → Analysis → Cross-Validation → Deliberation. Each stage must complete before the next begins. Eliminates non-deterministic ordering bugs.',
+    category: 'verifiable',
+    status: 'planned',
+    icon: <GitBranch size={18} />,
+  },
+  {
+    id: 'a5',
     title: 'On-Chain Verdicto Certificate',
     description: 'Mint a non-transferable NFT on Casper containing the verdict hash, agent signatures, and receipt root. Permanent, verifiable proof of assessment.',
     category: 'verifiable',
@@ -181,7 +213,7 @@ const ROADMAP_ITEMS: RoadmapItem[] = [
     icon: <Shield size={18} />,
   },
   {
-    id: 'a2',
+    id: 'a6',
     title: 'Compliance Export',
     description: 'One-click generation of regulatory compliance documents (SEC, EU MiCA, UAE VARA) with cryptographic signatures and methodology documentation.',
     category: 'verifiable',
