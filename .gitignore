@@ -35,3 +35,8 @@ test-*.js
 *_deploy.json
 *_result.json
 test_output.txt
+
+# Internal docs / planning (not for repo)
+inventory.json
+.mimo-context.md
+screenshot.cjs
