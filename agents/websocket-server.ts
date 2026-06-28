@@ -1,16 +1,35 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import type { Server } from 'http';
+import type { IncomingMessage } from 'http';
 
 const clients = new Set<WebSocket>();
 
 let connectionCallback: (() => void) | null = null;
+
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5174,http://localhost:3000,https://verdicto.xyz,https://www.verdicto.xyz').split(',').map(s => s.trim());
+
+function isAllowedOrigin(origin: string | undefined): boolean {
+  if (!origin) return false;
+  return ALLOWED_ORIGINS.includes(origin);
+}
 
 /**
  * Attach WebSocket server to an existing HTTP server.
  * This allows WS and HTTP to share the same port (required for Railway deployment).
  */
 export function attachWebSocket(server: Server) {
-  const wss = new WebSocketServer({ server, path: '/ws' });
+  const wss = new WebSocketServer({
+    server,
+    path: '/ws',
+    verifyClient: (info: { origin: string; req: IncomingMessage }, callback) => {
+      const origin = info.origin || info.req.headers.origin;
+      if (!isAllowedOrigin(origin)) {
+        callback(false, 403, 'Forbidden: invalid origin');
+        return;
+      }
+      callback(true);
+    },
+  });
 
   wss.on('connection', (ws) => {
     console.log('[WebSocket] Dashboard client connected');

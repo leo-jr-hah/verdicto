@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import { runAgentDeliberation } from '../shared/agent-engine.js';
+import { runDualValuation } from '../shared/agent-engine.js';
 import * as db from '../shared/db.js';
 
 // Minimal mock app to test Assess endpoint
@@ -10,18 +10,10 @@ app.use(express.json());
 
 // Mock dependencies
 vi.mock('../shared/agent-engine.js', () => ({
-  runAgentDeliberation: vi.fn().mockResolvedValue({
-    assetId: 'test-asset-123',
-    assetType: 'real-estate',
-    name: 'Test Asset',
-    assessedValue: 1000000,
-    confidence: 0.85,
-    divergence: 0.05,
-    decision: 'AgentAPreferred',
-    valuationA: { value: 1000000, confidence: 0.85 },
-    valuationB: { value: 950000, confidence: 0.8 },
-    timestamp: Date.now()
-  })
+  runDualValuation: vi.fn().mockResolvedValue([
+    { value: 1000000, confidence: 0.85, reasoning: 'Comps analysis', methodology: 'Comparable Sales' },
+    { value: 950000, confidence: 0.8, reasoning: 'DCF analysis', methodology: 'DCF' },
+  ]),
 }));
 
 vi.mock('../shared/db.js', () => ({
@@ -40,8 +32,13 @@ vi.mock('../shared/verifiable-execution.js', () => ({
 app.post('/api/assess', async (req, res) => {
   try {
     const { assetType, name, description, askingPrice } = req.body;
-    const result = await runAgentDeliberation(assetType, name, description, askingPrice);
-    res.json({ success: true, assessment: result });
+    const [valuationA, valuationB] = await runDualValuation({
+      assetType,
+      assetId: `test-${Date.now()}`,
+      name,
+      location: 'Test Location',
+    });
+    res.json({ success: true, assessment: { valuationA, valuationB } });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -69,14 +66,14 @@ describe('Assess Flow Integration', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
-    expect(response.body.assessment).toHaveProperty('assessedValue', 1000000);
-    expect(response.body.assessment).toHaveProperty('confidence', 0.85);
+    expect(response.body.assessment).toHaveProperty('valuationA');
+    expect(response.body.assessment).toHaveProperty('valuationB');
     
-    expect(runAgentDeliberation).toHaveBeenCalledWith(
-      'real-estate',
-      'Downtown Office',
-      'Test building',
-      1000000
+    expect(runDualValuation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        assetType: 'real-estate',
+        name: 'Downtown Office',
+      })
     );
   });
 });

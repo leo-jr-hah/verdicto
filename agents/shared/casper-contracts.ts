@@ -576,7 +576,7 @@ export interface Dispute {
   retrial?: RetrialResult;
   outcome?: 'upheld' | 'overturned';
   resolvedAt?: number;
-  stakeDistribution?: { recipient: string; amountCSPR: number }[];
+  stakeDistribution?: { recipient: string; amountCSPR: number; txHash?: string }[];
   paymentTxHash?: string;   // on-chain deploy hash of the 5 CSPR stake payment
   paymentPayer?: string;    // public key that paid the stake
 }

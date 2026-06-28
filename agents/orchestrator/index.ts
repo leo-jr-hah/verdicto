@@ -46,6 +46,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import { getCasperMcpClient } from '../shared/casper-mcp-client.js';
 import { attachWebSocket, emitEvent } from '../websocket-server.js';
 import { computeAggregateTrust } from '../shared/trust-framework.js';
@@ -925,14 +926,26 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   app.use(cors({
     origin: ALLOWED_ORIGINS,
     methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'x-payment-proof'],
+    allowedHeaders: ['Content-Type', 'x-payment-proof', 'x-admin-secret'],
   }));
   app.use(express.json({ limit: '16kb' }));
 
-  // ── Security headers ─────────────────────────────────────────────────────
+  // ── Security headers (helmet + manual extras) ────────────────────────────
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'", ...ALLOWED_ORIGINS],
+        frameSrc: ["'none'"],
+        objectSrc: ["'none'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false, // needed for wallet extension
+  }));
   app.use((_req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'no-referrer');
     next();
@@ -965,6 +978,36 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     recent.push(now);
     return false;
   }
+
+  // ── Global rate limiter: 60 requests/min per IP (all endpoints) ──────────
+  const globalTimestamps = new Map<string, number[]>();
+  const GLOBAL_RATE_WINDOW_MS = 60_000;
+  const GLOBAL_RATE_MAX = 60;
+
+  setInterval(() => {
+    const now = Date.now();
+    for (const [ip, timestamps] of globalTimestamps) {
+      const recent = timestamps.filter(t => now - t < GLOBAL_RATE_WINDOW_MS);
+      if (recent.length === 0) {
+        globalTimestamps.delete(ip);
+      } else {
+        globalTimestamps.set(ip, recent);
+      }
+    }
+  }, GLOBAL_RATE_WINDOW_MS);
+
+  app.use((_req, res, next) => {
+    const ip = _req.ip || _req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const timestamps = globalTimestamps.get(ip) || [];
+    const recent = timestamps.filter(t => now - t < GLOBAL_RATE_WINDOW_MS);
+    if (recent.length >= GLOBAL_RATE_MAX) {
+      return res.status(429).json({ success: false, error: 'Too many requests. Please try again later.' });
+    }
+    recent.push(now);
+    globalTimestamps.set(ip, recent);
+    next();
+  });
 
   // ─── Deploy Relay: broadcast a user-signed deploy to the Casper testnet ────
   // The browser cannot call the CSPR RPC directly (CORS), so the frontend sends
@@ -4035,8 +4078,12 @@ Respond in JSON format:
   // Gated by ADMIN_SECRET header to prevent unauthorized access.
   app.get('/api/admin/loans', (req, res) => {
     const adminSecret = process.env.ADMIN_SECRET;
-    if (!adminSecret || req.headers['x-admin-secret'] !== adminSecret) {
-      return res.status(403).json({ error: 'Forbidden - missing or invalid x-admin-secret header' });
+    if (!adminSecret || !req.headers['x-admin-secret'] ||
+        !crypto.timingSafeEqual(
+          Buffer.from(String(req.headers['x-admin-secret']), 'utf-8'),
+          Buffer.from(adminSecret, 'utf-8')
+        )) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
     const loans = Array.from(loanStore.values()).map(l => ({
       loanId: l.loanId,
