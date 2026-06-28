@@ -100,29 +100,21 @@ export const PlatformSection: React.FC = () => {
         </p>
 
         <div className="platform-grid">
-          {PRODUCTS.map((product, i) => {
-            const Glyph = product.glyph;
-            return (
-              <Link
-                key={product.name}
-                to={product.route}
-                ref={(el) => { cardRefs.current[i] = el as unknown as HTMLDivElement; }}
-                className="platform-card"
-                style={{ flex: `1 1 ${product.width}` }}
-              >
-                <Glyph className="platform-card__glyph" />
-                <span className="platform-card__name">{product.name}</span>
-                <span className="platform-card__tagline">{product.tagline}</span>
+          {PRODUCTS.map((product, i) => (
+            <Link
+              key={product.name}
+              to={product.route}
+              ref={(el) => { cardRefs.current[i] = el as unknown as HTMLDivElement; }}
+              className="platform-card"
+            >
+              <div className="platform-card__bg-glow" />
+              <div className="platform-card__content">
+                <span className="platform-card__tagline">PRODUCT: {product.name}</span>
+                <span className="platform-card__name">{product.tagline}</span>
                 <p className="platform-card__description">{product.description}</p>
-                <span className="platform-card__link">
-                  Open {product.name}
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M3 7H11M11 7L7.5 3.5M11 7L7.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </span>
-              </Link>
-            );
-          })}
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </section>

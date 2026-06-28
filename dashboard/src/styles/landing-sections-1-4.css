@@ -59,51 +59,80 @@
 
 .platform-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-6);
   margin-top: var(--space-12);
 }
 
 .platform-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  background: var(--navy-900);
+  justify-content: flex-end;
+  min-height: 360px;
+  background: linear-gradient(180deg, var(--navy-900) 0%, var(--navy-950) 100%);
   border: 1px solid var(--border-dark);
-  border-radius: var(--radius-lg);
-  padding: var(--space-8);
-  transition: border-color 0.3s, background 0.3s;
+  border-radius: 20px;
+  padding: 40px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.platform-card__bg-glow {
+  position: absolute;
+  bottom: -40%;
+  left: -20%;
+  width: 140%;
+  height: 100%;
+  background: radial-gradient(ellipse at bottom, rgba(14, 165, 233, 0.15) 0%, rgba(30, 64, 175, 0.05) 40%, transparent 70%);
+  filter: blur(40px);
+  z-index: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .platform-card:hover {
+  transform: translateY(-4px);
   border-color: var(--border-dark-strong);
-  background: var(--navy-800);
+}
+
+.platform-card:hover .platform-card__bg-glow {
+  opacity: 0.8;
+}
+
+.platform-card__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.platform-card__tagline {
+  font-family: monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--text-dark-secondary);
+  text-transform: uppercase;
+  margin-bottom: 32px;
 }
 
 .platform-card__name {
   font-family: var(--font-sans);
-  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  font-size: clamp(1.5rem, 2.5vw, 1.8rem);
   font-weight: var(--weight-bold);
-  color: var(--accent);
-  margin: 0 0 var(--space-2);
-  letter-spacing: var(--tracking-tight);
-}
-
-.platform-card__tagline {
-  font-family: var(--font-sans);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: var(--text-dark-secondary);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
-  margin: 0 0 var(--space-4);
+  color: #FFFFFF;
+  margin: 0 0 16px;
+  line-height: 1.2;
 }
 
 .platform-card__description {
   font-family: var(--font-sans);
-  font-size: var(--text-sm);
-  line-height: var(--leading-relaxed);
+  font-size: 1rem;
+  line-height: 1.6;
   color: var(--text-dark-secondary);
   margin: 0;
+  max-width: 95%;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
