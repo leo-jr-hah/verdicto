@@ -1,0 +1,695 @@
+[
+  {
+    "file": "agents/evidence-analyst/server.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/market-data-interpreter/server.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/orchestrator/index.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/precedent-researcher/rag.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/precedent-researcher/server.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/agent-engine.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/audit-trail.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/casper-contracts.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/casper-mcp-client.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/data-sources.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/db.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/fred-client.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/juror-engine.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/mimo-client.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/rentcast-client.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/transaction-log.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/trust-framework.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/types.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/verifiable-execution.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/x402-client.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/shared/x402-middleware.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/test-e2e.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/test-mcp.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/test-sdk.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/test-stateless.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/test-streamable.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/tests/agent-engine.test.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/tests/trust-framework.test.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/tests/verifiable-execution.test.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/tests/x402-integration.test.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/valuation-agent-a/server.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/valuation-agent-b/server.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/vitest.config.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "agents/websocket-server.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "contracts/reputation/src/lib.rs",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "contracts/verdict-oracle/src/lib.rs",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "contracts/voting/src/lib.rs",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/README.md",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/App.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/AgentExplainer.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/AppModal.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/ConnectionStatus.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/DemoModeBanner.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/ErrorBoundary.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/FacetedBackground.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/LiveContractPanel.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/Logo.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/MultiMethodologyDashboard.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/PaymentModal.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/Tooltip.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/WalletConnectButton.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/X402PaymentStream.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/ArchitectureDiagram.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/AudienceSection.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/ClosingCTA.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/ClosingSection.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/ContractProofSection.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/FeaturesSection.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/Footer.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/GeometricIcons.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/HeroButton.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/HeroSection.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/LiveStateSection.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/PlatformSection.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/ProblemSection.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/ProcessSection.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/ProductGlyphs.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/ProductShowcase.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/SecurityAuditSection.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/StatsSection.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/TechPipeline.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/TechnologySection.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/TrustSection.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/components/landing/VerdictoIcons.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/config/casper.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/contexts/CSPRClickContext.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/hooks/useAssessment.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/hooks/useInsurance.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/hooks/useLenis.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/hooks/useLoan.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/hooks/usePaymentFlow.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/layouts/LandingLayout.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/layouts/Layout.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/main.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/pages/ArchitectureView.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/pages/AssessView.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/pages/BorrowView.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/pages/DashboardView.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/pages/DisputesView.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/pages/HowItWorksView.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/pages/InsureView.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/pages/LandingPage.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/pages/OracleView.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/pages/PredictionView.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/pages/ReputationView.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/pages/RoadmapView.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/pages/TransactionsView.tsx",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/src/services/api.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  },
+  {
+    "file": "dashboard/vite.config.ts",
+    "isEmpty": false,
+    "isStub": false,
+    "todos": [],
+    "fixmes": []
+  }
+]

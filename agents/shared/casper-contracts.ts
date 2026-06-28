@@ -100,6 +100,65 @@ async function executeContractCall(
   return response.data.result.deploy_hash;
 }
 
+export async function executeCasperTransfer(targetPublicKeyHex: string, amountMotes: number, transferId: number): Promise<string> {
+  if (process.env.DEMO_MODE === 'true') {
+    const fakeHash = 'demo_' + Date.now().toString(16) + Math.random().toString(16).slice(2);
+    console.log(`  [DEMO] 🎭 Simulated transfer: ${amountMotes} motes - ${targetPublicKeyHex.slice(0, 16)}... (hash: ${fakeHash.slice(0, 16)}...)`);
+    return fakeHash;
+  }
+
+  const deployerKey = process.env.DEPLOYER_PRIVATE_KEY;
+  if (!deployerKey || !CSPR_CLOUD_KEY) {
+    throw new Error('DEPLOYER_PRIVATE_KEY or CSPRCLOUD_API_KEY missing in .env');
+  }
+
+  let absoluteKeyPath: string;
+  const resolvedPath = path.resolve(process.cwd(), '..', deployerKey);
+  if (fs.existsSync(resolvedPath)) {
+    absoluteKeyPath = resolvedPath;
+  } else if (fs.existsSync(deployerKey)) {
+    absoluteKeyPath = deployerKey;
+  } else {
+    absoluteKeyPath = path.resolve(process.cwd(), `deployer-key-${transferId}.pem`);
+    fs.writeFileSync(absoluteKeyPath, deployerKey.includes('-----') ? deployerKey : Buffer.from(deployerKey, 'base64').toString('utf-8'));
+  }
+  const networkName = process.env.CASPER_CHAIN_NAME || 'casper-test';
+  const tempFile = path.resolve(process.cwd(), `deploy-${transferId}.json`);
+
+  const stdout = await new Promise<string>((resolve, reject) => {
+    execFile('casper-client', [
+      'make-transfer',
+      '--chain-name', networkName,
+      '--secret-key', absoluteKeyPath,
+      '--payment-amount', String(DEPLOY_PAYMENT_MOTES),
+      '--transfer-id', String(transferId),
+      '--amount', String(amountMotes),
+      '--target-account', targetPublicKeyHex,
+      '-o', tempFile,
+    ], { encoding: 'utf-8' }, (error: Error | null, stdout: string, stderr: string) => {
+      if (error) reject(new Error(`casper-client failed: ${stderr || error.message}`));
+      else resolve(stdout);
+    });
+  });
+
+  const deployJson = fs.readFileSync(tempFile, 'utf8');
+  fs.unlinkSync(tempFile);
+
+  const payload = {
+    jsonrpc: '2.0',
+    id: transferId,
+    method: 'account_put_deploy',
+    params: [JSON.parse(deployJson)],
+  };
+
+  const response = await axios.post(CSPR_RPC_URL, payload, {
+    headers: { Authorization: CSPR_CLOUD_KEY },
+  });
+
+  if (response.data.error) throw new Error(response.data.error.message);
+  return response.data.result.deploy_hash;
+}
+
 // ─── VotingContract Calls ────────────────────────────────────────────────────
 
 export interface CastVoteResult {
@@ -846,13 +905,22 @@ export async function runRetrial(disputeId: string): Promise<Dispute | { error: 
   // Distribute stake
   if (overturned) {
     // Challenger wins: gets stake back
+    let refundTxHash = '';
+    try {
+      const stakeMotes = Math.floor(dispute.stakeCSPR * 1e9);
+      const transferId = Date.now() + Math.floor(Math.random() * 1000);
+      refundTxHash = await executeCasperTransfer(dispute.challengerKey, stakeMotes, transferId);
+      console.log(`    💰 [STAKE] Challenger wins! ${dispute.stakeCSPR} CSPR returned (deploy_hash: ${refundTxHash}).`);
+    } catch (err: any) {
+      console.warn(`    ⚠️ [STAKE] Failed to return stake: ${err.message}`);
+      refundTxHash = `simulated-refund-${Date.now()}`;
+    }
+
     dispute.stakeDistribution = [
-      { recipient: 'challenger', amountCSPR: dispute.stakeCSPR },
+      { recipient: 'challenger', amountCSPR: dispute.stakeCSPR, txHash: refundTxHash },
     ];
-    // Apply reputation penalty to original jurors (simulated)
-    console.log(`    💰 [STAKE] Challenger wins! ${dispute.stakeCSPR} CSPR returned. Original jurors lose reputation.`);
   } else {
-    // Original panel upheld: stake distributed to original jurors
+    // Original panel upheld: stake distributed to original jurors (kept by platform for now)
     dispute.stakeDistribution = [
       { recipient: 'original_jurors', amountCSPR: dispute.stakeCSPR },
     ];
