@@ -12,7 +12,6 @@ import {
   ChevronRight,
   RefreshCw,
   ExternalLink,
-  ArrowRight,
   Building2,
   Gem,
   Palette,
