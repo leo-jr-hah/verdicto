@@ -149,9 +149,7 @@ export const LiveStateSection: React.FC = () => {
           </div>
         </div>
 
-        <div className="livestate-footer">
-          5 agents · 2 rounds · 1 commitment · 4.2s total latency
-        </div>
+
       </div>
     </section>
   );
