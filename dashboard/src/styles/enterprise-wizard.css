@@ -391,6 +391,110 @@ textarea.wizard-field__input {
   flex: 2;
 }
 
+/* ── Analysing Wave Loader (on button) ──────────────────────────────── */
+.wizard-actions .btn-analysing {
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.wizard-actions .btn-analysing .wave-loader {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 1.4em;
+  width: 9em;
+  overflow: hidden;
+}
+
+.wizard-actions .btn-analysing .wave-loader .wave-text {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  color: var(--text-inverse, #fff);
+}
+
+.wizard-actions .btn-analysing .wave-loader .wave-text span {
+  display: inline-block;
+  animation: waveScroll 2s cubic-bezier(0.1, 0.6, 0.9, 0.4) infinite;
+}
+
+/* Shimmer sweep across the text */
+.wizard-actions .btn-analysing .wave-loader .wave-text span {
+  background: linear-gradient(
+    to right,
+    var(--text-inverse, #fff) 45%,
+    rgba(255,255,255,0.3) 55%,
+    var(--text-inverse, #fff) 65%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation:
+    waveScroll 2s cubic-bezier(0.1, 0.6, 0.9, 0.4) infinite,
+    waveShine 2s cubic-bezier(0.1, 0.6, 0.9, 0.4) infinite;
+}
+
+.wizard-actions .btn-analysing .wave-loader .wave-line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  height: 2px;
+  width: 3em;
+  margin-top: 0.15em;
+  border-radius: 2px;
+}
+
+.wizard-actions .btn-analysing .wave-loader .wave-line::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-color: var(--text-inverse, #fff);
+  opacity: 0.3;
+  border-radius: 2px;
+}
+
+.wizard-actions .btn-analysing .wave-loader .wave-line::after {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-color: var(--text-inverse, #fff);
+  border-radius: 2px;
+  transform: translateX(-90%);
+  animation: waveWobble 2s cubic-bezier(0.5, 0.8, 0.5, 0.2) infinite;
+}
+
+@keyframes waveScroll {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes waveShine {
+  0% { background-position: -98% 0; }
+  100% { background-position: 102% 0; }
+}
+
+@keyframes waveWobble {
+  0% { transform: translateX(-90%); }
+  50% { transform: translateX(90%); }
+  100% { transform: translateX(-90%); }
+}
+
 /* ── Error Banner ────────────────────────────────────────────────────────── */
 .wizard-error {
   display: flex;

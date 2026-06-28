@@ -919,7 +919,7 @@ export const AssessView: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="mobile-sticky-cta"
+                className={`mobile-sticky-cta ${loading ? 'btn-analysing' : ''}`}
                 style={{
                   width: '100%',
                   display: 'flex',
@@ -935,13 +935,15 @@ export const AssessView: React.FC = () => {
                   fontWeight: 600,
                   cursor: loading ? 'not-allowed' : 'pointer',
                   transition: 'background 0.15s ease',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
                 {loading ? (
-                  <>
-                    <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
-                    Analyzing...
-                  </>
+                  <div className="wave-loader">
+                    <div className="wave-text"><span>Analysing</span></div>
+                    <div className="wave-line"></div>
+                  </div>
                 ) : (
                   <>
                     <Scale size={18} />

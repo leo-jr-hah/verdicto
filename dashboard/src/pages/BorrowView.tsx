@@ -561,11 +561,22 @@ export const BorrowView: React.FC = () => {
               </div>
 
               <div className="wizard-actions">
-                <button onClick={handleStartNew} className="btn">
+                <button onClick={handleStartNew} className="btn" disabled={loanLoading || signing}>
                   <RotateCcw size={16} /> Start Over
                 </button>
-                <button onClick={handleRequestLoan} className="btn btn-primary">
-                  <Landmark size={16} /> Request Loan
+                <button
+                  onClick={handleRequestLoan}
+                  className={`btn btn-primary ${(loanLoading || signing) ? 'btn-analysing' : ''}`}
+                  disabled={loanLoading || signing}
+                >
+                  {(loanLoading || signing) ? (
+                    <div className="wave-loader">
+                      <div className="wave-text"><span>Analysing</span></div>
+                      <div className="wave-line"></div>
+                    </div>
+                  ) : (
+                    <><Landmark size={16} /> Request Loan</>
+                  )}
                 </button>
               </div>
             </div>

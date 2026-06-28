@@ -313,8 +313,15 @@ export const InsureView: React.FC = () => {
             {!connected ? (
               <button onClick={() => wallet.connect()} className="btn btn-primary">Connect Wallet to Continue <ArrowRight size={16} /></button>
             ) : (
-              <button onClick={handleSubmitAsset} disabled={!assetName || !assetValue || assessmentLoading} className="btn btn-primary" style={{ opacity: !assetName || !assetValue ? 0.5 : 1 }}>
-                {assessmentLoading ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Running...</> : <>Run Assessment <ArrowRight size={16} /></>}
+              <button onClick={handleSubmitAsset} disabled={!assetName || !assetValue || assessmentLoading || insLoading} className={`btn btn-primary ${(assessmentLoading || insLoading) ? 'btn-analysing' : ''}`} style={{ opacity: !assetName || !assetValue ? 0.5 : 1 }}>
+                {(assessmentLoading || insLoading) ? (
+                  <div className="wave-loader">
+                    <div className="wave-text"><span>Analysing</span></div>
+                    <div className="wave-line"></div>
+                  </div>
+                ) : (
+                  <>Run Assessment <ArrowRight size={16} /></>
+                )}
               </button>
             )}
           </div>

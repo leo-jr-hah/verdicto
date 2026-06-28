@@ -444,22 +444,29 @@ export const PredictionView: React.FC = () => {
               }}>
                 <button
                   onClick={handlePredict}
-                  disabled={!question.trim()}
+                  disabled={!question.trim() || loading}
+                  className={loading ? 'btn-analysing' : ''}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                     padding: '12px 28px', borderRadius: 10, border: 'none',
-                    background: question.trim()
-                      ? 'linear-gradient(135deg, var(--accent), var(--primary-dark, #cc2222))'
-                      : 'var(--border)',
+                    background: (!question.trim() || loading)
+                      ? 'var(--border)'
+                      : 'linear-gradient(135deg, var(--accent), var(--primary-dark, #cc2222))',
                     color: 'var(--text-inverse)', fontSize: '0.95rem', fontWeight: 700,
-                    cursor: question.trim() ? 'pointer' : 'not-allowed',
+                    cursor: (!question.trim() || loading) ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s ease',
-                    boxShadow: question.trim() ? '0 2px 8px var(--accent-glow)' : 'none',
+                    boxShadow: question.trim() && !loading ? '0 2px 8px var(--accent-glow)' : 'none',
+                    position: 'relative', overflow: 'hidden',
                   }}
                 >
-                  <Wallet size={16} />
-                  Pay {PREDICTION_FEE_CSPR} CSPR & Run Analysis
-                  <ArrowRight size={16} />
+                  {loading ? (
+                    <div className="wave-loader">
+                      <div className="wave-text"><span>Analysing</span></div>
+                      <div className="wave-line"></div>
+                    </div>
+                  ) : (
+                    <><Wallet size={16} /> Pay {PREDICTION_FEE_CSPR} CSPR & Run Analysis <ArrowRight size={16} /></>
+                  )}
                 </button>
 
                 <div style={{
