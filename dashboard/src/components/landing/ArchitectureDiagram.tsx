@@ -1,6 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { motion, useInView } from 'framer-motion';
-import type { Variants } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { 
   User, Brain, Database, Shield, Scale, Gavel, FileCheck, Link2, 
   Search, TrendingUp, BookOpen, Zap 
@@ -8,7 +7,27 @@ import {
 
 /**
  * ArchitectureDiagram - "How the Oracle Gets Fed"
+ * 
+ * A clean, properly-connected vertical flow diagram showing the real pipeline:
+ * 
+ *   User → Orchestrator → Data Sources → x402 Payment
+ *                                       ↓
+ *                     ┌─────────────────┼─────────────────┐
+ *                     ↓                 ↓                 ↓
+ *              Comps Specialist   DCF Specialist     MiMo LLM
+ *                     └─────────────────┼─────────────────┘
+ *                                       ↓
+ *                     ┌─────────────────┼─────────────────┐
+ *                     ↓                 ↓                 ↓
+ *              Evidence Analyst  Market Interpreter  Precedent Researcher
+ *                     └─────────────────┼─────────────────┘
+ *                                       ↓
+ *                    Trust Framework → HMAC Receipt Chain → Verdict Oracle
+ *                                                          ↓
+ *                                                    Casper Blockchain
  */
+
+// ─── Step definitions ──────────────────────────────────────────────────────
 
 interface FlowNode {
   id: string;
@@ -18,60 +37,78 @@ interface FlowNode {
   accentColor: string;
   row: number;
   col: number;
-  isCore?: boolean;
 }
 
 const NODES: FlowNode[] = [
+  // Row 0: Entry
   { id: 'user', label: 'You', sublabel: 'Connect wallet, choose product', icon: <User size={18} />, accentColor: 'var(--accent)', row: 0, col: 0 },
-  { id: 'orchestrator', label: 'Orchestrator', sublabel: 'Routes to product pipeline', icon: <Brain size={18} />, accentColor: 'var(--accent)', row: 0, col: 1, isCore: true },
+  { id: 'orchestrator', label: 'Orchestrator', sublabel: 'Routes to product pipeline', icon: <Brain size={18} />, accentColor: 'var(--text-secondary)', row: 0, col: 1 },
 
+  // Row 1: Data & Payment
   { id: 'datasources', label: 'Data Sources', sublabel: 'RentCast, FRED, CSPR.cloud', icon: <Database size={18} />, accentColor: 'var(--text-secondary)', row: 1, col: 0 },
   { id: 'x402', label: 'x402 Payment', sublabel: '1-5 CSPR per product', icon: <Zap size={18} />, accentColor: 'var(--accent)', row: 1, col: 1 },
 
+  // Row 2: AI Agents
   { id: 'comps', label: 'Agent A', sublabel: 'Comparable sales analysis', icon: <Search size={18} />, accentColor: 'var(--text-secondary)', row: 2, col: 0 },
   { id: 'dcf', label: 'Agent B', sublabel: 'Discounted cash flow', icon: <TrendingUp size={18} />, accentColor: 'var(--text-secondary)', row: 2, col: 1 },
   { id: 'llm', label: 'LLM Engine', sublabel: 'Qualitative reasoning', icon: <Brain size={18} />, accentColor: 'var(--text-secondary)', row: 2, col: 2 },
 
+  // Row 3: Jurors
   { id: 'evidence', label: 'Evidence Analyst', sublabel: 'Data quality review', icon: <Shield size={18} />, accentColor: 'var(--text-tertiary)', row: 3, col: 0 },
   { id: 'market', label: 'Market Interpreter', sublabel: 'Macro trends and timing', icon: <TrendingUp size={18} />, accentColor: 'var(--text-tertiary)', row: 3, col: 1 },
   { id: 'precedent', label: 'Precedent Researcher', sublabel: 'Historical comparisons', icon: <BookOpen size={18} />, accentColor: 'var(--text-tertiary)', row: 3, col: 2 },
 
+  // Row 4: Settlement
   { id: 'trust', label: 'Trust Framework', sublabel: 'Reputation scoring', icon: <Scale size={18} />, accentColor: 'var(--text-secondary)', row: 4, col: 0 },
   { id: 'hmac', label: 'HMAC Receipt Chain', sublabel: 'Tamper-proof audit trail', icon: <FileCheck size={18} />, accentColor: 'var(--text-secondary)', row: 4, col: 1 },
-  { id: 'verdict', label: 'Verdict Oracle', sublabel: 'On-chain dispute resolution', icon: <Gavel size={18} />, accentColor: 'var(--accent)', row: 4, col: 2, isCore: true },
+  { id: 'verdict', label: 'Verdict Oracle', sublabel: 'On-chain dispute resolution', icon: <Gavel size={18} />, accentColor: 'var(--accent)', row: 4, col: 2 },
 
-  { id: 'blockchain', label: 'Casper Blockchain', sublabel: 'Immutable on-chain record', icon: <Link2 size={18} />, accentColor: 'var(--accent)', row: 5, col: 1, isCore: true },
+  // Row 5: On-chain
+  { id: 'blockchain', label: 'Casper Blockchain', sublabel: 'Immutable on-chain record', icon: <Link2 size={18} />, accentColor: 'var(--accent)', row: 5, col: 1 },
 ];
 
 interface FlowEdge {
   from: string;
   to: string;
-  tag?: string;
+  animated?: boolean;
 }
 
 const EDGES: FlowEdge[] = [
-  { from: 'user', to: 'orchestrator', tag: '[ INIT_REQ ]' },
-  { from: 'orchestrator', to: 'datasources', tag: '[ FETCH_DATA ]' },
-  { from: 'orchestrator', to: 'x402', tag: '[ PAY_GAS ]' },
-  { from: 'datasources', to: 'comps' },
-  { from: 'datasources', to: 'dcf' },
-  { from: 'datasources', to: 'llm' },
-  { from: 'comps', to: 'evidence' },
-  { from: 'comps', to: 'market' },
-  { from: 'comps', to: 'precedent' },
-  { from: 'dcf', to: 'evidence' },
-  { from: 'dcf', to: 'market' },
-  { from: 'dcf', to: 'precedent' },
-  { from: 'llm', to: 'evidence', tag: '[ RAW_EVIDENCE ]' },
-  { from: 'llm', to: 'market' },
-  { from: 'llm', to: 'precedent' },
-  { from: 'evidence', to: 'trust' },
-  { from: 'market', to: 'trust' },
-  { from: 'precedent', to: 'trust' },
-  { from: 'trust', to: 'hmac', tag: '[ SIGNED_DATA ]' },
-  { from: 'hmac', to: 'verdict' },
-  { from: 'verdict', to: 'blockchain', tag: '[ CSPR_TX_HASH ]' },
+  // Row 0 connections
+  { from: 'user', to: 'orchestrator', animated: true },
+  
+  // Row 0 → Row 1
+  { from: 'orchestrator', to: 'datasources', animated: true },
+  { from: 'orchestrator', to: 'x402', animated: true },
+  
+  // Row 1 → Row 2
+  { from: 'datasources', to: 'comps', animated: true },
+  { from: 'datasources', to: 'dcf', animated: true },
+  { from: 'datasources', to: 'llm', animated: true },
+  
+  // Row 2 → Row 3 (parallel flow)
+  { from: 'comps', to: 'evidence', animated: true },
+  { from: 'comps', to: 'market', animated: true },
+  { from: 'comps', to: 'precedent', animated: true },
+  { from: 'dcf', to: 'evidence', animated: true },
+  { from: 'dcf', to: 'market', animated: true },
+  { from: 'dcf', to: 'precedent', animated: true },
+  { from: 'llm', to: 'evidence', animated: true },
+  { from: 'llm', to: 'market', animated: true },
+  { from: 'llm', to: 'precedent', animated: true },
+  
+  // Row 3 → Row 4
+  { from: 'evidence', to: 'trust', animated: true },
+  { from: 'market', to: 'trust', animated: true },
+  { from: 'precedent', to: 'trust', animated: true },
+  { from: 'trust', to: 'hmac', animated: true },
+  { from: 'hmac', to: 'verdict', animated: true },
+  
+  // Row 4 → Row 5
+  { from: 'verdict', to: 'blockchain', animated: true },
 ];
+
+// ─── Layout constants ──────────────────────────────────────────────────────
 
 const NODE_W = 180;
 const NODE_H = 64;
@@ -82,38 +119,56 @@ const PAD_Y = 60;
 const SVG_W = PAD_X * 2 + 3 * COL_GAP;
 const SVG_H = PAD_Y * 2 + 6 * ROW_GAP + NODE_H;
 
-function getNodeCenter(node: FlowNode) {
-  const nodesInRow = NODES.filter(n => n.row === node.row);
-  const totalRowWidth = (nodesInRow.length - 1) * COL_GAP;
+// ─── Helpers ───────────────────────────────────────────────────────────────
+
+function getNodeCenter(node: FlowNode): { x: number; y: number } {
+  const row = node.row;
+  const col = node.col;
+  
+  // Count nodes in this row
+  const nodesInRow = NODES.filter(n => n.row === row);
+  const colsInRow = nodesInRow.length;
+  
+  // Center the row horizontally
+  const totalRowWidth = (colsInRow - 1) * COL_GAP;
   const startX = (SVG_W - totalRowWidth) / 2;
+  
   return {
-    x: startX + node.col * COL_GAP + NODE_W / 2,
-    y: PAD_Y + node.row * ROW_GAP + NODE_H / 2,
+    x: startX + col * COL_GAP + NODE_W / 2,
+    y: PAD_Y + row * ROW_GAP + NODE_H / 2,
   };
 }
 
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
-  }
-};
+function getNodeById(id: string): FlowNode | undefined {
+  return NODES.find(n => n.id === id);
+}
 
-const nodeVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { type: 'spring', stiffness: 300, damping: 24 }
-  }
-};
+// ─── Component ─────────────────────────────────────────────────────────────
 
 export const ArchitectureDiagram: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(containerRef, { once: true, amount: 0.1 });
+  const svgRef = useRef<SVGSVGElement>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (svgRef.current) {
+      observer.observe(svgRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Get connected nodes for hover highlighting
   const connectedNodes = hoveredNode
     ? new Set([
         hoveredNode,
@@ -122,92 +177,102 @@ export const ArchitectureDiagram: React.FC = () => {
     : null;
 
   return (
-    <section style={{ padding: '80px 32px', background: 'var(--bg-base)' }} ref={containerRef}>
+    <section style={{
+      padding: '80px 32px',
+      background: 'var(--bg-base)',
+    }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
+        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
           style={{ marginBottom: 48 }}
         >
-          <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>
+          <h2 style={{
+            fontSize: '2rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            marginBottom: 12,
+          }}>
             How the Oracle Gets Fed
           </h2>
-          <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', maxWidth: 600, margin: '0 auto', lineHeight: 1.6 }}>
+          <p style={{
+            fontSize: '1rem',
+            color: 'var(--text-secondary)',
+            maxWidth: 600,
+            margin: '0 auto',
+            lineHeight: 1.6,
+          }}>
             Every product follows this pipeline, from wallet connection to immutable on-chain record.
           </p>
         </motion.div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', overflow: 'auto' }}>
-          <motion.svg
-            width={SVG_W} height={SVG_H} viewBox={`0 0 ${SVG_W} ${SVG_H}`}
-            style={{ maxWidth: '100%', height: 'auto' }}
-            variants={containerVariants}
-            initial="hidden"
-            animate={isInView ? "visible" : "hidden"}
+        {/* Flow Diagram */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          overflow: 'auto',
+        }}>
+          <svg
+            ref={svgRef}
+            width={SVG_W}
+            height={SVG_H}
+            viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+            }}
           >
-            {/* Blueprint Grid + Crosshairs */}
+            {/* Background Grid */}
             <defs>
-              <pattern id="blueprint-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
                 <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--border-weak)" strokeWidth="0.5" />
-                <path d="M 18 20 L 22 20 M 20 18 L 20 22" fill="none" stroke="var(--border)" strokeWidth="1" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#blueprint-grid)" />
+            <rect width="100%" height="100%" fill="url(#grid)" />
 
             {/* Edges */}
             {EDGES.map((edge, i) => {
-              const fromNode = NODES.find(n => n.id === edge.from);
-              const toNode = NODES.find(n => n.id === edge.to);
+              const fromNode = getNodeById(edge.from);
+              const toNode = getNodeById(edge.to);
               if (!fromNode || !toNode) return null;
 
               const from = getNodeCenter(fromNode);
               const to = getNodeCenter(toNode);
-              const isHighlighted = connectedNodes && (connectedNodes.has(edge.from) && connectedNodes.has(edge.to));
 
-              const midX = (from.x + to.x) / 2;
-              const midY = (from.y + to.y) / 2;
+              const isHighlighted = connectedNodes && (
+                connectedNodes.has(edge.from) && connectedNodes.has(edge.to)
+              );
 
               return (
-                <motion.g key={`edge-${i}`} variants={nodeVariants}>
-                  {/* Base path */}
+                <g key={`edge-${i}`}>
+                  {/* Edge line */}
                   <line
-                    x1={from.x} y1={from.y} x2={to.x} y2={to.y}
+                    x1={from.x}
+                    y1={from.y}
+                    x2={to.x}
+                    y2={to.y}
                     stroke={isHighlighted ? 'var(--accent)' : 'var(--border)'}
                     strokeWidth={isHighlighted ? 2 : 1}
-                    strokeDasharray="4 4"
-                  />
-                  
-                  {/* Pulsing data stream overlay */}
-                  <line
-                    x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                    stroke="var(--accent)"
-                    strokeWidth="1.5"
-                    strokeDasharray="20 100"
-                    strokeLinecap="round"
+                    strokeDasharray={isHighlighted ? 'none' : '4 4'}
                     style={{
-                      animation: `flow-dash ${3 + (i % 3)}s linear infinite`,
-                      opacity: isHighlighted ? 1 : 0.4
+                      transition: 'all 0.2s ease',
                     }}
                   />
 
-                  {/* Metadata Tag */}
-                  {edge.tag && (
-                    <g transform={`translate(${midX}, ${midY})`}>
-                      <rect x="-45" y="-10" width="90" height="20" fill="var(--bg-base)" />
-                      <text
-                        x="0" y="3"
-                        fontSize={9}
-                        fill="var(--accent)"
-                        fontFamily="var(--font-mono)"
-                        textAnchor="middle"
-                        letterSpacing="0.05em"
-                      >
-                        {edge.tag}
-                      </text>
-                    </g>
+                  {/* Animated packet */}
+                  {edge.animated && isVisible && (
+                    <circle r="3" fill="var(--accent)" opacity="0.8">
+                      <animateMotion
+                        dur={`${2 + i * 0.1}s`}
+                        repeatCount="indefinite"
+                        path={`M${from.x},${from.y} L${to.x},${to.y}`}
+                      />
+                    </circle>
                   )}
-                </motion.g>
+                </g>
               );
             })}
 
@@ -218,76 +283,92 @@ export const ArchitectureDiagram: React.FC = () => {
               const isConnected = connectedNodes?.has(node.id);
 
               return (
-                <motion.g
+                <g
                   key={node.id}
-                  variants={nodeVariants}
                   transform={`translate(${center.x - NODE_W / 2}, ${center.y - NODE_H / 2})`}
                   onMouseEnter={() => setHoveredNode(node.id)}
                   onMouseLeave={() => setHoveredNode(null)}
                   style={{ cursor: 'pointer' }}
                 >
+                  {/* Node background */}
                   <rect
-                    width={NODE_W} height={NODE_H} rx={8}
-                    fill="var(--bg-elevated)"
+                    width={NODE_W}
+                    height={NODE_H}
+                    rx={8}
+                    fill={isHovered ? 'var(--bg-elevated)' : 'var(--bg-elevated)'}
                     stroke={isHovered ? node.accentColor : isConnected ? 'var(--accent)' : 'var(--border)'}
                     strokeWidth={isHovered ? 2 : 1}
                     style={{
-                      transition: 'all 0.3s ease',
-                      filter: node.isCore 
-                        ? `drop-shadow(0 0 15px ${node.accentColor}40)` 
-                        : isHovered 
-                          ? `drop-shadow(0 4px 12px ${node.accentColor}33)` 
-                          : 'none',
+                      transition: 'all 0.2s ease',
+                      filter: isHovered ? `drop-shadow(0 4px 12px ${node.accentColor}33)` : 'none',
                     }}
                   />
+
+                  {/* Left accent bar */}
                   <rect
-                    x={0} y={0} width={4} height={NODE_H} rx={2}
+                    x={0}
+                    y={0}
+                    width={4}
+                    height={NODE_H}
+                    rx={2}
                     fill={node.accentColor}
                     opacity={isHovered ? 1 : 0.6}
                     style={{ transition: 'opacity 0.2s ease' }}
                   />
+
+                  {/* Icon */}
                   <foreignObject x={16} y={20} width={24} height={24}>
-                    <div style={{ color: node.accentColor }}>{node.icon}</div>
+                    <div style={{ color: node.accentColor }}>
+                      {node.icon}
+                    </div>
                   </foreignObject>
+
+                  {/* Label */}
                   <text
-                    x={40} y={26} fontSize={13} fontWeight={600}
-                    fill="var(--text-primary)" fontFamily="var(--font-sans)"
+                    x={40}
+                    y={26}
+                    fontSize={13}
+                    fontWeight={600}
+                    fill="var(--text-primary)"
+                    fontFamily="var(--font-sans)"
                   >
                     {node.label}
                   </text>
+
+                  {/* Sublabel */}
                   <text
-                    x={40} y={44} fontSize={10}
-                    fill="var(--text-tertiary)" fontFamily="var(--font-sans)"
+                    x={40}
+                    y={44}
+                    fontSize={10}
+                    fill="var(--text-tertiary)"
+                    fontFamily="var(--font-sans)"
                   >
                     {node.sublabel}
                   </text>
-                </motion.g>
+                </g>
               );
             })}
 
             {/* Row labels */}
             {['ENTRY', 'DATA & PAY', 'AI AGENTS', 'DELIBERATION', 'SETTLEMENT', 'CHAIN'].map((label, i) => (
-              <motion.text
+              <text
                 key={label}
-                variants={nodeVariants}
-                x={24} y={PAD_Y + i * ROW_GAP + NODE_H / 2 + 4}
-                fontSize={9} fontWeight={600}
-                fill="var(--text-tertiary)" fontFamily="var(--font-sans)"
-                letterSpacing="0.05em" textAnchor="start"
+                x={24}
+                y={PAD_Y + i * ROW_GAP + NODE_H / 2 + 4}
+                fontSize={9}
+                fontWeight={600}
+                fill="var(--text-tertiary)"
+                fontFamily="var(--font-sans)"
+                letterSpacing="0.05em"
+                textAnchor="start"
               >
                 {label}
-              </motion.text>
+              </text>
             ))}
-          </motion.svg>
+          </svg>
         </div>
+
       </div>
-      
-      {/* Global styles for SVG animations */}
-      <style>{`
-        @keyframes flow-dash {
-          to { stroke-dashoffset: -120; }
-        }
-      `}</style>
     </section>
   );
 };
