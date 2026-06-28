@@ -26,7 +26,7 @@ export const LandingLayout: React.FC = () => {
             <a href="#how-it-works" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
             <a href="#agents" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>Agents</a>
             <a href="#oracle" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>Oracle</a>
-            <a href="#contracts" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>Contracts</a>
+            <a href="#security" className="landing-nav-link" onClick={() => setMobileMenuOpen(false)}>Security</a>
             <Link to="/dashboard" className="landing-cta-btn" onClick={() => setMobileMenuOpen(false)}>
               Open App →
             </Link>

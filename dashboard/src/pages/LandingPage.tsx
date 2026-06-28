@@ -2,7 +2,7 @@ import React from 'react';
 import { TrustSection } from '../components/landing/TrustSection';
 import { ProcessSection } from '../components/landing/ProcessSection';
 import { LiveStateSection } from '../components/landing/LiveStateSection';
-import { ContractProofSection } from '../components/landing/ContractProofSection';
+import { SecurityAuditSection } from '../components/landing/SecurityAuditSection';
 import { ClosingCTA } from '../components/landing/ClosingCTA';
 import { Footer } from '../components/landing/Footer';
 
@@ -16,7 +16,7 @@ export const LandingPage: React.FC = () => {
         <TrustSection />
         <ProcessSection />
         <LiveStateSection />
-        <ContractProofSection />
+        <SecurityAuditSection />
         <ClosingCTA />
       </main>
 
