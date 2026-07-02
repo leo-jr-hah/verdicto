@@ -151,8 +151,8 @@ const AgentBar: React.FC<{ agent: PredictionAgent; index: number }> = ({ agent, 
         cursor: 'pointer',
         transition: 'border-color 0.15s ease',
       }}
-      onMouseEnter={(e) => e.currentTarget.style.borderColor = `${agent.color}50`}
-      onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+      onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => e.currentTarget.style.borderColor = `${agent.color}50`}
+      onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => e.currentTarget.style.borderColor = 'var(--border)'}
     >
       <div style={{
         display: 'flex', alignItems: 'center', gap: 12,
@@ -547,11 +547,11 @@ export const PredictionView: React.FC = () => {
                             cursor: 'pointer', textAlign: 'left',
                             transition: 'all 0.15s ease',
                           }}
-                          onMouseEnter={(e) => {
+                          onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
                             e.currentTarget.style.borderColor = 'var(--accent)';
                             e.currentTarget.style.boxShadow = '0 2px 8px var(--accent-soft)';
                           }}
-                          onMouseLeave={(e) => {
+                          onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
                             e.currentTarget.style.borderColor = 'var(--border)';
                             e.currentTarget.style.boxShadow = 'none';
                           }}

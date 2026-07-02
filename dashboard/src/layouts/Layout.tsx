@@ -285,7 +285,7 @@ export const Layout: React.FC = () => {
               exit={{ x: -280 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="mobile-menu-content"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
             >
               {NAV_SECTIONS.map((section) => (
                   <div key={section.title || section.items[0].path}>

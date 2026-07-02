@@ -231,8 +231,8 @@ export const DashboardView: React.FC = () => {
                     cursor: 'pointer',
                     transition: 'background 0.12s ease',
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-elevated)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => (e.currentTarget.style.background = 'var(--bg-elevated)')}
+                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => (e.currentTarget.style.background = 'transparent')}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
                     <div style={{
