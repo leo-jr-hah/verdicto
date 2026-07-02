@@ -40,3 +40,4 @@ test_output.txt
 inventory.json
 .mimo-context.md
 screenshot.cjs
+dashboard/pnpm-lock.yaml
