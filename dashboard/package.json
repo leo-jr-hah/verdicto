@@ -26,6 +26,9 @@
     "styled-components": "^5.3.9",
     "use-scramble": "^2.2.15"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@testing-library/dom": "^10.4.1",
