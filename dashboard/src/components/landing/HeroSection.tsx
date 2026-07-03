@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'motion/react';
 import { HeroButton } from './HeroButton';
 
@@ -30,6 +30,20 @@ const FacetedBackground: React.FC = () => (
 /* ── Hero Section ─────────────────────────────────────────────────────── */
 export const HeroSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [heroOpacity, setHeroOpacity] = useState(1);
+  
+  // Fade hero text out on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const fadeStart = window.innerHeight * 0.15; // start fading at 15% scroll
+      const fadeEnd = window.innerHeight * 0.55;   // fully gone at 55% scroll
+      const opacity = Math.max(0, 1 - (scrollY - fadeStart) / (fadeEnd - fadeStart));
+      setHeroOpacity(opacity);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   
   // Interactive Mouse Parallax Values
   const mouseX = useMotionValue(0);
@@ -66,7 +80,7 @@ export const HeroSection: React.FC = () => {
     <section className="hero-section-new">
       <FacetedBackground />
 
-      <div className="hero-content-new">
+      <div className="hero-content-new" style={{ opacity: heroOpacity, pointerEvents: heroOpacity < 0.1 ? 'none' : 'auto', transition: 'opacity 0.05s linear' }}>
         {/* Intro Animation Wrapper */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
