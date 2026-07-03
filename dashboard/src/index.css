@@ -2568,13 +2568,17 @@ a:focus-visible {
   align-items: center;
   justify-content: flex-start;
   overflow: hidden;
+  z-index: 0;
 }
 
 /* ── Faceted Geometric Background ─────────────────────────────────────── */
 
 .hero-facets {
-  position: absolute;
-  inset: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 0;
   pointer-events: none;
 }
@@ -2632,12 +2636,19 @@ a:focus-visible {
 /* ── Hero Content ─────────────────────────────────────────────────────── */
 
 .hero-content-new {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 1;
   padding: var(--space-16) 32px;
   max-width: 1280px;
   margin: 0 auto;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .hero-headline-new {
@@ -2728,6 +2739,8 @@ a:focus-visible {
 
 .landing-main {
   padding-top: 0;
+  position: relative;
+  z-index: 2;
 }
 
 /* ── Landing Footer ─────────────────────────────────────────────────────── */
