@@ -2734,7 +2734,7 @@ a:focus-visible {
 
 .landing-page-wrapper {
   min-height: 100vh;
-  background: var(--bg-dark);
+  background: transparent;
 }
 
 .landing-main {
@@ -3768,7 +3768,7 @@ a:focus-visible {
 
 .problem-section {
   padding: 140px 48px;
-  background: var(--navy-950);
+  background: rgba(2, 10, 19, 0.82);
   min-height: 80vh;
   display: flex;
   align-items: center;

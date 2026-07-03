@@ -8,7 +8,7 @@ import { Footer } from '../components/landing/Footer';
 
 export const LandingPage: React.FC = () => {
   return (
-    <div style={{ position: 'relative', overflowX: 'hidden', background: '#020a13' }}>
+    <div style={{ position: 'relative', overflowX: 'hidden' }}>
       {/* HERO is rendered by LandingLayout, not here */}
 
       <main>
