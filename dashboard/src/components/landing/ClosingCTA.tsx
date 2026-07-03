@@ -3,7 +3,6 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
-import { FacetedBackground } from '../FacetedBackground';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -27,7 +26,6 @@ export const ClosingCTA: React.FC = () => {
 
   return (
     <section ref={sectionRef} className="closing-section">
-      <FacetedBackground intensity={0.5} />
       <div ref={contentRef} className="closing-content">
         <h2 className="closing-headline">Ready to verify?</h2>
         <p className="closing-body">
