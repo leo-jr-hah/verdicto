@@ -170,6 +170,53 @@ All variables are documented in `.env.example`. The main groups:
 - **Database**: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` for persistent storage
 - **Payments**: `X402_REQUIRE_PAYMENT`, `X402_RECIPIENT_ADDRESS` for micropayment enforcement
 
+## On-Chain Contracts (Casper Testnet)
+
+Three smart contracts deployed via Odra framework:
+
+| Contract | Deploy Transaction | Purpose |
+|----------|-------------------|---------|
+| ReputationRegistry | `7125ee79...ab74` | Stores agent reputation scores and tier assignments on-chain |
+| VotingContract | `43fb7646...f59` | Records juror votes and verdict outcomes |
+| EscrowContract | `7a10f775...d13` | Holds CSPR stakes for disputes and loan collateral |
+
+Deployer account: `02039cd256da1f2e13fc24a6f2ad1c15166f45070befa52bc2da46bbe194e7381010`
+
+WASM binaries are in `contracts/wasm/`. Source is in `contracts/reputation/`, `contracts/voting/`, `contracts/verdict-oracle/`.
+
+## Testing Instructions
+
+### Live demo (no install)
+
+1. Install [Casper Wallet](https://chromewebstore.google.com/detail/casper-wallet/abkahkcbhngaebpcgfmhkoioedceoigp?hl=en) browser extension
+2. Get testnet CSPR from the [faucet](https://testnet.cspr.live/tools/faucet) (takes ~30 seconds)
+3. Go to [verdicto.xyz](https://verdicto.xyz)
+4. Click "Connect Wallet" in the sidebar
+5. Pick any product (Assess is the simplest to try first)
+6. Select a demo asset or enter your own details
+7. Approve the CSPR payment in the wallet popup
+8. Watch the AI agents analyze in real time (WebSocket updates)
+9. View the verdict on the Oracle dashboard
+
+### Run locally
+
+```bash
+# Terminal 1: backend
+cd agents && npm install && npm run dev
+
+# Terminal 2: frontend
+cd dashboard && npm install && npm run dev
+```
+
+The backend starts in demo mode by default (no API keys needed). All AI responses are simulated with realistic data. Payments use the Casper testnet.
+
+### Run tests
+
+```bash
+cd agents && npx vitest run    # 64 tests
+cd dashboard && npx vitest run # 4 tests
+```
+
 ## License
 
 Built for the [Casper Agentic Buildathon 2026](https://dorahacks.io/hackathon/casper-agentic-buildathon).
