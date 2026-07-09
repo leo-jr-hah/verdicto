@@ -131,7 +131,7 @@ export const DashboardView: React.FC = () => {
             { label: 'Oracle Verdicts', value: oracleStats.totalVerdicts, icon: Radio, color: 'var(--text-secondary)', bg: 'var(--bg-inset)' },
             { label: 'Active Agents', value: 5, icon: Zap, color: 'var(--text-secondary)', bg: 'var(--bg-inset)' },
             { label: 'Live Feeds', value: 3, icon: TrendingUp, color: 'var(--text-tertiary)', bg: 'var(--warning-soft)' },
-          ].map((stat, i) => (
+          ].map((stat) => (
             <div
               key={stat.label}
               className="stat-card"
@@ -223,7 +223,7 @@ export const DashboardView: React.FC = () => {
                 <p className="empty-state-text">Run an assessment to see activity here.</p>
               </div>
             ) : (
-              transactions.map((tx, i) => (
+              transactions.map((tx) => (
                 <div
                   key={tx.id}
                   style={{

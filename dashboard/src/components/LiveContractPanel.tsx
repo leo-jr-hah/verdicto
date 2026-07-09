@@ -41,7 +41,7 @@ const StatCard: React.FC<{
   color: string;
   subtext?: string;
   index: number;
-}> = ({ icon, label, value, color, subtext, index }) => (
+}> = ({ icon, label, value, color, subtext }) => (
   <div
     style={{
       background: 'var(--bg-elevated)',
@@ -79,7 +79,7 @@ const StatCard: React.FC<{
 const AgentRow: React.FC<{
   agent: ContractState['agents'][0];
   index: number;
-}> = ({ agent, index }) => (
+}> = ({ agent }) => (
   <div
     style={{
       display: 'flex',
