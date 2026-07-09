@@ -1,5 +1,22 @@
 [
   {
+    "id": "tx-1783624894188-q7ls8l",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: Miami Beach Condo → 710,460",
+    "hash": "oracle-mem-1783624894188",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T19:21:34.188Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/oracle-mem-1783624894188",
+    "onChain": true,
+    "metadata": {
+      "assetId": "re-miami-condo-001",
+      "assessedValue": 710460,
+      "confidence": 1,
+      "divergence": 36
+    }
+  },
+  {
     "id": "tx-1783624713804-n4g901",
     "type": "ExecuteVerdict",
     "action": "Oracle verdict: 1oz Platinum Coin → 55",
