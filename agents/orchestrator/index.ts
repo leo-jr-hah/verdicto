@@ -4077,66 +4077,8 @@ Respond in JSON format:
 
     // ─── Auto-revaluation monitor ───────────────────────────────────────────
     // Periodically checks active loans and triggers revaluation if stale.
-    // This makes the system "monitor its own loans" rather than requiring manual triggers.
-    const REVAL_INTERVAL_MS = 5 * 60 * 1000;
-    const REVAL_STALE_MS = 30 * 60 * 1000;
-
-    console.log(`[Auto-Revalue] Checking every 5 min, staleness threshold 30 min`);
-
-    setInterval(async () => {
-      const activeLoans = Array.from(loanStore.values()).filter(
-        l => l.status === 'active' || l.status === 'healthy'
-      );
-      if (activeLoans.length === 0) return;
-
-      console.log(`\n[Auto-Revalue] Checking ${activeLoans.length} active loans...`);
-      const now = Date.now();
-
-      for (const loan of activeLoans) {
-        const lastReval = loan.revaluationHistory?.length
-          ? loan.revaluationHistory[loan.revaluationHistory.length - 1].timestamp
-          : loan.createdAt;
-        const staleMs = now - lastReval;
-
-        if (staleMs < REVAL_STALE_MS) continue;
-
-        console.log(`[Auto-Revalue] Loan ${loan.loanId} is stale (${Math.round(staleMs / 60000)} min since last revaluation). Triggering...`);
-
-        try {
-          // Re-run the dual-agent deliberation pipeline
-          const [agentA, agentB] = await runDualValuation({
-            assetId: loan.assetId,
-            assetType: loan.assetType as AssetType,
-          });
-
-          const newValue = Math.round((agentA.estimated_value + agentB.estimated_value) / 2);
-          const confidence = (agentA.confidence + agentB.confidence) / 2;
-
-          // Compute new health ratio
-          const newHealthRatio = Math.round((newValue / (loan.loanAmountCSPR * 100)) * 100);
-          const newStatus: Loan['status'] = newHealthRatio < 50 ? 'warning' : 'healthy';
-
-          // Store revaluation
-          loan.revaluationHistory.push({
-            timestamp: now,
-            previousValue: loan.assessedValue,
-            newValue,
-            healthRatio: newHealthRatio,
-            status: newStatus,
-            valuationA: { value: agentA.estimated_value, method: agentA.method, confidence: agentA.confidence, reasoning: agentA.reasoning },
-            valuationB: { value: agentB.estimated_value, method: agentB.method, confidence: agentB.confidence, reasoning: agentB.reasoning },
-          });
-          loan.assessedValue = newValue;
-          loan.lastRevaluedAt = now;
-          loan.healthRatio = newHealthRatio;
-          loan.status = newStatus;
-
-          console.log(`[Auto-Revalue] ${loan.loanId}: ${loan.assessedValue.toLocaleString()} - ${newValue.toLocaleString()} health=${newHealthRatio}`);
-        } catch (err: any) {
-          console.error(`[Auto-Revalue] Failed for ${loan.loanId}:`, err.message);
-        }
-      }
-    }, REVAL_INTERVAL_MS);
+    // DISABLED: User requested no automatic transactions. Current count is sufficient.
+    console.log(`[Auto-Revalue] Auto-revaluation DISABLED (user request)`);
 
     // ─── Background Oracle Activity Generator ───────────────────────────────
     // Periodically runs real AI-powered oracle valuations for diverse asset types.
@@ -4243,21 +4185,9 @@ Respond in JSON format:
       }
     }
 
-    // Run first 12 assets in rapid burst (every 15s), then settle to 3-min intervals
-    setTimeout(() => {
-      let burstCount = 0;
-      const burstInterval = setInterval(() => {
-        runOracleActivityCycle();
-        burstCount++;
-        if (burstCount >= ORACLE_ASSET_POOL.length) {
-          clearInterval(burstInterval);
-          // After burst, continue at normal pace
-          setInterval(runOracleActivityCycle, ORACLE_ACTIVITY_INTERVAL_MS);
-          console.log(`[OracleActivity] Burst complete. Switching to ${ORACLE_ACTIVITY_INTERVAL_MS / 1000}s intervals.`);
-        }
-      }, 15_000); // 15s between each during burst
-    }, 30_000);
-
-    console.log(`[OracleActivity] Background oracle valuations scheduled (burst: ${ORACLE_ASSET_POOL.length} × 15s, then every ${ORACLE_ACTIVITY_INTERVAL_MS / 1000}s)`);
+    // ─── Background Oracle Activity Generator ───────────────────────────────
+    // DISABLED: User requested no automatic transactions. Current count is sufficient.
+    // To re-enable, uncomment the setInterval calls below.
+    console.log(`[OracleActivity] Background oracle valuations DISABLED (user request)`);
   });
 }
