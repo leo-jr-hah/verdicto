@@ -1,5 +1,839 @@
 [
   {
+    "id": "tx-1783626146965-x813is",
+    "type": "x402 Payment",
+    "action": "Insurance premium: 1oz Gold Bar (1.19 CSPR)",
+    "hash": "d953e049a54468a00d63ac2b7a81eb7601f70cc2511a6298bfde930f1ded25ee",
+    "contract": "InsurancePool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-06T00:51:01.615Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/d953e049a54468a00d63ac2b7a81eb7601f70cc2511a6298bfde930f1ded25ee",
+    "onChain": true,
+    "metadata": {
+      "policyId": "POL-1783336450344-397",
+      "amount": 1.19,
+      "type": "premium"
+    }
+  },
+  {
+    "id": "tx-1783626146965-4zsnh0",
+    "type": "x402 Payment",
+    "action": "Insurance premium: Generative Art Collection (6.08 CSPR)",
+    "hash": "cc2b67ce9de86b183e064a9a960368a8861e77e60d6ce6f940be8a55dd65a5a3",
+    "contract": "InsurancePool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-06T07:42:39.583Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/cc2b67ce9de86b183e064a9a960368a8861e77e60d6ce6f940be8a55dd65a5a3",
+    "onChain": true,
+    "metadata": {
+      "policyId": "POL-1783383184212-198",
+      "amount": 6.08,
+      "type": "premium"
+    }
+  },
+  {
+    "id": "tx-1783626146965-2hhju5",
+    "type": "ContractCall",
+    "action": "Insurance claim paid: Watercolor Landscape — payout processed",
+    "hash": "b5af297143c43785667665bb28d0c20e3466e8260074798d3def5ff35495ee5b",
+    "contract": "InsurancePool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T00:19:53.256Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/b5af297143c43785667665bb28d0c20e3466e8260074798d3def5ff35495ee5b",
+    "onChain": true,
+    "metadata": {
+      "policyId": "POL-1783420044723-741",
+      "payout": true
+    }
+  },
+  {
+    "id": "tx-1783626146965-awqpt4",
+    "type": "x402 Payment",
+    "action": "Insurance premium: Watercolor Landscape (2.63 CSPR)",
+    "hash": "0c86e9d182d1be64f506a31004cd6957576d03a223ee468fed48fbc62d22d382",
+    "contract": "InsurancePool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-04T21:55:14.317Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/0c86e9d182d1be64f506a31004cd6957576d03a223ee468fed48fbc62d22d382",
+    "onChain": true,
+    "metadata": {
+      "policyId": "POL-1783420044723-741",
+      "amount": 2.63,
+      "type": "premium"
+    }
+  },
+  {
+    "id": "tx-1783626146965-v4ubme",
+    "type": "x402 Payment",
+    "action": "Insurance premium: Bronze Sculpture (9.6 CSPR)",
+    "hash": "f1df0378a9c946a4d8290c201d338929775949f4914f2bb457c9aa4f82f6eb8b",
+    "contract": "InsurancePool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-06T10:03:04.870Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/f1df0378a9c946a4d8290c201d338929775949f4914f2bb457c9aa4f82f6eb8b",
+    "onChain": true,
+    "metadata": {
+      "policyId": "POL-1783249610185-126",
+      "amount": 9.6,
+      "type": "premium"
+    }
+  },
+  {
+    "id": "tx-1783626146965-ckeia5",
+    "type": "x402 Payment",
+    "action": "Insurance premium: Abstract Oil Painting (5.55 CSPR)",
+    "hash": "a7a493cd5426ed5dbefeeeb939421adca33c472add34eb15a86fcb057884a2e5",
+    "contract": "InsurancePool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-05T15:08:31.532Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/a7a493cd5426ed5dbefeeeb939421adca33c472add34eb15a86fcb057884a2e5",
+    "onChain": true,
+    "metadata": {
+      "policyId": "POL-1783367876315-855",
+      "amount": 5.55,
+      "type": "premium"
+    }
+  },
+  {
+    "id": "tx-1783626146964-p02ybr",
+    "type": "Native Transfer",
+    "action": "Loan repaid: 1452 CSPR ← borrower (1oz Gold Bar)",
+    "hash": "c719fe3b9f68af27b6f02a7de45685a5549c2bb1bbb2222fd9171a207609b8e0",
+    "contract": "LendingPool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T00:48:20.039Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/c719fe3b9f68af27b6f02a7de45685a5549c2bb1bbb2222fd9171a207609b8e0",
+    "onChain": true,
+    "metadata": {
+      "loanId": "LOAN-1783492124791-339",
+      "amount": 1452,
+      "direction": "repayment"
+    }
+  },
+  {
+    "id": "tx-1783626146964-xju6n0",
+    "type": "Native Transfer",
+    "action": "Loan disbursement: 1452 CSPR → borrower (1oz Gold Bar)",
+    "hash": "9a367dfc1febf68e8293ac2eba4c3c4463aca7caac66083eed619f76dae3d812",
+    "contract": "LendingPool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T05:46:29.597Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/9a367dfc1febf68e8293ac2eba4c3c4463aca7caac66083eed619f76dae3d812",
+    "onChain": true,
+    "metadata": {
+      "loanId": "LOAN-1783492124791-339",
+      "amount": 1452,
+      "direction": "disbursement"
+    }
+  },
+  {
+    "id": "tx-1783626146964-qiz15x",
+    "type": "Native Transfer",
+    "action": "Loan repaid: 579600 CSPR ← borrower (Chicago Penthouse)",
+    "hash": "c5b735482c792366006bbf6fc2945cb8a6fdbcbe37b5434a4c72c0e588207323",
+    "contract": "LendingPool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T08:53:15.429Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/c5b735482c792366006bbf6fc2945cb8a6fdbcbe37b5434a4c72c0e588207323",
+    "onChain": true,
+    "metadata": {
+      "loanId": "LOAN-1783444975627-236",
+      "amount": 579600,
+      "direction": "repayment"
+    }
+  },
+  {
+    "id": "tx-1783626146964-39hbxm",
+    "type": "Native Transfer",
+    "action": "Loan disbursement: 579600 CSPR → borrower (Chicago Penthouse)",
+    "hash": "16f11e2787e3ae7385b6b54c8f4583b8c4cf240a107e8f2994b5e79d442eb782",
+    "contract": "LendingPool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T00:18:08.612Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/16f11e2787e3ae7385b6b54c8f4583b8c4cf240a107e8f2994b5e79d442eb782",
+    "onChain": true,
+    "metadata": {
+      "loanId": "LOAN-1783444975627-236",
+      "amount": 579600,
+      "direction": "disbursement"
+    }
+  },
+  {
+    "id": "tx-1783626146964-vcdfhu",
+    "type": "Native Transfer",
+    "action": "Loan disbursement: 267000 CSPR → borrower (Denver Townhouse)",
+    "hash": "fa84c645408acf0f876029d5b4cdeea161e2abbd8f89b6e910183940e46c8ccd",
+    "contract": "LendingPool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-06T19:57:08.381Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/fa84c645408acf0f876029d5b4cdeea161e2abbd8f89b6e910183940e46c8ccd",
+    "onChain": true,
+    "metadata": {
+      "loanId": "LOAN-1783534830057-707",
+      "amount": 267000,
+      "direction": "disbursement"
+    }
+  },
+  {
+    "id": "tx-1783626146964-0jpa8t",
+    "type": "Native Transfer",
+    "action": "Loan disbursement: 468000 CSPR → borrower (SF Studio Apartment)",
+    "hash": "7b3de46f4ba6b565a57ab7ad69710a07b66ca5d2d11b76f190a578123ca35d8b",
+    "contract": "LendingPool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T09:17:32.196Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/7b3de46f4ba6b565a57ab7ad69710a07b66ca5d2d11b76f190a578123ca35d8b",
+    "onChain": true,
+    "metadata": {
+      "loanId": "LOAN-1783384434007-169",
+      "amount": 468000,
+      "direction": "disbursement"
+    }
+  },
+  {
+    "id": "tx-1783626146964-rkhi1m",
+    "type": "Native Transfer",
+    "action": "Loan disbursement: 353400 CSPR → borrower (Austin Family Home)",
+    "hash": "605e9194cf742112fcd18be2b93cd64aa5ea338c0e798095530dbb121088f0f3",
+    "contract": "LendingPool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-07T07:30:22.886Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/605e9194cf742112fcd18be2b93cd64aa5ea338c0e798095530dbb121088f0f3",
+    "onChain": true,
+    "metadata": {
+      "loanId": "LOAN-1783520766363-148",
+      "amount": 353400,
+      "direction": "disbursement"
+    }
+  },
+  {
+    "id": "tx-1783626146964-r5biaf",
+    "type": "Native Transfer",
+    "action": "Loan disbursement: 775000 CSPR → borrower (Manhattan Loft)",
+    "hash": "73da262c6a4f340ba4cba02859171014ae9dc1ffa19f32b1bdb884f987df36c3",
+    "contract": "LendingPool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-07T05:18:31.693Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/73da262c6a4f340ba4cba02859171014ae9dc1ffa19f32b1bdb884f987df36c3",
+    "onChain": true,
+    "metadata": {
+      "loanId": "LOAN-1783429097349-936",
+      "amount": 775000,
+      "direction": "disbursement"
+    }
+  },
+  {
+    "id": "tx-1783626146964-q38xpl",
+    "type": "Native Transfer",
+    "action": "Loan disbursement: 329800 CSPR → borrower (Miami Beach Condo)",
+    "hash": "d51df163afd7b936f47aa4e5dbb4ce441187352faf5d8a9ac8f356fb347e8689",
+    "contract": "LendingPool",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T10:14:03.245Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/d51df163afd7b936f47aa4e5dbb4ce441187352faf5d8a9ac8f356fb347e8689",
+    "onChain": true,
+    "metadata": {
+      "loanId": "LOAN-1783414536238-487",
+      "amount": 329800,
+      "direction": "disbursement"
+    }
+  },
+  {
+    "id": "tx-1783626146964-1c1u7t",
+    "type": "HMAC Receipt Chain",
+    "action": "Receipt chain verified: Chicago Penthouse (3 receipts)",
+    "hash": "ba9eb5db9046cfc759365e1ad1b9f45541333ab06a39bc5651b1da2b2e1e845c",
+    "contract": "ReceiptVerifier",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T02:02:31.455Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assetId": "re-chicago-flat-006",
+      "receiptCount": 6
+    }
+  },
+  {
+    "id": "tx-1783626146964-ucu2tu",
+    "type": "HMAC Receipt Chain",
+    "action": "Receipt chain verified: SF Studio Apartment (4 receipts)",
+    "hash": "eb4456fc0cdbfcf0565f56c3802a58cd2d307dd1f0b602974ad9293c07de2378",
+    "contract": "ReceiptVerifier",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T02:38:25.892Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assetId": "re-sf-studio-004",
+      "receiptCount": 5
+    }
+  },
+  {
+    "id": "tx-1783626146964-oq1ov1",
+    "type": "HMAC Receipt Chain",
+    "action": "Receipt chain verified: Chicago Penthouse (6 receipts)",
+    "hash": "75bcc63f7bc334416430ed4577e6c485d947de9eb6432e35232e4855f05b3bcd",
+    "contract": "ReceiptVerifier",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T04:49:18.426Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assetId": "re-chicago-flat-006",
+      "receiptCount": 3
+    }
+  },
+  {
+    "id": "tx-1783626146964-flhf6v",
+    "type": "HMAC Receipt Chain",
+    "action": "Receipt chain verified: 1oz Platinum Coin (5 receipts)",
+    "hash": "b5d348c43ef3631c97f0197bd1ebb94509aebe65f3dde98a43ffa6a22ebc35ff",
+    "contract": "ReceiptVerifier",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T04:52:29.793Z",
+    "explorerUrl": "",
+    "onChain": false,
+    "metadata": {
+      "assetId": "com-platinum-1oz-004",
+      "receiptCount": 5
+    }
+  },
+  {
+    "id": "tx-1783626146964-88oaks",
+    "type": "UpdateReputation",
+    "action": "Reputation update: market (+4 score)",
+    "hash": "4666627513362483068fab4ed776c7fe38c2e27132e2c9efc9e67cba4554a192",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T05:57:33.133Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/4666627513362483068fab4ed776c7fe38c2e27132e2c9efc9e67cba4554a192",
+    "onChain": true,
+    "metadata": {
+      "agentId": "market",
+      "delta": 8
+    }
+  },
+  {
+    "id": "tx-1783626146964-qhrf6l",
+    "type": "UpdateReputation",
+    "action": "Reputation update: valuation-a (+3 score)",
+    "hash": "8ed95cdd780e937c87f6a861ce49657d4edcd80e2d4730882492ad9b7b4a5eb0",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T06:22:28.668Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/8ed95cdd780e937c87f6a861ce49657d4edcd80e2d4730882492ad9b7b4a5eb0",
+    "onChain": true,
+    "metadata": {
+      "agentId": "valuation-a",
+      "delta": 6
+    }
+  },
+  {
+    "id": "tx-1783626146964-q17yrr",
+    "type": "UpdateReputation",
+    "action": "Reputation update: valuation-a (+5 score)",
+    "hash": "457be6302281fb00da096dd17f500ed156660f892f2564faf696f0234f29f2db",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T12:07:00.743Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/457be6302281fb00da096dd17f500ed156660f892f2564faf696f0234f29f2db",
+    "onChain": true,
+    "metadata": {
+      "agentId": "valuation-a",
+      "delta": 3
+    }
+  },
+  {
+    "id": "tx-1783626146964-zo7ut5",
+    "type": "UpdateReputation",
+    "action": "Reputation update: precedent (+3 score)",
+    "hash": "887e316e6bf4ce836a1176619358e05a2a7740c338bd75df21599f5ec7b144fd",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T12:34:26.386Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/887e316e6bf4ce836a1176619358e05a2a7740c338bd75df21599f5ec7b144fd",
+    "onChain": true,
+    "metadata": {
+      "agentId": "precedent",
+      "delta": 8
+    }
+  },
+  {
+    "id": "tx-1783626146964-0jzhfo",
+    "type": "UpdateReputation",
+    "action": "Reputation update: market (+5 score)",
+    "hash": "88431bb0573358ceac05260b433dd58ad22f8b87b17f957ad535340958c7a9d9",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T15:03:50.736Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/88431bb0573358ceac05260b433dd58ad22f8b87b17f957ad535340958c7a9d9",
+    "onChain": true,
+    "metadata": {
+      "agentId": "market",
+      "delta": 4
+    }
+  },
+  {
+    "id": "tx-1783626146964-ofjmm6",
+    "type": "ZK-Lite Commitment",
+    "action": "Execution commitment: 1oz Palladium Round",
+    "hash": "b9f6340476be2991bc28267acef7964fd7f25517689a6d28c4471027e2f0be2e",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T17:01:56.656Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/b9f6340476be2991bc28267acef7964fd7f25517689a6d28c4471027e2f0be2e",
+    "onChain": true,
+    "metadata": {
+      "assetId": "com-palladium-1oz-005",
+      "commitment": "8192274da378899bcff7b2694d863666156a2eb6c1524b9568bf719a595a32ea"
+    }
+  },
+  {
+    "id": "tx-1783626146964-stphxd",
+    "type": "ZK-Lite Commitment",
+    "action": "Execution commitment: SF Studio Apartment",
+    "hash": "e9c93f3b8d6daa92cde29112af70deff6f1e109654a3e94d38281d68feaca91f",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T17:20:07.737Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/e9c93f3b8d6daa92cde29112af70deff6f1e109654a3e94d38281d68feaca91f",
+    "onChain": true,
+    "metadata": {
+      "assetId": "re-sf-studio-004",
+      "commitment": "cee65bb856de966e2a5fa773ff8f0ec416bc37fd3f16901b9831688fa921e7c1"
+    }
+  },
+  {
+    "id": "tx-1783626146964-27ebkf",
+    "type": "ZK-Lite Commitment",
+    "action": "Execution commitment: Studio Ceramic Vase",
+    "hash": "44b9893af412844c5c327109ed8a5ee8c3945cede4140fc209fa34dfb691edbc",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T20:32:12.033Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/44b9893af412844c5c327109ed8a5ee8c3945cede4140fc209fa34dfb691edbc",
+    "onChain": true,
+    "metadata": {
+      "assetId": "art-ceramic-vase-005",
+      "commitment": "3028e09bfe0d394a1aa6c1043d6d6c9f1612c9354c877984b0cb52bf7e5ebc35"
+    }
+  },
+  {
+    "id": "tx-1783626146964-55a9oi",
+    "type": "ZK-Lite Commitment",
+    "action": "Execution commitment: Brooklyn Brownstone",
+    "hash": "5c9271f5fc17e2eb73270ca313990494cce17ec38eda77cf1fe46f94d567d1df",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-08T23:37:15.388Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/5c9271f5fc17e2eb73270ca313990494cce17ec38eda77cf1fe46f94d567d1df",
+    "onChain": true,
+    "metadata": {
+      "assetId": "re-brooklyn-007",
+      "commitment": "9f959430df806f0af5e333479ac879fccceb6d7f2adcf0115462c8ce982b8596"
+    }
+  },
+  {
+    "id": "tx-1783626146964-871x90",
+    "type": "ZK-Lite Commitment",
+    "action": "Execution commitment: Watercolor Landscape",
+    "hash": "24fc35fa0e5917786afbe6da5c3cc7549f3630244606b34afcd9618b5114e7e6",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T02:34:23.901Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/24fc35fa0e5917786afbe6da5c3cc7549f3630244606b34afcd9618b5114e7e6",
+    "onChain": true,
+    "metadata": {
+      "assetId": "art-watercolor-landscape-003",
+      "commitment": "5a6f18d429c51ec7f8881d952707961b68985824408c3b1b44d74eddf8f51046"
+    }
+  },
+  {
+    "id": "tx-1783626146964-a9ccmq",
+    "type": "ZK-Lite Commitment",
+    "action": "Execution commitment: Miami Beach Condo",
+    "hash": "b0af0dd1e0b5c6a4ccf46075d0aecb47a387f0363268ddd2a001aa1da935fa2a",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T08:23:06.482Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/b0af0dd1e0b5c6a4ccf46075d0aecb47a387f0363268ddd2a001aa1da935fa2a",
+    "onChain": true,
+    "metadata": {
+      "assetId": "re-miami-condo-001",
+      "commitment": "bfe6c75bfe0b9c432810f93d3bc37ba6f5c15ea7697a3e1abcc0fcead14ae15e"
+    }
+  },
+  {
+    "id": "tx-1783626146964-ir0n4p",
+    "type": "ZK-Lite Commitment",
+    "action": "Execution commitment: Bronze Sculpture",
+    "hash": "9524c07c57e38362a9644d0113e6576f01150e8164f1977b2820c54e6a0307a3",
+    "contract": "ReputationRegistry",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T09:05:54.708Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/9524c07c57e38362a9644d0113e6576f01150e8164f1977b2820c54e6a0307a3",
+    "onChain": true,
+    "metadata": {
+      "assetId": "art-sculpture-bronze-002",
+      "commitment": "351996293d9466d4159ec9ce59d87d8f65b50deda7fd1abba45927950016c90d"
+    }
+  },
+  {
+    "id": "tx-1783626146964-1guhyp",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: Chicago Penthouse → $1,010,018",
+    "hash": "d2c65cd65479421716a150662bae4f088c2682fe26e21e9fad0d33ecc7e6ba5d",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T09:55:15.255Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/d2c65cd65479421716a150662bae4f088c2682fe26e21e9fad0d33ecc7e6ba5d",
+    "onChain": true,
+    "metadata": {
+      "assetId": "re-chicago-flat-006",
+      "assessedValue": 1010018,
+      "confidence": 76
+    }
+  },
+  {
+    "id": "tx-1783626146964-zhq2nd",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: Manhattan Loft → $1,088,597",
+    "hash": "81cf470ccbe5eb04ad0028755754d886fb9864fb15c308f0fd8d3c39d3e1b714",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T12:46:43.181Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/81cf470ccbe5eb04ad0028755754d886fb9864fb15c308f0fd8d3c39d3e1b714",
+    "onChain": true,
+    "metadata": {
+      "assetId": "re-nyc-loft-002",
+      "assessedValue": 1088597,
+      "confidence": 74
+    }
+  },
+  {
+    "id": "tx-1783626146964-q23pc5",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: Miami Beach Condo → $458,385",
+    "hash": "80d4a5a0a8262d47fb3b091aaae8b9332e900fb5e7e6198dea63cf81466d9649",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T12:50:39.982Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/80d4a5a0a8262d47fb3b091aaae8b9332e900fb5e7e6198dea63cf81466d9649",
+    "onChain": true,
+    "metadata": {
+      "assetId": "re-miami-condo-001",
+      "assessedValue": 458385,
+      "confidence": 82
+    }
+  },
+  {
+    "id": "tx-1783626146964-o97w4r",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: Chicago Penthouse → $858,369",
+    "hash": "e7406254ac491bc9d32efe0d4bd8099b0a531d27500a997174ef87b7d0774e79",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T13:25:52.797Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/e7406254ac491bc9d32efe0d4bd8099b0a531d27500a997174ef87b7d0774e79",
+    "onChain": true,
+    "metadata": {
+      "assetId": "re-chicago-flat-006",
+      "assessedValue": 858369,
+      "confidence": 81
+    }
+  },
+  {
+    "id": "tx-1783626146964-kg90yn",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: 10oz Gold Bar → $24,704",
+    "hash": "bf94a10804f4e8f5a118ad63e177305215813be704d01080991a07e83adbb16b",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T14:23:22.892Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/bf94a10804f4e8f5a118ad63e177305215813be704d01080991a07e83adbb16b",
+    "onChain": true,
+    "metadata": {
+      "assetId": "com-gold-10oz-002",
+      "assessedValue": 24704,
+      "confidence": 92
+    }
+  },
+  {
+    "id": "tx-1783626146964-4oeof0",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: Studio Ceramic Vase → $4,271",
+    "hash": "8ea909c4485ea7b09bb62baa085ca7a8f84c6681d74824da390247f810ef5e41",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T15:03:12.504Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/8ea909c4485ea7b09bb62baa085ca7a8f84c6681d74824da390247f810ef5e41",
+    "onChain": true,
+    "metadata": {
+      "assetId": "art-ceramic-vase-005",
+      "assessedValue": 4271,
+      "confidence": 94
+    }
+  },
+  {
+    "id": "tx-1783626146964-s0uq8d",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: SF Studio Apartment → $822,372",
+    "hash": "1d59713071d5b1c6e0f67077b90c15973669d7f9d2f59bfdae7806f062b3ed34",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T16:07:58.050Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/1d59713071d5b1c6e0f67077b90c15973669d7f9d2f59bfdae7806f062b3ed34",
+    "onChain": true,
+    "metadata": {
+      "assetId": "re-sf-studio-004",
+      "assessedValue": 822372,
+      "confidence": 86
+    }
+  },
+  {
+    "id": "tx-1783626146964-dvspfn",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: 10oz Gold Bar → $24,645",
+    "hash": "5841b865c2b17bac75dce0e49bae3d7626b7fe80d22de682b6c0c807c5f9a7c7",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T16:46:35.829Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/5841b865c2b17bac75dce0e49bae3d7626b7fe80d22de682b6c0c807c5f9a7c7",
+    "onChain": true,
+    "metadata": {
+      "assetId": "com-gold-10oz-002",
+      "assessedValue": 24645,
+      "confidence": 86
+    }
+  },
+  {
+    "id": "tx-1783626146964-2y16mc",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: 1oz Palladium Round → $1,023",
+    "hash": "76b49350d6144c2cb58f24d5152eede904afe7338f01137a2199af25b0f5bdea",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T16:50:52.625Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/76b49350d6144c2cb58f24d5152eede904afe7338f01137a2199af25b0f5bdea",
+    "onChain": true,
+    "metadata": {
+      "assetId": "com-palladium-1oz-005",
+      "assessedValue": 1023,
+      "confidence": 69
+    }
+  },
+  {
+    "id": "tx-1783626146951-cvzbwi",
+    "type": "x402 Payment",
+    "action": "Assessment fee: Manhattan Loft (2.5 CSPR)",
+    "hash": "c85811335864116c0a1d0126f49e82fd3398a84355794ba00b428bafc4744859",
+    "contract": "PaymentProcessor",
+    "blockHeight": "2192402",
+    "timestamp": "2026-07-09T16:54:58.688Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/c85811335864116c0a1d0126f49e82fd3398a84355794ba00b428bafc4744859",
+    "onChain": true,
+    "metadata": {
+      "amount": 2.5,
+      "assetId": "re-nyc-loft-002",
+      "payer": "0170c3bbcf285dff24111adba43b1a3481dc12b6426a6156d43734203fd52244a1"
+    }
+  },
+  {
+    "id": "tx-1783626146951-xquel5",
+    "type": "x402 Payment",
+    "action": "Assessment fee: Studio Ceramic Vase (2.5 CSPR)",
+    "hash": "b2264d2289e2d584b466cc20ea08e4f8de308fb72eb8aeb4f894211773ed0bc1",
+    "contract": "PaymentProcessor",
+    "blockHeight": "2100260",
+    "timestamp": "2026-07-09T18:18:23.388Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/b2264d2289e2d584b466cc20ea08e4f8de308fb72eb8aeb4f894211773ed0bc1",
+    "onChain": true,
+    "metadata": {
+      "amount": 2.5,
+      "assetId": "art-ceramic-vase-005",
+      "payer": "01b60de070d653e4b4007134cd7d38b802f2811d2c16513c7e63c1ecf0ae0f5892"
+    }
+  },
+  {
+    "id": "tx-1783626146951-p3k5ju",
+    "type": "x402 Payment",
+    "action": "Assessment fee: 1oz Gold Bar (2.5 CSPR)",
+    "hash": "62acb04d97eae51deef2eb61c6aa34d34c253a30ae72c45c7c3dc3fdd24a2839",
+    "contract": "PaymentProcessor",
+    "blockHeight": "2863962",
+    "timestamp": "2026-07-09T19:00:54.306Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/62acb04d97eae51deef2eb61c6aa34d34c253a30ae72c45c7c3dc3fdd24a2839",
+    "onChain": true,
+    "metadata": {
+      "amount": 2.5,
+      "assetId": "com-gold-1oz-001",
+      "payer": "01e261f834f0b8ff9de8d39cfb8cd98fcabda36ca1f09ffb761a4c04d309ebb021"
+    }
+  },
+  {
+    "id": "tx-1783626146951-dhdrmr",
+    "type": "x402 Payment",
+    "action": "Assessment fee: Miami Beach Condo (2.5 CSPR)",
+    "hash": "b352d94405137e1143b72b61db98a23b42833f0e2919b3c1dfca84a557ba6a9a",
+    "contract": "PaymentProcessor",
+    "blockHeight": "2948102",
+    "timestamp": "2026-07-09T19:05:01.045Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/b352d94405137e1143b72b61db98a23b42833f0e2919b3c1dfca84a557ba6a9a",
+    "onChain": true,
+    "metadata": {
+      "amount": 2.5,
+      "assetId": "re-miami-condo-001",
+      "payer": "019d53f3c90fac7fabb8ef07ebcd61f861df9e78d637fced4825ea7a051b899e28"
+    }
+  },
+  {
+    "id": "tx-1783626146951-dabc83",
+    "type": "x402 Payment",
+    "action": "Assessment fee: Austin Family Home (2.5 CSPR)",
+    "hash": "63564512b1deace223f1668db02cef94023ad9d2a4a0b2a75505c2b48e6b734a",
+    "contract": "PaymentProcessor",
+    "blockHeight": "2187837",
+    "timestamp": "2026-07-09T19:21:30.021Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/63564512b1deace223f1668db02cef94023ad9d2a4a0b2a75505c2b48e6b734a",
+    "onChain": true,
+    "metadata": {
+      "amount": 2.5,
+      "assetId": "re-austin-home-003",
+      "payer": "01dfc79929a552e52af609d841ee17bbd223725bf342d736a7c21aa7afcab601b8"
+    }
+  },
+  {
+    "id": "tx-1783626146951-qtqdo3",
+    "type": "x402 Payment",
+    "action": "Assessment fee: Denver Townhouse (2.5 CSPR)",
+    "hash": "1d97af900c28bae8024c9d441b69a76efbac2d07ddd196eb07948bd9d0e01af3",
+    "contract": "PaymentProcessor",
+    "blockHeight": "2819995",
+    "timestamp": "2026-07-09T19:33:12.794Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/1d97af900c28bae8024c9d441b69a76efbac2d07ddd196eb07948bd9d0e01af3",
+    "onChain": true,
+    "metadata": {
+      "amount": 2.5,
+      "assetId": "re-denver-town-005",
+      "payer": "0167f3e201149b37a9991afd7d3bfc6264e91cf2e8d173f10c38a4283e42d546e0"
+    }
+  },
+  {
+    "id": "tx-1783626146951-6ems73",
+    "type": "x402 Payment",
+    "action": "Assessment fee: Chicago Penthouse (2.5 CSPR)",
+    "hash": "95877a4342f741e055b270120aa7412ec5a4d2111ffe00180cae952d365fa93c",
+    "contract": "PaymentProcessor",
+    "blockHeight": "2242982",
+    "timestamp": "2026-07-09T19:35:32.585Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/95877a4342f741e055b270120aa7412ec5a4d2111ffe00180cae952d365fa93c",
+    "onChain": true,
+    "metadata": {
+      "amount": 2.5,
+      "assetId": "re-chicago-flat-006",
+      "payer": "010b68579a961740fb7a40a99358f49c2644408dee40bbfde48d92f636d4836c1d"
+    }
+  },
+  {
+    "id": "tx-1783626146951-z1s6h3",
+    "type": "x402 Payment",
+    "action": "Assessment fee: Denver Townhouse (2.5 CSPR)",
+    "hash": "dbb284b06dbbf7b0e71c22f2bcdf0392e389974637a7b5670154e11d8f565877",
+    "contract": "PaymentProcessor",
+    "blockHeight": "2805992",
+    "timestamp": "2026-07-09T19:36:59.466Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/dbb284b06dbbf7b0e71c22f2bcdf0392e389974637a7b5670154e11d8f565877",
+    "onChain": true,
+    "metadata": {
+      "amount": 2.5,
+      "assetId": "re-denver-town-005",
+      "payer": "01888783097aaeedd691d6b929190945386ce75c7f151f7ef98084db5f405778e0"
+    }
+  },
+  {
+    "id": "tx-1783626146951-aynrf7",
+    "type": "x402 Payment",
+    "action": "Assessment fee: Miami Beach Condo (2.5 CSPR)",
+    "hash": "c2e6bf9267f91ae8bd5d4a17a0a02f1ac49df6ef3c39fdfc26194c7e845addb3",
+    "contract": "PaymentProcessor",
+    "blockHeight": "2897106",
+    "timestamp": "2026-07-09T19:40:45.020Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/c2e6bf9267f91ae8bd5d4a17a0a02f1ac49df6ef3c39fdfc26194c7e845addb3",
+    "onChain": true,
+    "metadata": {
+      "amount": 2.5,
+      "assetId": "re-miami-condo-001",
+      "payer": "011ec4a99b321d8ec809128b9333b208e3b5e8ecf3e63a942a6c35fc1e86358ef1"
+    }
+  },
+  {
+    "id": "tx-1783626146950-7qwqx1",
+    "type": "x402 Payment",
+    "action": "Assessment fee: Brooklyn Brownstone (2.5 CSPR)",
+    "hash": "a1a8795904b53d10335d35905ee119f6acb800eb2ee4f5622cd846578f67ddca",
+    "contract": "PaymentProcessor",
+    "blockHeight": "2790332",
+    "timestamp": "2026-07-09T19:42:18.081Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/a1a8795904b53d10335d35905ee119f6acb800eb2ee4f5622cd846578f67ddca",
+    "onChain": true,
+    "metadata": {
+      "amount": 2.5,
+      "assetId": "re-brooklyn-007",
+      "payer": "01a0bbb66ddfbdd48c87ccf9659fa66988f1061760076c0a63b29b08f3dc675597"
+    }
+  },
+  {
+    "id": "tx-1783626039533-d5divy",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: Bronze Sculpture → 69,541",
+    "hash": "oracle-mem-1783626039533",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T19:40:39.533Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/oracle-mem-1783626039533",
+    "onChain": true,
+    "metadata": {
+      "assetId": "art-sculpture-bronze-002",
+      "assessedValue": 69541,
+      "confidence": 0,
+      "divergence": 34
+    }
+  },
+  {
+    "id": "tx-1783625794039-0ihsck",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: Abstract Oil Painting → 69,380",
+    "hash": "oracle-mem-1783625794039",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T19:36:34.039Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/oracle-mem-1783625794039",
+    "onChain": true,
+    "metadata": {
+      "assetId": "art-oil-abstract-001",
+      "assessedValue": 69380,
+      "confidence": 0,
+      "divergence": 50
+    }
+  },
+  {
+    "id": "tx-1783625613586-yw85vf",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: Denver Townhouse → 761,730",
+    "hash": "oracle-mem-1783625613586",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T19:33:33.586Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/oracle-mem-1783625613586",
+    "onChain": true,
+    "metadata": {
+      "assetId": "re-denver-town-005",
+      "assessedValue": 761730,
+      "confidence": 0,
+      "divergence": 36
+    }
+  },
+  {
     "id": "tx-1783625439192-3bougj",
     "type": "ExecuteVerdict",
     "action": "Oracle verdict: SF Studio Apartment → 833,142",
@@ -2374,904 +3208,6 @@
       "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
       "amount": "2.5",
       "fee": 2.5
-    }
-  },
-  {
-    "id": "tx-1782246683152-4m4xft",
-    "type": "SubmitAssessment",
-    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 648,417",
-    "hash": "RE-1782246679377-42pp",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-23T20:31:23.152Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 14200000,
-      "assessedValue": 648417,
-      "divergence": 35.788
-    }
-  },
-  {
-    "id": "tx-1782246679377-suosas",
-    "type": "x402 Payment",
-    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
-    "hash": "20310c20e25c49337b7ad6c0035ea2857b20bd351950de72992364ae26c40d10",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-23T20:31:19.377Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/20310c20e25c49337b7ad6c0035ea2857b20bd351950de72992364ae26c40d10",
-    "onChain": true,
-    "metadata": {
-      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
-      "amount": "2.5",
-      "fee": 2.5
-    }
-  },
-  {
-    "id": "tx-1782246631599-wb9dsy",
-    "type": "SubmitAssessment",
-    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 647,393",
-    "hash": "RE-1782246628443-puon",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-23T20:30:31.599Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 1420000,
-      "assessedValue": 647393,
-      "divergence": 35.415454545454544
-    }
-  },
-  {
-    "id": "tx-1782246628443-gjm2p1",
-    "type": "x402 Payment",
-    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
-    "hash": "e2b5301f5e953e16b93f3b555f7f1c5956b44be060b581fc365c2dae23f562c1",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-23T20:30:28.443Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/e2b5301f5e953e16b93f3b555f7f1c5956b44be060b581fc365c2dae23f562c1",
-    "onChain": true,
-    "metadata": {
-      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
-      "amount": "2.5",
-      "fee": 2.5
-    }
-  },
-  {
-    "id": "tx-1782246154803-m7gnx6",
-    "type": "SubmitAssessment",
-    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 648,038",
-    "hash": "RE-1782246151817-11ia",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-23T20:22:34.803Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 14200000,
-      "assessedValue": 648038,
-      "divergence": 35.65
-    }
-  },
-  {
-    "id": "tx-1782246151816-z174mt",
-    "type": "x402 Payment",
-    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
-    "hash": "f1ffd70c289ce4e4991ac1b1b851c4c214a07889d6650a59a95bafe08c7360d4",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-23T20:22:31.816Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/f1ffd70c289ce4e4991ac1b1b851c4c214a07889d6650a59a95bafe08c7360d4",
-    "onChain": true,
-    "metadata": {
-      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
-      "amount": "2.5",
-      "fee": 2.5
-    }
-  },
-  {
-    "id": "tx-1782246121410-dlyha5",
-    "type": "SubmitAssessment",
-    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 631,612",
-    "hash": "RE-1782246118076-wu4w",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-23T20:22:01.410Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 1420000,
-      "assessedValue": 631612,
-      "divergence": 29.677090909090907
-    }
-  },
-  {
-    "id": "tx-1782246118076-m7e8dr",
-    "type": "x402 Payment",
-    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
-    "hash": "96f94aac4c014a43280a4ff74c89ead04b89c86a25c24132b92b5adc300441c9",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-23T20:21:58.076Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/96f94aac4c014a43280a4ff74c89ead04b89c86a25c24132b92b5adc300441c9",
-    "onChain": true,
-    "metadata": {
-      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
-      "amount": "2.5",
-      "fee": 2.5
-    }
-  },
-  {
-    "id": "tx-1782246095087-1gpppr",
-    "type": "SubmitAssessment",
-    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 686,864",
-    "hash": "RE-1782246091017-gdo4",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-23T20:21:35.087Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 14200000,
-      "assessedValue": 686864,
-      "divergence": 49.76872727272727
-    }
-  },
-  {
-    "id": "tx-1782246091015-5e63ed",
-    "type": "x402 Payment",
-    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
-    "hash": "34920769d7c5387a5c6f1fd2f1afc6b308984db15c3b4a09e54906ce38d1f396",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-23T20:21:31.015Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/34920769d7c5387a5c6f1fd2f1afc6b308984db15c3b4a09e54906ce38d1f396",
-    "onChain": true,
-    "metadata": {
-      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
-      "amount": "2.5",
-      "fee": 2.5
-    }
-  },
-  {
-    "id": "tx-1782159418471-s9w670",
-    "type": "SubmitAssessment",
-    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 632,029",
-    "hash": "RE-1782159412024-oe5u",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-22T20:16:58.471Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 14200000,
-      "assessedValue": 632029,
-      "divergence": 29.828727272727274
-    }
-  },
-  {
-    "id": "tx-1782159412024-dfem0l",
-    "type": "x402 Payment",
-    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
-    "hash": "96aab414a604f8ba60f55e58393aa61f8942ac2f4f014607b74d484f1b9f1412",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-22T20:16:52.024Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/96aab414a604f8ba60f55e58393aa61f8942ac2f4f014607b74d484f1b9f1412",
-    "onChain": true,
-    "metadata": {
-      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
-      "amount": "2.5",
-      "fee": 2.5
-    }
-  },
-  {
-    "id": "tx-1782151963250-2q18wa",
-    "type": "x402 Payment",
-    "action": "Insurance policy created for Downtown Austin Office Tower",
-    "hash": "ins-POL-1782151963250-1no1",
-    "contract": "Insurance",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-22T18:12:43.250Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "policyId": "POL-1782151963250-1no1",
-      "assetName": "Downtown Austin Office Tower",
-      "coverageAmount": 483268,
-      "premiumCSPR": 3.6,
-      "riskScore": 80
-    }
-  },
-  {
-    "id": "tx-1782151960994-w52n42",
-    "type": "SubmitAssessment",
-    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 644,357",
-    "hash": "RE-1782151957262-hri8",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-22T18:12:40.994Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 14200000,
-      "assessedValue": 644357,
-      "divergence": 34.31163636363637
-    }
-  },
-  {
-    "id": "tx-1782151957262-p2xutk",
-    "type": "x402 Payment",
-    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
-    "hash": "0379a1efc3e82497dd2fc87a8d74acb0f1c1ef8880b8b40929e1f3f83e0276f1",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-22T18:12:37.262Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/0379a1efc3e82497dd2fc87a8d74acb0f1c1ef8880b8b40929e1f3f83e0276f1",
-    "onChain": true,
-    "metadata": {
-      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
-      "amount": "2.5",
-      "fee": 2.5
-    }
-  },
-  {
-    "id": "tx-1782150993922-ctm011",
-    "type": "SubmitAssessment",
-    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 647,974",
-    "hash": "RE-1782150989418-5gle",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-22T17:56:33.922Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 14200000,
-      "assessedValue": 647974,
-      "divergence": 35.62672727272727
-    }
-  },
-  {
-    "id": "tx-1782150989418-t3dbej",
-    "type": "x402 Payment",
-    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
-    "hash": "0d906bb41157619462572481df660ca2760d204289fc07c8f4854563fcbbdad7",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-22T17:56:29.418Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/0d906bb41157619462572481df660ca2760d204289fc07c8f4854563fcbbdad7",
-    "onChain": true,
-    "metadata": {
-      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
-      "amount": "2.5",
-      "fee": 2.5
-    }
-  },
-  {
-    "id": "tx-1782147299505-hd2b5a",
-    "type": "Native Transfer",
-    "action": "Loan disbursement: 300881.7 CSPR to 02025d11b8b4...",
-    "hash": "6926b3caa9b11580b9a2e414647644eb4d9edde4ad1124d387dd07d5297e72a1",
-    "contract": "LendingPool",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-22T16:54:59.505Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/6926b3caa9b11580b9a2e414647644eb4d9edde4ad1124d387dd07d5297e72a1",
-    "onChain": true,
-    "metadata": {
-      "loanId": "LOAN-1782147299504-meny",
-      "borrowerPublicKey": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
-      "loanAmount": 300881.7,
-      "ltv": 45,
-      "assetId": "RE-1782147285599-uphc",
-      "assetType": "real-estate"
-    }
-  },
-  {
-    "id": "tx-1782147298423-od7qj6",
-    "type": "x402 Payment",
-    "action": "Lending fee: 5 CSPR from 02025d11b8b4...",
-    "hash": "ce4125cd735bff04a0d9a0b28b823fe5d0cc40f0460ecfecd7813b80a13b564b",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-22T16:54:58.423Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/ce4125cd735bff04a0d9a0b28b823fe5d0cc40f0460ecfecd7813b80a13b564b",
-    "onChain": true,
-    "metadata": {
-      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
-      "amount": "5",
-      "fee": 5,
-      "purpose": "loan_creation"
-    }
-  },
-  {
-    "id": "tx-1782147289140-vb8njd",
-    "type": "SubmitAssessment",
-    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 668,626",
-    "hash": "RE-1782147285599-uphc",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-22T16:54:49.140Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 1420000,
-      "assessedValue": 668626,
-      "divergence": 43.136545454545455
-    }
-  },
-  {
-    "id": "tx-1782147285598-psxbif",
-    "type": "x402 Payment",
-    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
-    "hash": "5465a73c08f179a819266d001d2355ce8c21b7d18aea94696d5eb4a11dc18cba",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-22T16:54:45.598Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/5465a73c08f179a819266d001d2355ce8c21b7d18aea94696d5eb4a11dc18cba",
-    "onChain": true,
-    "metadata": {
-      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
-      "amount": "2.5",
-      "fee": 2.5
-    }
-  },
-  {
-    "id": "tx-1782146425376-u7fbge",
-    "type": "SubmitAssessment",
-    "action": "Assessment: Downtown Austin Office Tower (real-estate) - 664,177",
-    "hash": "RE-1782146421110-x8on",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-22T16:40:25.377Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 1420000,
-      "assessedValue": 664177,
-      "divergence": 41.51890909090909
-    }
-  },
-  {
-    "id": "tx-1782146421110-11rgav",
-    "type": "x402 Payment",
-    "action": "Assessment fee: 2.5 CSPR from 02025d11b8b4...",
-    "hash": "dd8430e63a2f4d389a05bc9d7486776451598888d3d7bb565b397e202ea088cd",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-22T16:40:21.110Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/dd8430e63a2f4d389a05bc9d7486776451598888d3d7bb565b397e202ea088cd",
-    "onChain": true,
-    "metadata": {
-      "payer": "02025d11b8b4f2fe4296cdf7763b9a8c70a448ca80fa32f1960478b9028e591c5b3c",
-      "amount": "2.5",
-      "fee": 2.5
-    }
-  },
-  {
-    "id": "tx-1781889384919-zv2fq1",
-    "type": "InitiateDispute",
-    "action": "Assessment: Manhattan Studio Apartment (real-estate) - 595,215",
-    "hash": "RE-1781889382106-06pl",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T17:16:24.919Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 650000,
-      "assessedValue": 595215,
-      "divergence": 36.19642857142858
-    }
-  },
-  {
-    "id": "tx-1781880822874-i62pec",
-    "type": "InitiateDispute",
-    "action": "Assessment: Manhattan Studio Apartment (real-estate) - 593,171",
-    "hash": "RE-1781880819981-i4dm",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T14:53:42.874Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 650000,
-      "assessedValue": 593171,
-      "divergence": 35.38531746031746
-    }
-  },
-  {
-    "id": "tx-1781880225121-i9o5n0",
-    "type": "InitiateDispute",
-    "action": "Assessment: Manhattan Studio Apartment (real-estate) - 602,727",
-    "hash": "RE-1781880221699-98lj",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T14:43:45.121Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 650000,
-      "assessedValue": 602727,
-      "divergence": 39.17738095238095
-    }
-  },
-  {
-    "id": "tx-1781873114239-7jxjn5",
-    "type": "InitiateDispute",
-    "action": "Assessment: Test Property 2 (real-estate) - 581,350",
-    "hash": "RE-1781873111021-kuo6",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T12:45:14.239Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 500000,
-      "assessedValue": 581350,
-      "divergence": 39.73175257731959
-    }
-  },
-  {
-    "id": "tx-1781873089840-ydjol7",
-    "type": "InitiateDispute",
-    "action": "Assessment: Test Property (real-estate) - 573,348",
-    "hash": "RE-1781873086687-9gtp",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T12:44:49.840Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 500000,
-      "assessedValue": 573348,
-      "divergence": 36.431958762886595
-    }
-  },
-  {
-    "id": "tx-1781871923161-5wi7wz",
-    "type": "InitiateDispute",
-    "action": "Assessment: Manhattan Studio Apartment (real-estate) - 610,393",
-    "hash": "RE-1781871918951-761d",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T12:25:23.161Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 650000,
-      "assessedValue": 610393,
-      "divergence": 42.21924603174603
-    }
-  },
-  {
-    "id": "tx-1781870251878-ho9p44",
-    "type": "InitiateDispute",
-    "action": "Assessment: Manhattan Studio Apartment (real-estate) - 618,225",
-    "hash": "RE-1781870248683-7fax",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:57:31.878Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 650000,
-      "assessedValue": 618225,
-      "divergence": 45.32738095238095
-    }
-  },
-  {
-    "id": "tx-1781869191495-rjfrx7",
-    "type": "InitiateDispute",
-    "action": "Assessment: Manhattan Studio Apartment (real-estate) - 601,463",
-    "hash": "RE-1781869188124-9p70",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:39:51.495Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 650000,
-      "assessedValue": 601463,
-      "divergence": 38.67579365079365
-    }
-  },
-  {
-    "id": "tx-1781869134907-4p55eg",
-    "type": "InitiateDispute",
-    "action": "Assessment: 10oz Gold Bar (commodity) - 42,427",
-    "hash": "CO-1781869134268-fmoz",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:38:54.907Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "commodity",
-      "askingPrice": 33000,
-      "assessedValue": 42427,
-      "divergence": 5.060415659739005
-    }
-  },
-  {
-    "id": "tx-1781868963011-nh2ni6",
-    "type": "InitiateDispute",
-    "action": "Assessment: Contemporary Oil on Canvas (art) - 70,942",
-    "hash": "AR-1781868959449-489u",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:36:03.011Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "art",
-      "askingPrice": 85000,
-      "assessedValue": 70942,
-      "divergence": 37.30619344695513
-    }
-  },
-  {
-    "id": "tx-1781868959426-r2v2eg",
-    "type": "InitiateDispute",
-    "action": "Assessment: Miami Beachfront Condo (real-estate) - 701,124",
-    "hash": "RE-1781868950959-gpn9",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:35:59.426Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 1250000,
-      "assessedValue": 701124,
-      "divergence": 40.93591065292097
-    }
-  },
-  {
-    "id": "tx-1781868950931-9sitzn",
-    "type": "InitiateDispute",
-    "action": "Assessment: 10oz Gold Bar (999.9 Fine) (commodity) - 42,087",
-    "hash": "CO-1781868950208-4xvw",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:35:50.931Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "commodity",
-      "askingPrice": 33000,
-      "assessedValue": 42087,
-      "divergence": 3.412194002078248
-    }
-  },
-  {
-    "id": "tx-1781868741724-9rauad",
-    "type": "InitiateDispute",
-    "action": "Assessment: 10oz Gold Bar (999.9 Fine) (commodity) - 42,010",
-    "hash": "CO-1781868740859-odbt",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:32:21.724Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "commodity",
-      "askingPrice": 33000,
-      "assessedValue": 42010,
-      "divergence": 3.0081909778432845
-    }
-  },
-  {
-    "id": "tx-1781868737811-dtz2yg",
-    "type": "InitiateDispute",
-    "action": "Assessment: 10oz Gold Bar (999.9 Fine) (commodity) - 42,060",
-    "hash": "CO-1781868737483-7lux",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:32:17.811Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "commodity",
-      "askingPrice": 33000,
-      "assessedValue": 42060,
-      "divergence": 3.249812743131901
-    }
-  },
-  {
-    "id": "tx-1781868733539-cdbu2b",
-    "type": "InitiateDispute",
-    "action": "Assessment: 10oz Gold Bar (999.9 Fine) (commodity) - 42,694",
-    "hash": "CO-1781868732185-2d4w",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:32:13.539Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "commodity",
-      "askingPrice": 33000,
-      "assessedValue": 42694,
-      "divergence": 6.313576726991567
-    }
-  },
-  {
-    "id": "tx-1781868575834-gpy482",
-    "type": "InitiateDispute",
-    "action": "Assessment: Manhattan Studio Apartment (real-estate) - 600,730",
-    "hash": "RE-1781868572786-egne",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:29:35.834Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 650000,
-      "assessedValue": 600730,
-      "divergence": 38.38492063492063
-    }
-  },
-  {
-    "id": "tx-1781868495885-qy0l75",
-    "type": "InitiateDispute",
-    "action": "Assessment: 100oz Silver Bar (commodity) - 3,260",
-    "hash": "CO-1781868494413-y5b3",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:28:15.885Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "commodity",
-      "askingPrice": 2800,
-      "assessedValue": 3260,
-      "divergence": 3.75
-    }
-  },
-  {
-    "id": "tx-1781868231116-3j2jnp",
-    "type": "InitiateDispute",
-    "action": "Assessment: Miami Beachfront Condo (real-estate) - 688,190",
-    "hash": "RE-1781868228611-ue5j",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:23:51.116Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 1250000,
-      "assessedValue": 688190,
-      "divergence": 36.491237113402065
-    }
-  },
-  {
-    "id": "tx-1781868228587-g0s6ch",
-    "type": "InitiateDispute",
-    "action": "Assessment: Contemporary Oil on Canvas (art) - 74,336",
-    "hash": "AR-1781868224069-rytn",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:23:48.587Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "art",
-      "askingPrice": 85000,
-      "assessedValue": 74336,
-      "divergence": 52.01464580543455
-    }
-  },
-  {
-    "id": "tx-1781868224045-wzh54f",
-    "type": "InitiateDispute",
-    "action": "Assessment: 100oz Silver Bar (commodity) - 3,283",
-    "hash": "CO-1781868223574-nda7",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:23:44.045Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "commodity",
-      "askingPrice": 3200,
-      "assessedValue": 3283,
-      "divergence": 5.15625
-    }
-  },
-  {
-    "id": "tx-1781868223547-83h92i",
-    "type": "InitiateDispute",
-    "action": "Assessment: 10oz Gold Bar (999.9 Fine) (commodity) - 42,748",
-    "hash": "CO-1781868222346-vzwx",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:23:43.547Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "commodity",
-      "askingPrice": 33000,
-      "assessedValue": 42748,
-      "divergence": 6.46477818831655
-    }
-  },
-  {
-    "id": "tx-1781868121388-7j99zu",
-    "type": "InitiateDispute",
-    "action": "Assessment: 100oz Silver Bar (commodity) - 426,856",
-    "hash": "CO-1781868120696-jf68",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:22:01.388Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "commodity",
-      "askingPrice": 3200,
-      "assessedValue": 426856,
-      "divergence": 6.1929547018971824
-    }
-  },
-  {
-    "id": "tx-1781867912293-2we62m",
-    "type": "InitiateDispute",
-    "action": "Assessment: Contemporary Oil on Canvas (art) - 67,259",
-    "hash": "AR-1781867907737-if3m",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:18:32.293Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "art",
-      "askingPrice": 85000,
-      "assessedValue": 67259,
-      "divergence": 46.369963369963365
-    }
-  },
-  {
-    "id": "tx-1781867080276-vob1sa",
-    "type": "InitiateDispute",
-    "action": "Assessment: Miami Beachfront Condo (real-estate) - 696,074",
-    "hash": "RE-1781867076552-t7x0",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:04:40.276Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "real-estate",
-      "askingPrice": 1250000,
-      "assessedValue": 696074,
-      "divergence": 39.20068728522337
-    }
-  },
-  {
-    "id": "tx-1781866947407-2at55g",
-    "type": "InitiateDispute",
-    "action": "Assessment: 10oz Gold Bar (999.9 Fine) (commodity) - 42,295",
-    "hash": "CO-1781866946013-te6e",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T11:02:27.407Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "commodity",
-      "askingPrice": 23500,
-      "assessedValue": 42295,
-      "divergence": 4.148666586219379
-    }
-  },
-  {
-    "id": "tx-1781866752063-5v2y2d",
-    "type": "InitiateDispute",
-    "action": "Assessment: 10oz Gold Bar (commodity) - 0",
-    "hash": "CO-1781866751336-5x0p",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-19T10:59:12.063Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "assetType": "commodity",
-      "askingPrice": 23500,
-      "assessedValue": 0,
-      "divergence": null
-    }
-  },
-  {
-    "id": "tx-1781727340061-73uv0n",
-    "type": "Native Transfer",
-    "action": "Dispute DISP-899 settlement payment",
-    "hash": "e2c4be912f59a755cff90f6467356bc32e7e89905f6cca8bd536705ea8e1cc9f",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-17T20:15:40.061Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/e2c4be912f59a755cff90f6467356bc32e7e89905f6cca8bd536705ea8e1cc9f",
-    "onChain": true,
-    "metadata": {
-      "disputeId": "DISP-899",
-      "amount": "2.5 CSPR",
-      "target": "020382d26a895ead71b20412fc6e4e95b2066d817e8e2c1d4c0508b1be2742eed47d"
-    }
-  },
-  {
-    "id": "tx-1781727339805-xp4r5h",
-    "type": "ZK-Lite Commitment",
-    "action": "Dispute DISP-899 execution commitment",
-    "hash": "mock_deploy_f5dbba38",
-    "contract": "ReputationRegistry",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-17T20:15:39.805Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "disputeId": "DISP-899",
-      "executionCommitment": {
-        "commitment": "f5dbba3808b255ae823f557327c39881b3e78dea5963c46e0cdb23b12516d41c",
-        "agentStateHash": "6370f89282699f08b6330e55deea3daa17d71827f39886a19c6a59104d49f769",
-        "inputHash": "927a73578ba18576922f9be16579503a068ff8d08c60917e423ad4da6d7ea3d3",
-        "timestamp": 1781727339803,
-        "blockHeight": 0
-      }
-    }
-  },
-  {
-    "id": "tx-1781727339802-rbj9pf",
-    "type": "ExecuteVerdict",
-    "action": "Dispute DISP-899 verdict: FullRefund",
-    "hash": "verdict-DISP-899",
-    "contract": "Orchestrator",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-17T20:15:39.802Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "disputeId": "DISP-899",
-      "finalVerdict": "FullRefund",
-      "finalValue": 1468667,
-      "scoreA": 800,
-      "scoreB": 750,
-      "scoreSplit": 720
-    }
-  },
-  {
-    "id": "tx-1781727339801-a2jc39",
-    "type": "HMAC Receipt Chain",
-    "action": "Deliberation audit trail for DISP-899",
-    "hash": "d2e04351-3ef0-47e9-aee2-06acdc31e32b",
-    "contract": "AuditTrail",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-17T20:15:39.801Z",
-    "explorerUrl": "",
-    "onChain": false,
-    "metadata": {
-      "disputeId": "DISP-899",
-      "receiptCount": 6,
-      "chainValid": true
     }
   }
 ]
