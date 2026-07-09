@@ -47,8 +47,9 @@ export const Layout: React.FC = () => {
 
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [networkOnline, setNetworkOnline] = React.useState<boolean | null>(null);
+  const networkRef = React.useRef<boolean | null>(null);
 
-  // Network status polling
+  // Network status polling — only update state when value actually changes
   React.useEffect(() => {
     const checkNetwork = async () => {
       try {
@@ -56,9 +57,16 @@ export const Layout: React.FC = () => {
           method: 'GET',
           signal: AbortSignal.timeout(8000),
         });
-        setNetworkOnline(res.ok);
+        const online = res.ok;
+        if (networkRef.current !== online) {
+          networkRef.current = online;
+          setNetworkOnline(online);
+        }
       } catch {
-        setNetworkOnline(false);
+        if (networkRef.current !== false) {
+          networkRef.current = false;
+          setNetworkOnline(false);
+        }
       }
     };
     checkNetwork();

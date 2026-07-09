@@ -7,7 +7,7 @@ import {
   Wifi,
   WifiOff,
 } from 'lucide-react';
-import { createWebSocket, type WSMessage } from '../services/api';
+import { createWebSocket, fetchTransactions, type WSMessage, type TransactionEntry } from '../services/api';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -24,9 +24,9 @@ interface PaymentEvent {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function formatCSPR(motes: number): string {
-  const n = typeof motes === 'number' && !isNaN(motes) ? motes : 0;
-  return `${(n / 1_000_000_000).toFixed(2)} CSPR`;
+function formatCSPR(value: number): string {
+  const n = typeof value === 'number' && !isNaN(value) ? value : 0;
+  return `${n.toFixed(2)} CSPR`;
 }
 
 function formatTime(timestamp: number): string {
@@ -106,6 +106,29 @@ export const X402PaymentStream: React.FC = () => {
   const [payments, setPayments] = useState<PaymentEvent[]>(DEMO_PAYMENTS);
   const [connected, setConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    // Load historical x402 payments from API
+    (async () => {
+      try {
+        const txs = await fetchTransactions();
+        const x402Txs = (txs || []).filter((t: TransactionEntry) => t.type === 'x402 Payment');
+        const historical: PaymentEvent[] = x402Txs.map((t: TransactionEntry) => ({
+          id: t.id,
+          from: (t.metadata?.payer as string) || 'Unknown',
+          to: 'Verdicto',
+          amount: (t.metadata?.amount as number) || 0,
+          tool: t.action || 'x402 Payment',
+          txHash: t.hash || '',
+          timestamp: new Date(t.timestamp).getTime() || Date.now(),
+          status: 'confirmed' as const,
+        }));
+        if (historical.length > 0) {
+          setPayments(historical.slice(0, 50));
+        }
+      } catch { /* API optional */ }
+    })();
+  }, []);
 
   useEffect(() => {
     try {

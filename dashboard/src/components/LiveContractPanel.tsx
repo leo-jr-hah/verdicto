@@ -21,9 +21,9 @@ function formatNumber(n: number): string {
   return new Intl.NumberFormat('en-US').format(n);
 }
 
-function formatCSPR(motes: number): string {
-  const n = typeof motes === 'number' && !isNaN(motes) ? motes : 0;
-  return `${(n / 1_000_000_000).toFixed(2)} CSPR`;
+function formatCSPR(value: number): string {
+  const n = typeof value === 'number' && !isNaN(value) ? value : 0;
+  return `${n.toFixed(2)} CSPR`;
 }
 
 function formatTimeAgo(timestamp: number): string {
