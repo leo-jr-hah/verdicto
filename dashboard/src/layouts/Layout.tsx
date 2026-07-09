@@ -4,7 +4,6 @@ import { Menu, X, LayoutDashboard, Users, Scale, History, Cpu, ChevronLeft, Chev
 import { motion, AnimatePresence } from 'framer-motion';
 import verdictLogo from '../assets/newlogo.png';
 import { WalletConnectButton } from '../components/WalletConnectButton';
-import { DemoModeBanner } from '../components/DemoModeBanner';
 import { ORCHESTRATOR_URL } from '../services/api';
 import '../styles/sidebar-switches.css';
 
@@ -314,7 +313,6 @@ export const Layout: React.FC = () => {
 
       {/* Main Content Area */}
       <main className="main-content-area">
-        <DemoModeBanner />
         <div className="page-layout">
           <Outlet />
         </div>

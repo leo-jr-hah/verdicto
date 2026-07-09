@@ -7,14 +7,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const FRED_API_KEY = process.env.FRED_API_KEY;
-const DEMO_MODE = process.env.DEMO_MODE === 'true';
 
 export async function getMortgageRate(): Promise<number> {
-  if (DEMO_MODE) {
-    // Return a realistic demo mortgage rate (6.5-7.2%)
-    return 0.068 + (Math.random() - 0.5) * 0.008;
-  }
-
   if (!FRED_API_KEY) {
     throw new Error('FRED_API_KEY is not set');
   }

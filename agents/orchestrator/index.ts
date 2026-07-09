@@ -5,9 +5,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 // ─── Env Validation (fail fast with clear messages) ──────────────────────────
-const DEMO_MODE = process.env.DEMO_MODE === 'true';
-
-const REQUIRED_ENV = DEMO_MODE ? [] : [
+const REQUIRED_ENV = [
   'CSPRCLOUD_API_KEY',
   'DEPLOYER_PRIVATE_KEY',
   'REPUTATION_CONTRACT_HASH',
@@ -34,9 +32,6 @@ function validateEnv() {
     console.log(`✅ Optional env vars configured: ${optionalPresent.join(', ')}`);
   }
   console.log('✅ All required environment variables present.\n');
-  if (DEMO_MODE) {
-    console.log('🎭 DEMO MODE ACTIVE — all external APIs, payments, and blockchain calls are simulated.\n');
-  }
 }
 validateEnv();
 
@@ -207,13 +202,6 @@ function jurorKeySuffix(jurorName: string): string {
 async function fetchOnChainReputation(agentId: string): Promise<number> {
   const envKey = `${agentId.replace('-', '_').toUpperCase()}_REPUTATION`;
 
-  // Demo mode: return env-based reputation without querying chain
-  if (process.env.DEMO_MODE === 'true') {
-    const demoRep = parseInt(process.env[envKey] || '750', 10);
-    console.log(`  [ReputationRegistry] 🎭 Demo mode — using ${envKey}: ${demoRep}`);
-    return demoRep;
-  }
-
   // Try on-chain query via MCP
   const reputationHash = process.env.REPUTATION_CONTRACT_HASH;
   if (reputationHash && CSPR_CLOUD_KEY) {
@@ -268,13 +256,6 @@ function parseSseResponse(raw: string): any {
  * Uses async execFile (non-blocking) to avoid shell injection from env-var-derived arguments.
  */
 async function executeCasperTransfer(targetPublicKeyHex: string, amountMotes: number, transferId: number): Promise<string> {
-  // Demo mode: return a fake deploy hash without touching blockchain
-  if (process.env.DEMO_MODE === 'true') {
-    const fakeHash = 'demo_' + crypto.randomBytes(32).toString('hex');
-    console.log(`  [DEMO] 🎭 Simulated transfer: ${amountMotes} motes - ${targetPublicKeyHex.slice(0, 16)}... (hash: ${fakeHash.slice(0, 16)}...)`);
-    return fakeHash;
-  }
-
   const deployerKey = process.env.DEPLOYER_PRIVATE_KEY;
   if (!deployerKey || !CSPR_CLOUD_KEY) {
     throw new Error('DEPLOYER_PRIVATE_KEY or CSPRCLOUD_API_KEY missing in .env');
@@ -1029,13 +1010,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         return res.status(400).json({ success: false, error: 'deploy.hash is required' });
       }
 
-      // Demo mode: return a fake deploy hash
-      if (DEMO_MODE) {
-        const fakeHash = 'demo_' + crypto.randomBytes(32).toString('hex');
-        console.log(`[relay-deploy] 🎭 Demo mode — simulated broadcast: ${fakeHash.slice(0, 16)}...`);
-        return res.json({ success: true, deployHash: fakeHash });
-      }
-
       const payload = {
         jsonrpc: '2.0',
         id: Date.now(),
@@ -1096,7 +1070,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     res.json({
       status: 'ok',
       service: 'orchestrator',
-      demoMode: DEMO_MODE,
+      demoMode: false,
       version: '2.0.0',
       uptime: Math.round(process.uptime()),
       timestamp: new Date().toISOString(),
@@ -1292,10 +1266,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
       const paymentProof = req.headers['x-payment-proof'] as string | undefined;
 
-      // Demo mode: skip all payment verification
-      if (DEMO_MODE) {
-        console.log(`[x402] 🎭 Demo mode — skipping payment verification`);
-      } else if (requirePayment && !paymentProof) {
+      if (requirePayment && !paymentProof) {
         // Return 402 with x402 payment requirements
         res.setHeader('payment-required', 'true');
         return res.status(402).json({
@@ -4133,18 +4104,10 @@ Respond in JSON format:
     // ─── Auto-revaluation monitor ───────────────────────────────────────────
     // Periodically checks active loans and triggers revaluation if stale.
     // This makes the system "monitor its own loans" rather than requiring manual triggers.
-    //
-    // DEMO_MODE: When DEMO_MODE=true, checks every 30s with 0 staleness threshold.
-    // This lets you show autonomous revaluation firing live during a demo.
-    const isDemoMode = process.env.DEMO_MODE === 'true';
-    const REVAL_INTERVAL_MS = isDemoMode ? 30_000 : 5 * 60 * 1000;
-    const REVAL_STALE_MS = isDemoMode ? 0 : 30 * 60 * 1000;
+    const REVAL_INTERVAL_MS = 5 * 60 * 1000;
+    const REVAL_STALE_MS = 30 * 60 * 1000;
 
-    if (isDemoMode) {
-      console.log(`[Auto-Revalue] ⚡ DEMO MODE - checking every 30s, revalues on every check`);
-    } else {
-      console.log(`[Auto-Revalue] Normal mode - checking every 5 min, staleness threshold 30 min`);
-    }
+    console.log(`[Auto-Revalue] Checking every 5 min, staleness threshold 30 min`);
 
     setInterval(async () => {
       const activeLoans = Array.from(loanStore.values()).filter(

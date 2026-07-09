@@ -33,7 +33,6 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 const LLM_TIMEOUT_MS = 15_000;
-const DEMO_MODE = process.env.DEMO_MODE === 'true';
 
 // ─── Input Sanitization (Prompt Injection Defense) ──────────────────────────
 
@@ -316,16 +315,6 @@ export interface JurorResponse {
 }
 
 export async function askJuror(systemPrompt: string, userPrompt: string): Promise<JurorResponse> {
-  // Demo mode: return realistic mock LLM response without hitting any API
-  if (DEMO_MODE) {
-    console.log(`[LLM] 🎭 Demo mode — returning mock response`);
-    return {
-      result: buildDemoLLMResponse(systemPrompt, userPrompt),
-      provider: 'heuristic',
-      fallbackTriggered: false,
-    };
-  }
-
   // Step 1: Try MiMo
   try {
     console.log(`[LLM] 🤖 Trying MiMo (${MIMO_MODEL})...`);

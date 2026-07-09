@@ -1,8 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { PLATFORM_WALLET } from '../config/casper';
 
-const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
-
 /**
  * Shared payment flow hook — eliminates the repeated
  * showModal / signing / signError / handleConfirm / handleCancel
@@ -51,28 +49,15 @@ export function usePaymentFlow(
       let paymentProof: string;
       let deployHash: string;
 
-      if (DEMO_MODE) {
-        // Demo mode: generate a fake payment proof without wallet
-        const fakeProof = {
-          scheme: 'demo',
-          payload: { deploy: 'demo', payer: 'demo-user', amount: feeCSPR, network: 'casper-testnet' },
-          deployHash: 'demo_' + Math.random().toString(36).slice(2),
-          broadcast: true,
-        };
-        paymentProof = btoa(JSON.stringify(fakeProof));
-        deployHash = fakeProof.deployHash;
-        console.log('[DEMO] 🎭 Simulated payment proof generated');
-      } else {
-        if (!signPayment) {
-          setSignError('Wallet not available. Please install Casper Wallet.');
-          setSignErrorHint('Install the Casper Wallet browser extension from the Chrome Web Store.');
-          setSigning(false);
-          return;
-        }
-        const result = await signPayment(PLATFORM_WALLET, feeCSPR);
-        paymentProof = result.paymentProof;
-        deployHash = result.deployHash;
+      if (!signPayment) {
+        setSignError('Wallet not available. Please install Casper Wallet.');
+        setSignErrorHint('Install the Casper Wallet browser extension from the Chrome Web Store.');
+        setSigning(false);
+        return;
       }
+      const result = await signPayment(PLATFORM_WALLET, feeCSPR);
+      paymentProof = result.paymentProof;
+      deployHash = result.deployHash;
 
       // Close modal immediately after signing — don't block on the API call
       setShowModal(false);

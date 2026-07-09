@@ -101,12 +101,6 @@ async function executeContractCall(
 }
 
 export async function executeCasperTransfer(targetPublicKeyHex: string, amountMotes: number, transferId: number): Promise<string> {
-  if (process.env.DEMO_MODE === 'true') {
-    const fakeHash = 'demo_' + Date.now().toString(16) + Math.random().toString(16).slice(2);
-    console.log(`  [DEMO] 🎭 Simulated transfer: ${amountMotes} motes - ${targetPublicKeyHex.slice(0, 16)}... (hash: ${fakeHash.slice(0, 16)}...)`);
-    return fakeHash;
-  }
-
   const deployerKey = process.env.DEPLOYER_PRIVATE_KEY;
   if (!deployerKey || !CSPR_CLOUD_KEY) {
     throw new Error('DEPLOYER_PRIVATE_KEY or CSPRCLOUD_API_KEY missing in .env');

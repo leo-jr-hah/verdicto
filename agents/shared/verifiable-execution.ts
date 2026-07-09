@@ -52,13 +52,6 @@ export async function storeCommitmentOnCasper(
 ) {
   console.log(`  🔗 [ZK-Lite] Anchoring commitment ${commitment.commitment.slice(0, 16)}... to Casper`);
   
-  // Demo mode: return a mock deploy hash without touching blockchain
-  if (process.env.DEMO_MODE === 'true') {
-    const mockHash = 'mock_deploy_' + commitment.commitment.slice(0, 16);
-    console.log(`  [DEMO] 🎭 Simulated on-chain commitment: ${mockHash}`);
-    return mockHash;
-  }
-  
   try {
     // Import casper-js-sdk v5.x APIs
     const { 
@@ -123,8 +116,7 @@ export async function storeCommitmentOnCasper(
     console.log(`  🔗 [ZK-Lite] ✅ Commitment anchored! tx_hash: ${txHash}`);
     return txHash;
   } catch (err: any) {
-    console.log(`  🔗 [ZK-Lite] ⚠️ On-chain storage failed: ${err.message}`);
-    // Fallback to mock if on-chain fails
-    return `mock_deploy_${commitment.commitment.substring(0, 8)}`;
+    console.error(`  🔗 [ZK-Lite] ❌ On-chain commitment storage FAILED: ${err.message}`);
+    throw new Error(`ZK-Lite commitment failed: ${err.message}`);
   }
 }

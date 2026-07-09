@@ -3,7 +3,6 @@ import axios from 'axios';
 
 const CSPR_CLOUD_URL = process.env.CSPRCLOUD_BASE_URL || 'https://api.testnet.cspr.cloud';
 const CSPR_CLOUD_KEY = process.env.CSPRCLOUD_API_KEY || '';
-const DEMO_MODE = process.env.DEMO_MODE === 'true';
 
 // ─── Allowed internal IPs for localhost bypass ──────────────────────────────
 // Only the loopback addresses trusted for orchestrator-agent calls.
@@ -86,12 +85,6 @@ export function casperX402Middleware(config: { recipientAddress: string; amountC
     const isTrustedLocal = TRUSTED_LOCAL_IPS.has(socketIp ?? '') ||
                            process.env.NODE_ENV === 'development';
     const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
-
-    // Demo mode: skip all payment verification
-    if (DEMO_MODE) {
-      (req as any).x402Payment = { valid: true, payer: 'demo-mode', local: false, demo: true };
-      return next();
-    }
 
     if (isTrustedLocal && !paymentProof && !requirePayment) {
       (req as any).x402Payment = { valid: true, payer: 'localhost-bypass', local: true };

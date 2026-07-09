@@ -20,9 +20,6 @@ import type { AssetType, AssetListing } from './types.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-// ─── Demo Mode ───────────────────────────────────────────────────────────────
-const DEMO_MODE = process.env.DEMO_MODE === 'true';
-
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface AssetData {
@@ -146,8 +143,6 @@ const RENTCAST_API_KEY = process.env.RENTCAST_API_KEY;
 const RENTCAST_BASE = 'https://api.rentcast.io/v1';
 
 export async function getRealEstateData(address: string): Promise<AssetData> {
-  if (DEMO_MODE) return demoRealEstateData(address);
-
   const [propertyRes, compsRes] = await Promise.allSettled([
     // Property details
     RENTCAST_API_KEY ? axios.get(
@@ -198,8 +193,6 @@ export async function getRealEstateData(address: string): Promise<AssetData> {
 const MET_API_BASE = 'https://collectionapi.metmuseum.org/public/collection/v1';
 
 export async function getArtData(query: string): Promise<AssetData> {
-  if (DEMO_MODE) return demoArtData(query);
-
   // Search for artworks
   const searchRes = await axios.get(
     `${MET_API_BASE}/search?q=${encodeURIComponent(query)}&hasImages=true`,
@@ -318,8 +311,6 @@ export async function getGoldData(): Promise<AssetData> {
  * Get commodity price by ID (gold, silver, platinum, etc.)
  */
 export async function getCommodityData(commodityId: string): Promise<AssetData> {
-  if (DEMO_MODE) return demoCommodityData(commodityId);
-
   const coinId = COMMODITY_IDS[commodityId] || commodityId;
   const params: any = {
     ids: coinId,
@@ -361,8 +352,6 @@ export async function getCommodityData(commodityId: string): Promise<AssetData> 
 const FRED_API_KEY = process.env.FRED_API_KEY;
 
 export async function getMacroContext(): Promise<any> {
-  if (DEMO_MODE) return demoMacroContext();
-
   if (!FRED_API_KEY) {
     return {
       mortgageRate: null,
