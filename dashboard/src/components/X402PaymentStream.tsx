@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap,
   ArrowRight,
@@ -51,10 +50,7 @@ const PaymentRow: React.FC<{ payment: PaymentEvent; index: number }> = ({ paymen
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
+    <div
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -96,7 +92,7 @@ const PaymentRow: React.FC<{ payment: PaymentEvent; index: number }> = ({ paymen
           {formatTime(payment.timestamp)}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -215,10 +211,7 @@ export const X402PaymentStream: React.FC = () => {
       </div>
 
       {/* Payment stream */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+      <div
         style={{
           background: 'var(--bg-elevated)',
           borderRadius: '12px',
@@ -246,14 +239,12 @@ export const X402PaymentStream: React.FC = () => {
               No payments yet. Payments will appear here as assessments and services are used.
             </div>
           ) : (
-          <AnimatePresence>
-            {payments.map((payment, i) => (
+            payments.map((payment, i) => (
               <PaymentRow key={payment.id} payment={payment} index={i} />
-            ))}
-          </AnimatePresence>
+            ))
           )}
         </div>
-      </motion.div>
+      </div>
 
       {/* Info note */}
       <div style={{

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Activity, Scale, TrendingUp, Shield, Zap, ArrowRight, BarChart3, CheckCircle2, Wifi, WifiOff, Landmark, Radio } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { fetchTransactions, fetchOracleStats, createWebSocket, type TransactionEntry, type WSMessage, type OracleStats } from '../services/api';
 import { LiveContractPanel } from '../components/LiveContractPanel';
 import { X402PaymentStream } from '../components/X402PaymentStream';
@@ -133,12 +132,9 @@ export const DashboardView: React.FC = () => {
             { label: 'Active Agents', value: 5, icon: Zap, color: 'var(--text-secondary)', bg: 'var(--bg-inset)' },
             { label: 'Live Feeds', value: 3, icon: TrendingUp, color: 'var(--text-tertiary)', bg: 'var(--warning-soft)' },
           ].map((stat, i) => (
-            <motion.div
+            <div
               key={stat.label}
               className="stat-card"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
             >
               <div className="stat-icon" style={{ background: stat.bg }}>
                 <stat.icon size={18} color={stat.color} />
@@ -147,7 +143,7 @@ export const DashboardView: React.FC = () => {
                 <div className="stat-value">{stat.value}</div>
                 <div className="stat-label">{stat.label}</div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -228,11 +224,8 @@ export const DashboardView: React.FC = () => {
               </div>
             ) : (
               transactions.map((tx, i) => (
-                <motion.div
+                <div
                   key={tx.id}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.04 }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -275,7 +268,7 @@ export const DashboardView: React.FC = () => {
                       {formatTime(tx.timestamp)}
                     </span>
                   </div>
-                </motion.div>
+                </div>
               ))
             )}
           </div>

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import {
   Activity,
   Users,
@@ -43,10 +42,7 @@ const StatCard: React.FC<{
   subtext?: string;
   index: number;
 }> = ({ icon, label, value, color, subtext, index }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4, delay: index * 0.1 }}
+  <div
     style={{
       background: 'var(--bg-elevated)',
       borderRadius: '12px',
@@ -77,17 +73,14 @@ const StatCard: React.FC<{
         {subtext}
       </div>
     )}
-  </motion.div>
+  </div>
 );
 
 const AgentRow: React.FC<{
   agent: ContractState['agents'][0];
   index: number;
 }> = ({ agent, index }) => (
-  <motion.div
-    initial={{ opacity: 0, x: -20 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ duration: 0.3, delay: index * 0.05 }}
+  <div
     style={{
       display: 'flex',
       alignItems: 'center',
@@ -129,7 +122,7 @@ const AgentRow: React.FC<{
     }}>
       {agent.reputation}
     </div>
-  </motion.div>
+  </div>
 );
 
 // ─── Main Component ──────────────────────────────────────────────────────────
@@ -294,10 +287,7 @@ export const LiveContractPanel: React.FC = () => {
       </div>
 
       {/* Agent reputation table */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.4 }}
+      <div
         style={{
           background: 'var(--bg-elevated)',
           borderRadius: '12px',
@@ -322,7 +312,7 @@ export const LiveContractPanel: React.FC = () => {
         {state.agents.map((agent, i) => (
           <AgentRow key={agent.id} agent={agent} index={i} />
         ))}
-      </motion.div>
+      </div>
 
       {/* Auto-refresh indicator */}
       <div style={{
