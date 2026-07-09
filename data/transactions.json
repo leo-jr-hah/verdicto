@@ -1,5 +1,22 @@
 [
   {
+    "id": "tx-1783625076481-pkf72a",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: Manhattan Loft → 2,460,973",
+    "hash": "oracle-mem-1783625076481",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T19:24:36.481Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/oracle-mem-1783625076481",
+    "onChain": true,
+    "metadata": {
+      "assetId": "re-nyc-loft-002",
+      "assessedValue": 2460973,
+      "confidence": 1,
+      "divergence": 36
+    }
+  },
+  {
     "id": "tx-1783624894188-q7ls8l",
     "type": "ExecuteVerdict",
     "action": "Oracle verdict: Miami Beach Condo → 710,460",

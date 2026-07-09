@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Analytics } from '@vercel/analytics/react';
 import { Layout } from './layouts/Layout';
 import { LandingLayout } from './layouts/LandingLayout';

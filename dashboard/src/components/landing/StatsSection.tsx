@@ -84,7 +84,7 @@ export const StatsSection: React.FC = () => {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const [liveStats, setLiveStats] = useState<LiveStats>(FALLBACK_STATS);
-  const [statsLoaded, setStatsLoaded] = useState(false);
+  const [_statsLoaded, setStatsLoaded] = useState(false);
 
   useEffect(() => {
     fetchLiveStats().then(stats => {

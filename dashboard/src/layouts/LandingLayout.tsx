@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation, useOutlet } from 'react-router-dom';
+import { Link, useLocation, useOutlet } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import verdictoLogo from '../assets/newlogo.png';
