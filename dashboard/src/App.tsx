@@ -47,28 +47,26 @@ function App() {
 
   return (
     <>
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<LandingLayout />}>
-            <Route index element={<AnimatedPage><LandingPage /></AnimatedPage>} />
-          </Route>
-          <Route path="/" element={<Layout />}>
-            <Route path="dashboard" element={<AnimatedPage><DashboardView /></AnimatedPage>} />
-            <Route path="assess" element={<AnimatedPage><AssessView /></AnimatedPage>} />
-            <Route path="confidence" element={<AnimatedPage><PredictionView /></AnimatedPage>} />
-            <Route path="predict" element={<Navigate to="/confidence" replace />} />
-            <Route path="borrow" element={<AnimatedPage><BorrowView /></AnimatedPage>} />
-            <Route path="insure" element={<AnimatedPage><InsureView /></AnimatedPage>} />
-            <Route path="reputation" element={<AnimatedPage><ReputationView /></AnimatedPage>} />
-            <Route path="transactions" element={<AnimatedPage><TransactionsView /></AnimatedPage>} />
-            <Route path="how-it-works" element={<AnimatedPage><HowItWorksView /></AnimatedPage>} />
-            <Route path="architecture" element={<AnimatedPage><ArchitectureView /></AnimatedPage>} />
-            <Route path="roadmap" element={<AnimatedPage><RoadmapView /></AnimatedPage>} />
-            <Route path="oracle" element={<AnimatedPage><OracleView /></AnimatedPage>} />
-            <Route path="disputes" element={<AnimatedPage><DisputesView /></AnimatedPage>} />
-          </Route>
-        </Routes>
-      </AnimatePresence>
+      <Routes location={location}>
+        <Route path="/" element={<LandingLayout />}>
+          <Route index element={<AnimatedPage><LandingPage /></AnimatedPage>} />
+        </Route>
+        <Route path="/" element={<Layout />}>
+          <Route path="dashboard" element={<AnimatedPage><DashboardView /></AnimatedPage>} />
+          <Route path="assess" element={<AnimatedPage><AssessView /></AnimatedPage>} />
+          <Route path="confidence" element={<AnimatedPage><PredictionView /></AnimatedPage>} />
+          <Route path="predict" element={<Navigate to="/confidence" replace />} />
+          <Route path="borrow" element={<AnimatedPage><BorrowView /></AnimatedPage>} />
+          <Route path="insure" element={<AnimatedPage><InsureView /></AnimatedPage>} />
+          <Route path="reputation" element={<AnimatedPage><ReputationView /></AnimatedPage>} />
+          <Route path="transactions" element={<AnimatedPage><TransactionsView /></AnimatedPage>} />
+          <Route path="how-it-works" element={<AnimatedPage><HowItWorksView /></AnimatedPage>} />
+          <Route path="architecture" element={<AnimatedPage><ArchitectureView /></AnimatedPage>} />
+          <Route path="roadmap" element={<AnimatedPage><RoadmapView /></AnimatedPage>} />
+          <Route path="oracle" element={<AnimatedPage><OracleView /></AnimatedPage>} />
+          <Route path="disputes" element={<AnimatedPage><DisputesView /></AnimatedPage>} />
+        </Route>
+      </Routes>
       <Analytics />
     </>
   );

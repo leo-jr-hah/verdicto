@@ -555,6 +555,8 @@ export interface ContractState {
     verified: number;
     pending: number;
   };
+  totalTransactions?: number;
+  onChainTransactions?: number;
   lastUpdated: number;
 }
 

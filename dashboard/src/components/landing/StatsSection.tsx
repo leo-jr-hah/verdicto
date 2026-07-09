@@ -5,12 +5,41 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const STATS = [
-  { value: 2847, suffix: '+', label: 'valuations', sub: 'completed', isPrimary: true },
-  { value: 5, suffix: '', label: 'agents', sub: 'active', isPrimary: false },
-  { value: 3, suffix: '', label: 'contracts', sub: 'deployed', isPrimary: false },
-  { value: 29, suffix: '', label: 'on-chain tx', sub: 'verified', isPrimary: false },
-];
+// ─── Live data fetcher ────────────────────────────────────────────────────────
+
+interface LiveStats {
+  valuations: number;
+  agents: number;
+  contracts: number;
+  onChainTx: number;
+}
+
+const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || (import.meta.env.PROD ? 'https://verdicto-production.up.railway.app' : '');
+const FALLBACK_STATS: LiveStats = { valuations: 0, agents: 5, contracts: 3, onChainTx: 0 };
+
+async function fetchLiveStats(): Promise<LiveStats> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/contract-state`);
+    if (!res.ok) return FALLBACK_STATS;
+    const data = await res.json();
+    if (!data.success) return FALLBACK_STATS;
+    const state = data.state || data;
+    const agents = (state.agents || []).length || 5;
+    // Count total assessments from agents
+    const valuations = (state.agents || []).reduce(
+      (sum: number, a: any) => sum + (a.totalAssessments || 0), 0
+    );
+    // Count on-chain transactions from the endpoint
+    const onChainTx = state.onChainTransactions || state.totalTransactions || 0;
+    // Contracts: always 3 (VerdictOracle, ReputationRegistry, VotingContract)
+    const contracts = 3;
+    return { valuations, agents, contracts, onChainTx };
+  } catch {
+    return FALLBACK_STATS;
+  }
+}
+
+// ─── Animated Counter ─────────────────────────────────────────────────────────
 
 function AnimatedCounter({ target, suffix, isPrimary }: { target: number; suffix: string; isPrimary: boolean }) {
   const [count, setCount] = useState(0);
@@ -48,10 +77,34 @@ function AnimatedCounter({ target, suffix, isPrimary }: { target: number; suffix
   );
 }
 
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 export const StatsSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const [liveStats, setLiveStats] = useState<LiveStats>(FALLBACK_STATS);
+  const [statsLoaded, setStatsLoaded] = useState(false);
+
+  useEffect(() => {
+    fetchLiveStats().then(stats => {
+      setLiveStats(stats);
+      setStatsLoaded(true);
+    });
+    // Refresh every 60s so values grow as background activity runs
+    const interval = setInterval(() => {
+      fetchLiveStats().then(setLiveStats);
+    }, 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Use live data once loaded, otherwise show minimum values for first paint
+  const stats = [
+    { value: liveStats.valuations || 0, suffix: '+', label: 'valuations', sub: 'completed', isPrimary: true },
+    { value: liveStats.agents || 5, suffix: '', label: 'agents', sub: 'active', isPrimary: false },
+    { value: liveStats.contracts || 3, suffix: '', label: 'contracts', sub: 'deployed', isPrimary: false },
+    { value: liveStats.onChainTx || 0, suffix: '', label: 'on-chain tx', sub: 'verified', isPrimary: false },
+  ];
 
   useGSAP(() => {
     // Headline: clip-path reveal from left
@@ -94,7 +147,7 @@ export const StatsSection: React.FC = () => {
         <h2 ref={headlineRef} className="stats-headline">Built for scale</h2>
 
         <div ref={gridRef} className="stats-grid">
-          {STATS.map((stat) => (
+          {stats.map((stat) => (
             <div key={stat.label} className="stat-col">
               <AnimatedCounter
                 target={stat.value}

@@ -40,6 +40,16 @@ export const DashboardView: React.FC = () => {
     };
     load();
 
+    // Periodic refresh for oracle stats (WebSocket only pushes transactions)
+    const refreshInterval = setInterval(async () => {
+      try {
+        const txs = await fetchTransactions();
+        if (!unmounted) setTransactions(txs.slice(0, 10));
+        const os = await fetchOracleStats();
+        if (!unmounted) setOracleStats(os);
+      } catch { /* silent */ }
+    }, 30_000); // every 30s
+
     let ws: WebSocket | null = null;
     let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     let reconnectDelay = 1000;
@@ -77,6 +87,7 @@ export const DashboardView: React.FC = () => {
 
     return () => {
       unmounted = true;
+      clearInterval(refreshInterval);
       if (reconnectTimeout) clearTimeout(reconnectTimeout);
       if (ws && ws.readyState === WebSocket.OPEN) ws.close();
     };

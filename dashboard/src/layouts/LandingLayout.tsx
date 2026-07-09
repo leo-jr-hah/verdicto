@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation, useOutlet } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import verdictoLogo from '../assets/newlogo.png';
 import { HeroSection } from '../components/landing/HeroSection';
 
 export const LandingLayout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const outlet = useOutlet();
 
   return (
     <div className="landing-page-wrapper">
@@ -45,7 +48,9 @@ export const LandingLayout: React.FC = () => {
 
       {/* ── Rest of the page content ── */}
       <main className="landing-main">
-        <Outlet />
+        <AnimatePresence mode="wait">
+          {outlet && React.cloneElement(outlet as React.ReactElement, { key: location.pathname })}
+        </AnimatePresence>
       </main>
     </div>
   );

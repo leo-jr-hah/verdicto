@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useOutlet } from 'react-router-dom';
 import { Menu, X, LayoutDashboard, Users, Scale, History, Cpu, ChevronLeft, ChevronRight, Droplets, Target, Map, Landmark, Shield, GitBranch, Radio, Gavel, Wifi, WifiOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import verdictLogo from '../assets/newlogo.png';
@@ -39,6 +39,7 @@ const NAV_SECTIONS = [
 
 export const Layout: React.FC = () => {
   const location = useLocation();
+  const outlet = useOutlet();
   const [theme, setTheme] = React.useState(() => {
     return localStorage.getItem('verdicto-theme') || 'light';
   });
@@ -314,7 +315,9 @@ export const Layout: React.FC = () => {
       {/* Main Content Area */}
       <main className="main-content-area">
         <div className="page-layout">
-          <Outlet />
+          <AnimatePresence mode="wait">
+            {outlet && React.cloneElement(outlet as React.ReactElement, { key: location.pathname })}
+          </AnimatePresence>
         </div>
       </main>
 
