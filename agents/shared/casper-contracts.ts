@@ -17,6 +17,7 @@ import { fileURLToPath } from 'url';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import * as db from './db.js';
+import { askJuror } from './mimo-client.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -826,16 +827,18 @@ export async function runRetrial(disputeId: string): Promise<Dispute | { error: 
     try {
       const retrialPrompt = buildRetrialPrompt(original, juror.methodology, dispute.reason, assetId);
 
-      // Try calling the actual juror agent on the retrial ports (3006-3008 for retrial panel)
-      // In production, these would be separate agent instances with different system prompts
-      // For now, simulate adversarial analysis with methodology-influenced verdict
-      const simulatedVerdict = simulateAdversarialVerdict(original, juror.methodology);
+      // Real LLM call for adversarial analysis (MiMo → Groq → heuristic fallback)
+      const systemPrompt = `You are ${juror.name}, a retrial juror specializing in ${juror.methodology} analysis. You are reviewing a disputed asset valuation. Be rigorous and adversarial. Respond with JSON: { "vote": "A" (uphold) | "B" (overturn) | "Split", "confidence": 0-100, "reasoning": "..." }`;
 
-      juror.vote = simulatedVerdict.vote;
-      juror.confidence = simulatedVerdict.confidence;
-      juror.reasoning = simulatedVerdict.reasoning;
+      const llmResponse = await askJuror(systemPrompt, retrialPrompt);
+      const verdict = llmResponse.result;
 
-      console.log(`    👨‍⚖️ [RETRIAL] ${juror.name} (${juror.methodology}): Vote=${juror.vote} | Confidence=${juror.confidence}%`);
+      juror.vote = verdict.vote === 'A' || verdict.vote === 'B' || verdict.vote === 'Split'
+        ? verdict.vote : 'Split';
+      juror.confidence = Math.min(100, Math.max(0, Number(verdict.confidence) || 60));
+      juror.reasoning = String(verdict.reasoning || `${juror.methodology} analysis via ${llmResponse.provider}`);
+
+      console.log(`    👨‍⚖️ [RETRIAL] ${juror.name} (${juror.methodology}): Vote=${juror.vote} | Confidence=${juror.confidence}% | Provider=${llmResponse.provider}`);
     } catch (err: any) {
       console.warn(`    ⚠️  [RETRIAL] ${juror.name} failed: ${err.message}`);
       // Juror abstains - vote stays as default
@@ -858,11 +861,13 @@ export async function runRetrial(disputeId: string): Promise<Dispute | { error: 
     newValue = original.value; // Upheld: original value stands
   } else if (scoreB >= scoreA && scoreB >= scoreSplit) {
     newDecision = 'AgentBPreferred';
-    // Overturned: calculate adversarial estimate
-    newValue = Math.round(original.value * (0.75 + Math.random() * 0.15)); // 15-25% lower
+    // Overturned: use average retrial confidence to estimate magnitude of correction
+    const avgConfidence = retrialPanel.filter(j => j.vote === 'B').reduce((s, j) => s + j.confidence, 0) / retrialPanel.filter(j => j.vote === 'B').length || 60;
+    const correctionPct = 0.10 + (avgConfidence / 100) * 0.15; // 10-25% based on confidence
+    newValue = Math.round(original.value * (1 - correctionPct));
   } else {
     newDecision = 'SplitFifty';
-    newValue = Math.round(original.value * (0.88 + Math.random() * 0.08)); // 4-16% lower
+    newValue = Math.round(original.value * 0.92); // ~8% lower for split verdict
   }
 
   // New confidence is weighted average of retrial panel
@@ -899,16 +904,10 @@ export async function runRetrial(disputeId: string): Promise<Dispute | { error: 
   // Distribute stake
   if (overturned) {
     // Challenger wins: gets stake back
-    let refundTxHash = '';
-    try {
-      const stakeMotes = Math.floor(dispute.stakeCSPR * 1e9);
-      const transferId = Date.now() + Math.floor(Math.random() * 1000);
-      refundTxHash = await executeCasperTransfer(dispute.challengerKey, stakeMotes, transferId);
-      console.log(`    💰 [STAKE] Challenger wins! ${dispute.stakeCSPR} CSPR returned (deploy_hash: ${refundTxHash}).`);
-    } catch (err: any) {
-      console.warn(`    ⚠️ [STAKE] Failed to return stake: ${err.message}`);
-      refundTxHash = `simulated-refund-${Date.now()}`;
-    }
+    const stakeMotes = Math.floor(dispute.stakeCSPR * 1e9);
+    const transferId = Date.now() + Math.floor(Math.random() * 1000);
+    const refundTxHash = await executeCasperTransfer(dispute.challengerKey, stakeMotes, transferId);
+    console.log(`    💰 [STAKE] Challenger wins! ${dispute.stakeCSPR} CSPR returned (deploy_hash: ${refundTxHash}).`);
 
     dispute.stakeDistribution = [
       { recipient: 'challenger', amountCSPR: dispute.stakeCSPR, txHash: refundTxHash },
@@ -1003,88 +1002,6 @@ Produce a vote (A=original upheld, B=overturned, Split) and confidence score.`;
       return `${base}
 Review the original verdict and the challenger's claim. Vote independently.`;
   }
-}
-
-/**
- * Simulate an adversarial verdict based on methodology.
- * In production, this would be a real LLM call to a retrial agent.
- * The simulation demonstrates the mechanism with methodology-influenced variation.
- */
-function simulateAdversarialVerdict(
-  original: OracleVerdict,
-  methodology: string,
-): { vote: 'A' | 'B' | 'Split'; confidence: number; reasoning: string } {
-  // Each methodology has different probability of agreeing with original
-  const agreementRates: Record<string, number> = {
-    stress_test: 0.40,      // 40% chance of agreeing with original (most adversarial)
-    value_at_risk: 0.45,    // 45% chance
-    contrarian: 0.35,       // 35% chance (most adversarial)
-  };
-
-  const agreeRate = agreementRates[methodology] || 0.50;
-  const roll = Math.random();
-
-  if (roll < agreeRate) {
-    // Agrees with original
-    return {
-      vote: 'A',
-      confidence: Math.round(original.confidence * (0.85 + Math.random() * 0.15)),
-      reasoning: getMethodologyReasoning(methodology, true, original),
-    };
-  } else if (roll < agreeRate + (1 - agreeRate) * 0.7) {
-    // Disagrees: overturn
-    return {
-      vote: 'B',
-      confidence: Math.round(55 + Math.random() * 25),
-      reasoning: getMethodologyReasoning(methodology, false, original),
-    };
-  } else {
-    // Split
-    return {
-      vote: 'Split',
-      confidence: Math.round(45 + Math.random() * 30),
-      reasoning: getMethodologyReasoning(methodology, false, original),
-    };
-  }
-}
-
-function getMethodologyReasoning(methodology: string, agrees: boolean, original: OracleVerdict): string {
-  const reasonings: Record<string, { agree: string[]; disagree: string[] }> = {
-    stress_test: {
-      agree: [
-        'Under stress conditions (rate spike, demand shock), valuation holds within 5% margin. Original methodology is robust.',
-        'Comparable sales data confirmed fresh as of last 48h. Stress scenario produces similar value due to strong fundamentals.',
-      ],
-      disagree: [
-        'Stress test reveals 18-22% downside risk. Original panel used optimistic assumptions on cap rate and absorption.',
-        'Comparable data shows 15-day staleness. Under adverse conditions (rates +150bps), value drops significantly.',
-      ],
-    },
-    value_at_risk: {
-      agree: [
-        'Value-at-risk analysis shows 95th percentile loss within acceptable bounds. Original valuation is defensible.',
-        'Risk-adjusted DCF with appropriate discount rates produces value within 3% of original verdict.',
-      ],
-      disagree: [
-        'VaR analysis shows tail risk not accounted for. Adjusted discount rate yields 20% lower intrinsic value.',
-        'Original panel used risk-free rate proxy that understates volatility in this asset class.',
-      ],
-    },
-    contrarian: {
-      agree: [
-        'Despite adversarial review, original methodology is sound. Key assumptions are well-supported by market data.',
-        'Tried to find weaknesses but comparable sales analysis and DCF both converge on similar value.',
-      ],
-      disagree: [
-        'Original panel exhibited confirmation bias: cherry-picked favorable comps, ignored declining absorption rate.',
-        'Strongest case for different valuation: updated comparable sales show 22% correction in subject submarket.',
-      ],
-    },
-  };
-
-  const pool = reasonings[methodology] || reasonings.contrarian;
-  const options = agrees ? pool.agree : pool.disagree;
-  return options[Math.floor(Math.random() * options.length)];
 }
 
 /**

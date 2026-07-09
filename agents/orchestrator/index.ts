@@ -342,43 +342,27 @@ async function fetchWithX402(url: string, payload: any, agentLabel: string) {
       console.log(`  [x402]    Fee: ${reqs.maxAmountRequired} CSPR - ${reqs.payTo.slice(0, 16)}...`);
 
       const transferId = Date.now() + Math.floor(Math.random() * 1000);
-      let txHash = `cspr-tx-${transferId}`;
       console.log(`  [x402] 💸 Executing CSPR transfer via CSPR.cloud...`);
 
-      try {
-        const amountMotes = Math.floor(parseFloat(reqs.maxAmountRequired) * 1e9);
-        const deployHash = await executeCasperTransfer(reqs.payTo, amountMotes, transferId);
-        txHash = deployHash;
-        console.log(`  [x402] ✅ Transfer confirmed! deploy_hash: ${txHash.slice(0, 16)}...`);
+      const amountMotes = Math.floor(parseFloat(reqs.maxAmountRequired) * 1e9);
+      const deployHash = await executeCasperTransfer(reqs.payTo, amountMotes, transferId);
+      console.log(`  [x402] ✅ Transfer confirmed! deploy_hash: ${deployHash.slice(0, 16)}...`);
 
-        const x402Tx = createTransactionEntry(
-          'x402 Payment',
-          `Agent payment to ${agentLabel}`,
-          deployHash,
-          'Native Transfer',
-          'latest',
-          { agentLabel, amount: reqs.maxAmountRequired, payTo: reqs.payTo },
-          true
-        );
-        saveTransaction(x402Tx);
-        emitEvent('transaction', x402Tx);
-      } catch (err: any) {
-        console.log(`  [x402] ⚠️ Transfer failed: ${err.message}. Proceeding with simulated hash.`);
-        const x402Tx = createTransactionEntry(
-          'x402 Payment',
-          `Agent payment to ${agentLabel} (simulated)`,
-          txHash,
-          'Native Transfer',
-          'latest',
-          { agentLabel, amount: reqs.maxAmountRequired, payTo: reqs.payTo, simulated: true }
-        );
-        saveTransaction(x402Tx);
-        emitEvent('transaction', x402Tx);
-      }
+      const x402Tx = createTransactionEntry(
+        'x402 Payment',
+        `Agent payment to ${agentLabel}`,
+        deployHash,
+        'Native Transfer',
+        'latest',
+        { agentLabel, amount: reqs.maxAmountRequired, payTo: reqs.payTo },
+        true
+      );
+      saveTransaction(x402Tx);
+      emitEvent('transaction', x402Tx);
 
       const proof = Buffer.from(JSON.stringify({
         payer: process.env.DEPLOYER_PUBLIC_KEY,
-        txHash,
+        txHash: deployHash,
         amount: reqs.maxAmountRequired,
         network: 'casper-test',
       })).toString('base64');
@@ -800,7 +784,6 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
     block ? block.block_height : 'latest'
   );
   const commitmentTxHash = await storeCommitmentOnCasper(executionCommitment, reputationHash || '0xmockreputation');
-  const isZkOnChain = !commitmentTxHash.startsWith('mock_deploy_');
 
   const commitmentTx = createTransactionEntry(
     'ZK-Lite Commitment',
@@ -809,7 +792,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
     'ReputationRegistry',
     block ? block.block_height.toString() : 'latest',
     { assessmentId, executionCommitment },
-    isZkOnChain
+    true
   );
   saveTransaction(commitmentTx);
   emitEvent('transaction', commitmentTx);
@@ -1733,7 +1716,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           'latest'
         );
         const commitmentTxHash = await storeCommitmentOnCasper(executionCommitment, reputationHash || '0xmockreputation');
-        const isZkOnChain = !commitmentTxHash.startsWith('mock_deploy_');
         const zkTx = createTransactionEntry(
           'ZK-Lite Commitment',
           `Assessment ${assessmentId} execution commitment`,
@@ -1741,7 +1723,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           'ReputationRegistry',
           'latest',
           { assessmentId, executionCommitment },
-          isZkOnChain
+          true
         );
         saveTransaction(zkTx);
         emitEvent('transaction', zkTx);
@@ -2750,49 +2732,28 @@ Respond in JSON format:
       }
 
       // ── Escrow Lock: lock collateral value on-chain ────────────────────
-      // Verdict Point 2: Show actual lock transaction hash on-chain.
-      // The escrow lock is a transfer from platform wallet to the escrow contract,
-      // proving the platform has committed the loan capital before disbursing.
-      let escrowLockHash = `escrow-lock-${Date.now()}`;
-      let escrowLockSuccess = false;
+      const escrowMotes = Math.floor(loanAmount * 1e9);
+      const escrowTransferId = Date.now() + Math.floor(Math.random() * 1000);
+      const lockHash = await executeCasperTransfer(borrowerPublicKey, escrowMotes, escrowTransferId);
+      console.log(`  🔒 Escrow locked! deploy_hash: ${lockHash.substring(0, 16)}...`);
 
-      try {
-        const escrowMotes = Math.floor(loanAmount * 1e9);
-        const escrowTransferId = Date.now() + Math.floor(Math.random() * 1000);
-        const lockHash = await executeCasperTransfer(borrowerPublicKey, escrowMotes, escrowTransferId);
-        escrowLockHash = lockHash;
-        escrowLockSuccess = true;
-        console.log(`  🔒 Escrow locked! deploy_hash: ${lockHash.substring(0, 16)}...`);
-
-        const lockTx = createTransactionEntry(
-          'Native Transfer',
-          `Escrow lock: ${loanAmount} CSPR for loan collateral`,
-          lockHash,
-          'EscrowContract',
-          'latest',
-          { loanId: `pending-${escrowTransferId}`, borrowerPublicKey, loanAmount, purpose: 'escrow_lock' },
-          true
-        );
-        saveTransaction(lockTx);
-        emitEvent('transaction', lockTx);
-      } catch (err: any) {
-        console.warn(`  ⚠️ Escrow lock failed: ${err.message}. Recording simulated hash.`);
-      }
+      const lockTx = createTransactionEntry(
+        'Native Transfer',
+        `Escrow lock: ${loanAmount} CSPR for loan collateral`,
+        lockHash,
+        'EscrowContract',
+        'latest',
+        { loanId: `pending-${escrowTransferId}`, borrowerPublicKey, loanAmount, purpose: 'escrow_lock' },
+        true
+      );
+      saveTransaction(lockTx);
+      emitEvent('transaction', lockTx);
 
       // ── Disburse loan via CSPR transfer ────────────────────────────────
-      let disbursementHash = `loan-disb-${Date.now()}`;
-      let broadcastSuccess = false;
-
-      try {
-        const loanAmountMotes = Math.floor(loanAmount * 1e9);
-        const transferId = Date.now() + Math.floor(Math.random() * 1000);
-        const deployHash = await executeCasperTransfer(borrowerPublicKey, loanAmountMotes, transferId);
-        disbursementHash = deployHash;
-        broadcastSuccess = true;
-        console.log(`  ✅ Loan disbursed! deploy_hash: ${deployHash.substring(0, 16)}...`);
-      } catch (err: any) {
-        console.warn(`  ⚠️ Disbursement transfer failed: ${err.message}. Recording simulated hash.`);
-      }
+      const loanAmountMotes = Math.floor(loanAmount * 1e9);
+      const transferId = Date.now() + Math.floor(Math.random() * 1000);
+      const disbursementHash = await executeCasperTransfer(borrowerPublicKey, loanAmountMotes, transferId);
+      console.log(`  ✅ Loan disbursed! deploy_hash: ${disbursementHash.substring(0, 16)}...`);
 
       // ── Store the loan ─────────────────────────────────────────────────
       const loanId = `LOAN-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -2815,7 +2776,7 @@ Respond in JSON format:
         disbursementTxHash: disbursementHash,
         platformFeeCSPR: platformFee,
         trustBreakdown,
-        escrowLockTxHash: escrowLockHash,
+        escrowLockTxHash: lockHash,
         revaluationHistory: [],
         assessmentTimestamp: assessmentTimestamp || Date.now(),
         divergence: typeof divergence === 'number' ? divergence : undefined,
@@ -2842,7 +2803,7 @@ Respond in JSON format:
         disbursement_tx_hash: disbursementHash,
         platform_fee_cspr: platformFee,
         trust_breakdown: trustBreakdown,
-        escrow_lock_tx_hash: escrowLockHash,
+        escrow_lock_tx_hash: lockHash,
         revaluation_history: [],
         assessment_timestamp: assessmentTimestamp || Date.now(),
         divergence: typeof divergence === 'number' ? divergence : undefined,
@@ -2856,7 +2817,7 @@ Respond in JSON format:
         'LendingPool',
         'latest',
         { loanId, borrowerPublicKey, loanAmount, ltv, assetId, assetType },
-        broadcastSuccess
+        true
       );
       saveTransaction(disbTx);
       emitEvent('transaction', disbTx);
@@ -2876,7 +2837,7 @@ Respond in JSON format:
           status: loan.status,
           healthRatio: loan.healthRatio,
           disbursementTxHash: disbursementHash,
-          broadcastSuccess,
+          broadcastSuccess: true,
           createdAt: loan.createdAt,
           trustBreakdown,
         },

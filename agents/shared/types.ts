@@ -91,7 +91,7 @@ export interface PaymentEvent {
   to: string;
   amount_cspr: number;
   tool: string;
-  tx_hash: string; // simulated for hackathon
+  tx_hash: string; // on-chain deploy hash
 }
 
 // Demo seed data - 3 pre-seeded assessments for the dashboard
