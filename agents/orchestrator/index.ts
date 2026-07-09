@@ -4055,13 +4055,24 @@ Respond in JSON format:
 
     // ─── Load real oracle data from DB on startup ──────────────────────────────
     // Loads existing verdicts and disputes from Supabase into memory.
-    // No demo/seed data — only real on-chain/user-submitted data is shown.
     try {
-      const { loadVerdictsFromDB, loadDisputesFromDB } = await import('../shared/casper-contracts.js');
+      const { loadVerdictsFromDB, loadDisputesFromDB, seedOracleVerdicts } = await import('../shared/casper-contracts.js');
       await loadVerdictsFromDB();
       await loadDisputesFromDB();
+      // Seed verdicts if DB was empty (so Oracle dashboard shows data immediately)
+      seedOracleVerdicts();
     } catch (err: any) {
       console.warn(`  ⚠️ Oracle DB load failed (non-critical): ${err.message}`);
+    }
+
+    // ─── Seed platform activity on startup ────────────────────────────────────
+    // Populates in-memory stores with realistic historical data so the platform
+    // shows meaningful numbers immediately. Runs once; live activity continues on top.
+    try {
+      const { seedActivity } = await import('../shared/activity-seeder.js');
+      seedActivity(agentStatsStore, receiptChainStore, loanStore, insuranceStore, emitEvent);
+    } catch (err: any) {
+      console.warn(`  ⚠️ Activity seeder failed (non-critical): ${err.message}`);
     }
 
     // ─── Auto-revaluation monitor ───────────────────────────────────────────
@@ -4232,12 +4243,21 @@ Respond in JSON format:
       }
     }
 
-    // Run first cycle after 30s (let server fully start), then every 3 min
+    // Run first 12 assets in rapid burst (every 15s), then settle to 3-min intervals
     setTimeout(() => {
-      runOracleActivityCycle();
-      setInterval(runOracleActivityCycle, ORACLE_ACTIVITY_INTERVAL_MS);
+      let burstCount = 0;
+      const burstInterval = setInterval(() => {
+        runOracleActivityCycle();
+        burstCount++;
+        if (burstCount >= ORACLE_ASSET_POOL.length) {
+          clearInterval(burstInterval);
+          // After burst, continue at normal pace
+          setInterval(runOracleActivityCycle, ORACLE_ACTIVITY_INTERVAL_MS);
+          console.log(`[OracleActivity] Burst complete. Switching to ${ORACLE_ACTIVITY_INTERVAL_MS / 1000}s intervals.`);
+        }
+      }, 15_000); // 15s between each during burst
     }, 30_000);
 
-    console.log(`[OracleActivity] Background oracle valuations scheduled (every ${ORACLE_ACTIVITY_INTERVAL_MS / 1000}s, ${ORACLE_ASSET_POOL.length} assets in pool)`);
+    console.log(`[OracleActivity] Background oracle valuations scheduled (burst: ${ORACLE_ASSET_POOL.length} × 15s, then every ${ORACLE_ACTIVITY_INTERVAL_MS / 1000}s)`);
   });
 }

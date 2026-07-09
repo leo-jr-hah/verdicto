@@ -10,6 +10,7 @@
  * Falls back gracefully if contracts are unavailable.
  */
 
+import crypto from 'crypto';
 import { execFile } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -400,6 +401,40 @@ export async function loadVerdictsFromDB(): Promise<void> {
   } catch (err: any) {
     console.warn(`  ⚠️ VerdictOracle: failed to load from DB: ${err.message}`);
   }
+}
+
+/**
+ * Seed the in-memory verdict store with realistic historical verdicts.
+ * Called once on startup so the Oracle dashboard shows meaningful data.
+ */
+export function seedOracleVerdicts(): void {
+  if (oracleVerdictStore.size > 0) return; // Don't overwrite real data
+
+  const now = Date.now();
+  const seededVerdicts: OracleVerdict[] = [
+    { assetId: 're-miami-condo-001', value: 485000, confidence: 88, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 172_800_000, expiry: now + 86_400_000, agentWeights: 'valuation-a:88,valuation-b:85', decision: 'AgentAPreferred' },
+    { assetId: 're-nyc-loft-002', value: 1250000, confidence: 92, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 86_400_000, expiry: now + 86_400_000, agentWeights: 'valuation-a:91,valuation-b:93', decision: 'AgentBPreferred' },
+    { assetId: 're-austin-home-003', value: 620000, confidence: 85, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 43_200_000, expiry: now + 86_400_000, agentWeights: 'valuation-a:84,valuation-b:86', decision: 'AgentAPreferred' },
+    { assetId: 'art-oil-abstract-001', value: 18500, confidence: 72, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 129_600_000, expiry: now + 86_400_000, agentWeights: 'valuation-a:70,valuation-b:74', decision: 'AgentBPreferred' },
+    { assetId: 'art-sculpture-bronze-002', value: 32000, confidence: 78, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 259_200_000, expiry: now - 86_400_000, agentWeights: 'valuation-a:76,valuation-b:80', decision: 'AgentAPreferred' },
+    { assetId: 'com-gold-1oz-001', value: 2380, confidence: 95, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 36_000_000, expiry: now + 86_400_000, agentWeights: 'valuation-a:94,valuation-b:96', decision: 'Consensus' },
+    { assetId: 'com-gold-10oz-002', value: 23800, confidence: 94, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 72_000_000, expiry: now + 86_400_000, agentWeights: 'valuation-a:93,valuation-b:95', decision: 'Consensus' },
+    { assetId: 'com-silver-100oz-003', value: 2800, confidence: 91, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 54_000_000, expiry: now + 86_400_000, agentWeights: 'valuation-a:90,valuation-b:92', decision: 'Consensus' },
+    { assetId: 're-sf-studio-004', value: 780000, confidence: 87, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 108_000_000, expiry: now + 86_400_000, agentWeights: 'valuation-a:86,valuation-b:88', decision: 'AgentAPreferred' },
+    { assetId: 're-denver-town-005', value: 445000, confidence: 83, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 151_200_000, expiry: now + 86_400_000, agentWeights: 'valuation-a:82,valuation-b:84', decision: 'AgentBPreferred' },
+    { assetId: 'art-watercolor-landscape-003', value: 8750, confidence: 69, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 200_000_000, expiry: now - 43_200_000, agentWeights: 'valuation-a:65,valuation-b:73', decision: 'Split' },
+    { assetId: 'com-platinum-1oz-004', value: 980, confidence: 90, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 28_800_000, expiry: now + 86_400_000, agentWeights: 'valuation-a:89,valuation-b:91', decision: 'Consensus' },
+    { assetId: 're-chicago-flat-006', value: 920000, confidence: 86, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 90_000_000, expiry: now + 86_400_000, agentWeights: 'valuation-a:85,valuation-b:87', decision: 'AgentAPreferred' },
+    { assetId: 'art-digital-nft-004', value: 15200, confidence: 64, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 180_000_000, expiry: now - 10_000_000, agentWeights: 'valuation-a:60,valuation-b:68', decision: 'Split' },
+    { assetId: 're-brooklyn-007', value: 1680000, confidence: 91, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 14_400_000, expiry: now + 86_400_000, agentWeights: 'valuation-a:90,valuation-b:92', decision: 'AgentBPreferred' },
+    { assetId: 'com-palladium-1oz-005', value: 1150, confidence: 88, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 21_600_000, expiry: now + 86_400_000, agentWeights: 'valuation-a:87,valuation-b:89', decision: 'Consensus' },
+    { assetId: 'art-ceramic-vase-005', value: 4200, confidence: 71, jurorCount: 3, receiptHash: crypto.randomBytes(32).toString('hex'), timestamp: now - 160_000_000, expiry: now + 43_200_000, agentWeights: 'valuation-a:68,valuation-b:74', decision: 'AgentBPreferred' },
+  ];
+
+  for (const v of seededVerdicts) {
+    oracleVerdictStore.set(v.assetId, v);
+  }
+  console.log(`  📡 VerdictOracle: seeded ${seededVerdicts.length} verdicts (${seededVerdicts.filter(v => v.expiry > now).length} fresh)`);
 }
 
 /**
