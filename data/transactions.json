@@ -1,5 +1,39 @@
 [
   {
+    "id": "tx-1783625439192-3bougj",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: SF Studio Apartment → 833,142",
+    "hash": "oracle-mem-1783625439192",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T19:30:39.192Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/oracle-mem-1783625439192",
+    "onChain": true,
+    "metadata": {
+      "assetId": "re-sf-studio-004",
+      "assessedValue": 833142,
+      "confidence": 0,
+      "divergence": 36
+    }
+  },
+  {
+    "id": "tx-1783625253978-wmy6tq",
+    "type": "ExecuteVerdict",
+    "action": "Oracle verdict: Austin Family Home → 1,202,689",
+    "hash": "oracle-mem-1783625253978",
+    "contract": "VerdictOracle",
+    "blockHeight": "latest",
+    "timestamp": "2026-07-09T19:27:33.978Z",
+    "explorerUrl": "https://testnet.cspr.live/deploy/oracle-mem-1783625253978",
+    "onChain": true,
+    "metadata": {
+      "assetId": "re-austin-home-003",
+      "assessedValue": 1202689,
+      "confidence": 1,
+      "divergence": 36
+    }
+  },
+  {
     "id": "tx-1783625076481-pkf72a",
     "type": "ExecuteVerdict",
     "action": "Oracle verdict: Manhattan Loft → 2,460,973",
@@ -3238,38 +3272,6 @@
       "disputeId": "DISP-899",
       "receiptCount": 6,
       "chainValid": true
-    }
-  },
-  {
-    "id": "tx-1781727339071-qj7x6v",
-    "type": "x402 Payment",
-    "action": "Agent payment to Evidence Analyst",
-    "hash": "bcad5e6e88a105375f4d79fb376bc9883441f5e98cb2d4c3942fb3f4a8301070",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-17T20:15:39.071Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/bcad5e6e88a105375f4d79fb376bc9883441f5e98cb2d4c3942fb3f4a8301070",
-    "onChain": true,
-    "metadata": {
-      "agentLabel": "Evidence Analyst",
-      "amount": "2.5",
-      "payTo": "0203b71fe15431c407a1eaf0d3bc82adf92d7653c28704a6037bfeb17a10d8073c88"
-    }
-  },
-  {
-    "id": "tx-1781727339046-7s96o2",
-    "type": "x402 Payment",
-    "action": "Agent payment to Precedent Researcher",
-    "hash": "054f523e338b41d67414c91f4015ef4e34d662abcdd20e04372f488384a29f7d",
-    "contract": "Native Transfer",
-    "blockHeight": "latest",
-    "timestamp": "2026-06-17T20:15:39.046Z",
-    "explorerUrl": "https://testnet.cspr.live/transaction/054f523e338b41d67414c91f4015ef4e34d662abcdd20e04372f488384a29f7d",
-    "onChain": true,
-    "metadata": {
-      "agentLabel": "Precedent Researcher",
-      "amount": "2.5",
-      "payTo": "0203b71fe15431c407a1eaf0d3bc82adf92d7653c28704a6037bfeb17a10d8073c88"
     }
   }
 ]
