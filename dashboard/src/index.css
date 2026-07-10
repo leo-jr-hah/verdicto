@@ -24,6 +24,16 @@
    Tokens defined in styles/tokens.css — this file imports them.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 /* NOTE: All :root and [data-theme="dark"] variables are now in styles/tokens.css */
 
 /* ═══════════════════════════════════════════════════════════════════════════
