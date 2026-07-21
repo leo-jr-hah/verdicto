@@ -148,45 +148,25 @@ Graceful degradation — works with zero API keys, falls back to deterministic c
 
 ## Screenshots
 
-### 1. Landing Page Hero
-
-[PASTE SCREENSHOT: Full hero section of verdicto.xyz with title, tagline, and CTA button]
+### 1. Landing Page
 
 ### 2. Interactive Story Explainer
 
-[PASTE SCREENSHOT: Step-by-step explainer on the landing page with icons and progression]
-
 ### 3. Assessment Page, Asset Selection
-
-[PASTE SCREENSHOT: /assess page showing demo assets grid with Pay and Assess button]
 
 ### 4. "Under the Hood" Agent Log
 
-[PASTE SCREENSHOT: Terminal-style real-time log showing agents analyzing, deliberating, reaching consensus]
-
 ### 5. Assessment Results
-
-[PASTE SCREENSHOT: Final verdict card with consensus value, confidence score, and CSPR.live link]
 
 ### 6. Oracle Dashboard
 
-[PASTE SCREENSHOT: /oracle page showing on-chain verdicts with timestamps and explorer links]
-
 ### 7. Borrow or Insure
-
-[PASTE SCREENSHOT: /borrow or /insure wizard UI]
 
 ### 8. Wallet and Payment
 
-[PASTE SCREENSHOT: Casper Wallet connect or payment modal with CSPR amount and Sign button]
-
 ### 9. Disputes
 
-[PASTE SCREENSHOT: /disputes page with dispute filing or active disputes list]
-
 ### 10. Transaction Feed
-
-[PASTE SCREENSHOT: Transaction history with deploy hashes and CSPR.live links]
 
 ---
 

@@ -902,7 +902,7 @@ export async function fetchInsurancePoolStats(): Promise<InsurancePoolStats | nu
 
 export interface OnChainReputation {
   agentId: string;
-  parkingScore: number;
+  generalScore: number;
   realEstateScore: number;
   reliabilityScore: number;
   assessmentCount: number;

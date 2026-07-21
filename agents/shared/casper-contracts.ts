@@ -3,7 +3,7 @@
  * 
  * Real on-chain calls to deployed Odra contracts:
  * - VotingContract: cast_vote, get_verdict, get_tally
- * - ReputationRegistry: register_agent, get_agent, update_parking_score
+ * - ReputationRegistry: register_agent, get_agent, update_general_score
  * 
  * Uses casper-client CLI + CSPR.cloud RPC for contract calls.
  * Same pattern as executeCasperTransfer in orchestrator.
@@ -229,20 +229,20 @@ export async function getVerdictOnChain(assessmentId: string): Promise<{ verdict
 
 export interface OnChainReputation {
   agentId: string;
-  parkingScore: number;
+  generalScore: number;
   realEstateScore: number;
   reliabilityScore: number;
   assessmentCount: number;
 }
 
 /**
- * Update an agent's parking score on the ReputationRegistry.
+ * Update an agent's general score on the ReputationRegistry.
  * 
- * Contract entry point: update_parking_score(agent_id: Address, delta: i32)
+ * Contract entry point: update_general_score(agent_id: Address, delta: i32)
  */
 export async function updateReputationOnChain(
   agentId: string,
-  domain: 'parking' | 'real_estate',
+  domain: 'general' | 'real_estate',
   delta: number,
 ): Promise<{ success: boolean; txHash: string }> {
   if (!REPUTATION_CONTRACT_HASH) {
@@ -251,20 +251,19 @@ export async function updateReputationOnChain(
   }
 
   try {
-    // For Odra Address type, we use the deployer's own address as the agent_id
-    // since agents are registered by the deployer (admin)
-    const deployerKeyPath = getDeployerKeyPath();
-    const pemContent = fs.readFileSync(deployerKeyPath, 'utf8');
+    let agentKeyFile = process.env.DEPLOYER_PRIVATE_KEY;
+    if (agentId === 'valuation-agent-a') agentKeyFile = process.env.AGENT_A_PRIVATE_KEY;
+    if (agentId === 'valuation-agent-b') agentKeyFile = process.env.AGENT_B_PRIVATE_KEY;
     
-    // Extract public key from PEM for the agent address
-    // Odra Address is the account hash (blake2b of public key)
-    // For simplicity, use the deployer's account as the agent address
+    const keyPath = path.resolve(__dirname, '../../', agentKeyFile || 'keys/deployer.pem');
+    const pemContent = fs.readFileSync(keyPath, 'utf8');
+    
     const { PrivateKey, KeyAlgorithm } = await import('casper-js-sdk');
     const privateKey = PrivateKey.fromPem(pemContent, KeyAlgorithm.ED25519);
-    const publicKey = privateKey.publicKey;
-    const accountHash = publicKey.accountHash().toString();
+    // Buffer.from is used to reliably get hex string from Uint8Array
+    const accountHash = privateKey.publicKey.accountHash().toString();
 
-    const entryPoint = 'update_parking_score';
+    const entryPoint = 'update_general_score';
     const sessionArgs = [
       `agent_id:key_account-hash:${accountHash}`,
       `delta:i32:${delta}`,
@@ -299,7 +298,7 @@ export async function getReputationsOnChain(): Promise<OnChainReputation[]> {
     if (state?.cards) {
       return Object.entries(state.cards).map(([agentId, card]: [string, any]) => ({
         agentId,
-        parkingScore: card.parking_score || 700,
+        generalScore: card.general_score || 700,
         realEstateScore: card.real_estate_score || 700,
         reliabilityScore: card.reliability_score || 700,
         assessmentCount: card.assessment_count || 0,
@@ -319,35 +318,35 @@ function getDefaultReputations(): OnChainReputation[] {
   return [
     {
       agentId: 'valuation-agent-a',
-      parkingScore: parseInt(process.env.AGENT_A_REPUTATION || '750', 10),
+      generalScore: parseInt(process.env.AGENT_A_REPUTATION || '750', 10),
       realEstateScore: 750,
       reliabilityScore: 735,
       assessmentCount: 156,
     },
     {
       agentId: 'valuation-agent-b',
-      parkingScore: parseInt(process.env.AGENT_B_REPUTATION || '780', 10),
+      generalScore: parseInt(process.env.AGENT_B_REPUTATION || '780', 10),
       realEstateScore: 780,
       reliabilityScore: 745,
       assessmentCount: 142,
     },
     {
       agentId: 'evidence-analyst',
-      parkingScore: parseInt(process.env.AGENT_EVIDENCE_REPUTATION || '820', 10),
+      generalScore: parseInt(process.env.AGENT_EVIDENCE_REPUTATION || '820', 10),
       realEstateScore: 820,
       reliabilityScore: 805,
       assessmentCount: 189,
     },
     {
       agentId: 'market-interpreter',
-      parkingScore: parseInt(process.env.AGENT_MARKET_REPUTATION || '790', 10),
+      generalScore: parseInt(process.env.AGENT_MARKET_REPUTATION || '790', 10),
       realEstateScore: 790,
       reliabilityScore: 775,
       assessmentCount: 174,
     },
     {
       agentId: 'precedent-researcher',
-      parkingScore: parseInt(process.env.AGENT_PRECEDENT_REPUTATION || '810', 10),
+      generalScore: parseInt(process.env.AGENT_PRECEDENT_REPUTATION || '810', 10),
       realEstateScore: 810,
       reliabilityScore: 795,
       assessmentCount: 168,

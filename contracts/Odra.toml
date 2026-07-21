@@ -3,3 +3,6 @@ fqn = "voting::VotingContract"
 
 [[contracts]]
 fqn = "reputation::ReputationRegistry"
+
+[[contracts]]
+fqn = "verdict_oracle::VerdictOracle"

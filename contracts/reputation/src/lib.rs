@@ -14,7 +14,7 @@ pub enum RegistryError {
 #[odra::odra_type]
 pub struct ReputationCard {
     pub agent_id: Address,
-    pub parking_score: u32,
+    pub general_score: u32,
     pub real_estate_score: u32,
     pub reliability_score: u32,
     pub assessment_count: u32,
@@ -48,14 +48,14 @@ impl ReputationRegistry {
         self.agent_count.set(0);
     }
 
-    pub fn register_agent(&mut self, agent_id: Address, initial_parking: u32, initial_real_estate: u32) {
+    pub fn register_agent(&mut self, agent_id: Address, initial_general: u32, initial_real_estate: u32) {
         self.assert_admin();
 
-        let reliability = (initial_parking + initial_real_estate) / 2;
+        let reliability = (initial_general + initial_real_estate) / 2;
         
         self.cards.set(&agent_id, ReputationCard {
             agent_id,
-            parking_score: initial_parking,
+            general_score: initial_general,
             real_estate_score: initial_real_estate,
             reliability_score: reliability,
             assessment_count: 0,
@@ -70,23 +70,23 @@ impl ReputationRegistry {
         });
     }
 
-    pub fn update_parking_score(&mut self, agent_id: Address, delta: i32) {
+    pub fn update_general_score(&mut self, agent_id: Address, delta: i32) {
         self.assert_admin();
 
         let mut card = self.cards.get(&agent_id).unwrap_or_revert_with(&self.env(), RegistryError::AgentNotFound);
 
-        let old_score = card.parking_score;
-        let new_score = ((card.parking_score as i32) + delta).max(0).min(1000) as u32;
+        let old_score = card.general_score;
+        let new_score = ((card.general_score as i32) + delta).max(0).min(1000) as u32;
         
-        card.parking_score = new_score;
+        card.general_score = new_score;
         card.assessment_count += 1;
-        card.reliability_score = (card.parking_score + card.real_estate_score) / 2;
+        card.reliability_score = (card.general_score + card.real_estate_score) / 2;
         
         self.cards.set(&agent_id, card);
 
         self.env().emit_event(ReputationUpdated {
             agent_id,
-            domain: "parking".to_string(),
+            domain: "general".to_string(),
             old_score,
             new_score,
         });
@@ -108,18 +108,18 @@ impl ReputationRegistry {
             else if err_pct > 250 { -30 }                // > 25% error -> -30
             else { 0 };
 
-        let old_score = card.parking_score;
-        let new_score = ((card.parking_score as i32) + delta).max(0).min(1000) as u32;
+        let old_score = card.general_score;
+        let new_score = ((card.general_score as i32) + delta).max(0).min(1000) as u32;
         
-        card.parking_score = new_score;
+        card.general_score = new_score;
         card.assessment_count += 1;
-        card.reliability_score = (card.parking_score + card.real_estate_score) / 2;
+        card.reliability_score = (card.general_score + card.real_estate_score) / 2;
         
         self.cards.set(&agent_id, card);
 
         self.env().emit_event(ReputationUpdated {
             agent_id,
-            domain: "parking".to_string(),
+            domain: "general".to_string(),
             old_score,
             new_score,
         });
@@ -129,8 +129,8 @@ impl ReputationRegistry {
         self.cards.get(&agent_id)
     }
 
-    pub fn get_parking_score(&self, agent_id: Address) -> u32 {
-        self.cards.get(&agent_id).map(|c| c.parking_score).unwrap_or(0)
+    pub fn get_general_score(&self, agent_id: Address) -> u32 {
+        self.cards.get(&agent_id).map(|c| c.general_score).unwrap_or(0)
     }
 
     pub fn get_agent_count(&self) -> u32 {
@@ -160,7 +160,7 @@ mod tests {
         contract.register_agent(agent, 700, 650);
 
         let card = contract.get_card(agent).unwrap();
-        assert_eq!(card.parking_score, 700);
+        assert_eq!(card.general_score, 700);
         assert_eq!(card.real_estate_score, 650);
         assert_eq!(card.reliability_score, 675);
     }
@@ -172,9 +172,9 @@ mod tests {
 
         let agent = env.get_account(1);
         contract.register_agent(agent, 700, 650);
-        contract.update_parking_score(agent, 50);
+        contract.update_general_score(agent, 50);
 
-        assert_eq!(contract.get_parking_score(agent), 750);
+        assert_eq!(contract.get_general_score(agent), 750);
     }
 
     #[test]
@@ -184,9 +184,9 @@ mod tests {
 
         let agent = env.get_account(1);
         contract.register_agent(agent, 980, 500);
-        contract.update_parking_score(agent, 100);
+        contract.update_general_score(agent, 100);
 
-        assert_eq!(contract.get_parking_score(agent), 1000);
+        assert_eq!(contract.get_general_score(agent), 1000);
     }
 
     #[test]
@@ -196,9 +196,9 @@ mod tests {
 
         let agent = env.get_account(1);
         contract.register_agent(agent, 50, 500);
-        contract.update_parking_score(agent, -200);
+        contract.update_general_score(agent, -200);
 
-        assert_eq!(contract.get_parking_score(agent), 0);
+        assert_eq!(contract.get_general_score(agent), 0);
     }
 
     #[test]
@@ -226,10 +226,10 @@ mod tests {
         // Actual price is 2,000,000
         // Agent 1 guessed 2,050,000 (2.5% error -> < 5% -> +50)
         contract.resolve_retroactive_reputation(agent1, 2_050_000, 2_000_000);
-        assert_eq!(contract.get_parking_score(agent1), 750);
+        assert_eq!(contract.get_general_score(agent1), 750);
 
         // Agent 2 guessed 1,400,000 (30% error -> > 25% -> -30)
         contract.resolve_retroactive_reputation(agent2, 1_400_000, 2_000_000);
-        assert_eq!(contract.get_parking_score(agent2), 670);
+        assert_eq!(contract.get_general_score(agent2), 670);
     }
 }

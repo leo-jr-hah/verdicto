@@ -150,6 +150,39 @@ Analyze the evidence from your perspective.`;
     }
   );
 
+  mcpServer.tool(
+    'predict',
+    'Analyze a prediction question and estimate the probability',
+    {
+      question: z.string(),
+      timeframe: z.string(),
+      market_context: z.string().optional()
+    },
+    async ({ question, timeframe, market_context }) => {
+      const systemPrompt = `You are ${config.name}, a specialized juror in the Verdict autonomous assessment system.
+Your specialization: ${config.specializationContext}`;
+      
+      const userPrompt = `Analyze this prediction question and estimate the probability.
+
+Question: "${question}"
+Timeframe: ${timeframe}
+${market_context ? `Market Context: ${market_context}` : ''}
+
+Respond in JSON format:
+{
+  "probability": <0.0 to 1.0>,
+  "confidence": <0.0 to 1.0>,
+  "reasoning": "<2-3 sentences explaining your analysis>"
+}`;
+      
+      const { result: llmResponse, provider: llmProvider, fallbackTriggered } = await askJuror(systemPrompt, userPrompt);
+      
+      return {
+        content: [{ type: 'text', text: typeof llmResponse === 'string' ? llmResponse : JSON.stringify({ ...llmResponse, _provider: llmProvider, _fallbackTriggered: fallbackTriggered }) }],
+      };
+    }
+  );
+
   // MCP endpoint
   app.post('/mcp', async (req, res) => {
     try {

@@ -93,7 +93,7 @@ function mergeAgentData(reputations: OnChainReputation[]): AgentData[] {
 
   return AGENT_META.map(meta => {
     const rep = repMap.get(meta.id);
-    const score = rep?.parkingScore ?? 700;
+    const score = rep?.generalScore ?? 700;
     const reliability = rep?.reliabilityScore ?? 700;
     const count = rep?.assessmentCount ?? 0;
 

@@ -40,6 +40,8 @@ import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { getCasperMcpClient } from '../shared/casper-mcp-client.js';
 import { attachWebSocket, emitEvent } from '../websocket-server.js';
 import { computeAggregateTrust } from '../shared/trust-framework.js';
@@ -212,7 +214,7 @@ async function fetchOnChainReputation(agentId: string): Promise<number> {
           key: agentId,
         },
       }) as any;
-      const value = parseInt(res.content[0]?.text, 10);
+      const value = parseInt(res.content[0]?.text ?? '0', 10);
       if (!isNaN(value)) {
         console.log(`  [ReputationRegistry] ✅ On-chain reputation for ${agentId}: ${value}`);
         return value;
@@ -318,73 +320,73 @@ async function executeCasperTransfer(targetPublicKeyHex: string, amountMotes: nu
 // ─── x402-aware HTTP client ──────────────────────────────────────────────────
 
 /**
- * POST to an MCP endpoint, handling x402 payment negotiation.
- * Parses SSE responses transparently.
+ * Call an MCP tool on an agent, handling x402 payment negotiation using the MCP SDK.
  */
-async function fetchWithX402(url: string, payload: any, agentLabel: string) {
-  try {
-    console.log(`  [x402] POST ${url}`);
-    const res = await axios.post(url, payload, {
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json, text/event-stream',
-      },
-    });
+async function callMcpToolWithX402(port: number, agentLabel: string, toolName: string, args: any): Promise<any> {
+  const url = new URL(`http://localhost:${port}/mcp`);
+  const transport = new StreamableHTTPClientTransport(url, {
+    fetch: async (input, init) => {
+      console.log(`  [x402] MCP Client calling ${url} (${toolName})`);
+      let res = await fetch(input, init);
+      
+      if (res.status === 402) {
+        const errorData: any = await res.clone().json();
+        const reqs = errorData.paymentRequirements || { maxAmountRequired: '2.5', payTo: 'fallback-address' };
+        console.log(`  [x402] 🛑 402 Payment Required from ${agentLabel}`);
+        console.log(`  [x402]    Fee: ${reqs.maxAmountRequired} CSPR - ${reqs.payTo.slice(0, 16)}...`);
 
-    const data = typeof res.data === 'string' ? parseSseResponse(res.data) : res.data;
-    return data;
-  } catch (error: any) {
-    if (error.response?.status === 402) {
-      const reqs = error.response.data.paymentRequirements;
-      console.log(`  [x402] 🛑 402 Payment Required from ${agentLabel}`);
-      console.log(`  [x402]    Fee: ${reqs.maxAmountRequired} CSPR - ${reqs.payTo.slice(0, 16)}...`);
+        const transferId = Date.now() + Math.floor(Math.random() * 1000);
+        console.log(`  [x402] 💸 Executing CSPR transfer via CSPR.cloud...`);
 
-      const transferId = Date.now() + Math.floor(Math.random() * 1000);
-      console.log(`  [x402] 💸 Executing CSPR transfer via CSPR.cloud...`);
+        const amountMotes = Math.floor(parseFloat(reqs.maxAmountRequired) * 1e9);
+        const deployHash = await executeCasperTransfer(reqs.payTo, amountMotes, transferId);
+        console.log(`  [x402] ✅ Transfer confirmed! deploy_hash: ${deployHash.slice(0, 16)}...`);
 
-      const amountMotes = Math.floor(parseFloat(reqs.maxAmountRequired) * 1e9);
-      const deployHash = await executeCasperTransfer(reqs.payTo, amountMotes, transferId);
-      console.log(`  [x402] ✅ Transfer confirmed! deploy_hash: ${deployHash.slice(0, 16)}...`);
+        const x402Tx = createTransactionEntry(
+          'x402 Payment',
+          `Agent payment to ${agentLabel}`,
+          deployHash,
+          'Native Transfer',
+          'latest',
+          { agentLabel, amount: reqs.maxAmountRequired, payTo: reqs.payTo },
+          true
+        );
+        saveTransaction(x402Tx);
+        emitEvent('transaction', x402Tx);
 
-      const x402Tx = createTransactionEntry(
-        'x402 Payment',
-        `Agent payment to ${agentLabel}`,
-        deployHash,
-        'Native Transfer',
-        'latest',
-        { agentLabel, amount: reqs.maxAmountRequired, payTo: reqs.payTo },
-        true
-      );
-      saveTransaction(x402Tx);
-      emitEvent('transaction', x402Tx);
+        const proof = Buffer.from(JSON.stringify({
+          payer: process.env.DEPLOYER_PUBLIC_KEY,
+          txHash: deployHash,
+          amount: reqs.maxAmountRequired,
+          network: 'casper-test',
+        })).toString('base64');
 
-      const proof = Buffer.from(JSON.stringify({
-        payer: process.env.DEPLOYER_PUBLIC_KEY,
-        txHash: deployHash,
-        amount: reqs.maxAmountRequired,
-        network: 'casper-test',
-      })).toString('base64');
-
-      const retry = await axios.post(url, payload, {
-        headers: {
-          'x-payment-proof': proof,
-          'Content-Type': 'application/json',
-          Accept: 'application/json, text/event-stream',
-        },
-      });
-
-      const data = typeof retry.data === 'string' ? parseSseResponse(retry.data) : retry.data;
-      console.log(`  [x402] ✅ Payment accepted, response received`);
-      return data;
+        console.log(`  [x402] 🔄 Retrying POST ${url} with payment proof...`);
+        const headers = new Headers(init?.headers);
+        headers.set('x-payment-proof', proof);
+        
+        res = await fetch(input, { ...init, headers });
+      }
+      return res;
     }
-    throw error;
+  });
+
+  const client = new Client({ name: 'orchestrator', version: '1.0' }, { capabilities: {} });
+  await client.connect(transport);
+  
+  try {
+    const result = await client.callTool({ name: toolName, arguments: args });
+    return result;
+  } finally {
+    // The connection is closed by StreamableHTTPClientTransport automatically or left to garbage collection,
+    // but we can ensure clean up if we want.
   }
 }
 
 // ─── CSPR.cloud queries ──────────────────────────────────────────────────────
 
 interface McpToolResult {
-  content: Array<{ type: string; text: string }>;
+  content: Array<{ type: string; text?: string; [key: string]: any }>;
 }
 
 async function fetchCasperAccountInfo(publicKey: string) {
@@ -422,7 +424,7 @@ async function fetchLatestBlock() {
       name: 'GetLatestBlock',
       arguments: {},
     }) as any;
-    const data = JSON.parse(res.content[0].text);
+    const data = JSON.parse(res.content[0]?.text ?? '{}');
     return { block_height: data.block_height || 'latest', timestamp: data.timestamp || new Date().toISOString() };
   } catch (mcpError: any) {
     try {
@@ -466,29 +468,18 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
     }
   }
 
-  // Step 1: Summon valuation agents
-  const mcpPayload = {
-    jsonrpc: '2.0',
-    id: 1,
-    method: 'tools/call',
-    params: {
-      name: 'assess_asset_autonomously',
-      arguments: { asset_id: assetId, location, spot_count: spotCount },
-    },
-  };
+  const mcpArgs = { asset_id: assetId, location, spot_count: spotCount };
 
   console.log(`\n--- Step 1: Summoning Agent A (Comps Specialist) ---`);
-  emitAgentThought('comps', 'Comps Specialist', 'Starting comparable sales analysis for the asset...', 10, 'reasoning');
+  emitAgentThought('valuation-a', 'Comps Specialist', 'Starting comparable sales analysis...', 10, 'reasoning');
 
   let resultA: any;
   try {
-    const res = await fetchWithX402('http://localhost:3001/mcp', mcpPayload, 'Agent-A');
-    resultA = JSON.parse(res.result.content[0].text);
+    const res = await callMcpToolWithX402(3001, 'Agent-A', 'assess', mcpArgs);
+    resultA = JSON.parse(res.content[0]?.text ?? '{}');
     console.log(`  📊 Agent-A verdict: ${resultA.estimated_value.toLocaleString()} via ${resultA.method}`);
 
-    emitAgentThought('valuation-a', 'Comps Specialist', `Found ${resultA.comparable_count || 3} comparable properties in ${location}`, 60, 'evidence');
-    emitAgentThought('valuation-a', 'Comps Specialist', `Calculated value: ${resultA.estimated_value.toLocaleString()} using ${resultA.method}`, 85, 'decision');
-
+    emitAgentThought('valuation-a', 'Comps Specialist', `Found ${resultA.comparable_count || 3} comparable properties`, 85, 'decision');
     emitEvent('valuation_result', { agent: 'Agent-A', result: resultA });
   } catch (e: any) {
     console.error(`  ❌ Agent-A failed: ${e.message}`);
@@ -500,13 +491,11 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
 
   let resultB: any;
   try {
-    const res = await fetchWithX402('http://localhost:3002/mcp', mcpPayload, 'Agent-B');
-    resultB = JSON.parse(res.result.content[0].text);
+    const res = await callMcpToolWithX402(3002, 'Agent-B', 'assess', mcpArgs);
+    resultB = JSON.parse(res.content[0]?.text ?? '{}');
     console.log(`  📊 Agent-B verdict: ${resultB.estimated_value.toLocaleString()} via ${resultB.method}`);
 
-    emitAgentThought('valuation-b', 'DCF Specialist', `Discount rate applied: ${resultB.discount_rate || 10}%`, 60, 'evidence');
-    emitAgentThought('valuation-b', 'DCF Specialist', `Calculated NPV: ${resultB.estimated_value.toLocaleString()} using ${resultB.method}`, 85, 'decision');
-
+    emitAgentThought('valuation-b', 'DCF Specialist', `Calculated NPV: ${resultB.estimated_value.toLocaleString()}`, 85, 'decision');
     emitEvent('valuation_result', { agent: 'Agent-B', result: resultB });
   } catch (e: any) {
     console.error(`  ❌ Agent-B failed: ${e.message}`);
@@ -527,18 +516,6 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
     { name: 'Precedent Researcher', port: 3005, rep: await fetchOnChainReputation('Agent-E'), pk: process.env.AGENT_E_PUBLIC_KEY || '0x' },
   ];
 
-  console.log(`\n  [IETF Trust Framework] Validating juror identities and trust scores...`);
-  for (const juror of jurorPorts) {
-    const score = computeAggregateTrust({
-      agentId: juror.pk,
-      identityVerified: true,
-      executionScore: 75,
-      outputConsistency: 80,
-      economicStake: 500,
-    });
-    console.log(`  🛡️  ${juror.name} | Tier: ${score.tier.toUpperCase()} | IETF Aggregate Score: ${score.aggregateScore}/1000`);
-  }
-
   const jurorArgs = {
     assessment_id: assessmentId,
     asset_id: assetId,
@@ -551,51 +528,26 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
   let receiptChain: DeliberationReceipt[] = [];
   let previousReceiptId = 'genesis';
 
-  const jurorMcpPayload = {
-    jsonrpc: '2.0',
-    id: 2,
-    method: 'tools/call',
-    params: {
-      name: 'deliberate',
-      arguments: jurorArgs,
-    },
-  };
-
   const round1Results = await Promise.all(jurorPorts.map(async (juror, index) => {
     const jurorId = JUROR_IDS[index];
     try {
-      emitAgentThought(jurorId, juror.name, `Starting deliberation: analyzing evidence from both agents...`, 15, 'reasoning');
-      emitAgentThought(jurorId, juror.name, `Reviewing Agent-A valuation: ${resultA.estimated_value.toLocaleString()}`, 30, 'evidence');
-
-      const res = await fetchWithX402(`http://localhost:${juror.port}/mcp`, jurorMcpPayload, juror.name);
-      const verdict = JSON.parse(res.result?.content?.[0]?.text);
+      emitAgentThought(jurorId, juror.name, `Starting deliberation...`, 15, 'reasoning');
+      
+      const res = await callMcpToolWithX402(juror.port, juror.name, 'deliberate', jurorArgs);
+      const verdict = JSON.parse(res.content[0].text);
       console.log(`  👨‍⚖️ ${juror.name} (Rep: ${juror.rep}): Voted ${verdict.vote} | ${verdict.reasoning}`);
 
-      emitAgentThought(jurorId, juror.name, `Vote: ${verdict.vote} | Confidence: ${verdict.confidence || 78}%`, 90, 'validation');
       emitEvent('juror_vote', { juror: juror.name, round: 1, verdict, rep: juror.rep });
 
-      // HMAC receipt with derived key (not raw private key)
       const secret = process.env[`AGENT_${jurorKeySuffix(juror.name)}_PRIVATE_KEY`] || 'fallback-dev-secret';
-      const receipt = createDeliberationReceipt(
-        secret,
-        assessmentId,
-        juror.pk,
-        1,
-        JSON.stringify(jurorArgs),
-        verdict.vote,
-        verdict.reasoning,
-        previousReceiptId
-      );
+      const receipt = createDeliberationReceipt(secret, assessmentId, juror.pk, 1, JSON.stringify(jurorArgs), verdict.vote, verdict.reasoning, previousReceiptId);
       receiptChain.push(receipt);
       previousReceiptId = receipt.receiptId;
-      console.log(`  📜 [Audit] Receipt: ${receipt.receiptId.slice(0, 8)}... - Hash: ${receipt.signature.slice(0, 16)}...`);
-
       emitEvent('receipt_created', { receipt, juror: juror.name, round: 1 });
 
       return { juror, verdict };
     } catch (e: any) {
       console.error(`  ❌ ${juror.name} failed: ${e.message}`);
-      emitAgentThought(jurorId, juror.name, `Error during deliberation: ${e.message}`, 0, 'validation');
       return null;
     }
   }));
@@ -607,20 +559,14 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
   console.log(`\n--- Step 4: Juror Deliberation (Round 2 - Peer Review) ---`);
 
   const round2Args = { ...jurorArgs, peer_reasoning: peerReasoning };
-  const jurorMcpPayload2 = {
-    jsonrpc: '2.0',
-    id: 3,
-    method: 'tools/call',
-    params: { name: 'deliberate', arguments: round2Args },
-  };
 
   const round2Results = await Promise.all(jurorPorts.map(async (juror, index) => {
     const jurorId = JUROR_IDS[index];
     try {
       emitAgentThought(jurorId, juror.name, `Round 2: Reviewing peer reasoning from Round 1...`, 20, 'reasoning');
 
-      const res = await fetchWithX402(`http://localhost:${juror.port}/mcp`, jurorMcpPayload2, juror.name);
-      const verdict = JSON.parse(res.result.content[0].text);
+      const res = await callMcpToolWithX402(juror.port, juror.name, 'deliberate', round2Args);
+      const verdict = JSON.parse(res.content[0].text);
       console.log(`  👨‍⚖️ ${juror.name}: Final Vote ${verdict.vote} | ${verdict.reasoning}`);
 
       emitAgentThought(jurorId, juror.name, `Final vote: ${verdict.vote} | Confidence: ${verdict.confidence || 82}%`, 95, 'validation');
@@ -831,7 +777,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
       const delta = finalVerdict === 'AgentAPreferred' ? 10 : finalVerdict === 'AgentBPreferred' ? -10 : 0;
       if (delta !== 0) {
         const agentToUpdate = finalVerdict === 'AgentAPreferred' ? 'valuation-agent-a' : 'valuation-agent-b';
-        const repResult = await updateReputationOnChain(agentToUpdate, 'parking', delta);
+        const repResult = await updateReputationOnChain(agentToUpdate, 'general', delta);
         if (repResult.success) {
           console.log(`  🏆 ReputationRegistry ✅ score updated on-chain: ${repResult.txHash.slice(0, 16)}...`);
           const repTx = createTransactionEntry('ContractCall', `ReputationRegistry: update ${agentToUpdate} +${delta}`, repResult.txHash, 'ReputationRegistry', 'latest', { agentId: agentToUpdate, delta }, true);

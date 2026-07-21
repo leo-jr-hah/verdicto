@@ -80,6 +80,13 @@ impl VerdictOracle {
         self.default_ttl.set(86_400); // 24 hours
     }
 
+    fn assert_admin(&self) {
+        let admin = self.admin.get().unwrap_or_revert_with(&self.env(), OracleError::NotAdmin);
+        if self.env().caller() != admin {
+            self.env().revert(OracleError::NotAdmin);
+        }
+    }
+
     // ─── Write Methods (admin only) ─────────────────────────────────────────
 
     /// Store a new verdict on-chain. Called by the orchestrator after
