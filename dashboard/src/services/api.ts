@@ -255,6 +255,11 @@ export async function fetchTransactions(): Promise<TransactionEntry[]> {
   }
 }
 
+export async function cleanupTransactions(): Promise<{ removed: number; remaining: number }> {
+  const res = await fetch(`${ORCHESTRATOR_URL}/api/transactions/cleanup`, { method: 'DELETE' });
+  return handleResponse<{ success: boolean; removed: number; remaining: number }>(res);
+}
+
 // ─── Predictions ─────────────────────────────────────────────────────────────
 
 export interface PredictionEntry {

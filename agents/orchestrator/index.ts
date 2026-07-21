@@ -1041,6 +1041,55 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 
   /**
+   * DELETE /api/transactions/cleanup
+   * Removes transactions with dead/broken explorer URLs.
+   * Keeps only transactions that are either off-chain (no URL needed)
+   * or have a valid-looking deploy hash (64 hex chars).
+   */
+  app.delete('/api/transactions/cleanup', async (_, res) => {
+    try {
+      const transactions = await loadTransactions();
+      const validHashRegex = /^[0-9a-f]{64}$/i;
+      
+      const cleaned = transactions.filter(tx => {
+        // Keep off-chain transactions (they don't need explorer URLs)
+        if (!tx.onChain) return true;
+        // Keep on-chain transactions with valid-looking deploy hashes
+        if (tx.explorerUrl && validHashRegex.test(tx.hash)) return true;
+        // Remove everything else (broken links, mock hashes, etc.)
+        console.log(`  [Cleanup] Removing dead transaction: ${tx.type} | hash=${tx.hash.slice(0, 20)}...`);
+        return false;
+      });
+
+      // Write cleaned list back to file
+      const LOG_FILE = path.resolve(__dirname, '../data/transactions.json');
+      const dir = path.dirname(LOG_FILE);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(LOG_FILE, JSON.stringify(cleaned, null, 2));
+
+      // Also clean Supabase if available
+      try {
+        const deadTxs = transactions.filter(tx => {
+          if (!tx.onChain) return false;
+          if (tx.explorerUrl && validHashRegex.test(tx.hash)) return false;
+          return true;
+        });
+        for (const tx of deadTxs) {
+          await db.deleteTransaction(tx.id);
+        }
+      } catch (dbErr: any) {
+        console.warn(`  [Cleanup] Supabase cleanup failed: ${dbErr.message}`);
+      }
+
+      const removed = transactions.length - cleaned.length;
+      console.log(`  [Cleanup] ✅ Removed ${removed} dead transactions, ${cleaned.length} remaining`);
+      res.json({ success: true, removed, remaining: cleaned.length });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: sanitizeError(err) });
+    }
+  });
+
+  /**
    * GET /api/contract-state
    * Returns real-time platform stats derived from in-memory stores.
    * Used by the dashboard LiveContractPanel to show actual data.

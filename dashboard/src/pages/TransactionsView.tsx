@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ExternalLink, RefreshCw, Wifi, WifiOff, Shield, Hash, Clock, BarChart3, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { fetchTransactions, fetchPredictions, createWebSocket, type TransactionEntry, type PredictionEntry, type WSMessage } from '../services/api';
+import { fetchTransactions, fetchPredictions, cleanupTransactions, createWebSocket, type TransactionEntry, type PredictionEntry, type WSMessage } from '../services/api';
 
 function formatTime(isoString: string): string {
   const date = new Date(isoString);
@@ -21,6 +21,11 @@ function formatTime(isoString: string): string {
 function truncateHash(hash: string): string {
   if (hash.length <= 16) return hash;
   return `${hash.slice(0, 8)}…${hash.slice(-8)}`;
+}
+
+/** Check if a hash looks like a valid Casper deploy hash (64 hex chars) */
+function isValidDeployHash(hash: string): boolean {
+  return /^[0-9a-f]{64}$/i.test(hash);
 }
 
 function typeColor(type: string): string {
@@ -197,6 +202,23 @@ export const TransactionsView: React.FC = () => {
             <RefreshCw size={14} className={loading ? 'spin' : ''} />
             Refresh
           </button>
+          <button
+            onClick={async () => {
+              if (!confirm('Remove transactions with broken explorer links?')) return;
+              try {
+                const result = await cleanupTransactions();
+                alert(`Removed ${result.removed} dead transactions. ${result.remaining} remaining.`);
+                loadTransactions();
+              } catch (err: any) {
+                alert('Cleanup failed: ' + (err.message || 'Unknown error'));
+              }
+            }}
+            className="tx-refresh-btn"
+            style={{ color: 'var(--text-tertiary)' }}
+            title="Remove transactions with broken explorer links"
+          >
+            🧹 Cleanup
+          </button>
         </div>
       </div>
 
@@ -300,13 +322,18 @@ export const TransactionsView: React.FC = () => {
                       <td
                         className="tx-hash-cell"
                         title={tx.hash}
-                        onClick={(e) => { e.stopPropagation(); if (tx.onChain && tx.explorerUrl) window.open(tx.explorerUrl, '_blank'); }}
-                        style={!tx.onChain ? { cursor: 'default', opacity: 0.6 } : undefined}
+                        onClick={(e) => { e.stopPropagation(); if (tx.onChain && tx.explorerUrl && isValidDeployHash(tx.hash)) window.open(tx.explorerUrl, '_blank'); }}
+                        style={!tx.onChain || !isValidDeployHash(tx.hash) ? { cursor: 'default', opacity: 0.6 } : undefined}
                       >
                         {truncateHash(tx.hash)}
                         {!tx.onChain && (
                           <span style={{ display: 'inline-block', marginLeft: '0.4rem', fontSize: '0.65rem', padding: '0.1rem 0.35rem', borderRadius: '4px', background: 'rgba(255,255,255,0.08)', color: 'var(--text-tertiary)', verticalAlign: 'middle' }}>
                             off-chain
+                          </span>
+                        )}
+                        {tx.onChain && !isValidDeployHash(tx.hash) && (
+                          <span style={{ display: 'inline-block', marginLeft: '0.4rem', fontSize: '0.65rem', padding: '0.1rem 0.35rem', borderRadius: '4px', background: 'rgba(245,158,11,0.15)', color: 'var(--text-tertiary)', verticalAlign: 'middle' }}>
+                            pending
                           </span>
                         )}
                       </td>
@@ -316,7 +343,7 @@ export const TransactionsView: React.FC = () => {
                         {formatTime(tx.timestamp)}
                       </td>
                       <td className="tx-cell">
-                        {tx.onChain && tx.explorerUrl ? (
+                        {tx.onChain && tx.explorerUrl && isValidDeployHash(tx.hash) ? (
                           <a
                             href={tx.explorerUrl}
                             target="_blank"
@@ -326,6 +353,8 @@ export const TransactionsView: React.FC = () => {
                           >
                             View <ExternalLink size={14} />
                           </a>
+                        ) : tx.onChain && !isValidDeployHash(tx.hash) ? (
+                          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem' }}>Pending</span>
                         ) : (
                           <span style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem' }}>Off-chain</span>
                         )}
@@ -388,7 +417,7 @@ export const TransactionsView: React.FC = () => {
                   </div>
                 </div>
 
-                {selectedTx.onChain && selectedTx.explorerUrl ? (
+                {selectedTx.onChain && selectedTx.explorerUrl && isValidDeployHash(selectedTx.hash) ? (
                   <a
                     href={selectedTx.explorerUrl}
                     target="_blank"
@@ -397,6 +426,10 @@ export const TransactionsView: React.FC = () => {
                   >
                     View on cspr.live <ExternalLink size={14} />
                   </a>
+                ) : selectedTx.onChain && !isValidDeployHash(selectedTx.hash) ? (
+                  <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
+                    ⏳ This transaction is pending confirmation. The deploy hash is not yet valid.
+                  </div>
                 ) : (
                   <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
                     ℹ️ This is an off-chain logical event. No on-chain deploy hash to view on cspr.live.

@@ -470,6 +470,19 @@ export async function getTransactionsFromDb(limit = 200): Promise<DbTransaction[
   }
 }
 
+export async function deleteTransaction(id: string): Promise<void> {
+  const client = await getClient();
+  if (!client) return;
+  try {
+    const { error } = await client.from('transactions').delete().eq('id', id);
+    if (error) {
+      console.error(`  [DB] ❌ Delete transaction ${id} failed:`, error.message);
+    }
+  } catch (err: any) {
+    console.error(`  [DB] ❌ Delete transaction ${id} exception:`, err.message);
+  }
+}
+
 // ─── Predictions ───────────────────────────────────────────────────────────
 
 export interface DbPrediction {
