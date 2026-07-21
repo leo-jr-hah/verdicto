@@ -16,6 +16,7 @@ import { HowItWorksView } from './pages/HowItWorksView';
 import { RoadmapView } from './pages/RoadmapView';
 import { OracleView } from './pages/OracleView';
 import { DisputesView } from './pages/DisputesView';
+import VerifyView from './pages/VerifyView';
 
 const pageVariants = {
   initial: { opacity: 0, y: 8 },
@@ -63,6 +64,7 @@ function App() {
           <Route path="roadmap" element={<AnimatedPage><RoadmapView /></AnimatedPage>} />
           <Route path="oracle" element={<AnimatedPage><OracleView /></AnimatedPage>} />
           <Route path="disputes" element={<AnimatedPage><DisputesView /></AnimatedPage>} />
+          <Route path="verify" element={<AnimatedPage><VerifyView /></AnimatedPage>} />
         </Route>
       </Routes>
       <Analytics />

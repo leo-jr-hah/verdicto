@@ -87,6 +87,14 @@ async function markDeployConsumed(deployHash: string): Promise<boolean> {
   return true;
 }
 
+/**
+ * Returns the set of consumed deploy hashes for public verification.
+ * Allows anyone to verify that a payment proof cannot be replayed.
+ */
+export function getConsumedHashes(): string[] {
+  return Array.from(consumedDeployHashes);
+}
+
 export function casperX402Middleware(config: { recipientAddress: string; amountCSPR: string }) {
   return async (req: Request, res: Response, next: NextFunction) => {
     const paymentProof = req.headers['payment-signature'] || req.headers['x-payment-proof'];

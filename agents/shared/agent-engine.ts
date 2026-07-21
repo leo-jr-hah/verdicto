@@ -24,7 +24,7 @@ import {
   getCommodityData,
   getMacroContext,
 } from './data-sources.js';
-import { askValuationAgent, sanitizeForPrompt } from './mimo-client.js';
+import { askValuationAgent, askValuationAgentB, sanitizeForPrompt } from './mimo-client.js';
 import type { ValuationResult, AssetType } from './types.js';
 import { createLogger } from './logger.js';
 const log = createLogger('AgentEngine');
@@ -219,7 +219,7 @@ export async function calcRealEstateComps(
   ].filter(Boolean).join('\n');
 
   try {
-    const { result: llmResult, provider: llmProvider, fallbackTriggered } = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
+    const { result: llmResult, provider: llmProvider, fallbackTriggered, model: llmModel } = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
     const estimatedValue = extractNumber(llmResult, 'estimated_value', fallbackValue);
     const confidence = extractConfidence(llmResult, 0.65);
 
@@ -235,6 +235,7 @@ export async function calcRealEstateComps(
       dataSource,
       fallbackTriggered,
       fallbackProvider: fallbackTriggered ? (llmProvider as 'groq' | 'heuristic') : undefined,
+      model: llmModel,
     };
   } catch {
     return {
@@ -249,6 +250,7 @@ export async function calcRealEstateComps(
       dataSource,
       fallbackTriggered: true,
       fallbackProvider: 'heuristic',
+      model: 'deterministic-fallback',
     };
   }
 }
@@ -292,7 +294,7 @@ export async function calcRealEstateDCF(
   ].filter(Boolean).join('\n');
 
   try {
-    const { result: llmResult, provider: llmProvider, fallbackTriggered } = await askValuationAgent(AGENT_B_SYSTEM, userPrompt);
+    const { result: llmResult, provider: llmProvider, fallbackTriggered, model: llmModel } = await askValuationAgentB(AGENT_B_SYSTEM, userPrompt);
     const estimatedValue = extractNumber(llmResult, 'estimated_value', dcfFallback);
     const confidence = extractConfidence(llmResult, 0.72);
 
@@ -308,6 +310,7 @@ export async function calcRealEstateDCF(
       dataSource,
       fallbackTriggered,
       fallbackProvider: fallbackTriggered ? (llmProvider as 'groq' | 'heuristic') : undefined,
+      model: llmModel,
     };
   } catch {
     return {
@@ -322,6 +325,7 @@ export async function calcRealEstateDCF(
       dataSource,
       fallbackTriggered: true,
       fallbackProvider: 'heuristic',
+      model: 'deterministic-fallback',
     };
   }
 }
@@ -404,7 +408,7 @@ export async function calcArtAppraisal(
   ].filter(Boolean).join('\n');
 
   try {
-    const { result: llmResult, provider: llmProvider, fallbackTriggered } = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
+    const { result: llmResult, provider: llmProvider, fallbackTriggered, model: llmModel } = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
     const estimatedValue = extractNumber(llmResult, 'estimated_value', fallbackValue);
     const confidence = extractConfidence(llmResult, 0.60);
 
@@ -420,6 +424,7 @@ export async function calcArtAppraisal(
       dataSource,
       fallbackTriggered,
       fallbackProvider: fallbackTriggered ? (llmProvider as 'groq' | 'heuristic') : undefined,
+      model: llmModel,
     };
   } catch {
     return {
@@ -434,6 +439,7 @@ export async function calcArtAppraisal(
       dataSource,
       fallbackTriggered: true,
       fallbackProvider: 'heuristic',
+      model: 'deterministic-fallback',
     };
   }
 }
@@ -461,7 +467,7 @@ export async function calcArtMarketComparison(
   ].filter(Boolean).join('\n');
 
   try {
-    const { result: llmResult, provider: llmProvider, fallbackTriggered } = await askValuationAgent(AGENT_B_SYSTEM, userPrompt);
+    const { result: llmResult, provider: llmProvider, fallbackTriggered, model: llmModel } = await askValuationAgentB(AGENT_B_SYSTEM, userPrompt);
     const estimatedValue = extractNumber(llmResult, 'estimated_value', dcfFallback);
     const confidence = extractConfidence(llmResult, 0.58);
 
@@ -477,6 +483,7 @@ export async function calcArtMarketComparison(
       dataSource,
       fallbackTriggered,
       fallbackProvider: fallbackTriggered ? (llmProvider as 'groq' | 'heuristic') : undefined,
+      model: llmModel,
     };
   } catch {
     return {
@@ -491,6 +498,7 @@ export async function calcArtMarketComparison(
       dataSource,
       fallbackTriggered: true,
       fallbackProvider: 'heuristic',
+      model: 'deterministic-fallback',
     };
   }
 }
@@ -557,7 +565,7 @@ export async function calcCommoditySpot(
   ].filter(Boolean).join('\n');
 
   try {
-    const { result: llmResult, provider: llmProvider, fallbackTriggered } = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
+    const { result: llmResult, provider: llmProvider, fallbackTriggered, model: llmModel } = await askValuationAgent(AGENT_A_SYSTEM, userPrompt);
     const estimatedValue = extractNumber(llmResult, 'estimated_value', fallbackValue);
     const confidence = extractConfidence(llmResult, 0.85);
 
@@ -573,6 +581,7 @@ export async function calcCommoditySpot(
       dataSource,
       fallbackTriggered,
       fallbackProvider: fallbackTriggered ? (llmProvider as 'groq' | 'heuristic') : undefined,
+      model: llmModel,
     };
   } catch {
     return {
@@ -587,6 +596,7 @@ export async function calcCommoditySpot(
       dataSource,
       fallbackTriggered: true,
       fallbackProvider: 'heuristic',
+      model: 'deterministic-fallback',
     };
   }
 }
@@ -615,7 +625,7 @@ export async function calcCommodityAppraisal(
   ].filter(Boolean).join('\n');
 
   try {
-    const { result: llmResult, provider: llmProvider, fallbackTriggered } = await askValuationAgent(AGENT_B_SYSTEM, userPrompt);
+    const { result: llmResult, provider: llmProvider, fallbackTriggered, model: llmModel } = await askValuationAgentB(AGENT_B_SYSTEM, userPrompt);
     const estimatedValue = extractNumber(llmResult, 'estimated_value', dcfFallback);
     const confidence = extractConfidence(llmResult, 0.78);
 
@@ -631,6 +641,7 @@ export async function calcCommodityAppraisal(
       dataSource: 'Physical Appraisal',
       fallbackTriggered,
       fallbackProvider: fallbackTriggered ? (llmProvider as 'groq' | 'heuristic') : undefined,
+      model: llmModel,
     };
   } catch {
     return {
@@ -645,6 +656,7 @@ export async function calcCommodityAppraisal(
       dataSource: 'Physical Appraisal',
       fallbackTriggered: true,
       fallbackProvider: 'heuristic',
+      model: 'deterministic-fallback',
     };
   }
 }

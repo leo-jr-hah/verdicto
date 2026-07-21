@@ -86,7 +86,7 @@ Open `http://localhost:5173`. Connect your wallet. Pick a product. Pay in CSPR. 
 cd agents && npm test
 ```
 
-64 tests covering HMAC receipt chains, trust scoring, tier assignment, agent orchestration, insurance, predictions, oracle disputes, and the borrow audit.
+68 tests covering HMAC receipt chains, trust scoring, tier assignment, agent orchestration, insurance, predictions, oracle disputes, x402 payment verification, and the borrow audit.
 
 ## Architecture
 
@@ -126,7 +126,7 @@ Browser (React + Casper Wallet)
 | Frontend | React 19, Vite, Tailwind CSS v3, motion, GSAP |
 | Backend | Node.js 20, Express, WebSocket (ws), TypeScript |
 | Blockchain | Casper testnet, casper-js-sdk v5, x402 HTTP micropayments |
-| AI | Groq llama-3.3-70b-versatile, heuristic fallback |
+| AI | Groq (Agent A: llama-3.3-70b, Agent B: gpt-oss-20b), heuristic fallback |
 | Wallet | Casper Wallet SDK (window.CasperWalletProvider) |
 | Database | Supabase (PostgreSQL) |
 | Smart Contracts | Rust, Odra framework, WASM |
@@ -213,9 +213,41 @@ The backend starts with heuristic fallback when no Groq API key is set. Set `GRO
 ### Run tests
 
 ```bash
-cd agents && npx vitest run    # 64 tests
-cd dashboard && npx vitest run # 4 tests
+cd agents && npx vitest run    # 68 tests
+cd dashboard && npx vitest run # 2 tests
 ```
+
+## Shipped vs Roadmap
+
+What actually works today vs what's planned.
+
+### Shipped (working in production)
+
+| Feature | Status | Details |
+|---------|--------|---------|
+| AI Assessment | ✅ Live | Dual-agent valuation (Agent A: comparable sales, Agent B: DCF), 3-juror deliberation, consensus verdict |
+| Model Diversity | ✅ Live | Agent A uses `llama-3.3-70b-versatile`, Agent B uses `openai/gpt-oss-20b` — different model families prove independent analysis |
+| x402 Micropayments | ✅ Live | Every endpoint gated by on-chain CSPR payment verification via Casper Wallet |
+| Replay Protection | ✅ Live | Consumed deploy hashes tracked in-memory, publicly auditable via `GET /api/replay-registry` |
+| HMAC Receipt Chain | ✅ Live | Every verdict produces a cryptographically signed audit trail with chained receipts |
+| Public Verification | ✅ Live | `GET /api/verify/:id` returns recomputed verdict hash + cspr.live explorer links |
+| Verify Page | ✅ Live | `/verify` — paste any assessment/receipt ID to view integrity proof and on-chain links |
+| Borrow | ✅ Live | AI-determined LTV, real CSPR disbursement, collateral monitoring |
+| Insure | ✅ Live | Risk scoring, premium quotes, claim filing with automatic revaluation |
+| Predict | ✅ Live | Yes/no questions with 3-juror consensus resolution |
+| Oracle Dashboard | ✅ Live | All verdicts, agent stats, valuation history |
+| Disputes | ✅ Live | 5 CSPR stake, adversarial re-trial, stake refund/forfeit |
+| Structured Logging | ✅ Live | Leveled logger (debug/info/warn/error) across all backend + frontend modules |
+| 68 Tests | ✅ Passing | HMAC chains, trust scoring, tier assignment, orchestration, insurance, predictions, x402 |
+
+### Roadmap (planned, not yet built)
+
+| Feature | Status | Blocker |
+|---------|--------|---------|
+| On-chain Verdict Oracle contract | 🔜 Deployed code ready, needs testnet deployment with funded wallet | Manual deploy step |
+| On-chain Reputation Registry update | 🔜 `general_score` rename complete in source, needs redeployment | Manual deploy step |
+| End-to-End Dispute Demo | 🔜 Full dispute flow works in code, needs live testnet execution + video recording | Manual testnet run |
+| Additional Asset Classes | 🔜 Architecture supports it, needs free API integration for vehicles, NFTs, etc. | API research |
 
 ## License
 

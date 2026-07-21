@@ -33,6 +33,8 @@ export interface ValuationResult {
   fallbackTriggered?: boolean;
   /** Which fallback level fired: 'heuristic' (Groq failed), or undefined if primary LLM worked. */
   fallbackProvider?: 'groq' | 'heuristic';
+  /** The LLM model that produced this valuation (proves model diversity). */
+  model?: string;
 }
 
 export interface AssessmentCase {

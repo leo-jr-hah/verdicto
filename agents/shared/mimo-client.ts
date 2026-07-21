@@ -19,7 +19,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+const GROQ_MODEL_B = process.env.GROQ_MODEL_B || 'openai/gpt-oss-20b';
 
 const LLM_TIMEOUT_MS = 15_000;
 
@@ -90,12 +91,13 @@ interface LLMResponse {
 
 // ─── Groq API Call ───────────────────────────────────────────────────────────
 
-async function callGroq(systemPrompt: string, userPrompt: string): Promise<LLMResponse> {
+async function callGroq(systemPrompt: string, userPrompt: string, modelOverride?: string): Promise<LLMResponse> {
   if (!GROQ_API_KEY) {
     throw new Error('GROQ_API_KEY not set');
   }
 
   const groq = new Groq({ apiKey: GROQ_API_KEY });
+  const model = modelOverride || GROQ_MODEL;
 
   const chatCompletion = await Promise.race([
     groq.chat.completions.create({
@@ -103,7 +105,7 @@ async function callGroq(systemPrompt: string, userPrompt: string): Promise<LLMRe
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
-      model: GROQ_MODEL,
+      model,
       response_format: { type: 'json_object' },
       temperature: 0.2,
     }),
@@ -118,7 +120,7 @@ async function callGroq(systemPrompt: string, userPrompt: string): Promise<LLMRe
   return {
     content,
     provider: 'groq',
-    model: GROQ_MODEL,
+    model,
     tokensUsed,
   };
 }
@@ -165,20 +167,23 @@ export interface JurorResponse {
   provider: 'groq' | 'heuristic';
   /** True if the primary LLM was unavailable. */
   fallbackTriggered: boolean;
+  /** The model that produced the response (for diversity tracking). */
+  model?: string;
 }
 
-export async function askJuror(systemPrompt: string, userPrompt: string): Promise<JurorResponse> {
+export async function askJuror(systemPrompt: string, userPrompt: string, modelOverride?: string): Promise<JurorResponse> {
   // Step 1: Try Groq
   try {
-    log.info(`[LLM] 🤖 Trying Groq (${GROQ_MODEL})...`);
-    const result = await callGroq(systemPrompt, userPrompt);
-    log.info(`[LLM] ✅ Groq responded (${result.tokensUsed} tokens)`);
+    const model = modelOverride || GROQ_MODEL;
+    log.info(`[LLM] 🤖 Trying Groq (${model})...`);
+    const result = await callGroq(systemPrompt, userPrompt, modelOverride);
+    log.info(`[LLM] ✅ Groq responded (${result.tokensUsed} tokens, model: ${result.model})`);
 
     try {
-      return { result: JSON.parse(result.content), provider: 'groq', fallbackTriggered: false };
+      return { result: JSON.parse(result.content), provider: 'groq', fallbackTriggered: false, model: result.model };
     } catch {
       log.warn(`[LLM] ⚠️  Groq returned non-JSON, using fallback`);
-      return { result: buildFallbackResponse(userPrompt), provider: 'heuristic', fallbackTriggered: true };
+      return { result: buildFallbackResponse(userPrompt), provider: 'heuristic', fallbackTriggered: true, model: 'heuristic' };
     }
   } catch (groqErr: any) {
     log.warn(`[LLM] ⚠️  Groq failed: ${groqErr.message} - using fallback`);
@@ -186,13 +191,22 @@ export async function askJuror(systemPrompt: string, userPrompt: string): Promis
 
   // Step 2: Heuristic fallback
   log.info(`[LLM] 🔄 Using heuristic fallback`);
-  return { result: buildFallbackResponse(userPrompt), provider: 'heuristic', fallbackTriggered: true };
+  return { result: buildFallbackResponse(userPrompt), provider: 'heuristic', fallbackTriggered: true, model: 'heuristic' };
 }
 
 /**
- * Ask the LLM for a valuation analysis (used by agent-engine).
- * Same chain: Groq → Fallback
+ * Ask the LLM for a valuation analysis (used by agent-engine for Agent A).
+ * Uses the primary model (GROQ_MODEL).
  */
 export async function askValuationAgent(systemPrompt: string, userPrompt: string): Promise<JurorResponse> {
-  return askJuror(systemPrompt, userPrompt);
+  return askJuror(systemPrompt, userPrompt, GROQ_MODEL);
+}
+
+/**
+ * Ask the LLM for a valuation analysis using Agent B's model.
+ * Uses GROQ_MODEL_B for model diversity — different provider family
+ * proves the agents aren't all running the same backend model.
+ */
+export async function askValuationAgentB(systemPrompt: string, userPrompt: string): Promise<JurorResponse> {
+  return askJuror(systemPrompt, userPrompt, GROQ_MODEL_B);
 }

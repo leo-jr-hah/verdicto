@@ -1209,3 +1209,57 @@ export async function triggerRetrial(disputeId: string): Promise<{ success: bool
     return { success: false, error: err.message };
   }
 }
+
+// ─── Verify ──────────────────────────────────────────────────────────────────
+
+export interface VerifyResult {
+  success: boolean;
+  id: string;
+  found: boolean;
+  assessment: {
+    id: string;
+    assetType: string;
+    assetName: string;
+    assessedValue: number;
+    status: string;
+    receiptCount: number;
+    receiptChainValid: boolean | null;
+    createdAt: string;
+  } | null;
+  verdict: {
+    assetId: string;
+    value: number;
+    confidence: number;
+    jurorCount: number;
+    decision: string;
+    receiptHash: string;
+    verdictHash: string;
+    timestamp: number;
+  } | null;
+  onChainTransactions: Array<{
+    type: string;
+    hash: string;
+    explorerUrl: string;
+    timestamp: string;
+  }>;
+  verificationInstructions: string;
+  error?: string;
+}
+
+export async function verifyById(id: string): Promise<VerifyResult> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/verify/${encodeURIComponent(id)}`);
+    return await res.json();
+  } catch (err: any) {
+    return { success: false, id, found: false, assessment: null, verdict: null, onChainTransactions: [], verificationInstructions: '', error: err.message };
+  }
+}
+
+export async function fetchReplayRegistry(): Promise<{ success: boolean; consumedCount: number; hashes: string[]; description: string }> {
+  try {
+    const res = await fetch(`${ORCHESTRATOR_URL}/api/replay-registry`);
+    return await res.json();
+  } catch (err: any) {
+    return { success: false, consumedCount: 0, hashes: [], description: err.message };
+  }
+}
