@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Activity,
-  Users,
   Scale,
   Shield,
   RefreshCw,
@@ -76,54 +75,7 @@ const StatCard: React.FC<{
   </div>
 );
 
-const AgentRow: React.FC<{
-  agent: ContractState['agents'][0];
-  index: number;
-}> = ({ agent }) => (
-  <div
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.75rem',
-      padding: '0.75rem 1rem',
-      borderBottom: '1px solid var(--border)',
-    }}
-  >
-    <div style={{
-      width: 36,
-      height: 36,
-      borderRadius: '8px',
-      background: 'var(--accent-soft)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}>
-      <Users size={16} color="var(--red-600)" />
-    </div>
-    <div style={{ flex: 1 }}>
-      <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-        {agent.name}
-      </div>
-      <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>
-        {agent.totalAssessments} assessments • {agent.accuracy}% accuracy
-      </div>
-    </div>
-    <div style={{
-      padding: '0.3rem 0.7rem',
-      borderRadius: '6px',
-      background: agent.reputation >= 800
-        ? 'var(--success-soft)'
-        : agent.reputation >= 600
-          ? 'var(--warning-soft)'
-          : 'var(--error-soft)',
-      color: agent.reputation >= 800 ? 'var(--text-secondary)' : agent.reputation >= 600 ? 'var(--text-tertiary)' : 'var(--red-600)',
-      fontSize: '0.85rem',
-      fontWeight: 700,
-    }}>
-      {agent.reputation}
-    </div>
-  </div>
-);
+
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
@@ -286,33 +238,7 @@ export const LiveContractPanel: React.FC = () => {
         />
       </div>
 
-      {/* Agent reputation table */}
-      <div
-        style={{
-          background: 'var(--bg-elevated)',
-          borderRadius: '12px',
-          border: '1px solid var(--border)',
-          overflow: 'hidden',
-        }}
-      >
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: '0.5rem',
-          padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)',
-        }}>
-          <Users size={16} color="var(--accent)" />
-          <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Agent Reputation</span>
-          <span style={{
-            marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-tertiary)',
-            padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'var(--bg-sunken)',
-          }}>
-            Verified on Casper
-          </span>
-        </div>
 
-        {state.agents.map((agent, i) => (
-          <AgentRow key={agent.id} agent={agent} index={i} />
-        ))}
-      </div>
 
       {/* Auto-refresh indicator */}
       <div style={{
