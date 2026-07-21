@@ -14,7 +14,7 @@ import {
  *                                       ↓
  *                     ┌─────────────────┼─────────────────┐
  *                     ↓                 ↓                 ↓
- *              Comps Specialist   DCF Specialist     MiMo LLM
+ *              Comps Specialist   DCF Specialist     Groq LLM
  *                     └─────────────────┼─────────────────┘
  *                                       ↓
  *                     ┌─────────────────┼─────────────────┐

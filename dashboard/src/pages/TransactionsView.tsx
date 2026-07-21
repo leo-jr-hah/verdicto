@@ -25,7 +25,7 @@ function truncateHash(hash: string): string {
 
 function typeColor(type: string): string {
   switch (type) {
-    case 'ZK-Lite Commitment': return 'var(--text-secondary)';
+    case 'Hash Commitment': return 'var(--text-secondary)';
     case 'HMAC Receipt Chain': return 'var(--red-600)';
     case 'Native Transfer': return 'var(--text-secondary)';
     case 'x402 Payment': return 'var(--text-tertiary)';
@@ -42,7 +42,7 @@ function matchesFilter(type: string, filter: string): boolean {
   if (filter === 'all') return true;
   const lower = type.toLowerCase();
   switch (filter) {
-    case 'valuations': return lower.includes('zk-lite') || lower.includes('hmac');
+    case 'valuations': return lower.includes('hash commitment') || lower.includes('hmac');
     case 'votes': return lower.includes('receipt') || lower.includes('juror');
     case 'payments': return lower.includes('payment') || lower.includes('x402');
     case 'verdicts': return lower.includes('verdict') || lower.includes('execute');
@@ -53,7 +53,7 @@ function matchesFilter(type: string, filter: string): boolean {
 
 const STATS = [
   { key: 'total' as const, label: 'Total', color: 'var(--text-primary)', icon: BarChart3 },
-  { key: 'zkLite' as const, label: 'ZK-Lite', color: 'var(--text-secondary)', icon: Shield },
+  { key: 'hashCommit' as const, label: 'Hash Commit', color: 'var(--text-secondary)', icon: Shield },
   { key: 'hmac' as const, label: 'HMAC', color: 'var(--red-600)', icon: Hash },
   { key: 'payments' as const, label: 'Payments', color: 'var(--text-tertiary)', icon: TrendingUp },
   { key: 'verdicts' as const, label: 'Verdicto', color: 'var(--text-secondary)', icon: Clock },
@@ -143,7 +143,7 @@ export const TransactionsView: React.FC = () => {
 
   const stats = {
     total: transactions.length + predictions.length,
-    zkLite: transactions.filter(t => t.type === 'ZK-Lite Commitment').length,
+    hashCommit: transactions.filter(t => t.type === 'Hash Commitment').length,
     hmac: transactions.filter(t => t.type === 'HMAC Receipt Chain').length,
     payments: transactions.filter(t => t.type === 'x402 Payment').length,
     verdicts: transactions.filter(t => t.type === 'ExecuteVerdict').length,

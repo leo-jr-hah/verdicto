@@ -10,7 +10,7 @@ const PIPELINE_STEPS = [
   { label: 'Agents Analyze', detail: 'Two independent valuations' },
   { label: 'Jury Deliberates', detail: 'HMAC-signed receipt chain' },
   { label: 'Verdict Recorded', detail: 'Consensus stored on-chain' },
-  { label: 'Receipt Anchored', detail: 'ZK-Lite commitment to Casper' },
+  { label: 'Receipt Anchored', detail: 'Hash commitment anchored to Casper' },
 ];
 
 export const TechPipeline: React.FC = () => {

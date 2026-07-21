@@ -13,9 +13,7 @@ const REQUIRED_ENV = [
 ] as const;
 
 const OPTIONAL_ENV = [
-  'OPENAI_API_KEY',
   'GROQ_API_KEY',
-  'MIMO_API_KEY',
   'ALLOWED_ORIGINS',
   'CASPER_CHAIN_NAME',
 ] as const;
@@ -777,7 +775,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
   const assessmentHash = process.env.ASSESSMENT_CONTRACT_HASH;
   const reputationHash = process.env.REPUTATION_CONTRACT_HASH;
 
-  console.log(`\n  [ZK-Lite] Generating Verifiable Execution Commitment...`);
+  console.log(`\n  [HashCommitment] Generating Verifiable Execution Commitment...`);
   const executionCommitment = createExecutionCommitment(
     JSON.stringify({ assessmentId, assetId, location, spotCount }),
     { finalVerdict, finalValue, scoreA, scoreB, scoreSplit },
@@ -786,7 +784,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
   const commitmentTxHash = await storeCommitmentOnCasper(executionCommitment, reputationHash || '0xmockreputation');
 
   const commitmentTx = createTransactionEntry(
-    'ZK-Lite Commitment',
+    'Hash Commitment',
     `Assessment ${assessmentId} execution commitment`,
     commitmentTxHash,
     'ReputationRegistry',
@@ -1148,11 +1146,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
             resolved: repaidLoans.length + liquidatedLoans.length + claimedPolicies.length,
           },
           agents: [
-            { id: 'valuation-agent-a', name: 'Valuation Agent A', reputation: 847, totalAssessments: agentStatsStore.get('valuation-a')!.assessmentCount, accuracy: agentStatsStore.get('valuation-a')!.assessmentCount > 0 ? Math.min(95, Math.round(80 + (agentStatsStore.get('valuation-a')!.totalConfidence / agentStatsStore.get('valuation-a')!.assessmentCount) * 0.15)) : 0 },
-            { id: 'valuation-agent-b', name: 'Valuation Agent B', reputation: 812, totalAssessments: agentStatsStore.get('valuation-b')!.assessmentCount, accuracy: agentStatsStore.get('valuation-b')!.assessmentCount > 0 ? Math.min(95, Math.round(80 + (agentStatsStore.get('valuation-b')!.totalConfidence / agentStatsStore.get('valuation-b')!.assessmentCount) * 0.15)) : 0 },
-            { id: 'evidence-analyst', name: 'Evidence Analyst', reputation: 891, totalAssessments: agentStatsStore.get('evidence')!.assessmentCount, accuracy: agentStatsStore.get('evidence')!.assessmentCount > 0 ? Math.min(95, Math.round(80 + (agentStatsStore.get('evidence')!.totalConfidence / agentStatsStore.get('evidence')!.assessmentCount) * 0.15)) : 0 },
-            { id: 'market-interpreter', name: 'Market Interpreter', reputation: 778, totalAssessments: agentStatsStore.get('market')!.assessmentCount, accuracy: agentStatsStore.get('market')!.assessmentCount > 0 ? Math.min(95, Math.round(80 + (agentStatsStore.get('market')!.totalConfidence / agentStatsStore.get('market')!.assessmentCount) * 0.15)) : 0 },
-            { id: 'precedent-researcher', name: 'Precedent Researcher', reputation: 856, totalAssessments: agentStatsStore.get('precedent')!.assessmentCount, accuracy: agentStatsStore.get('precedent')!.assessmentCount > 0 ? Math.min(95, Math.round(80 + (agentStatsStore.get('precedent')!.totalConfidence / agentStatsStore.get('precedent')!.assessmentCount) * 0.15)) : 0 },
+            { id: 'valuation-agent-a', name: 'Valuation Agent A', reputation: agentStatsStore.get('valuation-a')!.assessmentCount > 0 ? Math.round(500 + agentStatsStore.get('valuation-a')!.assessmentCount * 10 + (agentStatsStore.get('valuation-a')!.totalConfidence / agentStatsStore.get('valuation-a')!.assessmentCount) * 2) : 500, totalAssessments: agentStatsStore.get('valuation-a')!.assessmentCount, accuracy: agentStatsStore.get('valuation-a')!.assessmentCount > 0 ? Math.min(95, Math.round(80 + (agentStatsStore.get('valuation-a')!.totalConfidence / agentStatsStore.get('valuation-a')!.assessmentCount) * 0.15)) : 0 },
+            { id: 'valuation-agent-b', name: 'Valuation Agent B', reputation: agentStatsStore.get('valuation-b')!.assessmentCount > 0 ? Math.round(500 + agentStatsStore.get('valuation-b')!.assessmentCount * 10 + (agentStatsStore.get('valuation-b')!.totalConfidence / agentStatsStore.get('valuation-b')!.assessmentCount) * 2) : 500, totalAssessments: agentStatsStore.get('valuation-b')!.assessmentCount, accuracy: agentStatsStore.get('valuation-b')!.assessmentCount > 0 ? Math.min(95, Math.round(80 + (agentStatsStore.get('valuation-b')!.totalConfidence / agentStatsStore.get('valuation-b')!.assessmentCount) * 0.15)) : 0 },
+            { id: 'evidence-analyst', name: 'Evidence Analyst', reputation: agentStatsStore.get('evidence')!.assessmentCount > 0 ? Math.round(500 + agentStatsStore.get('evidence')!.assessmentCount * 10 + (agentStatsStore.get('evidence')!.totalConfidence / agentStatsStore.get('evidence')!.assessmentCount) * 2) : 500, totalAssessments: agentStatsStore.get('evidence')!.assessmentCount, accuracy: agentStatsStore.get('evidence')!.assessmentCount > 0 ? Math.min(95, Math.round(80 + (agentStatsStore.get('evidence')!.totalConfidence / agentStatsStore.get('evidence')!.assessmentCount) * 0.15)) : 0 },
+            { id: 'market-interpreter', name: 'Market Interpreter', reputation: agentStatsStore.get('market')!.assessmentCount > 0 ? Math.round(500 + agentStatsStore.get('market')!.assessmentCount * 10 + (agentStatsStore.get('market')!.totalConfidence / agentStatsStore.get('market')!.assessmentCount) * 2) : 500, totalAssessments: agentStatsStore.get('market')!.assessmentCount, accuracy: agentStatsStore.get('market')!.assessmentCount > 0 ? Math.min(95, Math.round(80 + (agentStatsStore.get('market')!.totalConfidence / agentStatsStore.get('market')!.assessmentCount) * 0.15)) : 0 },
+            { id: 'precedent-researcher', name: 'Precedent Researcher', reputation: agentStatsStore.get('precedent')!.assessmentCount > 0 ? Math.round(500 + agentStatsStore.get('precedent')!.assessmentCount * 10 + (agentStatsStore.get('precedent')!.totalConfidence / agentStatsStore.get('precedent')!.assessmentCount) * 2) : 500, totalAssessments: agentStatsStore.get('precedent')!.assessmentCount, accuracy: agentStatsStore.get('precedent')!.assessmentCount > 0 ? Math.min(95, Math.round(80 + (agentStatsStore.get('precedent')!.totalConfidence / agentStatsStore.get('precedent')!.assessmentCount) * 0.15)) : 0 },
           ],
           payments: {
             totalCollected: totalCollectedMotes,
@@ -1708,7 +1706,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         console.warn(`  ⚠️ HMAC receipt creation failed: ${err.message}`);
       }
 
-      // ── ZK-Lite Execution Commitment (for every assessment) ──────────────
+      // ── Hash Commitment (for every assessment) ──────────────
       try {
         const { createExecutionCommitment, storeCommitmentOnCasper } = await import('../shared/verifiable-execution.js');
         const reputationHash = process.env.REPUTATION_CONTRACT_HASH;
@@ -1719,7 +1717,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         );
         const commitmentTxHash = await storeCommitmentOnCasper(executionCommitment, reputationHash || '0xmockreputation');
         const zkTx = createTransactionEntry(
-          'ZK-Lite Commitment',
+          'Hash Commitment',
           `Assessment ${assessmentId} execution commitment`,
           commitmentTxHash,
           'ReputationRegistry',
@@ -1730,7 +1728,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         saveTransaction(zkTx);
         emitEvent('transaction', zkTx);
       } catch (err: any) {
-        console.warn(`  ⚠️ ZK-Lite commitment failed: ${err.message}`);
+        console.warn(`  ⚠️ Hash commitment failed: ${err.message}`);
       }
 
       // ── Store verdict on VerdictOracle ──────────────────────────────────────
@@ -2249,7 +2247,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const agents = await Promise.all(
         AGENT_PROFILES.map(async (profile) => {
           try {
-            // Each agent runs through the MiMo LLM for qualitative reasoning
+            // Each agent runs through the LLM for qualitative reasoning
             const { askJuror } = await import('../shared/mimo-client.js');
             const prompt = `You are ${profile.name} (${profile.role}). Analyze this prediction question and estimate the probability.
 
@@ -2271,17 +2269,19 @@ Respond in JSON format:
 
             if (response.result) {
               try {
-                const parsed = JSON.parse(response.result);
+                // response.result is already parsed JSON from askJuror
+                const parsed = typeof response.result === 'string' ? JSON.parse(response.result) : response.result;
                 probability = Math.max(0.05, Math.min(0.95, parsed.probability || 0.5));
                 confidence = Math.max(0.3, Math.min(0.95, parsed.confidence || 0.7));
                 reasoning = parsed.reasoning || reasoning;
               } catch {
-                // If JSON parsing fails, extract values from text
-                const probMatch = response.result.match(/probability[:\s]*(\d+\.?\d*)/i);
-                const confMatch = response.result.match(/confidence[:\s]*(\d+\.?\d*)/i);
+                // If parsing fails, extract values from text
+                const text = typeof response.result === 'string' ? response.result : JSON.stringify(response.result);
+                const probMatch = text.match(/probability[:\s]*(\d+\.?\d*)/i);
+                const confMatch = text.match(/confidence[:\s]*(\d+\.?\d*)/i);
                 if (probMatch) probability = Math.max(0.05, Math.min(0.95, parseFloat(probMatch[1]) > 1 ? parseFloat(probMatch[1]) / 100 : parseFloat(probMatch[1])));
                 if (confMatch) confidence = Math.max(0.3, Math.min(0.95, parseFloat(confMatch[1]) > 1 ? parseFloat(confMatch[1]) / 100 : parseFloat(confMatch[1])));
-                reasoning = response.result.slice(0, 500);
+                reasoning = text.slice(0, 500);
               }
             }
 
@@ -4056,24 +4056,14 @@ Respond in JSON format:
     // ─── Load real oracle data from DB on startup ──────────────────────────────
     // Loads existing verdicts and disputes from Supabase into memory.
     try {
-      const { loadVerdictsFromDB, loadDisputesFromDB, seedOracleVerdicts } = await import('../shared/casper-contracts.js');
+      const { loadVerdictsFromDB, loadDisputesFromDB } = await import('../shared/casper-contracts.js');
       await loadVerdictsFromDB();
       await loadDisputesFromDB();
-      // Seed verdicts if DB was empty (so Oracle dashboard shows data immediately)
-      seedOracleVerdicts();
     } catch (err: any) {
       console.warn(`  ⚠️ Oracle DB load failed (non-critical): ${err.message}`);
     }
 
-    // ─── Seed platform activity on startup ────────────────────────────────────
-    // Populates in-memory stores with realistic historical data so the platform
-    // shows meaningful numbers immediately. Runs once; live activity continues on top.
-    try {
-      const { seedActivity } = await import('../shared/activity-seeder.js');
-      seedActivity(agentStatsStore, receiptChainStore, loanStore, insuranceStore, emitEvent);
-    } catch (err: any) {
-      console.warn(`  ⚠️ Activity seeder failed (non-critical): ${err.message}`);
-    }
+
 
     // ─── Auto-revaluation monitor ───────────────────────────────────────────
     // Periodically checks active loans and triggers revaluation if stale.
@@ -4155,7 +4145,7 @@ Respond in JSON format:
           stats.lastActiveAt = now;
         }
 
-        // Step 5: ZK-Lite commitment (real on-chain)
+        // Step 5: Hash commitment (real on-chain)
         try {
           const reputationHash = process.env.REPUTATION_CONTRACT_HASH;
           const commitment = createExecutionCommitment(
@@ -4165,7 +4155,7 @@ Respond in JSON format:
           );
           const commitmentHash = await storeCommitmentOnCasper(commitment, reputationHash || '0xmockreputation');
           const zkTx = createTransactionEntry(
-            'ZK-Lite Commitment',
+            'Hash Commitment',
             `Oracle ${asset.name} execution commitment`,
             commitmentHash,
             'ReputationRegistry',

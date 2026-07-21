@@ -52,8 +52,8 @@ const AGENT_META: AgentMeta[] = [
   {
     id: 'evidence-analyst',
     name: 'Evidence Analyst',
-    description: 'Cross-references raw data points using MiMo LLM reasoning and flags inconsistencies in valuations.',
-    methodology: 'MiMo LLM-powered evidence validation with confidence scoring',
+    description: 'Cross-references raw data points using LLM reasoning and flags inconsistencies in valuations.',
+    methodology: 'LLM-powered evidence validation with confidence scoring',
     strengths: ['Data validation', 'Source cross-referencing', 'Outlier detection', 'Consistency checks'],
     icon: <Shield size={20} />,
     accentColor: 'var(--text-secondary)',
@@ -61,8 +61,8 @@ const AGENT_META: AgentMeta[] = [
   {
     id: 'market-data-interpreter',
     name: 'Market Interpreter',
-    description: 'Evaluates macro trends and market timing using MiMo LLM and live market feeds from multiple sources.',
-    methodology: 'MiMo LLM + time-series analysis with macro-economic indicators',
+    description: 'Evaluates macro trends and market timing using LLM analysis and live market feeds from multiple sources.',
+    methodology: 'LLM + time-series analysis with macro-economic indicators',
     strengths: ['Market trends', 'Economic indicators', 'Price forecasting', 'Timing analysis'],
     icon: <BarChart3 size={20} />,
     accentColor: 'var(--text-secondary)',

@@ -29,9 +29,9 @@ export interface ValuationResult {
   reasoning: string;
   timestamp: number;
   dataSource?: string;
-  /** True if the LLM (MiMo + Groq) was unavailable and a deterministic fallback was used. */
+  /** True if the LLM was unavailable and a deterministic fallback was used. */
   fallbackTriggered?: boolean;
-  /** Which fallback level fired: 'groq' (MiMo failed, Groq succeeded), 'heuristic' (both failed), or undefined if primary LLM worked. */
+  /** Which fallback level fired: 'heuristic' (Groq failed), or undefined if primary LLM worked. */
   fallbackProvider?: 'groq' | 'heuristic';
 }
 

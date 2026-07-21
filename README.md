@@ -42,8 +42,8 @@ Six products, one platform:
 ### Install
 
 ```bash
-git clone https://github.com/leo-jr-hah/verdicto.git
-cd verdicto
+git clone https://github.com/leo-jr-hah/casper-rwa-court.git
+cd casper-rwa-court
 
 cd dashboard && npm install
 cd ../agents && npm install
@@ -126,7 +126,7 @@ Browser (React + Casper Wallet)
 | Frontend | React 19, Vite, Tailwind CSS v3, motion, GSAP |
 | Backend | Node.js 20, Express, WebSocket (ws), TypeScript |
 | Blockchain | Casper testnet, casper-js-sdk v5, x402 HTTP micropayments |
-| AI | Groq llama-3.3-70b, MiMo V2, heuristic fallback |
+| AI | Groq llama-3.3-70b-versatile, heuristic fallback |
 | Wallet | Casper Wallet SDK (window.CasperWalletProvider) |
 | Database | Supabase (PostgreSQL) |
 | Smart Contracts | Rust, Odra framework, WASM |
@@ -165,7 +165,7 @@ verdicto/
 All variables are documented in `.env.example`. The main groups:
 
 - **Blockchain**: `CASPER_RPC_URL`, `DEPLOYER_PRIVATE_KEY`, `DEPLOYER_PUBLIC_KEY` for on-chain interaction
-- **Backend**: `PORT`, `ADMIN_SECRET`, `GROQ_API_KEY`, `MIMO_API_KEY` for server config and LLM access
+- **Backend**: `PORT`, `ADMIN_SECRET`, `GROQ_API_KEY` for server config and LLM access
 - **Frontend**: `VITE_ORCHESTRATOR_URL`, `VITE_WS_URL`, `VITE_PLATFORM_WALLET` for client-side config
 - **Database**: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` for persistent storage
 - **Payments**: `X402_REQUIRE_PAYMENT`, `X402_RECIPIENT_ADDRESS` for micropayment enforcement
@@ -208,7 +208,7 @@ cd agents && npm install && npm run dev
 cd dashboard && npm install && npm run dev
 ```
 
-The backend starts in demo mode by default (no API keys needed). All AI responses are simulated with realistic data. Payments use the Casper testnet.
+The backend starts with heuristic fallback when no Groq API key is set. Set `GROQ_API_KEY` in `.env` for full AI analysis. Payments use the Casper testnet.
 
 ### Run tests
 

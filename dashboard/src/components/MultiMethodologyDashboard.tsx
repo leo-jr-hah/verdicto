@@ -62,7 +62,7 @@ const AGENTS: AgentProfile[] = [
     role: 'Juror: Evidence',
     icon: <Search size={18} />,
     methodology: 'Evidence Validation',
-    description: 'Reviews data quality, source reliability, and methodology rigor using MiMo LLM reasoning. Flags inconsistencies, outliers, and potential data manipulation.',
+    description: 'Reviews data quality, source reliability, and methodology rigor using LLM reasoning. Flags inconsistencies, outliers, and potential data manipulation.',
   },
   {
     id: 'market-interpreter',
@@ -70,7 +70,7 @@ const AGENTS: AgentProfile[] = [
     role: 'Juror: Market Data',
     icon: <TrendingUp size={18} />,
     methodology: 'Market Trend Analysis',
-    description: 'Evaluates macroeconomic conditions, interest rates, local market dynamics, and seasonal patterns using MiMo LLM and live market feeds.',
+    description: 'Evaluates macroeconomic conditions, interest rates, local market dynamics, and seasonal patterns using LLM analysis and live market feeds.',
   },
   {
     id: 'precedent-researcher',
@@ -750,7 +750,7 @@ export const MultiMethodologyDashboard: React.FC<{ result: AssessmentResult }> =
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               {result.valuationA.fallbackTriggered && result.valuationB.fallbackTriggered
-                ? 'Both valuation agents fell back to deterministic calculations because the LLM (MiMo + Groq) was unavailable.'
+                ? 'Both valuation agents fell back to deterministic calculations because the LLM was unavailable.'
                 : `${result.fallbackAgents.map(f => f.agent).join(' and ')} fell back to deterministic calculations because the primary LLM was unavailable.`
               }{' '}
               Results are based on {result.fallbackAgents.some(f => f.provider === 'groq') ? 'Groq fallback (reduced reasoning quality)' : 'heuristic formulas (no LLM reasoning)'}.

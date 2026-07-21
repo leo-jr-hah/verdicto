@@ -34,7 +34,7 @@ const PILLARS = [
 ];
 
 const DETAILS = [
-  { label: 'LLM Pipeline', value: 'MiMo V2 -> Groq Llama 3.3 70B -> deterministic heuristic. Every fallback flagged in UI.' },
+  { label: 'LLM Pipeline', value: 'Groq Llama 3.3 70B -> deterministic heuristic fallback. Every fallback flagged in UI.' },
   { label: 'Data Sources', value: 'RentCast, Met Museum API, CoinGecko, FRED / Federal Reserve' },
   { label: 'Trust Framework', value: 'Five-dimension scoring. Bronze -> Silver -> Gold -> Platinum tiers.' },
   { label: 'Persistence', value: 'Supabase PostgreSQL (production). Dual-write local JSON (dev). Schema-versioned.' },

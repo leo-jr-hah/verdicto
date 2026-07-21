@@ -50,7 +50,7 @@ export async function storeCommitmentOnCasper(
   commitment: ExecutionCommitment,
   contractHash: string
 ) {
-  console.log(`  🔗 [ZK-Lite] Anchoring commitment ${commitment.commitment.slice(0, 16)}... to Casper`);
+  console.log(`  🔗 [HashCommitment] Anchoring commitment ${commitment.commitment.slice(0, 16)}... to Casper`);
   
   try {
     // Import casper-js-sdk v5.x APIs
@@ -113,10 +113,10 @@ export async function storeCommitmentOnCasper(
         ? result.hash
         : 'unknown';
     
-    console.log(`  🔗 [ZK-Lite] ✅ Commitment anchored! tx_hash: ${txHash}`);
+    console.log(`  🔗 [HashCommitment] ✅ Commitment anchored! tx_hash: ${txHash}`);
     return txHash;
   } catch (err: any) {
-    console.error(`  🔗 [ZK-Lite] ❌ On-chain commitment storage FAILED: ${err.message}`);
-    throw new Error(`ZK-Lite commitment failed: ${err.message}`);
+    console.error(`  🔗 [HashCommitment] ❌ On-chain commitment storage FAILED: ${err.message}`);
+    throw new Error(`Hash commitment failed: ${err.message}`);
   }
 }
