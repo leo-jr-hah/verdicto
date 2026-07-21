@@ -21,15 +21,15 @@ const OPTIONAL_ENV = [
 function validateEnv() {
   const missing = REQUIRED_ENV.filter(k => !process.env[k]);
   if (missing.length > 0) {
-    console.error(`\n❌ Missing required environment variables:\n   ${missing.map(k => `  • ${k}`).join('\n')}\n`);
-    log.error('Copy .env.example to .env and fill in the values.\n');
+    console.error(`\n❌ Missing required environment variables:\n   ${missing.map(k => `  • ${k}`).join('\n')}`);
+    console.error('Copy .env.example to .env and fill in the values.\n');
     process.exit(1);
   }
   const optionalPresent = OPTIONAL_ENV.filter(k => process.env[k]);
   if (optionalPresent.length > 0) {
-    log.info(`Optional env vars configured: ${optionalPresent.join(', ')}`);
+    console.log(`Optional env vars configured: ${optionalPresent.join(', ')}`);
   }
-  log.info('All required environment variables present.\n');
+  console.log('All required environment variables present.\n');
 }
 validateEnv();
 
@@ -70,7 +70,7 @@ function saveTransaction(entry: ReturnType<typeof createTransactionEntry>) {
     explorer_url: entry.explorerUrl,
     on_chain: entry.onChain,
     metadata: entry.metadata,
-  }).catch(err => log.warn(`⚠️ Failed to save transaction to Supabase: ${err.message}`));
+  }).catch(err => console.warn(`⚠️ Failed to save transaction to Supabase: ${err.message}`));
 }
 
 /** Load transactions from both Supabase and file, merged and deduplicated by id */
@@ -171,9 +171,9 @@ interface AgentStats {
 const agentStatsStore = new Map<string, AgentStats>([
   ['valuation-a', { name: 'Valuation Agent A', role: 'valuation', assessmentCount: 0, totalConfidence: 0, lastActiveAt: 0 }],
   ['valuation-b', { name: 'Valuation Agent B', role: 'valuation', assessmentCount: 0, totalConfidence: 0, lastActiveAt: 0 }],
-  ['evidence',    { name: 'Evidence Analyst',  role: 'juror',     assessmentCount: 0, totalConfidence: 0, lastActiveAt: 0 }],
-  ['market',      { name: 'Market Interpreter', role: 'juror',    assessmentCount: 0, totalConfidence: 0, lastActiveAt: 0 }],
-  ['precedent',   { name: 'Precedent Researcher', role: 'juror',  assessmentCount: 0, totalConfidence: 0, lastActiveAt: 0 }],
+  ['evidence', { name: 'Evidence Analyst', role: 'juror', assessmentCount: 0, totalConfidence: 0, lastActiveAt: 0 }],
+  ['market', { name: 'Market Interpreter', role: 'juror', assessmentCount: 0, totalConfidence: 0, lastActiveAt: 0 }],
+  ['precedent', { name: 'Precedent Researcher', role: 'juror', assessmentCount: 0, totalConfidence: 0, lastActiveAt: 0 }],
 ]);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -331,7 +331,7 @@ async function callMcpToolWithX402(port: number, agentLabel: string, toolName: s
     fetch: async (input, init) => {
       log.info(`[x402] MCP Client calling ${url} (${toolName})`);
       let res = await fetch(input, init);
-      
+
       if (res.status === 402) {
         const errorData: any = await res.clone().json();
         const reqs = errorData.paymentRequirements || { maxAmountRequired: '2.5', payTo: 'fallback-address' };
@@ -367,7 +367,7 @@ async function callMcpToolWithX402(port: number, agentLabel: string, toolName: s
         log.info(`[x402] 🔄 Retrying POST ${url} with payment proof...`);
         const headers = new Headers(init?.headers);
         headers.set('x-payment-proof', proof);
-        
+
         res = await fetch(input, { ...init, headers });
       }
       return res;
@@ -376,7 +376,7 @@ async function callMcpToolWithX402(port: number, agentLabel: string, toolName: s
 
   const client = new Client({ name: 'orchestrator', version: '1.0' }, { capabilities: {} });
   await client.connect(transport);
-  
+
   try {
     const result = await client.callTool({ name: toolName, arguments: args });
     return result;
@@ -389,7 +389,7 @@ async function callMcpToolWithX402(port: number, agentLabel: string, toolName: s
 // ─── CSPR.cloud queries ──────────────────────────────────────────────────────
 
 interface McpToolResult {
-  content: Array<{ type: string; text?: string; [key: string]: any }>;
+  content: Array<{ type: string; text?: string;[key: string]: any }>;
 }
 
 async function fetchCasperAccountInfo(publicKey: string) {
@@ -535,7 +535,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
     const jurorId = JUROR_IDS[index];
     try {
       emitAgentThought(jurorId, juror.name, `Starting deliberation...`, 15, 'reasoning');
-      
+
       const res = await callMcpToolWithX402(juror.port, juror.name, 'deliberate', jurorArgs);
       const verdict = JSON.parse(res.content[0].text);
       log.info(`${juror.name} (Rep: ${juror.rep}): Voted ${verdict.vote} | ${verdict.reasoning}`);
@@ -1053,7 +1053,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     try {
       const transactions = await loadTransactions();
       const validHashRegex = /^[0-9a-f]{64}$/i;
-      
+
       const cleaned = transactions.filter(tx => {
         // Keep off-chain transactions (they don't need explorer URLs)
         if (!tx.onChain) return true;
@@ -1235,450 +1235,450 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   app.post('/api/assess',
     casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(ASSESSMENT_FEE_CSPR) }),
     async (req, res) => {
-    try {
-      const ip = req.ip || req.socket.remoteAddress || 'unknown';
-      if (isRateLimited(ip)) {
-        return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
-      }
-
-
-      const { assetType, name, description, askingPrice, location, artistOrMedium, weightOz, sqft } = req.body;
-
-      // Validate asset type
-      const validTypes: AssetType[] = ['real-estate', 'art', 'commodity'];
-      if (!assetType || !validTypes.includes(assetType)) {
-        return res.status(400).json({
-          success: false,
-          error: `assetType must be one of: ${validTypes.join(', ')}`,
-        });
-      }
-
-      if (!name || typeof name !== 'string' || name.trim().length === 0) {
-        return res.status(400).json({ success: false, error: 'name is required' });
-      }
-      if (name.length > MAX_STRING_LENGTH) {
-        return res.status(400).json({ success: false, error: `name must be under ${MAX_STRING_LENGTH} characters` });
-      }
-      if (description && typeof description === 'string' && description.length > MAX_DESCRIPTION_LENGTH) {
-        return res.status(400).json({ success: false, error: `description must be under ${MAX_DESCRIPTION_LENGTH} characters` });
-      }
-
-      if (typeof askingPrice !== 'number' || askingPrice <= 0) {
-        return res.status(400).json({ success: false, error: 'askingPrice must be a positive number' });
-      }
-
-      // Asset-specific validation
-      if (assetType === 'real-estate' && !location) {
-        return res.status(400).json({ success: false, error: 'location is required for real estate' });
-      }
-      if (assetType === 'art' && !artistOrMedium) {
-        return res.status(400).json({ success: false, error: 'artistOrMedium is required for art' });
-      }
-      if (assetType === 'commodity' && (!weightOz || weightOz <= 0)) {
-        return res.status(400).json({ success: false, error: 'weightOz must be a positive number for commodities' });
-      }
-
-      const assetId = `${assetType.toUpperCase().slice(0, 2)}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-
-      log.info(`\n📋 Assessment request: ${name} (${assetType}) | ${askingPrice.toLocaleString()}`);
-
-      // Step 1: Fetch market data
-      let marketData: AssetData | null = null;
       try {
-        if (assetType === 'real-estate' && location) {
-          marketData = await fetchAssetData({ id: assetId, type: assetType, name, description: description || '', askingPrice, location });
-        } else if (assetType === 'art' && artistOrMedium) {
-          marketData = await fetchAssetData({ id: assetId, type: assetType, name, description: description || '', askingPrice, artist: artistOrMedium });
-        } else if (assetType === 'commodity') {
-          marketData = await fetchAssetData({ id: assetId, type: assetType, name, description: description || '', askingPrice, weight: weightOz });
+        const ip = req.ip || req.socket.remoteAddress || 'unknown';
+        if (isRateLimited(ip)) {
+          return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
         }
-      } catch (err: any) {
-        log.warn(`Market data fetch failed: ${err.message}`);
-      }
 
-      // Step 2: Dual valuation
-      const valuationReq: ValuationRequest = {
-        assetType,
-        assetId,
-        name,
-        location,
-        artistOrMedium,
-        weightOz,
-        sqft,
-      };
 
-      const [valuationA, valuationB] = await runDualValuation(valuationReq);
-      const minVal = Math.min(valuationA.estimated_value, valuationB.estimated_value);
-      const divergence = minVal > 0
-        ? Math.abs(((valuationA.estimated_value - valuationB.estimated_value) / minVal) * 100)
-        : 0;
+        const { assetType, name, description, askingPrice, location, artistOrMedium, weightOz, sqft } = req.body;
 
-      log.info(`Valuation A: ${valuationA.estimated_value.toLocaleString()} (${valuationA.method})`);
-      log.info(`Valuation B: ${valuationB.estimated_value.toLocaleString()} (${valuationB.method})`);
-      log.info(`Divergence: ${divergence.toFixed(1)}%`);
+        // Validate asset type
+        const validTypes: AssetType[] = ['real-estate', 'art', 'commodity'];
+        if (!assetType || !validTypes.includes(assetType)) {
+          return res.status(400).json({
+            success: false,
+            error: `assetType must be one of: ${validTypes.join(', ')}`,
+          });
+        }
 
-      // Step 3: If divergence > 15%, run juror deliberation
-      let verdict: any = null;
-      const assessmentId = `ASSESS-${Date.now()}`;
-      if (divergence > 15) {
+        if (!name || typeof name !== 'string' || name.trim().length === 0) {
+          return res.status(400).json({ success: false, error: 'name is required' });
+        }
+        if (name.length > MAX_STRING_LENGTH) {
+          return res.status(400).json({ success: false, error: `name must be under ${MAX_STRING_LENGTH} characters` });
+        }
+        if (description && typeof description === 'string' && description.length > MAX_DESCRIPTION_LENGTH) {
+          return res.status(400).json({ success: false, error: `description must be under ${MAX_DESCRIPTION_LENGTH} characters` });
+        }
+
+        if (typeof askingPrice !== 'number' || askingPrice <= 0) {
+          return res.status(400).json({ success: false, error: 'askingPrice must be a positive number' });
+        }
+
+        // Asset-specific validation
+        if (assetType === 'real-estate' && !location) {
+          return res.status(400).json({ success: false, error: 'location is required for real estate' });
+        }
+        if (assetType === 'art' && !artistOrMedium) {
+          return res.status(400).json({ success: false, error: 'artistOrMedium is required for art' });
+        }
+        if (assetType === 'commodity' && (!weightOz || weightOz <= 0)) {
+          return res.status(400).json({ success: false, error: 'weightOz must be a positive number for commodities' });
+        }
+
+        const assetId = `${assetType.toUpperCase().slice(0, 2)}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+
+        log.info(`\n📋 Assessment request: ${name} (${assetType}) | ${askingPrice.toLocaleString()}`);
+
+        // Step 1: Fetch market data
+        let marketData: AssetData | null = null;
         try {
-          const result = await runAssessmentPipeline(assessmentId, assetId, location || 'Global', weightOz || sqft || 1);
-          verdict = result;
+          if (assetType === 'real-estate' && location) {
+            marketData = await fetchAssetData({ id: assetId, type: assetType, name, description: description || '', askingPrice, location });
+          } else if (assetType === 'art' && artistOrMedium) {
+            marketData = await fetchAssetData({ id: assetId, type: assetType, name, description: description || '', askingPrice, artist: artistOrMedium });
+          } else if (assetType === 'commodity') {
+            marketData = await fetchAssetData({ id: assetId, type: assetType, name, description: description || '', askingPrice, weight: weightOz });
+          }
         } catch (err: any) {
-          log.warn(`Deliberation failed: ${err.message}`);
+          log.warn(`Market data fetch failed: ${err.message}`);
         }
-      }
 
-      const assessedValue = verdict?.finalValue || Math.round((valuationA.estimated_value + valuationB.estimated_value) / 2);
-
-      // ── Build analysis steps (the "how we got here" trail) ──────────────
-      const analysisSteps: Array<{
-        step: number;
-        title: string;
-        description: string;
-        status: 'success' | 'warning' | 'error';
-        data?: Record<string, unknown>;
-      }> = [];
-
-      // Step 1: Data collection
-      const dataSourcesUsed: Array<{
-        name: string;
-        type: string;
-        status: 'live' | 'mock' | 'failed';
-        detail: string;
-      }> = [];
-
-      if (assetType === 'real-estate') {
-        dataSourcesUsed.push({
-          name: 'RentCast API',
-          type: 'property_data',
-          status: marketData?.source === 'RentCast API' ? 'live' : 'mock',
-          detail: marketData?.source === 'RentCast API'
-            ? `Found ${marketData.comparables?.length || 0} comparable properties for ${location}`
-            : `Using regional price estimates for ${location} (API unavailable)`,
-        });
-        dataSourcesUsed.push({
-          name: 'FRED Economic Data',
-          type: 'interest_rates',
-          status: valuationA.dataSource === 'FRED API' || valuationB.dataSource === 'FRED API' ? 'live' : 'mock',
-          detail: valuationA.dataSource === 'FRED API' || valuationB.dataSource === 'FRED API'
-            ? 'Mortgage rate fetched from Federal Reserve Economic Data'
-            : 'Using default mortgage rate (6.8%)',
-        });
-      } else if (assetType === 'art') {
-        dataSourcesUsed.push({
-          name: 'Met Museum Collection API',
-          type: 'art_database',
-          status: marketData?.source === 'Met Museum API' ? 'live' : 'mock',
-          detail: marketData?.source === 'Met Museum API'
-            ? `Found ${marketData.comparables?.length || 0} comparable works in museum collections`
-            : 'Using art market heuristics (museum API unavailable)',
-        });
-        dataSourcesUsed.push({
-          name: 'Auction Market Heuristics',
-          type: 'price_estimation',
-          status: 'mock',
-          detail: 'Estimated auction value based on medium, artist prominence, and market conditions',
-        });
-      } else if (assetType === 'commodity') {
-        const commodityName = name?.toLowerCase() || 'gold';
-        const commodityType = commodityName.includes('silver') ? 'Silver'
-          : commodityName.includes('platinum') ? 'Platinum'
-          : commodityName.includes('palladium') ? 'Palladium' : 'Gold';
-        dataSourcesUsed.push({
-          name: 'CoinGecko API',
-          type: 'spot_price',
-          status: valuationA.dataSource === 'CoinGecko API' ? 'live' : 'mock',
-          detail: valuationA.dataSource === 'CoinGecko API'
-            ? `Live ${commodityType} spot price fetched`
-            : `Using mock ${commodityType} price (API unavailable)`,
-        });
-      }
-
-      analysisSteps.push({
-        step: 1,
-        title: 'Data Collection',
-        description: `Queried ${dataSourcesUsed.length} data source${dataSourcesUsed.length > 1 ? 's' : ''} for ${assetType.replace('-', ' ')} market data`,
-        status: dataSourcesUsed.some(s => s.status === 'live') ? 'success' : 'warning',
-        data: { sources: dataSourcesUsed },
-      });
-
-      // Step 2: Agent A valuation
-      analysisSteps.push({
-        step: 2,
-        title: `Agent A | ${valuationA.method.replace('_', ' ')} analysis`,
-        description: valuationA.reasoning,
-        status: valuationA.confidence >= 0.7 ? 'success' : 'warning',
-        data: {
-          method: valuationA.method,
-          value: valuationA.estimated_value,
-          confidence: valuationA.confidence,
-          source: valuationA.dataSource,
-        },
-      });
-
-      // Step 3: Agent B valuation
-      analysisSteps.push({
-        step: 3,
-        title: `Agent B | ${valuationB.method.replace('_', ' ')} analysis`,
-        description: valuationB.reasoning,
-        status: valuationB.confidence >= 0.7 ? 'success' : 'warning',
-        data: {
-          method: valuationB.method,
-          value: valuationB.estimated_value,
-          confidence: valuationB.confidence,
-          source: valuationB.dataSource,
-        },
-      });
-
-      // Step 4: Divergence check
-      const divergenceThreshold = 15;
-      const needsDeliberation = divergence > divergenceThreshold;
-      analysisSteps.push({
-        step: 4,
-        title: 'Divergence Analysis',
-        description: needsDeliberation
-          ? `Agents diverged by ${divergence.toFixed(1)}% (above ${divergenceThreshold}% threshold) - triggering juror deliberation`
-          : `Agents converged within ${divergence.toFixed(1)}% (below ${divergenceThreshold}% threshold) - no deliberation needed`,
-        status: needsDeliberation ? 'warning' : 'success',
-        data: {
-          divergence,
-          threshold: divergenceThreshold,
-          needsDeliberation,
-        },
-      });
-
-      // Step 5: Verdict (if deliberation happened)
-      if (verdict) {
-        analysisSteps.push({
-          step: 5,
-          title: 'Juror Deliberation',
-          description: `3 jurors deliberated and reached a ${verdict.verdict.replace('_', ' ')} decision`,
-          status: 'success',
-          data: {
-            decision: verdict.verdict,
-            finalValue: verdict.finalValue,
-            jurors: verdict.jurorCount || 0,
-          },
-        });
-      }
-
-      // Methodology explanation based on asset type
-      let methodology: { title: string; description: string; methods: Array<{ name: string; description: string }> };
-      if (assetType === 'real-estate') {
-        methodology = {
-          title: 'Real Estate Valuation Methodology',
-          description: 'Two independent agents use different approaches to value the property. If they disagree by more than 15%, a panel of 3 jurors deliberates.',
-          methods: [
-            { name: 'Comparable Sales (Agent A)', description: 'Analyzes recent sales of similar properties in the same area. Adjusts for size, condition, and features. Most reliable when enough comps exist.' },
-            { name: 'Discounted Cash Flow (Agent B)', description: 'Estimates future rental income and discounts it to present value using current mortgage rates. Better for investment properties.' },
-          ],
-        };
-      } else if (assetType === 'art') {
-        methodology = {
-          title: 'Fine Art Valuation Methodology',
-          description: 'Art valuation combines museum collection data with auction market heuristics. Art is inherently subjective, confidence scores reflect this.',
-          methods: [
-            { name: 'Appraisal Analysis (Agent A)', description: 'Cross-references the work against museum collections and established artists in the same medium. More conservative estimate.' },
-            { name: 'Market Comparison (Agent B)', description: 'Estimates auction value based on recent sales of comparable works. Upper range reflects premium market conditions.' },
-          ],
-        };
-      } else {
-        methodology = {
-          title: 'Commodity Valuation Methodology',
-          description: 'Commodities are valued against live spot prices with adjustments for physical delivery premiums.',
-          methods: [
-            { name: 'Spot Price (Agent A)', description: 'Uses the current market spot price per troy ounce. Most accurate for fungible commodities like gold and silver.' },
-            { name: 'Physical Appraisal (Agent B)', description: 'Adds a premium for assay certification, physical delivery, and secure storage. Reflects the true cost of physical ownership.' },
-          ],
-        };
-      }
-
-      const response = {
-        success: true,
-        assessment: {
-          assetId,
+        // Step 2: Dual valuation
+        const valuationReq: ValuationRequest = {
           assetType,
+          assetId,
           name,
-          askingPrice,
-          assessedValue,
-          divergence: Math.round(divergence * 10) / 10,
-          valuationA: {
+          location,
+          artistOrMedium,
+          weightOz,
+          sqft,
+        };
+
+        const [valuationA, valuationB] = await runDualValuation(valuationReq);
+        const minVal = Math.min(valuationA.estimated_value, valuationB.estimated_value);
+        const divergence = minVal > 0
+          ? Math.abs(((valuationA.estimated_value - valuationB.estimated_value) / minVal) * 100)
+          : 0;
+
+        log.info(`Valuation A: ${valuationA.estimated_value.toLocaleString()} (${valuationA.method})`);
+        log.info(`Valuation B: ${valuationB.estimated_value.toLocaleString()} (${valuationB.method})`);
+        log.info(`Divergence: ${divergence.toFixed(1)}%`);
+
+        // Step 3: If divergence > 15%, run juror deliberation
+        let verdict: any = null;
+        const assessmentId = `ASSESS-${Date.now()}`;
+        if (divergence > 15) {
+          try {
+            const result = await runAssessmentPipeline(assessmentId, assetId, location || 'Global', weightOz || sqft || 1);
+            verdict = result;
+          } catch (err: any) {
+            log.warn(`Deliberation failed: ${err.message}`);
+          }
+        }
+
+        const assessedValue = verdict?.finalValue || Math.round((valuationA.estimated_value + valuationB.estimated_value) / 2);
+
+        // ── Build analysis steps (the "how we got here" trail) ──────────────
+        const analysisSteps: Array<{
+          step: number;
+          title: string;
+          description: string;
+          status: 'success' | 'warning' | 'error';
+          data?: Record<string, unknown>;
+        }> = [];
+
+        // Step 1: Data collection
+        const dataSourcesUsed: Array<{
+          name: string;
+          type: string;
+          status: 'live' | 'mock' | 'failed';
+          detail: string;
+        }> = [];
+
+        if (assetType === 'real-estate') {
+          dataSourcesUsed.push({
+            name: 'RentCast API',
+            type: 'property_data',
+            status: marketData?.source === 'RentCast API' ? 'live' : 'mock',
+            detail: marketData?.source === 'RentCast API'
+              ? `Found ${marketData.comparables?.length || 0} comparable properties for ${location}`
+              : `Using regional price estimates for ${location} (API unavailable)`,
+          });
+          dataSourcesUsed.push({
+            name: 'FRED Economic Data',
+            type: 'interest_rates',
+            status: valuationA.dataSource === 'FRED API' || valuationB.dataSource === 'FRED API' ? 'live' : 'mock',
+            detail: valuationA.dataSource === 'FRED API' || valuationB.dataSource === 'FRED API'
+              ? 'Mortgage rate fetched from Federal Reserve Economic Data'
+              : 'Using default mortgage rate (6.8%)',
+          });
+        } else if (assetType === 'art') {
+          dataSourcesUsed.push({
+            name: 'Met Museum Collection API',
+            type: 'art_database',
+            status: marketData?.source === 'Met Museum API' ? 'live' : 'mock',
+            detail: marketData?.source === 'Met Museum API'
+              ? `Found ${marketData.comparables?.length || 0} comparable works in museum collections`
+              : 'Using art market heuristics (museum API unavailable)',
+          });
+          dataSourcesUsed.push({
+            name: 'Auction Market Heuristics',
+            type: 'price_estimation',
+            status: 'mock',
+            detail: 'Estimated auction value based on medium, artist prominence, and market conditions',
+          });
+        } else if (assetType === 'commodity') {
+          const commodityName = name?.toLowerCase() || 'gold';
+          const commodityType = commodityName.includes('silver') ? 'Silver'
+            : commodityName.includes('platinum') ? 'Platinum'
+              : commodityName.includes('palladium') ? 'Palladium' : 'Gold';
+          dataSourcesUsed.push({
+            name: 'CoinGecko API',
+            type: 'spot_price',
+            status: valuationA.dataSource === 'CoinGecko API' ? 'live' : 'mock',
+            detail: valuationA.dataSource === 'CoinGecko API'
+              ? `Live ${commodityType} spot price fetched`
+              : `Using mock ${commodityType} price (API unavailable)`,
+          });
+        }
+
+        analysisSteps.push({
+          step: 1,
+          title: 'Data Collection',
+          description: `Queried ${dataSourcesUsed.length} data source${dataSourcesUsed.length > 1 ? 's' : ''} for ${assetType.replace('-', ' ')} market data`,
+          status: dataSourcesUsed.some(s => s.status === 'live') ? 'success' : 'warning',
+          data: { sources: dataSourcesUsed },
+        });
+
+        // Step 2: Agent A valuation
+        analysisSteps.push({
+          step: 2,
+          title: `Agent A | ${valuationA.method.replace('_', ' ')} analysis`,
+          description: valuationA.reasoning,
+          status: valuationA.confidence >= 0.7 ? 'success' : 'warning',
+          data: {
             method: valuationA.method,
             value: valuationA.estimated_value,
             confidence: valuationA.confidence,
-            source: valuationA.dataSource || 'Agent',
-            reasoning: valuationA.reasoning,
-            fallbackTriggered: valuationA.fallbackTriggered || false,
-            fallbackProvider: valuationA.fallbackProvider,
+            source: valuationA.dataSource,
           },
-          valuationB: {
+        });
+
+        // Step 3: Agent B valuation
+        analysisSteps.push({
+          step: 3,
+          title: `Agent B | ${valuationB.method.replace('_', ' ')} analysis`,
+          description: valuationB.reasoning,
+          status: valuationB.confidence >= 0.7 ? 'success' : 'warning',
+          data: {
             method: valuationB.method,
             value: valuationB.estimated_value,
             confidence: valuationB.confidence,
-            source: valuationB.dataSource || 'Agent',
-            reasoning: valuationB.reasoning,
-            fallbackTriggered: valuationB.fallbackTriggered || false,
-            fallbackProvider: valuationB.fallbackProvider,
+            source: valuationB.dataSource,
           },
-          verdict: verdict ? {
-            decision: verdict.verdict,
-            finalValue: verdict.finalValue,
-          } : null,
-          marketData: marketData ? {
-            source: marketData.source,
-            comparables: marketData.comparables?.length || 0,
-            assetType,
-          } : null,
-          analysisSteps,
-          dataSources: dataSourcesUsed,
-          methodology,
-          timestamp: Date.now(),
-          /** Which agents fell back to deterministic responses (empty = all LLMs worked). */
-          fallbackAgents: [
-            ...(valuationA.fallbackTriggered ? [{ agent: 'Agent A', provider: valuationA.fallbackProvider }] : []),
-            ...(valuationB.fallbackTriggered ? [{ agent: 'Agent B', provider: valuationB.fallbackProvider }] : []),
-          ],
-        },
-      };
-
-      // Log the assessment as a transaction
-      const assessmentTx = createTransactionEntry(
-        'SubmitAssessment',
-        `Assessment: ${name} (${assetType}) - ${assessedValue.toLocaleString()}`,
-        assetId,
-        'Orchestrator',
-        'latest',
-        { assetType, askingPrice, assessedValue, divergence },
-        false
-      );
-      saveTransaction(assessmentTx);
-      emitEvent('transaction', assessmentTx);
-
-      // ── HMAC Receipt Chain (audit trail for every assessment) ─────────────
-      try {
-        const { createDeliberationReceipt } = await import('../shared/audit-trail.js');
-        const receiptChain = receiptChainStore.get(assessmentId) || [];
-        if (receiptChain.length > 0) {
-          // Deliberation happened — log the existing receipt chain
-          const hmacTx = createTransactionEntry(
-            'HMAC Receipt Chain',
-            `Deliberation audit trail for ${assessmentId}`,
-            receiptChain[receiptChain.length - 1].receiptId,
-            'AuditTrail',
-            'latest',
-            { assessmentId, receiptCount: receiptChain.length, chainValid: true },
-            false
-          );
-          saveTransaction(hmacTx);
-          emitEvent('transaction', hmacTx);
-        } else {
-          // No deliberation (low divergence) — create a direct consensus receipt
-          const receipt = createDeliberationReceipt(
-            'orchestrator-direct',
-            assessmentId,
-            'direct-consensus',
-            1,
-            JSON.stringify({ assetId, name, assetType, askingPrice }),
-            JSON.stringify({ assessedValue, divergence, valuationA: valuationA.estimated_value, valuationB: valuationB.estimated_value }),
-            `Agents converged within ${divergence.toFixed(1)}% — no deliberation needed. Direct consensus value: ${assessedValue.toLocaleString()}`,
-            'genesis'
-          );
-          receiptChainStore.set(assessmentId, [receipt]);
-          const hmacTx = createTransactionEntry(
-            'HMAC Receipt Chain',
-            `Direct consensus receipt for ${assessmentId}`,
-            receipt.receiptId,
-            'AuditTrail',
-            'latest',
-            { assessmentId, receiptCount: 1, chainValid: true, directConsensus: true },
-            false
-          );
-          saveTransaction(hmacTx);
-          emitEvent('transaction', hmacTx);
-
-          // ── Update per-agent stats (direct consensus path) ────────────────
-          const now = Date.now();
-          if (valuationA) {
-            const s = agentStatsStore.get('valuation-a')!;
-            s.assessmentCount++;
-            s.totalConfidence += Math.round((valuationA.confidence || 0.75) * 100);
-            s.lastActiveAt = now;
-          }
-          if (valuationB) {
-            const s = agentStatsStore.get('valuation-b')!;
-            s.assessmentCount++;
-            s.totalConfidence += Math.round((valuationB.confidence || 0.75) * 100);
-            s.lastActiveAt = now;
-          }
-        }
-      } catch (err: any) {
-        log.warn(`HMAC receipt creation failed: ${err.message}`);
-      }
-
-      // ── Hash Commitment (for every assessment) ──────────────
-      try {
-        const { createExecutionCommitment, storeCommitmentOnCasper } = await import('../shared/verifiable-execution.js');
-        const reputationHash = process.env.REPUTATION_CONTRACT_HASH;
-        const executionCommitment = createExecutionCommitment(
-          JSON.stringify({ assetId, name, assetType, askingPrice, location }),
-          { assessedValue, divergence, valuationA: valuationA.estimated_value, valuationB: valuationB.estimated_value },
-          'latest'
-        );
-        const commitmentTxHash = await storeCommitmentOnCasper(executionCommitment, reputationHash || '0xmockreputation');
-        const zkTx = createTransactionEntry(
-          'Hash Commitment',
-          `Assessment ${assessmentId} execution commitment`,
-          commitmentTxHash,
-          'ReputationRegistry',
-          'latest',
-          { assessmentId, executionCommitment },
-          true
-        );
-        saveTransaction(zkTx);
-        emitEvent('transaction', zkTx);
-      } catch (err: any) {
-        log.warn(`Hash commitment failed: ${err.message}`);
-      }
-
-      // ── Store verdict on VerdictOracle ──────────────────────────────────────
-      try {
-        const { storeVerdictOnChain } = await import('../shared/casper-contracts.js');
-        const jurorConfidence = verdict?.confidence || Math.round(
-          ((valuationA.confidence || 75) + (valuationB.confidence || 75)) / 2
-        );
-        const receiptChain = receiptChainStore.get(assessmentId) || [];
-        const lastReceipt = receiptChain[receiptChain.length - 1];
-        const receiptHash = lastReceipt ? (lastReceipt as any).receiptHash || (lastReceipt as any).receipt_hash || '' : '';
-
-        // Build agent weights string
-        const agentWeights = [
-          `valuation-a:${Math.round((valuationA.confidence || 0.75) * 100)}`,
-          `valuation-b:${Math.round((valuationB.confidence || 0.75) * 100)}`,
-        ].join(',');
-
-        await storeVerdictOnChain({
-          assetId,
-          value: assessedValue,
-          confidence: jurorConfidence,
-          jurorCount: verdict?.jurorCount || 2,
-          receiptHash,
-          timestamp: Date.now(),
-          expiry: Date.now() + 86_400_000, // 24h
-          agentWeights,
-          decision: verdict?.verdict || 'direct_consensus',
         });
-        log.info(`Verdict stored on oracle for ${assetId}`);
-      } catch (err: any) {
-        log.warn(`Oracle store failed (non-critical): ${err.message}`);
-      }
 
-      res.json(response);
-    } catch (err: any) {
-      log.error('[Assess] Error:: ' + err.message);
-      res.status(500).json({ success: false, error: sanitizeError(err) });
-    }
-  });
+        // Step 4: Divergence check
+        const divergenceThreshold = 15;
+        const needsDeliberation = divergence > divergenceThreshold;
+        analysisSteps.push({
+          step: 4,
+          title: 'Divergence Analysis',
+          description: needsDeliberation
+            ? `Agents diverged by ${divergence.toFixed(1)}% (above ${divergenceThreshold}% threshold) - triggering juror deliberation`
+            : `Agents converged within ${divergence.toFixed(1)}% (below ${divergenceThreshold}% threshold) - no deliberation needed`,
+          status: needsDeliberation ? 'warning' : 'success',
+          data: {
+            divergence,
+            threshold: divergenceThreshold,
+            needsDeliberation,
+          },
+        });
+
+        // Step 5: Verdict (if deliberation happened)
+        if (verdict) {
+          analysisSteps.push({
+            step: 5,
+            title: 'Juror Deliberation',
+            description: `3 jurors deliberated and reached a ${verdict.verdict.replace('_', ' ')} decision`,
+            status: 'success',
+            data: {
+              decision: verdict.verdict,
+              finalValue: verdict.finalValue,
+              jurors: verdict.jurorCount || 0,
+            },
+          });
+        }
+
+        // Methodology explanation based on asset type
+        let methodology: { title: string; description: string; methods: Array<{ name: string; description: string }> };
+        if (assetType === 'real-estate') {
+          methodology = {
+            title: 'Real Estate Valuation Methodology',
+            description: 'Two independent agents use different approaches to value the property. If they disagree by more than 15%, a panel of 3 jurors deliberates.',
+            methods: [
+              { name: 'Comparable Sales (Agent A)', description: 'Analyzes recent sales of similar properties in the same area. Adjusts for size, condition, and features. Most reliable when enough comps exist.' },
+              { name: 'Discounted Cash Flow (Agent B)', description: 'Estimates future rental income and discounts it to present value using current mortgage rates. Better for investment properties.' },
+            ],
+          };
+        } else if (assetType === 'art') {
+          methodology = {
+            title: 'Fine Art Valuation Methodology',
+            description: 'Art valuation combines museum collection data with auction market heuristics. Art is inherently subjective, confidence scores reflect this.',
+            methods: [
+              { name: 'Appraisal Analysis (Agent A)', description: 'Cross-references the work against museum collections and established artists in the same medium. More conservative estimate.' },
+              { name: 'Market Comparison (Agent B)', description: 'Estimates auction value based on recent sales of comparable works. Upper range reflects premium market conditions.' },
+            ],
+          };
+        } else {
+          methodology = {
+            title: 'Commodity Valuation Methodology',
+            description: 'Commodities are valued against live spot prices with adjustments for physical delivery premiums.',
+            methods: [
+              { name: 'Spot Price (Agent A)', description: 'Uses the current market spot price per troy ounce. Most accurate for fungible commodities like gold and silver.' },
+              { name: 'Physical Appraisal (Agent B)', description: 'Adds a premium for assay certification, physical delivery, and secure storage. Reflects the true cost of physical ownership.' },
+            ],
+          };
+        }
+
+        const response = {
+          success: true,
+          assessment: {
+            assetId,
+            assetType,
+            name,
+            askingPrice,
+            assessedValue,
+            divergence: Math.round(divergence * 10) / 10,
+            valuationA: {
+              method: valuationA.method,
+              value: valuationA.estimated_value,
+              confidence: valuationA.confidence,
+              source: valuationA.dataSource || 'Agent',
+              reasoning: valuationA.reasoning,
+              fallbackTriggered: valuationA.fallbackTriggered || false,
+              fallbackProvider: valuationA.fallbackProvider,
+            },
+            valuationB: {
+              method: valuationB.method,
+              value: valuationB.estimated_value,
+              confidence: valuationB.confidence,
+              source: valuationB.dataSource || 'Agent',
+              reasoning: valuationB.reasoning,
+              fallbackTriggered: valuationB.fallbackTriggered || false,
+              fallbackProvider: valuationB.fallbackProvider,
+            },
+            verdict: verdict ? {
+              decision: verdict.verdict,
+              finalValue: verdict.finalValue,
+            } : null,
+            marketData: marketData ? {
+              source: marketData.source,
+              comparables: marketData.comparables?.length || 0,
+              assetType,
+            } : null,
+            analysisSteps,
+            dataSources: dataSourcesUsed,
+            methodology,
+            timestamp: Date.now(),
+            /** Which agents fell back to deterministic responses (empty = all LLMs worked). */
+            fallbackAgents: [
+              ...(valuationA.fallbackTriggered ? [{ agent: 'Agent A', provider: valuationA.fallbackProvider }] : []),
+              ...(valuationB.fallbackTriggered ? [{ agent: 'Agent B', provider: valuationB.fallbackProvider }] : []),
+            ],
+          },
+        };
+
+        // Log the assessment as a transaction
+        const assessmentTx = createTransactionEntry(
+          'SubmitAssessment',
+          `Assessment: ${name} (${assetType}) - ${assessedValue.toLocaleString()}`,
+          assetId,
+          'Orchestrator',
+          'latest',
+          { assetType, askingPrice, assessedValue, divergence },
+          false
+        );
+        saveTransaction(assessmentTx);
+        emitEvent('transaction', assessmentTx);
+
+        // ── HMAC Receipt Chain (audit trail for every assessment) ─────────────
+        try {
+          const { createDeliberationReceipt } = await import('../shared/audit-trail.js');
+          const receiptChain = receiptChainStore.get(assessmentId) || [];
+          if (receiptChain.length > 0) {
+            // Deliberation happened — log the existing receipt chain
+            const hmacTx = createTransactionEntry(
+              'HMAC Receipt Chain',
+              `Deliberation audit trail for ${assessmentId}`,
+              receiptChain[receiptChain.length - 1].receiptId,
+              'AuditTrail',
+              'latest',
+              { assessmentId, receiptCount: receiptChain.length, chainValid: true },
+              false
+            );
+            saveTransaction(hmacTx);
+            emitEvent('transaction', hmacTx);
+          } else {
+            // No deliberation (low divergence) — create a direct consensus receipt
+            const receipt = createDeliberationReceipt(
+              'orchestrator-direct',
+              assessmentId,
+              'direct-consensus',
+              1,
+              JSON.stringify({ assetId, name, assetType, askingPrice }),
+              JSON.stringify({ assessedValue, divergence, valuationA: valuationA.estimated_value, valuationB: valuationB.estimated_value }),
+              `Agents converged within ${divergence.toFixed(1)}% — no deliberation needed. Direct consensus value: ${assessedValue.toLocaleString()}`,
+              'genesis'
+            );
+            receiptChainStore.set(assessmentId, [receipt]);
+            const hmacTx = createTransactionEntry(
+              'HMAC Receipt Chain',
+              `Direct consensus receipt for ${assessmentId}`,
+              receipt.receiptId,
+              'AuditTrail',
+              'latest',
+              { assessmentId, receiptCount: 1, chainValid: true, directConsensus: true },
+              false
+            );
+            saveTransaction(hmacTx);
+            emitEvent('transaction', hmacTx);
+
+            // ── Update per-agent stats (direct consensus path) ────────────────
+            const now = Date.now();
+            if (valuationA) {
+              const s = agentStatsStore.get('valuation-a')!;
+              s.assessmentCount++;
+              s.totalConfidence += Math.round((valuationA.confidence || 0.75) * 100);
+              s.lastActiveAt = now;
+            }
+            if (valuationB) {
+              const s = agentStatsStore.get('valuation-b')!;
+              s.assessmentCount++;
+              s.totalConfidence += Math.round((valuationB.confidence || 0.75) * 100);
+              s.lastActiveAt = now;
+            }
+          }
+        } catch (err: any) {
+          log.warn(`HMAC receipt creation failed: ${err.message}`);
+        }
+
+        // ── Hash Commitment (for every assessment) ──────────────
+        try {
+          const { createExecutionCommitment, storeCommitmentOnCasper } = await import('../shared/verifiable-execution.js');
+          const reputationHash = process.env.REPUTATION_CONTRACT_HASH;
+          const executionCommitment = createExecutionCommitment(
+            JSON.stringify({ assetId, name, assetType, askingPrice, location }),
+            { assessedValue, divergence, valuationA: valuationA.estimated_value, valuationB: valuationB.estimated_value },
+            'latest'
+          );
+          const commitmentTxHash = await storeCommitmentOnCasper(executionCommitment, reputationHash || '0xmockreputation');
+          const zkTx = createTransactionEntry(
+            'Hash Commitment',
+            `Assessment ${assessmentId} execution commitment`,
+            commitmentTxHash,
+            'ReputationRegistry',
+            'latest',
+            { assessmentId, executionCommitment },
+            true
+          );
+          saveTransaction(zkTx);
+          emitEvent('transaction', zkTx);
+        } catch (err: any) {
+          log.warn(`Hash commitment failed: ${err.message}`);
+        }
+
+        // ── Store verdict on VerdictOracle ──────────────────────────────────────
+        try {
+          const { storeVerdictOnChain } = await import('../shared/casper-contracts.js');
+          const jurorConfidence = verdict?.confidence || Math.round(
+            ((valuationA.confidence || 75) + (valuationB.confidence || 75)) / 2
+          );
+          const receiptChain = receiptChainStore.get(assessmentId) || [];
+          const lastReceipt = receiptChain[receiptChain.length - 1];
+          const receiptHash = lastReceipt ? (lastReceipt as any).receiptHash || (lastReceipt as any).receipt_hash || '' : '';
+
+          // Build agent weights string
+          const agentWeights = [
+            `valuation-a:${Math.round((valuationA.confidence || 0.75) * 100)}`,
+            `valuation-b:${Math.round((valuationB.confidence || 0.75) * 100)}`,
+          ].join(',');
+
+          await storeVerdictOnChain({
+            assetId,
+            value: assessedValue,
+            confidence: jurorConfidence,
+            jurorCount: verdict?.jurorCount || 2,
+            receiptHash,
+            timestamp: Date.now(),
+            expiry: Date.now() + 86_400_000, // 24h
+            agentWeights,
+            decision: verdict?.verdict || 'direct_consensus',
+          });
+          log.info(`Verdict stored on oracle for ${assetId}`);
+        } catch (err: any) {
+          log.warn(`Oracle store failed (non-critical): ${err.message}`);
+        }
+
+        res.json(response);
+      } catch (err: any) {
+        log.error('[Assess] Error:: ' + err.message);
+        res.status(500).json({ success: false, error: sanitizeError(err) });
+      }
+    });
 
   /**
    * GET /api/reputation
@@ -1724,18 +1724,18 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   app.get('/api/oracle/verdict/:assetId', casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(ORACLE_FEE_CSPR) }),
     async (req, res) => {
 
-    try {
-      const { getOracleVerdictOnChain } = await import('../shared/casper-contracts.js');
-      const verdict = await getOracleVerdictOnChain(req.params.assetId as string);
-      if (!verdict) {
-        return res.status(404).json({ success: false, error: 'Verdict not found' });
+      try {
+        const { getOracleVerdictOnChain } = await import('../shared/casper-contracts.js');
+        const verdict = await getOracleVerdictOnChain(req.params.assetId as string);
+        if (!verdict) {
+          return res.status(404).json({ success: false, error: 'Verdict not found' });
+        }
+        res.json({ success: true, verdict });
+      } catch (err: any) {
+        log.error('[Oracle] Error:: ' + err.message);
+        res.status(500).json({ success: false, error: sanitizeError(err) });
       }
-      res.json({ success: true, verdict });
-    } catch (err: any) {
-      log.error('[Oracle] Error:: ' + err.message);
-      res.status(500).json({ success: false, error: sanitizeError(err) });
-    }
-  });
+    });
 
   /**
    * GET /api/oracle/stats
@@ -1896,53 +1896,53 @@ if (import.meta.url === `file://${process.argv[1]}`) {
    */
   app.post('/api/oracle/dispute', casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(DISPUTE_FEE_CSPR) }),
     async (req, res) => {
-    try {
-      const ip = req.ip || req.socket.remoteAddress || 'unknown';
-      if (isRateLimited(ip)) {
-        return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
+      try {
+        const ip = req.ip || req.socket.remoteAddress || 'unknown';
+        if (isRateLimited(ip)) {
+          return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
+        }
+
+        const { assetId, challengerKey, reason } = req.body;
+        if (!assetId || !challengerKey || !reason) {
+          return res.status(400).json({ success: false, error: 'Missing required fields: assetId, challengerKey, reason' });
+        }
+        if (typeof reason !== 'string' || reason.length > MAX_DESCRIPTION_LENGTH) {
+          return res.status(400).json({ success: false, error: `reason is required (max ${MAX_DESCRIPTION_LENGTH} chars)` });
+        }
+
+        // Extract payment info from shared middleware
+        const x402 = (req as any).x402Payment;
+        const proofPayer = x402?.payer;
+        const proofTxHash = x402?.deployHash;
+
+        const { createDispute } = await import('../shared/casper-contracts.js');
+        const result = createDispute(assetId, challengerKey, DISPUTE_FEE_CSPR, reason, proofTxHash, proofPayer);
+
+        if ('error' in result) {
+          return res.status(400).json({ success: false, error: result.error });
+        }
+
+        // Log the dispute filing as a transaction
+        const disputeTx = createTransactionEntry(
+          'Dispute Filed',
+          `Dispute ${result.id} against verdict for ${assetId}`,
+          `dispute-${result.id}`,
+          'DisputeEngine',
+          'latest',
+          { disputeId: result.id, assetId, challengerKey, stakeCSPR: DISPUTE_FEE_CSPR },
+          false,
+        );
+        saveTransaction(disputeTx);
+        emitEvent('transaction', disputeTx);
+        emitEvent('dispute_filed', { disputeId: result.id, assetId, challengerKey });
+
+        log.info(`Dispute filed: ${result.id} against ${assetId} (${DISPUTE_FEE_CSPR} CSPR stake)`);
+        res.json({ success: true, dispute: result });
+      } catch (err: any) {
+        log.error('[Dispute] Error:: ' + err.message);
+        res.status(500).json({ success: false, error: sanitizeError(err) });
       }
-
-      const { assetId, challengerKey, reason } = req.body;
-      if (!assetId || !challengerKey || !reason) {
-        return res.status(400).json({ success: false, error: 'Missing required fields: assetId, challengerKey, reason' });
-      }
-      if (typeof reason !== 'string' || reason.length > MAX_DESCRIPTION_LENGTH) {
-        return res.status(400).json({ success: false, error: `reason is required (max ${MAX_DESCRIPTION_LENGTH} chars)` });
-      }
-
-      // Extract payment info from shared middleware
-      const x402 = (req as any).x402Payment;
-      const proofPayer = x402?.payer;
-      const proofTxHash = x402?.deployHash;
-
-      const { createDispute } = await import('../shared/casper-contracts.js');
-      const result = createDispute(assetId, challengerKey, DISPUTE_FEE_CSPR, reason, proofTxHash, proofPayer);
-
-      if ('error' in result) {
-        return res.status(400).json({ success: false, error: result.error });
-      }
-
-      // Log the dispute filing as a transaction
-      const disputeTx = createTransactionEntry(
-        'Dispute Filed',
-        `Dispute ${result.id} against verdict for ${assetId}`,
-        `dispute-${result.id}`,
-        'DisputeEngine',
-        'latest',
-        { disputeId: result.id, assetId, challengerKey, stakeCSPR: DISPUTE_FEE_CSPR },
-        false,
-      );
-      saveTransaction(disputeTx);
-      emitEvent('transaction', disputeTx);
-      emitEvent('dispute_filed', { disputeId: result.id, assetId, challengerKey });
-
-      log.info(`Dispute filed: ${result.id} against ${assetId} (${DISPUTE_FEE_CSPR} CSPR stake)`);
-      res.json({ success: true, dispute: result });
-    } catch (err: any) {
-      log.error('[Dispute] Error:: ' + err.message);
-      res.status(500).json({ success: false, error: sanitizeError(err) });
-    }
-  });
+    });
 
   /**
    * POST /api/oracle/disputes/:disputeId/retrial
@@ -2029,58 +2029,58 @@ if (import.meta.url === `file://${process.argv[1]}`) {
    */
   app.post('/api/predict', casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(PREDICTION_FEE_CSPR) }),
     async (req, res) => {
-    try {
-      const ip = req.ip || req.socket.remoteAddress || 'unknown';
-      if (isRateLimited(ip)) {
-        return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
-      }
-
-
-      const { question, timeframe, assetType } = req.body;
-
-      if (!question || typeof question !== 'string' || question.trim().length === 0) {
-        return res.status(400).json({ success: false, error: 'question is required' });
-      }
-
-      if (!timeframe || typeof timeframe !== 'string') {
-        return res.status(400).json({ success: false, error: 'timeframe is required' });
-      }
-
-      log.info(`\n🔮 Prediction request: "${question}" (${timeframe})`);
-
-      // ── Fetch relevant market data based on asset type ─────────────────────
-      let marketContext = '';
       try {
-        if (assetType === 'real-estate') {
-          const fredData = await fetchAssetData({ id: 'PRED-FRED', type: 'real-estate', name: 'Market Context', description: 'Economic indicators', askingPrice: 0 });
-          if (fredData?.source === 'FRED API' && fredData.comparables?.length) {
-            marketContext = `Current economic indicators: ${fredData.comparables.map((c: any) => `${c.name}: ${c.value}`).join('; ')}`;
-          }
-        } else if (assetType === 'commodity') {
-          const commodityData = await fetchAssetData({ id: 'PRED-COMMODITY', type: 'commodity', name: 'Spot Price', description: 'Current spot price', askingPrice: 0 });
-          if (commodityData) {
-            marketContext = `Commodity market data from ${commodityData.source}: ${commodityData.comparables?.length || 0} data points`;
-          }
+        const ip = req.ip || req.socket.remoteAddress || 'unknown';
+        if (isRateLimited(ip)) {
+          return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
         }
-      } catch (err: any) {
-        log.warn(`Market data fetch failed: ${err.message}`);
-      }
 
-      // ── Run 5-agent prediction ─────────────────────────────────────────────
-      const AGENT_PROFILES = [
-        { id: 'valuation-a', name: 'Valuation Agent A', role: 'Comparable Sales', color: '#EC4899', weight: 1.0 },
-        { id: 'valuation-b', name: 'Valuation Agent B', role: 'DCF & Cash Flow', color: '#F97316', weight: 1.0 },
-        { id: 'evidence', name: 'Evidence Analyst', role: 'Data Quality Auditor', color: '#10B981', weight: 0.85 },
-        { id: 'market', name: 'Market Interpreter', role: 'Macro & Sentiment', color: '#06B6D4', weight: 0.9 },
-        { id: 'precedent', name: 'Precedent Researcher', role: 'Historical Precedent', color: '#8B5CF6', weight: 0.85 },
-      ];
 
-      const agents = await Promise.all(
-        AGENT_PROFILES.map(async (profile) => {
-          try {
-            // Each agent runs through the LLM for qualitative reasoning
-            const { askJuror } = await import('../shared/mimo-client.js');
-            const prompt = `You are ${profile.name} (${profile.role}). Analyze this prediction question and estimate the probability.
+        const { question, timeframe, assetType } = req.body;
+
+        if (!question || typeof question !== 'string' || question.trim().length === 0) {
+          return res.status(400).json({ success: false, error: 'question is required' });
+        }
+
+        if (!timeframe || typeof timeframe !== 'string') {
+          return res.status(400).json({ success: false, error: 'timeframe is required' });
+        }
+
+        log.info(`\n🔮 Prediction request: "${question}" (${timeframe})`);
+
+        // ── Fetch relevant market data based on asset type ─────────────────────
+        let marketContext = '';
+        try {
+          if (assetType === 'real-estate') {
+            const fredData = await fetchAssetData({ id: 'PRED-FRED', type: 'real-estate', name: 'Market Context', description: 'Economic indicators', askingPrice: 0 });
+            if (fredData?.source === 'FRED API' && fredData.comparables?.length) {
+              marketContext = `Current economic indicators: ${fredData.comparables.map((c: any) => `${c.name}: ${c.value}`).join('; ')}`;
+            }
+          } else if (assetType === 'commodity') {
+            const commodityData = await fetchAssetData({ id: 'PRED-COMMODITY', type: 'commodity', name: 'Spot Price', description: 'Current spot price', askingPrice: 0 });
+            if (commodityData) {
+              marketContext = `Commodity market data from ${commodityData.source}: ${commodityData.comparables?.length || 0} data points`;
+            }
+          }
+        } catch (err: any) {
+          log.warn(`Market data fetch failed: ${err.message}`);
+        }
+
+        // ── Run 5-agent prediction ─────────────────────────────────────────────
+        const AGENT_PROFILES = [
+          { id: 'valuation-a', name: 'Valuation Agent A', role: 'Comparable Sales', color: '#EC4899', weight: 1.0 },
+          { id: 'valuation-b', name: 'Valuation Agent B', role: 'DCF & Cash Flow', color: '#F97316', weight: 1.0 },
+          { id: 'evidence', name: 'Evidence Analyst', role: 'Data Quality Auditor', color: '#10B981', weight: 0.85 },
+          { id: 'market', name: 'Market Interpreter', role: 'Macro & Sentiment', color: '#06B6D4', weight: 0.9 },
+          { id: 'precedent', name: 'Precedent Researcher', role: 'Historical Precedent', color: '#8B5CF6', weight: 0.85 },
+        ];
+
+        const agents = await Promise.all(
+          AGENT_PROFILES.map(async (profile) => {
+            try {
+              // Each agent runs through the LLM for qualitative reasoning
+              const { askJuror } = await import('../shared/mimo-client.js');
+              const prompt = `You are ${profile.name} (${profile.role}). Analyze this prediction question and estimate the probability.
 
 Question: "${question}"
 Timeframe: ${timeframe}
@@ -2093,73 +2093,108 @@ Respond in JSON format:
   "reasoning": "<2-3 sentences explaining your analysis>"
 }`;
 
-            const response = await askJuror(`You are ${profile.name} (${profile.role}).`, prompt);
-            let probability = 0.5;
-            let confidence = 0.7;
-            let reasoning = `Analysis based on ${profile.role} methodology.`;
+              const response = await askJuror(`You are ${profile.name} (${profile.role}).`, prompt);
+              let probability = 0.5;
+              let confidence = 0.7;
+              let reasoning = `Analysis based on ${profile.role} methodology.`;
 
-            if (response.result) {
-              try {
-                // response.result is already parsed JSON from askJuror
-                const parsed = typeof response.result === 'string' ? JSON.parse(response.result) : response.result;
-                probability = Math.max(0.05, Math.min(0.95, parsed.probability || 0.5));
-                confidence = Math.max(0.3, Math.min(0.95, parsed.confidence || 0.7));
-                reasoning = parsed.reasoning || reasoning;
-              } catch {
-                // If parsing fails, extract values from text
-                const text = typeof response.result === 'string' ? response.result : JSON.stringify(response.result);
-                const probMatch = text.match(/probability[:\s]*(\d+\.?\d*)/i);
-                const confMatch = text.match(/confidence[:\s]*(\d+\.?\d*)/i);
-                if (probMatch) probability = Math.max(0.05, Math.min(0.95, parseFloat(probMatch[1]) > 1 ? parseFloat(probMatch[1]) / 100 : parseFloat(probMatch[1])));
-                if (confMatch) confidence = Math.max(0.3, Math.min(0.95, parseFloat(confMatch[1]) > 1 ? parseFloat(confMatch[1]) / 100 : parseFloat(confMatch[1])));
-                reasoning = text.slice(0, 500);
+              if (response.result) {
+                try {
+                  // response.result is already parsed JSON from askJuror
+                  const parsed = typeof response.result === 'string' ? JSON.parse(response.result) : response.result;
+                  probability = Math.max(0.05, Math.min(0.95, parsed.probability || 0.5));
+                  confidence = Math.max(0.3, Math.min(0.95, parsed.confidence || 0.7));
+                  reasoning = parsed.reasoning || reasoning;
+                } catch {
+                  // If parsing fails, extract values from text
+                  const text = typeof response.result === 'string' ? response.result : JSON.stringify(response.result);
+                  const probMatch = text.match(/probability[:\s]*(\d+\.?\d*)/i);
+                  const confMatch = text.match(/confidence[:\s]*(\d+\.?\d*)/i);
+                  if (probMatch) probability = Math.max(0.05, Math.min(0.95, parseFloat(probMatch[1]) > 1 ? parseFloat(probMatch[1]) / 100 : parseFloat(probMatch[1])));
+                  if (confMatch) confidence = Math.max(0.3, Math.min(0.95, parseFloat(confMatch[1]) > 1 ? parseFloat(confMatch[1]) / 100 : parseFloat(confMatch[1])));
+                  reasoning = text.slice(0, 500);
+                }
               }
+
+              return {
+                ...profile,
+                probability,
+                confidence,
+                reasoning,
+                fallbackTriggered: response.fallbackTriggered || false,
+              };
+            } catch (err: any) {
+              log.warn(`${profile.name} failed: ${err.message}`);
+              return {
+                ...profile,
+                probability: 0.5,
+                confidence: 0.5,
+                reasoning: `${profile.name} encountered an error and used baseline estimate.`,
+                fallbackTriggered: true,
+              };
             }
+          })
+        );
 
-            return {
-              ...profile,
-              probability,
-              confidence,
-              reasoning,
-              fallbackTriggered: response.fallbackTriggered || false,
-            };
-          } catch (err: any) {
-            log.warn(`${profile.name} failed: ${err.message}`);
-            return {
-              ...profile,
-              probability: 0.5,
-              confidence: 0.5,
-              reasoning: `${profile.name} encountered an error and used baseline estimate.`,
-              fallbackTriggered: true,
-            };
-          }
-        })
-      );
+        // ── Compute weighted consensus ─────────────────────────────────────────
+        const weightedSum = agents.reduce((sum, a) => sum + a.probability * a.confidence * a.weight, 0);
+        const weightSum = agents.reduce((sum, a) => sum + a.confidence * a.weight, 0);
+        const consensusProbability = weightSum > 0 ? weightedSum / weightSum : 0.5;
+        const avgConfidence = agents.reduce((sum, a) => sum + a.confidence, 0) / agents.length;
 
-      // ── Compute weighted consensus ─────────────────────────────────────────
-      const weightedSum = agents.reduce((sum, a) => sum + a.probability * a.confidence * a.weight, 0);
-      const weightSum = agents.reduce((sum, a) => sum + a.confidence * a.weight, 0);
-      const consensusProbability = weightSum > 0 ? weightedSum / weightSum : 0.5;
-      const avgConfidence = agents.reduce((sum, a) => sum + a.confidence, 0) / agents.length;
+        // ── Risk factors ───────────────────────────────────────────────────────
+        const riskFactors: string[] = [];
+        const probStdDev = Math.sqrt(agents.reduce((sum, a) => sum + Math.pow(a.probability - consensusProbability, 2), 0) / agents.length);
+        if (probStdDev > 0.15) riskFactors.push('High agent disagreement - probability estimates vary significantly');
+        if (avgConfidence < 0.6) riskFactors.push('Low average confidence - limited data availability for this question');
+        if (agents.some(a => a.fallbackTriggered)) riskFactors.push('Some agents fell back to deterministic estimates (LLM unavailable)');
+        if (riskFactors.length === 0) riskFactors.push('Market volatility may affect outcome');
+        if (riskFactors.length === 1) riskFactors.push('Interest rate changes could shift probabilities');
 
-      // ── Risk factors ───────────────────────────────────────────────────────
-      const riskFactors: string[] = [];
-      const probStdDev = Math.sqrt(agents.reduce((sum, a) => sum + Math.pow(a.probability - consensusProbability, 2), 0) / agents.length);
-      if (probStdDev > 0.15) riskFactors.push('High agent disagreement - probability estimates vary significantly');
-      if (avgConfidence < 0.6) riskFactors.push('Low average confidence - limited data availability for this question');
-      if (agents.some(a => a.fallbackTriggered)) riskFactors.push('Some agents fell back to deterministic estimates (LLM unavailable)');
-      if (riskFactors.length === 0) riskFactors.push('Market volatility may affect outcome');
-      if (riskFactors.length === 1) riskFactors.push('Interest rate changes could shift probabilities');
+        const predictionId = `PRED-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
-      const predictionId = `PRED-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+        const response = {
+          success: true,
+          prediction: {
+            predictionId,
+            question,
+            timeframe,
+            assetType: assetType || 'general',
+            probability: Math.round(consensusProbability * 1000) / 1000,
+            confidence: Math.round(avgConfidence * 1000) / 1000,
+            agents: agents.map(a => ({
+              name: a.name,
+              role: a.role,
+              color: a.color,
+              probability: Math.round(a.probability * 1000) / 1000,
+              confidence: Math.round(a.confidence * 1000) / 1000,
+              reasoning: a.reasoning,
+              fallbackTriggered: a.fallbackTriggered,
+            })),
+            riskFactors,
+            timestamp: Date.now(),
+          },
+        };
 
-      const response = {
-        success: true,
-        prediction: {
+        // Log as transaction
+        const predTx = createTransactionEntry(
+          'SubmitAssessment',
+          `Prediction: "${question.slice(0, 60)}..." - ${(consensusProbability * 100).toFixed(1)}%`,
           predictionId,
+          'Orchestrator',
+          'latest',
+          { question, timeframe, probability: consensusProbability, confidence: avgConfidence },
+          false
+        );
+        saveTransaction(predTx);
+        emitEvent('transaction', predTx);
+
+        // ── DB: Persist prediction to Supabase ──
+        db.savePrediction({
+          prediction_id: predictionId,
           question,
           timeframe,
-          assetType: assetType || 'general',
+          asset_type: assetType || 'general',
           probability: Math.round(consensusProbability * 1000) / 1000,
           confidence: Math.round(avgConfidence * 1000) / 1000,
           agents: agents.map(a => ({
@@ -2171,52 +2206,17 @@ Respond in JSON format:
             reasoning: a.reasoning,
             fallbackTriggered: a.fallbackTriggered,
           })),
-          riskFactors,
-          timestamp: Date.now(),
-        },
-      };
+          risk_factors: riskFactors,
+          created_at: Date.now(),
+        }).catch(err => log.warn(`⚠️ Failed to save prediction: ${err.message}`));
 
-      // Log as transaction
-      const predTx = createTransactionEntry(
-        'SubmitAssessment',
-        `Prediction: "${question.slice(0, 60)}..." - ${(consensusProbability * 100).toFixed(1)}%`,
-        predictionId,
-        'Orchestrator',
-        'latest',
-        { question, timeframe, probability: consensusProbability, confidence: avgConfidence },
-        false
-      );
-      saveTransaction(predTx);
-      emitEvent('transaction', predTx);
-
-      // ── DB: Persist prediction to Supabase ──
-      db.savePrediction({
-        prediction_id: predictionId,
-        question,
-        timeframe,
-        asset_type: assetType || 'general',
-        probability: Math.round(consensusProbability * 1000) / 1000,
-        confidence: Math.round(avgConfidence * 1000) / 1000,
-        agents: agents.map(a => ({
-          name: a.name,
-          role: a.role,
-          color: a.color,
-          probability: Math.round(a.probability * 1000) / 1000,
-          confidence: Math.round(a.confidence * 1000) / 1000,
-          reasoning: a.reasoning,
-          fallbackTriggered: a.fallbackTriggered,
-        })),
-        risk_factors: riskFactors,
-        created_at: Date.now(),
-      }).catch(err => log.warn(`⚠️ Failed to save prediction: ${err.message}`));
-
-      log.info(`Consensus: ${(consensusProbability * 100).toFixed(1)}% (confidence: ${(avgConfidence * 100).toFixed(1)}%)`);
-      res.json(response);
-    } catch (err: any) {
-      log.error('[Predict] Error:: ' + err.message);
-      res.status(500).json({ success: false, error: sanitizeError(err) });
-    }
-  });
+        log.info(`Consensus: ${(consensusProbability * 100).toFixed(1)}% (confidence: ${(avgConfidence * 100).toFixed(1)}%)`);
+        res.json(response);
+      } catch (err: any) {
+        log.error('[Predict] Error:: ' + err.message);
+        res.status(500).json({ success: false, error: sanitizeError(err) });
+      }
+    });
 
   // ─── Prediction History ─────────────────────────────────────────────────────
 
@@ -2342,8 +2342,8 @@ Respond in JSON format:
   // LTV tiers based on asset type + confidence + trust
   const LTV_TIERS: Record<string, { base: number; max: number }> = {
     'real-estate': { base: 60, max: 75 },
-    'art':         { base: 40, max: 55 },
-    'commodity':   { base: 50, max: 65 },
+    'art': { base: 40, max: 55 },
+    'commodity': { base: 50, max: 65 },
   };
 
   /**
@@ -2402,215 +2402,215 @@ Respond in JSON format:
   app.post('/api/loans/create',
     casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(LOAN_FEE_CSPR) }),
     async (req, res) => {
-    try {
-      const ip = req.ip || req.socket.remoteAddress || 'unknown';
-      if (isRateLimited(ip)) {
-        return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
-      }
+      try {
+        const ip = req.ip || req.socket.remoteAddress || 'unknown';
+        if (isRateLimited(ip)) {
+          return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
+        }
 
-      const {
-        borrowerPublicKey,
-        assetId,
-        assetType,
-        assetName,
-        assessedValue,
-        askingPrice,
-        confidence,
-        assessmentId,
-      } = req.body;
-
-      // ── Validate inputs ────────────────────────────────────────────────
-      if (!borrowerPublicKey || typeof borrowerPublicKey !== 'string' || borrowerPublicKey.length < 64) {
-        return res.status(400).json({ success: false, error: 'borrowerPublicKey must be a valid Casper public key (64+ hex chars)' });
-      }
-      if (!assetId || !assetType || !assetName) {
-        return res.status(400).json({ success: false, error: 'assetId, assetType, and assetName are required' });
-      }
-      if (typeof assessedValue !== 'number' || assessedValue <= 0) {
-        return res.status(400).json({ success: false, error: 'assessedValue must be a positive number' });
-      }
-      if (typeof askingPrice !== 'number' || askingPrice <= 0) {
-        return res.status(400).json({ success: false, error: 'askingPrice must be a positive number' });
-      }
-      if (typeof confidence !== 'number' || confidence < 0 || confidence > 1) {
-        return res.status(400).json({ success: false, error: 'confidence must be between 0 and 1' });
-      }
-
-      const validTypes: AssetType[] = ['real-estate', 'art', 'commodity'];
-      if (!validTypes.includes(assetType)) {
-        return res.status(400).json({ success: false, error: `assetType must be one of: ${validTypes.join(', ')}` });
-      }
-
-      // ── Security: additional validation checks ────────────────────────
-
-      // A1: Minimum confidence threshold — low-confidence valuations are too unreliable for lending
-      if (confidence < 0.65) {
-        return res.status(400).json({
-          success: false,
-          error: 'Valuation confidence too low for lending',
-          hint: 'The AI agents could not reach sufficient consensus on this asset. Try a different asset or wait for market conditions to stabilize.',
-        });
-      }
-
-      // A2: Minimum collateral amount — prevent dust loans
-      if (assessedValue < 100) {
-        return res.status(400).json({
-          success: false,
-          error: 'Minimum assessed value is $100',
-          hint: 'Loans require a minimum collateral value of $100 USD equivalent.',
-        });
-      }
-
-      // A3: Valuation freshness — reject stale assessments (optional field, enforced if present)
-      const { assessmentTimestamp, divergence } = req.body;
-      if (assessmentTimestamp && (Date.now() - assessmentTimestamp) > 24 * 60 * 60 * 1000) {
-        return res.status(400).json({
-          success: false,
-          error: 'Assessment is too old',
-          hint: 'Valuations expire after 24 hours. Please run a new assessment before requesting a loan.',
-        });
-      }
-
-      // A4: Divergence check — reject when agents disagree too much (optional field, enforced if present)
-      if (typeof divergence === 'number' && divergence > 0.30) {
-        return res.status(400).json({
-          success: false,
-          error: 'Agent valuation divergence too high',
-          hint: 'The AI agents disagree significantly on this asset\'s value. Please try a different asset or wait for market stabilization.',
-        });
-      }
-
-      // ── Calculate LTV (trust-score-aware) ──────────────────────────────
-      const { ltv, loanAmount, tier, trustBreakdown } = calculateLTV(assetType, assessedValue, confidence, askingPrice);
-      // Flat platform fee matching frontend LOAN_FEE_CSPR (5 CSPR)
-      // assessedValue is in USD; the frontend sends a fixed 5 CSPR fee
-      const platformFee = 5;
-
-      log.info(`\n💰 Loan request: ${assetName}`);
-      log.info(`Assessed: ${assessedValue.toLocaleString()} | LTV: ${ltv}% (${tier})`);
-      log.info(`Trust: confidence=${trustBreakdown.confidence}, valueRatio=${trustBreakdown.valueRatio}`);
-      log.info(`Loan amount: ${loanAmount} CSPR | Platform fee: ${platformFee} CSPR`);
-
-
-      // ── Escrow Lock (honor-system label) ───────────────────────────────
-      // NOTE: This is a platform→borrower transfer, not a real escrow smart contract.
-      // The "escrow lock" is a ledger entry only — collateral is the assessed asset
-      // itself, and repayment is honor-system. No on-chain lock exists.
-      const escrowMotes = Math.floor(loanAmount * 1e9);
-      const escrowTransferId = Date.now() + Math.floor(Math.random() * 1000);
-      const lockHash = await executeCasperTransfer(borrowerPublicKey, escrowMotes, escrowTransferId);
-      log.info(`🔒 Escrow locked! deploy_hash: ${lockHash.substring(0, 16)}...`);
-
-      const lockTx = createTransactionEntry(
-        'Native Transfer',
-        `Escrow lock: ${loanAmount} CSPR for loan collateral`,
-        lockHash,
-        'EscrowContract',
-        'latest',
-        { loanId: `pending-${escrowTransferId}`, borrowerPublicKey, loanAmount, purpose: 'escrow_lock' },
-        true
-      );
-      saveTransaction(lockTx);
-      emitEvent('transaction', lockTx);
-
-      // ── Disburse loan via CSPR transfer ────────────────────────────────
-      const loanAmountMotes = Math.floor(loanAmount * 1e9);
-      const transferId = Date.now() + Math.floor(Math.random() * 1000);
-      const disbursementHash = await executeCasperTransfer(borrowerPublicKey, loanAmountMotes, transferId);
-      log.info(`Loan disbursed! deploy_hash: ${disbursementHash.substring(0, 16)}...`);
-
-      // ── Store the loan ─────────────────────────────────────────────────
-      const loanId = `LOAN-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-      const loan: Loan = {
-        loanId,
-        borrowerPublicKey,
-        assetId,
-        assetType,
-        assetName,
-        assessedValue,
-        ltvRatio: ltv,
-        loanAmountCSPR: loanAmount,
-        collateralAssessmentId: assessmentId || assetId,
-        status: 'active',
-        healthRatio: 100,
-        createdAt: Date.now(),
-        lastRevaluedAt: Date.now(),
-        repaidAmountCSPR: 0,
-        repaymentHistory: [],
-        disbursementTxHash: disbursementHash,
-        platformFeeCSPR: platformFee,
-        trustBreakdown,
-        escrowLockTxHash: lockHash,
-        revaluationHistory: [],
-        assessmentTimestamp: assessmentTimestamp || Date.now(),
-        divergence: typeof divergence === 'number' ? divergence : undefined,
-      };
-      loanStore.set(loanId, loan);
-
-      // ── DB: Persist loan to Supabase ──
-      db.saveLoan({
-        loan_id: loanId,
-        borrower_public_key: borrowerPublicKey,
-        asset_id: assetId,
-        asset_type: assetType,
-        asset_name: assetName,
-        assessed_value: assessedValue,
-        ltv_ratio: ltv,
-        loan_amount_cspr: loanAmount,
-        collateral_assessment_id: assessmentId || assetId,
-        status: 'active',
-        health_ratio: 100,
-        created_at: Date.now(),
-        last_revalued_at: Date.now(),
-        repaid_amount_cspr: 0,
-        repayment_history: [],
-        disbursement_tx_hash: disbursementHash,
-        platform_fee_cspr: platformFee,
-        trust_breakdown: trustBreakdown,
-        escrow_lock_tx_hash: lockHash,
-        revaluation_history: [],
-        assessment_timestamp: assessmentTimestamp || Date.now(),
-        divergence: typeof divergence === 'number' ? divergence : undefined,
-      }).catch(err => log.warn(`⚠️ Failed to save loan: ${err.message}`));
-
-      // Log disbursement as transaction
-      const disbTx = createTransactionEntry(
-        'Native Transfer',
-        `Loan disbursement: ${loanAmount} CSPR to ${borrowerPublicKey.substring(0, 12)}...`,
-        disbursementHash,
-        'LendingPool',
-        'latest',
-        { loanId, borrowerPublicKey, loanAmount, ltv, assetId, assetType },
-        true
-      );
-      saveTransaction(disbTx);
-      emitEvent('transaction', disbTx);
-
-      res.json({
-        success: true,
-        loan: {
-          loanId,
+        const {
+          borrowerPublicKey,
           assetId,
-          assetName,
           assetType,
+          assetName,
+          assessedValue,
+          askingPrice,
+          confidence,
+          assessmentId,
+        } = req.body;
+
+        // ── Validate inputs ────────────────────────────────────────────────
+        if (!borrowerPublicKey || typeof borrowerPublicKey !== 'string' || borrowerPublicKey.length < 64) {
+          return res.status(400).json({ success: false, error: 'borrowerPublicKey must be a valid Casper public key (64+ hex chars)' });
+        }
+        if (!assetId || !assetType || !assetName) {
+          return res.status(400).json({ success: false, error: 'assetId, assetType, and assetName are required' });
+        }
+        if (typeof assessedValue !== 'number' || assessedValue <= 0) {
+          return res.status(400).json({ success: false, error: 'assessedValue must be a positive number' });
+        }
+        if (typeof askingPrice !== 'number' || askingPrice <= 0) {
+          return res.status(400).json({ success: false, error: 'askingPrice must be a positive number' });
+        }
+        if (typeof confidence !== 'number' || confidence < 0 || confidence > 1) {
+          return res.status(400).json({ success: false, error: 'confidence must be between 0 and 1' });
+        }
+
+        const validTypes: AssetType[] = ['real-estate', 'art', 'commodity'];
+        if (!validTypes.includes(assetType)) {
+          return res.status(400).json({ success: false, error: `assetType must be one of: ${validTypes.join(', ')}` });
+        }
+
+        // ── Security: additional validation checks ────────────────────────
+
+        // A1: Minimum confidence threshold — low-confidence valuations are too unreliable for lending
+        if (confidence < 0.65) {
+          return res.status(400).json({
+            success: false,
+            error: 'Valuation confidence too low for lending',
+            hint: 'The AI agents could not reach sufficient consensus on this asset. Try a different asset or wait for market conditions to stabilize.',
+          });
+        }
+
+        // A2: Minimum collateral amount — prevent dust loans
+        if (assessedValue < 100) {
+          return res.status(400).json({
+            success: false,
+            error: 'Minimum assessed value is $100',
+            hint: 'Loans require a minimum collateral value of $100 USD equivalent.',
+          });
+        }
+
+        // A3: Valuation freshness — reject stale assessments (optional field, enforced if present)
+        const { assessmentTimestamp, divergence } = req.body;
+        if (assessmentTimestamp && (Date.now() - assessmentTimestamp) > 24 * 60 * 60 * 1000) {
+          return res.status(400).json({
+            success: false,
+            error: 'Assessment is too old',
+            hint: 'Valuations expire after 24 hours. Please run a new assessment before requesting a loan.',
+          });
+        }
+
+        // A4: Divergence check — reject when agents disagree too much (optional field, enforced if present)
+        if (typeof divergence === 'number' && divergence > 0.30) {
+          return res.status(400).json({
+            success: false,
+            error: 'Agent valuation divergence too high',
+            hint: 'The AI agents disagree significantly on this asset\'s value. Please try a different asset or wait for market stabilization.',
+          });
+        }
+
+        // ── Calculate LTV (trust-score-aware) ──────────────────────────────
+        const { ltv, loanAmount, tier, trustBreakdown } = calculateLTV(assetType, assessedValue, confidence, askingPrice);
+        // Flat platform fee matching frontend LOAN_FEE_CSPR (5 CSPR)
+        // assessedValue is in USD; the frontend sends a fixed 5 CSPR fee
+        const platformFee = 5;
+
+        log.info(`\n💰 Loan request: ${assetName}`);
+        log.info(`Assessed: ${assessedValue.toLocaleString()} | LTV: ${ltv}% (${tier})`);
+        log.info(`Trust: confidence=${trustBreakdown.confidence}, valueRatio=${trustBreakdown.valueRatio}`);
+        log.info(`Loan amount: ${loanAmount} CSPR | Platform fee: ${platformFee} CSPR`);
+
+
+        // ── Escrow Lock (honor-system label) ───────────────────────────────
+        // NOTE: This is a platform→borrower transfer, not a real escrow smart contract.
+        // The "escrow lock" is a ledger entry only — collateral is the assessed asset
+        // itself, and repayment is honor-system. No on-chain lock exists.
+        const escrowMotes = Math.floor(loanAmount * 1e9);
+        const escrowTransferId = Date.now() + Math.floor(Math.random() * 1000);
+        const lockHash = await executeCasperTransfer(borrowerPublicKey, escrowMotes, escrowTransferId);
+        log.info(`🔒 Escrow locked! deploy_hash: ${lockHash.substring(0, 16)}...`);
+
+        const lockTx = createTransactionEntry(
+          'Native Transfer',
+          `Escrow lock: ${loanAmount} CSPR for loan collateral`,
+          lockHash,
+          'EscrowContract',
+          'latest',
+          { loanId: `pending-${escrowTransferId}`, borrowerPublicKey, loanAmount, purpose: 'escrow_lock' },
+          true
+        );
+        saveTransaction(lockTx);
+        emitEvent('transaction', lockTx);
+
+        // ── Disburse loan via CSPR transfer ────────────────────────────────
+        const loanAmountMotes = Math.floor(loanAmount * 1e9);
+        const transferId = Date.now() + Math.floor(Math.random() * 1000);
+        const disbursementHash = await executeCasperTransfer(borrowerPublicKey, loanAmountMotes, transferId);
+        log.info(`Loan disbursed! deploy_hash: ${disbursementHash.substring(0, 16)}...`);
+
+        // ── Store the loan ─────────────────────────────────────────────────
+        const loanId = `LOAN-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+        const loan: Loan = {
+          loanId,
+          borrowerPublicKey,
+          assetId,
+          assetType,
+          assetName,
           assessedValue,
           ltvRatio: ltv,
           loanAmountCSPR: loanAmount,
-          tier,
-          platformFeeCSPR: platformFee,
-          status: loan.status,
-          healthRatio: loan.healthRatio,
+          collateralAssessmentId: assessmentId || assetId,
+          status: 'active',
+          healthRatio: 100,
+          createdAt: Date.now(),
+          lastRevaluedAt: Date.now(),
+          repaidAmountCSPR: 0,
+          repaymentHistory: [],
           disbursementTxHash: disbursementHash,
-          broadcastSuccess: true,
-          createdAt: loan.createdAt,
+          platformFeeCSPR: platformFee,
           trustBreakdown,
-        },
-      });
-    } catch (err: any) {
-      log.error('[Loan Create] Error:: ' + err.message);
-      res.status(500).json({ success: false, error: sanitizeError(err) });
-    }
-  });
+          escrowLockTxHash: lockHash,
+          revaluationHistory: [],
+          assessmentTimestamp: assessmentTimestamp || Date.now(),
+          divergence: typeof divergence === 'number' ? divergence : undefined,
+        };
+        loanStore.set(loanId, loan);
+
+        // ── DB: Persist loan to Supabase ──
+        db.saveLoan({
+          loan_id: loanId,
+          borrower_public_key: borrowerPublicKey,
+          asset_id: assetId,
+          asset_type: assetType,
+          asset_name: assetName,
+          assessed_value: assessedValue,
+          ltv_ratio: ltv,
+          loan_amount_cspr: loanAmount,
+          collateral_assessment_id: assessmentId || assetId,
+          status: 'active',
+          health_ratio: 100,
+          created_at: Date.now(),
+          last_revalued_at: Date.now(),
+          repaid_amount_cspr: 0,
+          repayment_history: [],
+          disbursement_tx_hash: disbursementHash,
+          platform_fee_cspr: platformFee,
+          trust_breakdown: trustBreakdown,
+          escrow_lock_tx_hash: lockHash,
+          revaluation_history: [],
+          assessment_timestamp: assessmentTimestamp || Date.now(),
+          divergence: typeof divergence === 'number' ? divergence : undefined,
+        }).catch(err => log.warn(`⚠️ Failed to save loan: ${err.message}`));
+
+        // Log disbursement as transaction
+        const disbTx = createTransactionEntry(
+          'Native Transfer',
+          `Loan disbursement: ${loanAmount} CSPR to ${borrowerPublicKey.substring(0, 12)}...`,
+          disbursementHash,
+          'LendingPool',
+          'latest',
+          { loanId, borrowerPublicKey, loanAmount, ltv, assetId, assetType },
+          true
+        );
+        saveTransaction(disbTx);
+        emitEvent('transaction', disbTx);
+
+        res.json({
+          success: true,
+          loan: {
+            loanId,
+            assetId,
+            assetName,
+            assetType,
+            assessedValue,
+            ltvRatio: ltv,
+            loanAmountCSPR: loanAmount,
+            tier,
+            platformFeeCSPR: platformFee,
+            status: loan.status,
+            healthRatio: loan.healthRatio,
+            disbursementTxHash: disbursementHash,
+            broadcastSuccess: true,
+            createdAt: loan.createdAt,
+            trustBreakdown,
+          },
+        });
+      } catch (err: any) {
+        log.error('[Loan Create] Error:: ' + err.message);
+        res.status(500).json({ success: false, error: sanitizeError(err) });
+      }
+    });
 
   /**
    * GET /api/loans
@@ -2722,129 +2722,129 @@ Respond in JSON format:
   app.post('/api/loans/:loanId/repay',
     casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(REPAY_FEE_CSPR) }),
     async (req, res) => {
-    try {
-      const loan = loanStore.get(req.params.loanId as string);
-      if (!loan) {
-        return res.status(404).json({ success: false, error: 'Loan not found' });
-      }
-      if (loan.status === 'repaid' || loan.status === 'liquidated') {
-        return res.status(400).json({ success: false, error: `Loan is ${loan.status} - no repayment possible` });
-      }
-
-      const { amount, txHash } = req.body;
-      if (typeof amount !== 'number' || amount <= 0) {
-        return res.status(400).json({ success: false, error: 'Repayment amount must be a positive number' });
-      }
-
-      const remaining = loan.loanAmountCSPR - loan.repaidAmountCSPR;
-      const repayAmount = Math.min(amount, remaining);
-
-
-      // Verify repayment on-chain if txHash provided
-      let verified = false;
-      if (txHash && CSPR_CLOUD_KEY) {
-        try {
-          const verifyRes = await axios.get(`${CSPR_CLOUD_URL}/deploys/${txHash}`, {
-            headers: { Authorization: CSPR_CLOUD_KEY, accept: 'application/json' },
-            timeout: 5_000,
-          });
-          const status = verifyRes.data?.data?.status || verifyRes.data?.status;
-          verified = status === 'processed';
-        } catch {
-          log.warn(`[Loan Repay] Could not verify deploy ${txHash}`);
+      try {
+        const loan = loanStore.get(req.params.loanId as string);
+        if (!loan) {
+          return res.status(404).json({ success: false, error: 'Loan not found' });
         }
-      }
-
-      loan.repaidAmountCSPR += repayAmount;
-      loan.repaymentHistory.push({
-        amount: repayAmount,
-        timestamp: Date.now(),
-        txHash: txHash || `repay-${Date.now()}`,
-      });
-
-      if (loan.repaidAmountCSPR >= loan.loanAmountCSPR) {
-        loan.status = 'repaid';
-        log.info(`Loan ${loan.loanId} fully repaid!`);
-
-        // Verdict Point 2: Escrow release - return collateral to platform
-        let escrowReleaseHash = `escrow-release-${Date.now()}`;
-        try {
-          const releaseMotes = Math.floor(loan.loanAmountCSPR * 1e9);
-          const releaseTransferId = Date.now() + Math.floor(Math.random() * 1000);
-          const releaseHash = await executeCasperTransfer(PLATFORM_WALLET, releaseMotes, releaseTransferId);
-          escrowReleaseHash = releaseHash;
-          loan.escrowReleaseTxHash = releaseHash;
-          log.info(`🔓 Escrow released! deploy_hash: ${releaseHash.substring(0, 16)}...`);
-
-          const releaseTx = createTransactionEntry(
-            'Native Transfer',
-            `Escrow release: ${loan.loanAmountCSPR} CSPR returned for loan ${loan.loanId}`,
-            releaseHash,
-            'EscrowContract',
-            'latest',
-            { loanId: loan.loanId, amount: loan.loanAmountCSPR, purpose: 'escrow_release' },
-            true
-          );
-          saveTransaction(releaseTx);
-          emitEvent('transaction', releaseTx);
-        } catch (err: any) {
-          log.warn(`Escrow release failed: ${err.message}`);
+        if (loan.status === 'repaid' || loan.status === 'liquidated') {
+          return res.status(400).json({ success: false, error: `Loan is ${loan.status} - no repayment possible` });
         }
-      }
 
-      // Log repayment
-      const repayTx = createTransactionEntry(
-        'Native Transfer',
-        `Loan repayment: ${repayAmount} CSPR for ${loan.loanId}`,
-        txHash || `repay-${Date.now()}`,
-        'LendingPool',
-        'latest',
-        { loanId: loan.loanId, repayAmount, totalRepaid: loan.repaidAmountCSPR, verified },
-        verified
-      );
-      saveTransaction(repayTx);
-      emitEvent('transaction', repayTx);
+        const { amount, txHash } = req.body;
+        if (typeof amount !== 'number' || amount <= 0) {
+          return res.status(400).json({ success: false, error: 'Repayment amount must be a positive number' });
+        }
 
-      // ── DB: Update loan in Supabase ──
-      db.saveLoan({
-        loan_id: loan.loanId,
-        borrower_public_key: loan.borrowerPublicKey,
-        asset_id: loan.assetId,
-        asset_type: loan.assetType,
-        asset_name: loan.assetName,
-        assessed_value: loan.assessedValue,
-        ltv_ratio: loan.ltvRatio,
-        loan_amount_cspr: loan.loanAmountCSPR,
-        collateral_assessment_id: loan.collateralAssessmentId,
-        status: loan.status,
-        health_ratio: loan.healthRatio,
-        created_at: loan.createdAt,
-        last_revalued_at: loan.lastRevaluedAt,
-        repaid_amount_cspr: loan.repaidAmountCSPR,
-        repayment_history: loan.repaymentHistory,
-        disbursement_tx_hash: loan.disbursementTxHash,
-        platform_fee_cspr: loan.platformFeeCSPR,
-        trust_breakdown: loan.trustBreakdown,
-        escrow_lock_tx_hash: loan.escrowLockTxHash,
-        escrow_release_tx_hash: loan.escrowReleaseTxHash,
-        revaluation_history: loan.revaluationHistory,
-      }).catch(err => log.warn(`⚠️ Failed to update loan after repay: ${err.message}`));
+        const remaining = loan.loanAmountCSPR - loan.repaidAmountCSPR;
+        const repayAmount = Math.min(amount, remaining);
 
-      res.json({
-        success: true,
-        loan: {
-          loanId: loan.loanId,
+
+        // Verify repayment on-chain if txHash provided
+        let verified = false;
+        if (txHash && CSPR_CLOUD_KEY) {
+          try {
+            const verifyRes = await axios.get(`${CSPR_CLOUD_URL}/deploys/${txHash}`, {
+              headers: { Authorization: CSPR_CLOUD_KEY, accept: 'application/json' },
+              timeout: 5_000,
+            });
+            const status = verifyRes.data?.data?.status || verifyRes.data?.status;
+            verified = status === 'processed';
+          } catch {
+            log.warn(`[Loan Repay] Could not verify deploy ${txHash}`);
+          }
+        }
+
+        loan.repaidAmountCSPR += repayAmount;
+        loan.repaymentHistory.push({
+          amount: repayAmount,
+          timestamp: Date.now(),
+          txHash: txHash || `repay-${Date.now()}`,
+        });
+
+        if (loan.repaidAmountCSPR >= loan.loanAmountCSPR) {
+          loan.status = 'repaid';
+          log.info(`Loan ${loan.loanId} fully repaid!`);
+
+          // Verdict Point 2: Escrow release - return collateral to platform
+          let escrowReleaseHash = `escrow-release-${Date.now()}`;
+          try {
+            const releaseMotes = Math.floor(loan.loanAmountCSPR * 1e9);
+            const releaseTransferId = Date.now() + Math.floor(Math.random() * 1000);
+            const releaseHash = await executeCasperTransfer(PLATFORM_WALLET, releaseMotes, releaseTransferId);
+            escrowReleaseHash = releaseHash;
+            loan.escrowReleaseTxHash = releaseHash;
+            log.info(`🔓 Escrow released! deploy_hash: ${releaseHash.substring(0, 16)}...`);
+
+            const releaseTx = createTransactionEntry(
+              'Native Transfer',
+              `Escrow release: ${loan.loanAmountCSPR} CSPR returned for loan ${loan.loanId}`,
+              releaseHash,
+              'EscrowContract',
+              'latest',
+              { loanId: loan.loanId, amount: loan.loanAmountCSPR, purpose: 'escrow_release' },
+              true
+            );
+            saveTransaction(releaseTx);
+            emitEvent('transaction', releaseTx);
+          } catch (err: any) {
+            log.warn(`Escrow release failed: ${err.message}`);
+          }
+        }
+
+        // Log repayment
+        const repayTx = createTransactionEntry(
+          'Native Transfer',
+          `Loan repayment: ${repayAmount} CSPR for ${loan.loanId}`,
+          txHash || `repay-${Date.now()}`,
+          'LendingPool',
+          'latest',
+          { loanId: loan.loanId, repayAmount, totalRepaid: loan.repaidAmountCSPR, verified },
+          verified
+        );
+        saveTransaction(repayTx);
+        emitEvent('transaction', repayTx);
+
+        // ── DB: Update loan in Supabase ──
+        db.saveLoan({
+          loan_id: loan.loanId,
+          borrower_public_key: loan.borrowerPublicKey,
+          asset_id: loan.assetId,
+          asset_type: loan.assetType,
+          asset_name: loan.assetName,
+          assessed_value: loan.assessedValue,
+          ltv_ratio: loan.ltvRatio,
+          loan_amount_cspr: loan.loanAmountCSPR,
+          collateral_assessment_id: loan.collateralAssessmentId,
           status: loan.status,
-          repaidAmountCSPR: loan.repaidAmountCSPR,
-          remainingCSPR: Math.max(0, loan.loanAmountCSPR - loan.repaidAmountCSPR),
-          repaymentVerified: verified,
-          escrowReleaseTxHash: loan.escrowReleaseTxHash || null,
-        },
-      });
-    } catch (err: any) {
-      res.status(500).json({ success: false, error: sanitizeError(err) });
-    }
-  });
+          health_ratio: loan.healthRatio,
+          created_at: loan.createdAt,
+          last_revalued_at: loan.lastRevaluedAt,
+          repaid_amount_cspr: loan.repaidAmountCSPR,
+          repayment_history: loan.repaymentHistory,
+          disbursement_tx_hash: loan.disbursementTxHash,
+          platform_fee_cspr: loan.platformFeeCSPR,
+          trust_breakdown: loan.trustBreakdown,
+          escrow_lock_tx_hash: loan.escrowLockTxHash,
+          escrow_release_tx_hash: loan.escrowReleaseTxHash,
+          revaluation_history: loan.revaluationHistory,
+        }).catch(err => log.warn(`⚠️ Failed to update loan after repay: ${err.message}`));
+
+        res.json({
+          success: true,
+          loan: {
+            loanId: loan.loanId,
+            status: loan.status,
+            repaidAmountCSPR: loan.repaidAmountCSPR,
+            remainingCSPR: Math.max(0, loan.loanAmountCSPR - loan.repaidAmountCSPR),
+            repaymentVerified: verified,
+            escrowReleaseTxHash: loan.escrowReleaseTxHash || null,
+          },
+        });
+      } catch (err: any) {
+        res.status(500).json({ success: false, error: sanitizeError(err) });
+      }
+    });
 
   /**
    * POST /api/loans/:loanId/revalue
@@ -3081,8 +3081,8 @@ Respond in JSON format:
   // Risk tiers based on asset type + confidence
   const RISK_TIERS: Record<string, { basePremium: number; maxCoverage: number; deductible: number }> = {
     'real-estate': { basePremium: 2.0, maxCoverage: 80, deductible: 10 },
-    'art':         { basePremium: 3.5, maxCoverage: 60, deductible: 15 },
-    'commodity':   { basePremium: 1.5, maxCoverage: 90, deductible: 5 },
+    'art': { basePremium: 3.5, maxCoverage: 60, deductible: 15 },
+    'commodity': { basePremium: 1.5, maxCoverage: 90, deductible: 5 },
   };
 
   function calculateInsurance(
@@ -3134,144 +3134,144 @@ Respond in JSON format:
   app.post('/api/insurance/create',
     casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(INSURANCE_FEE_CSPR) }),
     async (req, res) => {
-    try {
-      const ip = req.ip || req.socket.remoteAddress || 'unknown';
-      if (isRateLimited(ip)) {
-        return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
-      }
+      try {
+        const ip = req.ip || req.socket.remoteAddress || 'unknown';
+        if (isRateLimited(ip)) {
+          return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
+        }
 
-      const {
-        ownerPublicKey,
-        assetId,
-        assetType,
-        assetName,
-        assessedValue,
-        askingPrice,
-        confidence,
-        coveragePercent,
-        assessmentId,
-      } = req.body;
-
-      // ── Validate inputs ────────────────────────────────────────────────
-      if (!ownerPublicKey || typeof ownerPublicKey !== 'string' || ownerPublicKey.length < 64) {
-        return res.status(400).json({ success: false, error: 'ownerPublicKey must be a valid Casper public key (64+ hex chars)' });
-      }
-      if (!assetId || !assetType || !assetName) {
-        return res.status(400).json({ success: false, error: 'assetId, assetType, and assetName are required' });
-      }
-      if (typeof assessedValue !== 'number' || assessedValue <= 0) {
-        return res.status(400).json({ success: false, error: 'assessedValue must be a positive number' });
-      }
-      if (typeof askingPrice !== 'number' || askingPrice <= 0) {
-        return res.status(400).json({ success: false, error: 'askingPrice must be a positive number' });
-      }
-      if (typeof confidence !== 'number' || confidence < 0 || confidence > 1) {
-        return res.status(400).json({ success: false, error: 'confidence must be between 0 and 1' });
-      }
-
-      const validTypes: AssetType[] = ['real-estate', 'art', 'commodity'];
-      if (!validTypes.includes(assetType)) {
-        return res.status(400).json({ success: false, error: `assetType must be one of: ${validTypes.join(', ')}` });
-      }
-
-      // ── Calculate Insurance ────────────────────────────────────────────
-      const { coverage, coverageAmount, premiumCSPR, deductible, riskScore, riskFactors, tier, coolingOffEnd } =
-        calculateInsurance(assetType, assessedValue, confidence, askingPrice, coveragePercent);
-      const platformFee = 3; // INSURANCE_FEE_CSPR
-
-      log.info(`\n🛡️ Insurance request: ${assetName}`);
-      log.info(`Assessed: ${assessedValue.toLocaleString()} | Risk: ${riskScore}/100 (${tier})`);
-      log.info(`Coverage: ${coverageAmount.toLocaleString()} (${coverage}%) | Premium: ${premiumCSPR} CSPR/mo`);
-
-
-      // ── Store the policy ───────────────────────────────────────────────
-      const policyId = `POL-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-      const now = Date.now();
-      const policy: InsurancePolicy = {
-        policyId,
-        ownerPublicKey,
-        assetId,
-        assetType,
-        assetName,
-        assessedValue,
-        coverageAmount,
-        premiumCSPR,
-        deductiblePercent: deductible,
-        status: 'active',
-        riskScore,
-        riskFactors,
-        tier,
-        platformFeeCSPR: platformFee,
-        expiresAt: now + 365 * 24 * 60 * 60 * 1000, // 1 year
-        createdAt: now,
-        coolingOffEnd,
-        claimHistory: [],
-      };
-      insuranceStore.set(policyId, policy);
-      capitalPoolCSPR += platformFee; // Track capital inflow
-
-      // ── DB: Persist insurance policy to Supabase ──
-      db.saveInsurance({
-        policy_id: policyId,
-        owner_public_key: ownerPublicKey,
-        asset_id: assetId,
-        asset_type: assetType,
-        asset_name: assetName,
-        assessed_value: assessedValue,
-        coverage_amount: coverageAmount,
-        premium_cspr: premiumCSPR,
-        deductible_percent: deductible,
-        status: 'active',
-        risk_score: riskScore,
-        risk_factors: riskFactors,
-        tier,
-        platform_fee_cspr: platformFee,
-        expires_at: now + 365 * 24 * 60 * 60 * 1000,
-        created_at: now,
-        claim_history: [],
-      }).catch(err => log.warn(`⚠️ Failed to save insurance: ${err.message}`));
-
-      // Log as transaction
-      const insTx = createTransactionEntry(
-        'x402 Payment',
-        `Insurance policy created for ${assetName}`,
-        `ins-${policyId}`,
-        'Insurance',
-        'latest',
-        { policyId, assetName, coverageAmount, premiumCSPR, riskScore },
-        false
-      );
-      saveTransaction(insTx);
-      emitEvent('transaction', insTx);
-
-      log.info(`Policy ${policyId} created (${tier}, risk ${riskScore}/100)`);
-
-      res.json({
-        success: true,
-        policy: {
-          policyId,
+        const {
+          ownerPublicKey,
           assetId,
-          assetName,
           assetType,
+          assetName,
+          assessedValue,
+          askingPrice,
+          confidence,
+          coveragePercent,
+          assessmentId,
+        } = req.body;
+
+        // ── Validate inputs ────────────────────────────────────────────────
+        if (!ownerPublicKey || typeof ownerPublicKey !== 'string' || ownerPublicKey.length < 64) {
+          return res.status(400).json({ success: false, error: 'ownerPublicKey must be a valid Casper public key (64+ hex chars)' });
+        }
+        if (!assetId || !assetType || !assetName) {
+          return res.status(400).json({ success: false, error: 'assetId, assetType, and assetName are required' });
+        }
+        if (typeof assessedValue !== 'number' || assessedValue <= 0) {
+          return res.status(400).json({ success: false, error: 'assessedValue must be a positive number' });
+        }
+        if (typeof askingPrice !== 'number' || askingPrice <= 0) {
+          return res.status(400).json({ success: false, error: 'askingPrice must be a positive number' });
+        }
+        if (typeof confidence !== 'number' || confidence < 0 || confidence > 1) {
+          return res.status(400).json({ success: false, error: 'confidence must be between 0 and 1' });
+        }
+
+        const validTypes: AssetType[] = ['real-estate', 'art', 'commodity'];
+        if (!validTypes.includes(assetType)) {
+          return res.status(400).json({ success: false, error: `assetType must be one of: ${validTypes.join(', ')}` });
+        }
+
+        // ── Calculate Insurance ────────────────────────────────────────────
+        const { coverage, coverageAmount, premiumCSPR, deductible, riskScore, riskFactors, tier, coolingOffEnd } =
+          calculateInsurance(assetType, assessedValue, confidence, askingPrice, coveragePercent);
+        const platformFee = 3; // INSURANCE_FEE_CSPR
+
+        log.info(`\n🛡️ Insurance request: ${assetName}`);
+        log.info(`Assessed: ${assessedValue.toLocaleString()} | Risk: ${riskScore}/100 (${tier})`);
+        log.info(`Coverage: ${coverageAmount.toLocaleString()} (${coverage}%) | Premium: ${premiumCSPR} CSPR/mo`);
+
+
+        // ── Store the policy ───────────────────────────────────────────────
+        const policyId = `POL-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+        const now = Date.now();
+        const policy: InsurancePolicy = {
+          policyId,
+          ownerPublicKey,
+          assetId,
+          assetType,
+          assetName,
           assessedValue,
           coverageAmount,
           premiumCSPR,
           deductiblePercent: deductible,
+          status: 'active',
           riskScore,
           riskFactors,
           tier,
           platformFeeCSPR: platformFee,
+          expiresAt: now + 365 * 24 * 60 * 60 * 1000, // 1 year
+          createdAt: now,
+          coolingOffEnd,
+          claimHistory: [],
+        };
+        insuranceStore.set(policyId, policy);
+        capitalPoolCSPR += platformFee; // Track capital inflow
+
+        // ── DB: Persist insurance policy to Supabase ──
+        db.saveInsurance({
+          policy_id: policyId,
+          owner_public_key: ownerPublicKey,
+          asset_id: assetId,
+          asset_type: assetType,
+          asset_name: assetName,
+          assessed_value: assessedValue,
+          coverage_amount: coverageAmount,
+          premium_cspr: premiumCSPR,
+          deductible_percent: deductible,
           status: 'active',
-          expiresAt: policy.expiresAt,
-          createdAt: policy.createdAt,
-          coolingOffEnd: policy.coolingOffEnd,
-        },
-      });
-    } catch (err: any) {
-      log.error('[Insurance Create] Error:: ' + err.message);
-      res.status(500).json({ success: false, error: sanitizeError(err) });
-    }
-  });
+          risk_score: riskScore,
+          risk_factors: riskFactors,
+          tier,
+          platform_fee_cspr: platformFee,
+          expires_at: now + 365 * 24 * 60 * 60 * 1000,
+          created_at: now,
+          claim_history: [],
+        }).catch(err => log.warn(`⚠️ Failed to save insurance: ${err.message}`));
+
+        // Log as transaction
+        const insTx = createTransactionEntry(
+          'x402 Payment',
+          `Insurance policy created for ${assetName}`,
+          `ins-${policyId}`,
+          'Insurance',
+          'latest',
+          { policyId, assetName, coverageAmount, premiumCSPR, riskScore },
+          false
+        );
+        saveTransaction(insTx);
+        emitEvent('transaction', insTx);
+
+        log.info(`Policy ${policyId} created (${tier}, risk ${riskScore}/100)`);
+
+        res.json({
+          success: true,
+          policy: {
+            policyId,
+            assetId,
+            assetName,
+            assetType,
+            assessedValue,
+            coverageAmount,
+            premiumCSPR,
+            deductiblePercent: deductible,
+            riskScore,
+            riskFactors,
+            tier,
+            platformFeeCSPR: platformFee,
+            status: 'active',
+            expiresAt: policy.expiresAt,
+            createdAt: policy.createdAt,
+            coolingOffEnd: policy.coolingOffEnd,
+          },
+        });
+      } catch (err: any) {
+        log.error('[Insurance Create] Error:: ' + err.message);
+        res.status(500).json({ success: false, error: sanitizeError(err) });
+      }
+    });
 
   /**
    * GET /api/insurance
@@ -3375,218 +3375,218 @@ Respond in JSON format:
   app.post('/api/insurance/:policyId/claim',
     casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(INSURANCE_FEE_CSPR) }),
     async (req, res) => {
-    const policyId = req.params.policyId as string;
+      const policyId = req.params.policyId as string;
 
-    // ── Claim lock: prevent concurrent claims on same policy ──
-    if (claimLocks.has(policyId)) {
-      return res.status(423).json({ success: false, error: 'A claim is already being processed for this policy. Please wait.' });
-    }
-    claimLocks.add(policyId);
-
-    try {
-      const policy = insuranceStore.get(policyId);
-      if (!policy) {
-        return res.status(404).json({ success: false, error: 'Insurance policy not found' });
+      // ── Claim lock: prevent concurrent claims on same policy ──
+      if (claimLocks.has(policyId)) {
+        return res.status(423).json({ success: false, error: 'A claim is already being processed for this policy. Please wait.' });
       }
-
-      // ── Ownership verification ──
-      const claimantKey = req.body.ownerPublicKey as string | undefined;
-      if (!claimantKey || claimantKey !== policy.ownerPublicKey) {
-        return res.status(403).json({ success: false, error: 'Only the policy owner can file a claim' });
-      }
-
-      if (policy.status !== 'active') {
-        return res.status(400).json({ success: false, error: `Policy is ${policy.status} and cannot accept new claims` });
-      }
-      if (Date.now() > policy.expiresAt) {
-        policy.status = 'expired';
-        return res.status(400).json({ success: false, error: 'Policy has expired' });
-      }
-
-      // ── Cooling-off period check ──
-      const coolingOffEnd = policy.coolingOffEnd || (policy.createdAt + COOLING_OFF_DAYS * 24 * 60 * 60 * 1000);
-      if (Date.now() < coolingOffEnd) {
-        const daysRemaining = Math.ceil((coolingOffEnd - Date.now()) / (24 * 60 * 60 * 1000));
-        return res.status(400).json({
-          success: false,
-          error: `Policy is in the ${COOLING_OFF_DAYS}-day cooling-off period. Claims can be filed in ${daysRemaining} day${daysRemaining > 1 ? 's' : ''}.`,
-        });
-      }
-
-      // ── Minimum holding period check ──
-      const holdingDays = (Date.now() - policy.createdAt) / (24 * 60 * 60 * 1000);
-      if (holdingDays < MIN_HOLDING_DAYS) {
-        const daysRemaining = Math.ceil(MIN_HOLDING_DAYS - holdingDays);
-        return res.status(400).json({
-          success: false,
-          error: `Policy must be held for ${MIN_HOLDING_DAYS} days before filing a claim. ${daysRemaining} day${daysRemaining > 1 ? 's' : ''} remaining.`,
-        });
-      }
-
-      const { reason, requestedAmount } = req.body;
-      if (!reason || typeof reason !== 'string') {
-        return res.status(400).json({ success: false, error: 'reason is required' });
-      }
-      if (reason.length > MAX_DESCRIPTION_LENGTH) {
-        return res.status(400).json({ success: false, error: `reason must be under ${MAX_DESCRIPTION_LENGTH} characters` });
-      }
-
-      log.info(`\n📋 Insurance claim filed: ${policy.policyId}`);
-      log.info(`Claimant: ${claimantKey.slice(0, 12)}...`);
-      log.info(`Reason: ${reason}`);
-
-      // ── Revaluate the asset to determine current value ──
-      let currentValue = policy.assessedValue;
-      let lossPercent = 0;
-      let valuationAConfidence = 0;
-      let valuationBConfidence = 0;
+      claimLocks.add(policyId);
 
       try {
-        const valuationReq: ValuationRequest = {
-          assetType: policy.assetType,
-          assetId: policy.assetId,
-          name: policy.assetName,
-        };
-        const [valuationA, valuationB] = await runDualValuation(valuationReq);
-        currentValue = Math.round((valuationA.estimated_value + valuationB.estimated_value) / 2);
-        lossPercent = Math.max(0, ((policy.assessedValue - currentValue) / policy.assessedValue) * 100);
-        valuationAConfidence = valuationA.confidence;
-        valuationBConfidence = valuationB.confidence;
+        const policy = insuranceStore.get(policyId);
+        if (!policy) {
+          return res.status(404).json({ success: false, error: 'Insurance policy not found' });
+        }
 
-        log.info(`Previous value: ${policy.assessedValue.toLocaleString()}`);
-        log.info(`Current value:  ${currentValue.toLocaleString()}`);
-        log.info(`Loss: ${lossPercent.toFixed(1)}%`);
-        log.info(`Agent confidence: A=${valuationAConfidence.toFixed(2)}, B=${valuationBConfidence.toFixed(2)}`);
+        // ── Ownership verification ──
+        const claimantKey = req.body.ownerPublicKey as string | undefined;
+        if (!claimantKey || claimantKey !== policy.ownerPublicKey) {
+          return res.status(403).json({ success: false, error: 'Only the policy owner can file a claim' });
+        }
 
-        // ── Confidence threshold gating ──
-        if (valuationAConfidence < MIN_CLAIM_CONFIDENCE || valuationBConfidence < MIN_CLAIM_CONFIDENCE) {
+        if (policy.status !== 'active') {
+          return res.status(400).json({ success: false, error: `Policy is ${policy.status} and cannot accept new claims` });
+        }
+        if (Date.now() > policy.expiresAt) {
+          policy.status = 'expired';
+          return res.status(400).json({ success: false, error: 'Policy has expired' });
+        }
+
+        // ── Cooling-off period check ──
+        const coolingOffEnd = policy.coolingOffEnd || (policy.createdAt + COOLING_OFF_DAYS * 24 * 60 * 60 * 1000);
+        if (Date.now() < coolingOffEnd) {
+          const daysRemaining = Math.ceil((coolingOffEnd - Date.now()) / (24 * 60 * 60 * 1000));
           return res.status(400).json({
             success: false,
-            error: `Agent confidence too low for claim adjudication (A: ${(valuationAConfidence * 100).toFixed(0)}%, B: ${(valuationBConfidence * 100).toFixed(0)}%). Minimum required: ${(MIN_CLAIM_CONFIDENCE * 100).toFixed(0)}%. Please try again later when market data is more reliable.`,
+            error: `Policy is in the ${COOLING_OFF_DAYS}-day cooling-off period. Claims can be filed in ${daysRemaining} day${daysRemaining > 1 ? 's' : ''}.`,
           });
         }
 
-        // ── Split verdict detection: agents disagree on direction ──
-        const valueChangeA = (policy.assessedValue - valuationA.estimated_value) / policy.assessedValue;
-        const valueChangeB = (policy.assessedValue - valuationB.estimated_value) / policy.assessedValue;
-        if ((valueChangeA > 0 && valueChangeB < -0.02) || (valueChangeA < 0 && valueChangeB > 0.02) || (valueChangeA < -0.02 && valueChangeB > 0)) {
-          log.info(`Split verdict: Agent A says ${valueChangeA > 0 ? 'loss' : 'gain'}, Agent B says ${valueChangeB > 0 ? 'loss' : 'gain'}`);
+        // ── Minimum holding period check ──
+        const holdingDays = (Date.now() - policy.createdAt) / (24 * 60 * 60 * 1000);
+        if (holdingDays < MIN_HOLDING_DAYS) {
+          const daysRemaining = Math.ceil(MIN_HOLDING_DAYS - holdingDays);
           return res.status(400).json({
             success: false,
-            error: 'The AI agents disagree on the direction of value change. This claim requires manual review. Our oracle jurors will evaluate the evidence and render a verdict within 48 hours.',
+            error: `Policy must be held for ${MIN_HOLDING_DAYS} days before filing a claim. ${daysRemaining} day${daysRemaining > 1 ? 's' : ''} remaining.`,
           });
         }
-      } catch (err: any) {
-        log.info(`Revaluation failed, using original value: ${err.message}`);
-      }
 
-      const claimId = `CLM-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-
-      // Determine claim outcome
-      let claimStatus: 'approved' | 'denied' | 'paid';
-      let claimAmount = 0;
-
-      if (lossPercent < policy.deductiblePercent) {
-        claimStatus = 'denied';
-        log.info(`Claim denied: loss ${lossPercent.toFixed(1)}% < deductible ${policy.deductiblePercent}%`);
-      } else {
-        // Loss exceeds deductible - approve and calculate payout
-        claimAmount = Math.min(
-          (currentValue * (1 - policy.deductiblePercent / 100)),
-          policy.coverageAmount,
-        );
-        claimAmount = Math.round(claimAmount * 100) / 100;
-
-        if (requestedAmount && requestedAmount < claimAmount) {
-          claimAmount = requestedAmount;
+        const { reason, requestedAmount } = req.body;
+        if (!reason || typeof reason !== 'string') {
+          return res.status(400).json({ success: false, error: 'reason is required' });
+        }
+        if (reason.length > MAX_DESCRIPTION_LENGTH) {
+          return res.status(400).json({ success: false, error: `reason must be under ${MAX_DESCRIPTION_LENGTH} characters` });
         }
 
-        // ── Capital pool solvency check ──
-        const maxPayoutFromPool = capitalPoolCSPR * 0.5;
-        if (claimAmount > maxPayoutFromPool && maxPayoutFromPool > 0) {
-          claimAmount = Math.round(maxPayoutFromPool * 100) / 100;
-          log.info(`Payout capped by capital pool: ${claimAmount.toLocaleString()} CSPR (pool: ${capitalPoolCSPR.toLocaleString()})`);
+        log.info(`\n📋 Insurance claim filed: ${policy.policyId}`);
+        log.info(`Claimant: ${claimantKey.slice(0, 12)}...`);
+        log.info(`Reason: ${reason}`);
+
+        // ── Revaluate the asset to determine current value ──
+        let currentValue = policy.assessedValue;
+        let lossPercent = 0;
+        let valuationAConfidence = 0;
+        let valuationBConfidence = 0;
+
+        try {
+          const valuationReq: ValuationRequest = {
+            assetType: policy.assetType,
+            assetId: policy.assetId,
+            name: policy.assetName,
+          };
+          const [valuationA, valuationB] = await runDualValuation(valuationReq);
+          currentValue = Math.round((valuationA.estimated_value + valuationB.estimated_value) / 2);
+          lossPercent = Math.max(0, ((policy.assessedValue - currentValue) / policy.assessedValue) * 100);
+          valuationAConfidence = valuationA.confidence;
+          valuationBConfidence = valuationB.confidence;
+
+          log.info(`Previous value: ${policy.assessedValue.toLocaleString()}`);
+          log.info(`Current value:  ${currentValue.toLocaleString()}`);
+          log.info(`Loss: ${lossPercent.toFixed(1)}%`);
+          log.info(`Agent confidence: A=${valuationAConfidence.toFixed(2)}, B=${valuationBConfidence.toFixed(2)}`);
+
+          // ── Confidence threshold gating ──
+          if (valuationAConfidence < MIN_CLAIM_CONFIDENCE || valuationBConfidence < MIN_CLAIM_CONFIDENCE) {
+            return res.status(400).json({
+              success: false,
+              error: `Agent confidence too low for claim adjudication (A: ${(valuationAConfidence * 100).toFixed(0)}%, B: ${(valuationBConfidence * 100).toFixed(0)}%). Minimum required: ${(MIN_CLAIM_CONFIDENCE * 100).toFixed(0)}%. Please try again later when market data is more reliable.`,
+            });
+          }
+
+          // ── Split verdict detection: agents disagree on direction ──
+          const valueChangeA = (policy.assessedValue - valuationA.estimated_value) / policy.assessedValue;
+          const valueChangeB = (policy.assessedValue - valuationB.estimated_value) / policy.assessedValue;
+          if ((valueChangeA > 0 && valueChangeB < -0.02) || (valueChangeA < 0 && valueChangeB > 0.02) || (valueChangeA < -0.02 && valueChangeB > 0)) {
+            log.info(`Split verdict: Agent A says ${valueChangeA > 0 ? 'loss' : 'gain'}, Agent B says ${valueChangeB > 0 ? 'loss' : 'gain'}`);
+            return res.status(400).json({
+              success: false,
+              error: 'The AI agents disagree on the direction of value change. This claim requires manual review. Our oracle jurors will evaluate the evidence and render a verdict within 48 hours.',
+            });
+          }
+        } catch (err: any) {
+          log.info(`Revaluation failed, using original value: ${err.message}`);
         }
 
-        claimStatus = 'paid';
-        capitalPoolCSPR -= claimAmount; // Deduct from pool
-        log.info(`Claim approved: payout ${claimAmount.toLocaleString()} CSPR (pool remaining: ${capitalPoolCSPR.toLocaleString()})`);
+        const claimId = `CLM-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
-        // Log payout transaction
-        const payoutTx = createTransactionEntry(
-          'Native Transfer',
-          `Insurance claim payout for ${policy.assetName}`,
-          `claim-${claimId}`,
-          'Insurance',
-          'latest',
-          { claimId, policyId: policy.policyId, amount: claimAmount },
-          false
-        );
-        saveTransaction(payoutTx);
-        emitEvent('transaction', payoutTx);
-      }
+        // Determine claim outcome
+        let claimStatus: 'approved' | 'denied' | 'paid';
+        let claimAmount = 0;
 
-      // Record claim
-      policy.claimHistory.push({
-        claimId,
-        amount: claimAmount,
-        reason,
-        status: claimStatus,
-        filedAt: Date.now(),
-        resolvedAt: Date.now(),
-      });
+        if (lossPercent < policy.deductiblePercent) {
+          claimStatus = 'denied';
+          log.info(`Claim denied: loss ${lossPercent.toFixed(1)}% < deductible ${policy.deductiblePercent}%`);
+        } else {
+          // Loss exceeds deductible - approve and calculate payout
+          claimAmount = Math.min(
+            (currentValue * (1 - policy.deductiblePercent / 100)),
+            policy.coverageAmount,
+          );
+          claimAmount = Math.round(claimAmount * 100) / 100;
 
-      if (claimStatus === 'paid') {
-        policy.status = 'paid';
-      }
+          if (requestedAmount && requestedAmount < claimAmount) {
+            claimAmount = requestedAmount;
+          }
 
-      // ── DB: Update insurance policy in Supabase after claim ──
-      db.saveInsurance({
-        policy_id: policy.policyId,
-        owner_public_key: policy.ownerPublicKey,
-        asset_id: policy.assetId,
-        asset_type: policy.assetType,
-        asset_name: policy.assetName,
-        assessed_value: policy.assessedValue,
-        coverage_amount: policy.coverageAmount,
-        premium_cspr: policy.premiumCSPR,
-        deductible_percent: policy.deductiblePercent,
-        status: policy.status,
-        risk_score: policy.riskScore,
-        risk_factors: policy.riskFactors,
-        tier: policy.tier,
-        platform_fee_cspr: policy.platformFeeCSPR,
-        expires_at: policy.expiresAt,
-        created_at: policy.createdAt,
-        claim_history: policy.claimHistory,
-      }).catch(err => log.warn(`⚠️ Failed to update insurance after claim: ${err.message}`));
+          // ── Capital pool solvency check ──
+          const maxPayoutFromPool = capitalPoolCSPR * 0.5;
+          if (claimAmount > maxPayoutFromPool && maxPayoutFromPool > 0) {
+            claimAmount = Math.round(maxPayoutFromPool * 100) / 100;
+            log.info(`Payout capped by capital pool: ${claimAmount.toLocaleString()} CSPR (pool: ${capitalPoolCSPR.toLocaleString()})`);
+          }
 
-      res.json({
-        success: true,
-        claim: {
+          claimStatus = 'paid';
+          capitalPoolCSPR -= claimAmount; // Deduct from pool
+          log.info(`Claim approved: payout ${claimAmount.toLocaleString()} CSPR (pool remaining: ${capitalPoolCSPR.toLocaleString()})`);
+
+          // Log payout transaction
+          const payoutTx = createTransactionEntry(
+            'Native Transfer',
+            `Insurance claim payout for ${policy.assetName}`,
+            `claim-${claimId}`,
+            'Insurance',
+            'latest',
+            { claimId, policyId: policy.policyId, amount: claimAmount },
+            false
+          );
+          saveTransaction(payoutTx);
+          emitEvent('transaction', payoutTx);
+        }
+
+        // Record claim
+        policy.claimHistory.push({
           claimId,
-          policyId: policy.policyId,
           amount: claimAmount,
-          status: claimStatus,
           reason,
-          revaluation: {
-            previousValue: policy.assessedValue,
-            newValue: currentValue,
-            lossPercent,
+          status: claimStatus,
+          filedAt: Date.now(),
+          resolvedAt: Date.now(),
+        });
+
+        if (claimStatus === 'paid') {
+          policy.status = 'paid';
+        }
+
+        // ── DB: Update insurance policy in Supabase after claim ──
+        db.saveInsurance({
+          policy_id: policy.policyId,
+          owner_public_key: policy.ownerPublicKey,
+          asset_id: policy.assetId,
+          asset_type: policy.assetType,
+          asset_name: policy.assetName,
+          assessed_value: policy.assessedValue,
+          coverage_amount: policy.coverageAmount,
+          premium_cspr: policy.premiumCSPR,
+          deductible_percent: policy.deductiblePercent,
+          status: policy.status,
+          risk_score: policy.riskScore,
+          risk_factors: policy.riskFactors,
+          tier: policy.tier,
+          platform_fee_cspr: policy.platformFeeCSPR,
+          expires_at: policy.expiresAt,
+          created_at: policy.createdAt,
+          claim_history: policy.claimHistory,
+        }).catch(err => log.warn(`⚠️ Failed to update insurance after claim: ${err.message}`));
+
+        res.json({
+          success: true,
+          claim: {
+            claimId,
+            policyId: policy.policyId,
+            amount: claimAmount,
+            status: claimStatus,
+            reason,
+            revaluation: {
+              previousValue: policy.assessedValue,
+              newValue: currentValue,
+              lossPercent,
+            },
+            confidence: {
+              agentA: valuationAConfidence,
+              agentB: valuationBConfidence,
+            },
           },
-          confidence: {
-            agentA: valuationAConfidence,
-            agentB: valuationBConfidence,
-          },
-        },
-      });
-    } catch (err: any) {
-      log.error('[Insurance Claim] Error:: ' + err.message);
-      res.status(500).json({ success: false, error: sanitizeError(err) });
-    } finally {
-      claimLocks.delete(policyId); // Always release lock
-    }
-  });
+        });
+      } catch (err: any) {
+        log.error('[Insurance Claim] Error:: ' + err.message);
+        res.status(500).json({ success: false, error: sanitizeError(err) });
+      } finally {
+        claimLocks.delete(policyId); // Always release lock
+      }
+    });
 
   /**
    * GET /api/insurance/pool-stats
@@ -3616,10 +3616,10 @@ Respond in JSON format:
   app.post('/api/admin/force-revalue/:loanId', async (req, res) => {
     const adminSecret = process.env.ADMIN_SECRET;
     if (!adminSecret || !req.headers['x-admin-secret'] ||
-        !crypto.timingSafeEqual(
-          Buffer.from(String(req.headers['x-admin-secret']), 'utf-8'),
-          Buffer.from(adminSecret, 'utf-8')
-        )) {
+      !crypto.timingSafeEqual(
+        Buffer.from(String(req.headers['x-admin-secret']), 'utf-8'),
+        Buffer.from(adminSecret, 'utf-8')
+      )) {
       return res.status(403).json({ error: 'Forbidden' });
     }
     const { loanId } = req.params;
@@ -3682,10 +3682,10 @@ Respond in JSON format:
   app.get('/api/admin/loans', (req, res) => {
     const adminSecret = process.env.ADMIN_SECRET;
     if (!adminSecret || !req.headers['x-admin-secret'] ||
-        !crypto.timingSafeEqual(
-          Buffer.from(String(req.headers['x-admin-secret']), 'utf-8'),
-          Buffer.from(adminSecret, 'utf-8')
-        )) {
+      !crypto.timingSafeEqual(
+        Buffer.from(String(req.headers['x-admin-secret']), 'utf-8'),
+        Buffer.from(adminSecret, 'utf-8')
+      )) {
       return res.status(403).json({ error: 'Forbidden' });
     }
     const loans = Array.from(loanStore.values()).map(l => ({
@@ -3715,10 +3715,10 @@ Respond in JSON format:
   const PORT = process.env.ORCHESTRATOR_API_PORT || 3011;
   const { createServer } = await import('node:http');
   const server = createServer(app);
-  
+
   // Attach WebSocket server to the same HTTP server (shared port)
   attachWebSocket(server);
-  
+
   server.listen(PORT, async () => {
     log.info(`Orchestrator API running on http://localhost:${PORT}`);
 
