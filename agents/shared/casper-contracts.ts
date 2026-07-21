@@ -19,6 +19,9 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import * as db from './db.js';
 import { askJuror } from './mimo-client.js';
+import { createLogger } from './logger.js';
+const log = createLogger('Contracts');
+
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -178,7 +181,7 @@ export async function castVoteOnChain(
   weight: number,
 ): Promise<CastVoteResult> {
   if (!VOTING_CONTRACT_HASH) {
-    console.log(`  📝 VotingContract: [NO CONTRACT HASH] cast_vote skipped`);
+    log.info(`VotingContract: [NO CONTRACT HASH] cast_vote skipped`);
     return { success: false, txHash: '', assessmentId, verdictIndex: 0, weight };
   }
 
@@ -199,10 +202,10 @@ export async function castVoteOnChain(
     const deployId = Date.now() + Math.floor(Math.random() * 1000);
     const txHash = await executeContractCall(VOTING_CONTRACT_HASH, 'cast_vote', sessionArgs, deployId);
 
-    console.log(`  📝 VotingContract ✅ cast_vote - ${txHash.slice(0, 16)}...`);
+    log.info(`VotingContract ✅ cast_vote - ${txHash.slice(0, 16)}...`);
     return { success: true, txHash, assessmentId, verdictIndex, weight };
   } catch (err: any) {
-    console.warn(`  ⚠️ VotingContract cast_vote failed: ${err.message}`);
+    log.warn(`VotingContract cast_vote failed: ${err.message}`);
     return { success: false, txHash: '', assessmentId, verdictIndex: 0, weight };
   }
 }
@@ -220,7 +223,7 @@ export async function getVerdictOnChain(assessmentId: string): Promise<{ verdict
     );
     return response.data?.data || null;
   } catch (err: any) {
-    console.warn(`  ⚠️ VotingContract read failed: ${err.message}`);
+    log.warn(`VotingContract read failed: ${err.message}`);
     return null;
   }
 }
@@ -246,7 +249,7 @@ export async function updateReputationOnChain(
   delta: number,
 ): Promise<{ success: boolean; txHash: string }> {
   if (!REPUTATION_CONTRACT_HASH) {
-    console.log(`  🏆 ReputationRegistry: [NO CONTRACT HASH] update_score skipped`);
+    log.info(`ReputationRegistry: [NO CONTRACT HASH] update_score skipped`);
     return { success: false, txHash: '' };
   }
 
@@ -272,10 +275,10 @@ export async function updateReputationOnChain(
     const deployId = Date.now() + Math.floor(Math.random() * 1000);
     const txHash = await executeContractCall(REPUTATION_CONTRACT_HASH, entryPoint, sessionArgs, deployId);
 
-    console.log(`  🏆 ReputationRegistry ✅ ${entryPoint} - ${txHash.slice(0, 16)}...`);
+    log.info(`ReputationRegistry ✅ ${entryPoint} - ${txHash.slice(0, 16)}...`);
     return { success: true, txHash };
   } catch (err: any) {
-    console.warn(`  ⚠️ ReputationRegistry update failed: ${err.message}`);
+    log.warn(`ReputationRegistry update failed: ${err.message}`);
     return { success: false, txHash: '' };
   }
 }
@@ -306,7 +309,7 @@ export async function getReputationsOnChain(): Promise<OnChainReputation[]> {
     }
     return getDefaultReputations();
   } catch (err: any) {
-    console.warn(`  ⚠️ ReputationRegistry read failed: ${err.message}`);
+    log.warn(`ReputationRegistry read failed: ${err.message}`);
     return getDefaultReputations();
   }
 }
@@ -379,7 +382,7 @@ export async function loadVerdictsFromDB(): Promise<void> {
   try {
     const rows = await db.getAllVerdicts();
     if (!rows || rows.length === 0) {
-      console.log('  📡 VerdictOracle: no verdicts in DB');
+      log.info('VerdictOracle: no verdicts in DB');
       return;
     }
     for (const r of rows) {
@@ -396,9 +399,9 @@ export async function loadVerdictsFromDB(): Promise<void> {
       });
     }
     const now = Date.now();
-    console.log(`  📡 VerdictOracle: loaded ${rows.length} verdicts from DB (${rows.filter(v => v.expiry > now).length} fresh)`);
+    log.info(`VerdictOracle: loaded ${rows.length} verdicts from DB (${rows.filter(v => v.expiry > now).length} fresh)`);
   } catch (err: any) {
-    console.warn(`  ⚠️ VerdictOracle: failed to load from DB: ${err.message}`);
+    log.warn(`VerdictOracle: failed to load from DB: ${err.message}`);
   }
 }
 
@@ -415,7 +418,7 @@ export async function loadVerdictsFromDB(): Promise<void> {
 export async function storeVerdictOnChain(verdict: OracleVerdict): Promise<{ success: boolean; txHash: string }> {
   if (!VERDICT_ORACLE_CONTRACT_HASH) {
     // Fallback: store in memory
-    console.log(`  📡 VerdictOracle: [NO CONTRACT HASH] storing in-memory for ${verdict.assetId}`);
+    log.info(`VerdictOracle: [NO CONTRACT HASH] storing in-memory for ${verdict.assetId}`);
     oracleVerdictStore.set(verdict.assetId, verdict);
     // ── DB: Persist verdict to Supabase ──
     db.saveVerdict({
@@ -428,7 +431,7 @@ export async function storeVerdictOnChain(verdict: OracleVerdict): Promise<{ suc
       expiry: verdict.expiry,
       agent_weights: verdict.agentWeights,
       decision: verdict.decision,
-    }).catch(err => console.warn(`  [DB] ⚠️ Failed to save verdict: ${err.message}`));
+    }).catch(err => log.warn(`⚠️ Failed to save verdict: ${err.message}`));
     return { success: true, txHash: `oracle-mem-${Date.now()}` };
   }
 
@@ -446,7 +449,7 @@ export async function storeVerdictOnChain(verdict: OracleVerdict): Promise<{ suc
     const deployId = Date.now() + Math.floor(Math.random() * 1000);
     const txHash = await executeContractCall(VERDICT_ORACLE_CONTRACT_HASH, 'store_verdict', sessionArgs, deployId);
 
-    console.log(`  📡 VerdictOracle ✅ store_verdict - ${txHash.slice(0, 16)}...`);
+    log.info(`VerdictOracle ✅ store_verdict - ${txHash.slice(0, 16)}...`);
     // Also keep in memory for fast reads
     oracleVerdictStore.set(verdict.assetId, verdict);
     // ── DB: Persist verdict to Supabase ──
@@ -460,10 +463,10 @@ export async function storeVerdictOnChain(verdict: OracleVerdict): Promise<{ suc
       expiry: verdict.expiry,
       agent_weights: verdict.agentWeights,
       decision: verdict.decision,
-    }).catch(err => console.warn(`  [DB] ⚠️ Failed to save verdict: ${err.message}`));
+    }).catch(err => log.warn(`⚠️ Failed to save verdict: ${err.message}`));
     return { success: true, txHash };
   } catch (err: any) {
-    console.warn(`  ⚠️ VerdictOracle store_verdict failed: ${err.message}. Storing in-memory.`);
+    log.warn(`VerdictOracle store_verdict failed: ${err.message}. Storing in-memory.`);
     oracleVerdictStore.set(verdict.assetId, verdict);
     // ── DB: Persist verdict to Supabase (fallback) ──
     db.saveVerdict({
@@ -476,7 +479,7 @@ export async function storeVerdictOnChain(verdict: OracleVerdict): Promise<{ suc
       expiry: verdict.expiry,
       agent_weights: verdict.agentWeights,
       decision: verdict.decision,
-    }).catch(e => console.warn(`  [DB] ⚠️ Failed to save verdict (fallback): ${e.message}`));
+    }).catch(e => log.warn(`⚠️ Failed to save verdict (fallback): ${e.message}`));
     return { success: false, txHash: '' };
   }
 }
@@ -500,12 +503,12 @@ export async function getOracleVerdictOnChain(assetId: string): Promise<OracleVe
     // Parse contract state, the exact shape depends on Odra's CLValue encoding
     const state = response.data?.data;
     if (state) {
-      console.log(`  📡 VerdictOracle ✅ read verdict for ${assetId}`);
+      log.info(`VerdictOracle ✅ read verdict for ${assetId}`);
       // For now, return null from chain (complex CLValue parsing), memory store is primary
     }
     return null;
   } catch (err: any) {
-    console.warn(`  ⚠️ VerdictOracle read failed: ${err.message}`);
+    log.warn(`VerdictOracle read failed: ${err.message}`);
     return null;
   }
 }
@@ -610,7 +613,7 @@ export async function loadDisputesFromDB(): Promise<void> {
   try {
     const rows = await db.getAllDisputes();
     if (!rows || rows.length === 0) {
-      console.log('  ⚖️  DisputeEngine: no disputes in DB');
+      log.info('DisputeEngine: no disputes in DB');
       return;
     }
     for (const r of rows) {
@@ -629,9 +632,9 @@ export async function loadDisputesFromDB(): Promise<void> {
         stakeDistribution: r.stake_distribution,
       });
     }
-    console.log(`  ⚖️  DisputeEngine: loaded ${rows.length} disputes from DB`);
+    log.info(`DisputeEngine: loaded ${rows.length} disputes from DB`);
   } catch (err: any) {
-    console.warn(`  ⚠️ DisputeEngine: failed to load from DB: ${err.message}`);
+    log.warn(`DisputeEngine: failed to load from DB: ${err.message}`);
   }
 }
 
@@ -681,8 +684,8 @@ export function createDispute(
     status: dispute.status,
     payment_tx_hash: dispute.paymentTxHash,
     payment_payer: dispute.paymentPayer,
-  }).catch(err => console.warn(`  [DB] ⚠️ Failed to save dispute: ${err.message}`));
-  console.log(`  ⚖️  DisputeEngine: created dispute ${dispute.id} against ${assetId} (stake: ${stakeCSPR} CSPR)`);
+  }).catch(err => log.warn(`⚠️ Failed to save dispute: ${err.message}`));
+  log.info(`DisputeEngine: created dispute ${dispute.id} against ${assetId} (stake: ${stakeCSPR} CSPR)`);
   return dispute;
 }
 
@@ -781,12 +784,12 @@ export async function runRetrial(disputeId: string): Promise<Dispute | { error: 
     status: 'under_retrial',
     payment_tx_hash: dispute.paymentTxHash,
     payment_payer: dispute.paymentPayer,
-  }).catch(err => console.warn(`  [DB] ⚠️ Failed to update dispute status: ${err.message}`));
+  }).catch(err => log.warn(`⚠️ Failed to update dispute status: ${err.message}`));
 
   const assetId = dispute.assetId;
   const original = dispute.originalVerdict;
 
-  console.log(`\n  ⚖️  [RETRIAL] Starting re-trial for dispute ${disputeId} against asset ${assetId}`);
+  log.info(`\n  ⚖️  [RETRIAL] Starting re-trial for dispute ${disputeId} against asset ${assetId}`);
 
   // Independently selected re-trial panel with DIFFERENT methodology orientations
   // These are NOT the same jurors as the original deliberation
@@ -839,9 +842,9 @@ export async function runRetrial(disputeId: string): Promise<Dispute | { error: 
       juror.confidence = Math.min(100, Math.max(0, Number(verdict.confidence) || 60));
       juror.reasoning = String(verdict.reasoning || `${juror.methodology} analysis via ${llmResponse.provider}`);
 
-      console.log(`    👨‍⚖️ [RETRIAL] ${juror.name} (${juror.methodology}): Vote=${juror.vote} | Confidence=${juror.confidence}% | Provider=${llmResponse.provider}`);
+      log.info(`[RETRIAL] ${juror.name} (${juror.methodology}): Vote=${juror.vote} | Confidence=${juror.confidence}% | Provider=${llmResponse.provider}`);
     } catch (err: any) {
-      console.warn(`    ⚠️  [RETRIAL] ${juror.name} failed: ${err.message}`);
+      log.warn(`[RETRIAL] ${juror.name} failed: ${err.message}`);
       // Juror abstains - vote stays as default
     }
   }
@@ -908,7 +911,7 @@ export async function runRetrial(disputeId: string): Promise<Dispute | { error: 
     const stakeMotes = Math.floor(dispute.stakeCSPR * 1e9);
     const transferId = Date.now() + Math.floor(Math.random() * 1000);
     const refundTxHash = await executeCasperTransfer(dispute.challengerKey, stakeMotes, transferId);
-    console.log(`    💰 [STAKE] Challenger wins! ${dispute.stakeCSPR} CSPR returned (deploy_hash: ${refundTxHash}).`);
+    log.info(`[STAKE] Challenger wins! ${dispute.stakeCSPR} CSPR returned (deploy_hash: ${refundTxHash}).`);
 
     dispute.stakeDistribution = [
       { recipient: 'challenger', amountCSPR: dispute.stakeCSPR, txHash: refundTxHash },
@@ -918,7 +921,7 @@ export async function runRetrial(disputeId: string): Promise<Dispute | { error: 
     dispute.stakeDistribution = [
       { recipient: 'original_jurors', amountCSPR: dispute.stakeCSPR },
     ];
-    console.log(`    💰 [STAKE] Verdict upheld. ${dispute.stakeCSPR} CSPR distributed to original jurors.`);
+    log.info(`[STAKE] Verdict upheld. ${dispute.stakeCSPR} CSPR distributed to original jurors.`);
   }
 
   disputeStore.set(disputeId, dispute);
@@ -938,7 +941,7 @@ export async function runRetrial(disputeId: string): Promise<Dispute | { error: 
     stake_distribution: dispute.stakeDistribution,
     payment_tx_hash: dispute.paymentTxHash,
     payment_payer: dispute.paymentPayer,
-  }).catch(err => console.warn(`  [DB] ⚠️ Failed to save resolved dispute: ${err.message}`));
+  }).catch(err => log.warn(`⚠️ Failed to save resolved dispute: ${err.message}`));
 
   // Update the oracle verdict if overturned
   if (overturned) {
@@ -952,10 +955,10 @@ export async function runRetrial(disputeId: string): Promise<Dispute | { error: 
       agentWeights: retrialPanel.map(j => `${j.methodology}:${j.reputation}`).join(','),
     };
     oracleVerdictStore.set(assetId, updatedVerdict);
-    console.log(`    📡 VerdictOracle: verdict UPDATED after overturned dispute - ${newValue.toLocaleString()} (was ${original.value.toLocaleString()})`);
+    log.info(`VerdictOracle: verdict UPDATED after overturned dispute - ${newValue.toLocaleString()} (was ${original.value.toLocaleString()})`);
   }
 
-  console.log(`  ⚖️  [RETRIAL] Complete: dispute=${disputeId} outcome=${dispute.outcome} delta=${valueDelta.toFixed(1)}%`);
+  log.info(`[RETRIAL] Complete: dispute=${disputeId} outcome=${dispute.outcome} delta=${valueDelta.toFixed(1)}%`);
   return dispute;
 }
 

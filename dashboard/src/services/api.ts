@@ -4,6 +4,9 @@
 
 // In dev, empty string uses Vite proxy (/api/* - localhost:3011)
 // In production, set VITE_ORCHESTRATOR_URL to the deployed backend URL
+import { createLogger } from '../utils/logger.js';
+const log = createLogger('API');
+
 export const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || (import.meta.env.PROD ? 'https://verdicto-production.up.railway.app' : '');
 const WS_URL = import.meta.env.VITE_WS_URL || (import.meta.env.PROD ? 'wss://verdicto-production.up.railway.app/ws' : '');
 
@@ -250,7 +253,7 @@ export async function fetchTransactions(): Promise<TransactionEntry[]> {
       explorerUrl: tx.explorerUrl ?? '',
     }));
   } catch (err) {
-    console.error('[API] Failed to fetch transactions:', err);
+    log.error('Failed to fetch transactions: ' + err);
     throw err;
   }
 }
@@ -280,7 +283,7 @@ export async function fetchPredictions(): Promise<PredictionEntry[]> {
     const data = await handleResponse<{ success: boolean; predictions: PredictionEntry[] }>(res);
     return data.predictions || [];
   } catch (err) {
-    console.error('[API] Failed to fetch predictions:', err);
+    log.error('Failed to fetch predictions: ' + err);
     throw err;
   }
 }
@@ -496,7 +499,7 @@ export async function fetchDemoAssets(): Promise<DemoAsset[]> {
     // If backend returned data, use it; otherwise fall back to frontend demos
     return assets.length > 0 ? assets : FALLBACK_DEMOS;
   } catch (err) {
-    console.warn('[API] Backend unreachable, using built-in demo assets');
+    log.warn('Backend unreachable, using built-in demo assets');
     return FALLBACK_DEMOS;
   }
 }
@@ -571,7 +574,7 @@ export async function fetchContractState(): Promise<ContractState | null> {
     const data = await handleResponse<{ success: boolean; state: ContractState }>(res);
     return data.state || null;
   } catch (err) {
-    console.error('[API] Failed to fetch contract state:', err);
+    log.error('Failed to fetch contract state: ' + err);
     return null;
   }
 }
@@ -591,7 +594,7 @@ export function createWebSocket(onMessage: (msg: WSMessage) => void): WebSocket 
   const ws = new WebSocket(wsUrl);
 
   ws.onopen = () => {
-    console.log('[WS] Connected to orchestrator');
+    log.info('WS connected to orchestrator');
   };
 
   ws.onmessage = (event) => {
@@ -599,7 +602,7 @@ export function createWebSocket(onMessage: (msg: WSMessage) => void): WebSocket 
       const data = JSON.parse(event.data);
       onMessage(data);
     } catch (err) {
-      console.warn('[WS] Failed to parse message:', err);
+      log.warn('WS failed to parse message: ' + err);
     }
   };
 
@@ -608,7 +611,7 @@ export function createWebSocket(onMessage: (msg: WSMessage) => void): WebSocket 
   };
 
   ws.onclose = () => {
-    console.log('[WS] Disconnected');
+    log.info('WS disconnected');
   };
 
   return ws;
@@ -660,7 +663,7 @@ export async function fetchLoans(borrowerPublicKey?: string): Promise<Loan[]> {
     const data = await handleResponse<{ success: boolean; loans: Loan[] }>(res);
     return data.loans || [];
   } catch (err) {
-    console.error('[API] Failed to fetch loans:', err);
+    log.error('Failed to fetch loans: ' + err);
     return [];
   }
 }
@@ -674,7 +677,7 @@ export async function fetchLoan(loanId: string): Promise<Loan | null> {
     const data = await handleResponse<{ success: boolean; loan: Loan }>(res);
     return data.loan || null;
   } catch (err) {
-    console.error('[API] Failed to fetch loan:', err);
+    log.error('Failed to fetch loan: ' + err);
     return null;
   }
 }
@@ -840,7 +843,7 @@ export async function fetchInsurancePolicies(ownerPublicKey?: string): Promise<I
     const data = await handleResponse<{ success: boolean; policies: InsurancePolicy[] }>(res);
     return data.policies || [];
   } catch (err) {
-    console.error('[API] Failed to fetch insurance policies:', err);
+    log.error('Failed to fetch insurance policies: ' + err);
     return [];
   }
 }
@@ -854,7 +857,7 @@ export async function fetchInsurancePolicy(policyId: string): Promise<InsuranceP
     const data = await handleResponse<{ success: boolean; policy: InsurancePolicy }>(res);
     return data.policy || null;
   } catch (err) {
-    console.error('[API] Failed to fetch insurance policy:', err);
+    log.error('Failed to fetch insurance policy: ' + err);
     return null;
   }
 }
@@ -898,7 +901,7 @@ export async function fetchInsurancePoolStats(): Promise<InsurancePoolStats | nu
     const data = await handleResponse<{ success: boolean; pool: InsurancePoolStats }>(res);
     return data.pool || null;
   } catch (err) {
-    console.error('[API] Failed to fetch insurance pool stats:', err);
+    log.error('Failed to fetch insurance pool stats: ' + err);
     return null;
   }
 }
@@ -923,7 +926,7 @@ export async function fetchReputations(): Promise<OnChainReputation[]> {
     const data = await handleResponse<{ success: boolean; reputations: OnChainReputation[] }>(res);
     return data.reputations || [];
   } catch (err) {
-    console.error('[API] Failed to fetch reputations:', err);
+    log.error('Failed to fetch reputations: ' + err);
     return [];
   }
 }

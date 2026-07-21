@@ -23,6 +23,9 @@ import React, {
 } from 'react';
 import { makeCsprTransferDeploy, Deploy, PublicKey } from 'casper-js-sdk';
 import { ORCHESTRATOR_URL } from '../services/api';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('Wallet');
 
 /* ---------- Types (matching Casper Wallet SDK) ---------- */
 
@@ -330,16 +333,16 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     // ── Debug: log the exact type/shape of the wallet signature ──
     const rawSig: any = result.signature as any;
-    console.log('[signPayment] result.signature type:', typeof result.signature);
-    console.log('[signPayment] result.signature constructor:', rawSig?.constructor?.name);
-    console.log('[signPayment] result.signature:', rawSig);
-    console.log('[signPayment] result.signature length:', rawSig?.length);
+    log.debug('signature type: ' + typeof result.signature);
+    log.debug('signature constructor: ' + rawSig?.constructor?.name);
+    log.debug('signature raw:', rawSig);
+    log.debug('signature length: ' + rawSig?.length);
     if (rawSig instanceof Uint8Array) {
-      console.log('[signPayment] - Signature is Uint8Array, length:', rawSig.length);
+      log.debug('Signature is Uint8Array, length: ' + rawSig.length);
     } else if (typeof rawSig === 'string') {
-      console.log('[signPayment] - Signature is string, first 40 chars:', rawSig.substring(0, 40));
+      log.debug('Signature is string, first 40: ' + rawSig.substring(0, 40));
     } else if (Array.isArray(rawSig)) {
-      console.log('[signPayment] - Signature is Array, length:', rawSig.length);
+      log.debug('Signature is Array, length: ' + rawSig.length);
     }
 
     // Convert signature to Uint8Array regardless of input format
@@ -361,7 +364,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
       throw new Error(`Unexpected signature type: ${typeof sig}`);
     }
 
-    console.log('[signPayment] sigBytes length:', sigBytes.length, 'first bytes:', Array.from(sigBytes.slice(0, 10)));
+    log.debug('sigBytes length: ' + sigBytes.length + ' first: ' + Array.from(sigBytes.slice(0, 10)));
 
     // ── Prepend key-type tag if missing ──
     // Casper RPC expects the signature to include the algorithm prefix byte:
@@ -375,15 +378,15 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
       taggedSigBytes = new Uint8Array(65);
       taggedSigBytes[0] = keyTypeTag;
       taggedSigBytes.set(sigBytes, 1);
-      console.log('[signPayment] Prepended key-type tag:', keyTypeTag.toString(16), '- 65 bytes');
+      log.debug('Prepended key-type tag: 0x' + keyTypeTag.toString(16) + ' - 65 bytes');
     } else if (sigBytes.length === 65 && (sigBytes[0] === 0x01 || sigBytes[0] === 0x02)) {
       // Already has the tag
       taggedSigBytes = sigBytes;
-      console.log('[signPayment] Signature already has key-type tag:', sigBytes[0].toString(16));
+      log.debug('Signature already has key-type tag: 0x' + sigBytes[0].toString(16));
     } else {
       // Unknown format — pass through and hope for the best
       taggedSigBytes = sigBytes;
-      console.warn('[signPayment] Unexpected signature length:', sigBytes.length, '- passing through');
+      log.warn('Unexpected signature length: ' + sigBytes.length + ' - passing through');
     }
 
     const signedDeploy = Deploy.setSignature(deploy, taggedSigBytes, PublicKey.fromHex(publicKey));
@@ -409,12 +412,12 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
       if (relayResult.success && relayResult.deployHash) {
         confirmedHash = relayResult.deployHash;
         broadcastSuccess = true;
-        console.log('✅ Deploy broadcast via relay:', confirmedHash.substring(0, 16) + '...');
+        log.info('Deploy broadcast via relay: ' + confirmedHash.substring(0, 16) + '...');
       } else {
         // Broadcast failed — the deploy was signed but NOT submitted to chain.
         // Throw so the user knows the payment didn't go through.
         const errMsg = relayResult.error || 'Unknown relay error';
-        console.error('❌ Relay broadcast failed:', errMsg);
+        log.error('Relay broadcast failed: ' + errMsg);
         throw new Error(`Payment broadcast failed: ${errMsg}. The deploy was signed but NOT submitted to the chain. Please try again.`);
       }
     } catch (relayErr: any) {
@@ -423,7 +426,7 @@ export const CSPRClickProvider: React.FC<{ children: ReactNode }> = ({ children 
         throw relayErr;
       }
       // Network/fetch error — relay endpoint might be down
-      console.error('❌ Deploy relay unreachable:', relayErr);
+      log.error('Deploy relay unreachable: ' + relayErr);
       throw new Error(`Payment relay is unreachable (${relayErr.message || 'network error'}). The deploy was signed but NOT submitted to the chain. Please check your connection and try again.`);
     }
 

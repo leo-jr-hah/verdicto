@@ -17,6 +17,9 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { casperX402Middleware } from './x402-middleware.js';
 import { askJuror, sanitizeForPrompt } from './mimo-client.js';
 import type { AssetType } from './types.js';
+import { createLogger } from './logger.js';
+const log = createLogger('Juror');
+
 
 export interface JurorConfig {
   name: string;
@@ -140,9 +143,9 @@ Analyze the evidence from your perspective.`;
         userPrompt += `\n\nThis is ROUND 2 of deliberation. Here is what your peers said in Round 1:\n${sanitizedReasoning}\nGiven your peers' reasoning, do you maintain your position or shift your vote? Explain why.`;
       }
 
-      console.log(`[${config.name}] 🤔 Reasoning about assessment ${assessment_id} (${resolvedAssetType}, Round ${isRound2 ? 2 : 1})...`);
+      log.info(`[${config.name}] 🤔 Reasoning about assessment ${assessment_id} (${resolvedAssetType}, Round ${isRound2 ? 2 : 1})...`);
       const { result: llmResponse, provider: llmProvider, fallbackTriggered } = await askJuror(systemPrompt, userPrompt);
-      console.log(`[${config.name}] ✅ Reached verdict: ${llmResponse.vote} (provider: ${llmProvider}${fallbackTriggered ? ', FALLBACK' : ''})`);
+      log.info(`[${config.name}] ✅ Reached verdict: ${llmResponse.vote} (provider: ${llmProvider}${fallbackTriggered ? ', FALLBACK' : ''})`);
 
       return {
         content: [{ type: 'text', text: JSON.stringify({ ...llmResponse, _provider: llmProvider, _fallbackTriggered: fallbackTriggered }, null, 2) }],
@@ -190,7 +193,7 @@ Respond in JSON format:
       await mcpServer.connect(transport);
       await transport.handleRequest(req, res, req.body);
     } catch (err: any) {
-      console.error(`[Express] Error in /mcp: ${err.message}`, err);
+      log.error(`[Express] Error in /mcp: ${err.message}: ${err}`);
       res.status(500).json({ error: err.message });
     }
   });
@@ -200,7 +203,7 @@ Respond in JSON format:
   });
 
   app.listen(config.port, () => {
-    console.log(`⚖️  ${config.name} (Juror) running on :${config.port}`);
+    log.info(`${config.name} (Juror) running on :${config.port}`);
   });
 
   return app;

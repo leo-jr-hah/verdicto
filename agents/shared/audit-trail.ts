@@ -1,4 +1,7 @@
 import { createHmac, randomUUID, createHash, timingSafeEqual } from 'crypto';
+import { createLogger } from './logger.js';
+
+const log = createLogger('Audit');
 
 export interface DeliberationReceipt {
   receiptId: string; // UUID
@@ -76,7 +79,7 @@ export function verifyReceiptChain(
 
     // 1. Verify temporal chaining (skip genesis receipt)
     if (i > 0 && r.previousReceiptId !== receipts[i - 1].receiptId) {
-      console.error(`  [Audit] Chain broken at receipt ${i}: expected prev=${receipts[i - 1].receiptId}, got ${r.previousReceiptId}`);
+      log.error(`Chain broken at receipt ${i}: expected prev=${receipts[i - 1].receiptId}, got ${r.previousReceiptId}`);
       return false;
     }
 
@@ -86,7 +89,7 @@ export function verifyReceiptChain(
     const expectedSignature = createHmac('sha256', hmacKey).update(receiptData).digest('hex');
 
     if (!timingSafeEqual(Buffer.from(r.signature, 'hex'), Buffer.from(expectedSignature, 'hex'))) {
-      console.error(`  [Audit] Signature mismatch on receipt ${i} (${r.receiptId})`);
+      log.error(`Signature mismatch on receipt ${i} (${r.receiptId})`);
       return false;
     }
   }

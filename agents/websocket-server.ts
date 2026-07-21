@@ -1,6 +1,9 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import type { Server } from 'http';
 import type { IncomingMessage } from 'http';
+import { createLogger } from './shared/logger.js';
+const log = createLogger('WS');
+
 
 const clients = new Set<WebSocket>();
 
@@ -32,7 +35,7 @@ export function attachWebSocket(server: Server) {
   });
 
   wss.on('connection', (ws) => {
-    console.log('[WebSocket] Dashboard client connected');
+    log.info('[WebSocket] Dashboard client connected');
     clients.add(ws);
     if (connectionCallback) {
       connectionCallback();
@@ -40,17 +43,17 @@ export function attachWebSocket(server: Server) {
     }
 
     ws.on('error', (err) => {
-      console.error('[WebSocket] Client error:', err.message);
+      log.error('[WebSocket] Client error:: ' + err.message);
       clients.delete(ws);
     });
 
     ws.on('close', () => {
-      console.log('[WebSocket] Dashboard client disconnected');
+      log.info('[WebSocket] Dashboard client disconnected');
       clients.delete(ws);
     });
   });
 
-  console.log('[WebSocket] Attached to HTTP server on /ws');
+  log.info('[WebSocket] Attached to HTTP server on /ws');
 }
 
 export function waitForConnection(callback: () => void) {
@@ -58,7 +61,7 @@ export function waitForConnection(callback: () => void) {
     callback();
   } else {
     connectionCallback = callback;
-    console.log('[WebSocket] Waiting for dashboard client to connect...');
+    log.info('[WebSocket] Waiting for dashboard client to connect...');
   }
 }
 

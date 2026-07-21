@@ -8,6 +8,9 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createLogger } from './logger.js';
+
+const log = createLogger('TxLog');
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOG_FILE = path.resolve(__dirname, '../../data/transactions.json');
@@ -59,7 +62,7 @@ export function saveTransaction(entry: TransactionEntry): void {
     ensureDataDir();
     fs.writeFileSync(LOG_FILE, JSON.stringify(transactions, null, 2));
   }).catch((err: Error) => {
-    console.error('[TransactionLog] Write failed:', err.message);
+    log.error(`Write failed: ${err.message}`);
   });
 }
 

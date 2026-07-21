@@ -26,6 +26,9 @@ import {
 } from './data-sources.js';
 import { askValuationAgent, sanitizeForPrompt } from './mimo-client.js';
 import type { ValuationResult, AssetType } from './types.js';
+import { createLogger } from './logger.js';
+const log = createLogger('AgentEngine');
+
 
 // ─── Agent Specialization Prompts ────────────────────────────────────────────
 // Each agent has a distinct personality and analytical framework.
@@ -786,7 +789,7 @@ export function createAgentServer(config: AgentServerConfig): void {
         sqft?: number;
       };
 
-      console.log(`[${config.name}] Received valuation request:`, request);
+      log.info(`[${config.name}] Received valuation request:: ${request}`);
 
       // Run the appropriate single-agent method
       let result: ValuationResult;
@@ -811,18 +814,18 @@ export function createAgentServer(config: AgentServerConfig): void {
           throw new Error(`Unsupported asset type: ${request.assetType}`);
       }
 
-      console.log(`[${config.name}] Valuation complete: ${result.estimated_value.toLocaleString()}`);
+      log.info(`[${config.name}] Valuation complete: ${result.estimated_value.toLocaleString()}`);
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(result));
     } catch (err) {
-      console.error(`[${config.name}] Error:`, err);
+      log.error(`[${config.name}] Error:: ${err}`);
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: (err as Error).message }));
     }
   });
 
   server.listen(config.port, () => {
-    console.log(`[${config.name}] Listening on port ${config.port}`);
+    log.info(`[${config.name}] Listening on port ${config.port}`);
   });
 }

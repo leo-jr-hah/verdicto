@@ -9,6 +9,9 @@ import Groq from 'groq-sdk';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createLogger } from './logger.js';
+const log = createLogger('MiMo');
+
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -167,22 +170,22 @@ export interface JurorResponse {
 export async function askJuror(systemPrompt: string, userPrompt: string): Promise<JurorResponse> {
   // Step 1: Try Groq
   try {
-    console.log(`[LLM] 🤖 Trying Groq (${GROQ_MODEL})...`);
+    log.info(`[LLM] 🤖 Trying Groq (${GROQ_MODEL})...`);
     const result = await callGroq(systemPrompt, userPrompt);
-    console.log(`[LLM] ✅ Groq responded (${result.tokensUsed} tokens)`);
+    log.info(`[LLM] ✅ Groq responded (${result.tokensUsed} tokens)`);
 
     try {
       return { result: JSON.parse(result.content), provider: 'groq', fallbackTriggered: false };
     } catch {
-      console.warn(`[LLM] ⚠️  Groq returned non-JSON, using fallback`);
+      log.warn(`[LLM] ⚠️  Groq returned non-JSON, using fallback`);
       return { result: buildFallbackResponse(userPrompt), provider: 'heuristic', fallbackTriggered: true };
     }
   } catch (groqErr: any) {
-    console.warn(`[LLM] ⚠️  Groq failed: ${groqErr.message} - using fallback`);
+    log.warn(`[LLM] ⚠️  Groq failed: ${groqErr.message} - using fallback`);
   }
 
   // Step 2: Heuristic fallback
-  console.log(`[LLM] 🔄 Using heuristic fallback`);
+  log.info(`[LLM] 🔄 Using heuristic fallback`);
   return { result: buildFallbackResponse(userPrompt), provider: 'heuristic', fallbackTriggered: true };
 }
 

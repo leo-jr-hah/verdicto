@@ -1,5 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
+import { createLogger } from './logger.js';
+const log = createLogger('X402');
+
 
 const CSPR_CLOUD_URL = process.env.CSPRCLOUD_BASE_URL || 'https://api.testnet.cspr.cloud';
 const CSPR_CLOUD_KEY = process.env.CSPRCLOUD_API_KEY || '';
@@ -22,7 +25,7 @@ const DEPLOY_HASH_RE = /^[0-9a-f]{64}$/i;
  */
 async function verifyDeployOnChain(deployHash: string): Promise<boolean> {
   if (!CSPR_CLOUD_KEY) {
-    console.error(`  [x402] ❌ No CSPRCLOUD_API_KEY - cannot verify deploy, REJECTING`);
+    log.error(`[x402] ❌ No CSPRCLOUD_API_KEY - cannot verify deploy, REJECTING`);
     return false;
   }
 
@@ -40,15 +43,15 @@ async function verifyDeployOnChain(deployHash: string): Promise<boolean> {
       const status = res.data?.data?.status || res.data?.status;
       if (status === 'processed') {
         if (attempt > 1) {
-          console.log(`  [x402] ✅ Deploy ${deployHash.substring(0, 16)}... confirmed on attempt ${attempt}`);
+          log.info(`[x402] ✅ Deploy ${deployHash.substring(0, 16)}... confirmed on attempt ${attempt}`);
         }
         return true;
       }
       // Deploy exists but not yet processed — retry if we have attempts left
-      console.log(`  [x402] ⏳ Deploy ${deployHash.substring(0, 16)}... status: ${status || 'unknown'} (attempt ${attempt}/${MAX_RETRIES})`);
+      log.info(`[x402] ⏳ Deploy ${deployHash.substring(0, 16)}... status: ${status || 'unknown'} (attempt ${attempt}/${MAX_RETRIES})`);
     } catch {
       // Deploy not found yet or network error — retry if we have attempts left
-      console.log(`  [x402] ⏳ Deploy ${deployHash.substring(0, 16)}... not found yet (attempt ${attempt}/${MAX_RETRIES})`);
+      log.info(`[x402] ⏳ Deploy ${deployHash.substring(0, 16)}... not found yet (attempt ${attempt}/${MAX_RETRIES})`);
     }
 
     if (attempt < MAX_RETRIES) {
@@ -57,7 +60,7 @@ async function verifyDeployOnChain(deployHash: string): Promise<boolean> {
     }
   }
 
-  console.error(`  [x402] ❌ Deploy ${deployHash.substring(0, 16)}... NOT confirmed after ${MAX_RETRIES} attempts`);
+  log.error(`[x402] ❌ Deploy ${deployHash.substring(0, 16)}... NOT confirmed after ${MAX_RETRIES} attempts`);
   return false;
 }
 

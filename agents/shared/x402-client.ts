@@ -8,6 +8,9 @@ import {
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import { createLogger } from './logger.js';
+const log = createLogger('X402Client');
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Casper x402 Facilitator API endpoint
@@ -43,7 +46,7 @@ export async function fetchWithX402(url: string, payload: any, agentLabel: strin
     return res.data;
   } catch (err: any) {
     if (err.response && err.response.status === 402) {
-      console.log(`  [x402] 🛑 402 Payment Required from ${agentLabel}`);
+      log.info(`[x402] 🛑 402 Payment Required from ${agentLabel}`);
       
       // Parse payment requirements from response
       const requirements = err.response.data?.paymentRequirements || {};
@@ -55,12 +58,12 @@ export async function fetchWithX402(url: string, payload: any, agentLabel: strin
       // Validate fee before proceeding - prevent overcharging
       const validatedFee = validateFee(feeCSPR);
       
-      console.log(`  [x402]    Fee: ${validatedFee} CSPR on ${network}`);
-      console.log(`  [x402]    Pay to: ${destinationAddress.substring(0, 16)}...`);
-      console.log(`  [x402]    Scheme: ${scheme}`);
+      log.info(`[x402]    Fee: ${validatedFee} CSPR on ${network}`);
+      log.info(`[x402]    Pay to: ${destinationAddress.substring(0, 16)}...`);
+      log.info(`[x402]    Scheme: ${scheme}`);
 
       // Step 1: Verify payment requirements with facilitator
-      console.log(`  [x402] Verifying payment requirements...`);
+      log.info(`[x402] Verifying payment requirements...`);
       const verifyPayload = {
         paymentRequirements: requirements,
         payer: process.env.DEPLOYER_PUBLIC_KEY
@@ -77,7 +80,7 @@ export async function fetchWithX402(url: string, payload: any, agentLabel: strin
       }
       
       // Step 2: Create signed payment payload
-      console.log(`  [x402] Creating signed payment payload...`);
+      log.info(`[x402] Creating signed payment payload...`);
       const paymentPayload = await createCasperPaymentPayload(
         destinationAddress,
         String(validatedFee),
@@ -85,7 +88,7 @@ export async function fetchWithX402(url: string, payload: any, agentLabel: strin
       );
       
       // Step 3: Settle payment via facilitator
-      console.log(`  [x402] Settling payment via facilitator...`);
+      log.info(`[x402] Settling payment via facilitator...`);
       const settlePayload = {
         paymentRequirements: requirements,
         paymentPayload: paymentPayload
@@ -101,7 +104,7 @@ export async function fetchWithX402(url: string, payload: any, agentLabel: strin
       if (!deployHash || typeof deployHash !== 'string' || !DEPLOY_HASH_RE.test(deployHash)) {
         throw new Error('Facilitator returned invalid deploy hash');
       }
-      console.log(`  [x402] ✅ Payment settled! deploy_hash: ${deployHash}`);
+      log.info(`[x402] ✅ Payment settled! deploy_hash: ${deployHash}`);
       
       // Step 4: Retry original request with payment proof
       const paymentProof = {
@@ -122,7 +125,7 @@ export async function fetchWithX402(url: string, payload: any, agentLabel: strin
         timeout: 30_000,
       });
       
-      console.log(`  [x402] ✅ Payment accepted, response received`);
+      log.info(`[x402] ✅ Payment accepted, response received`);
       return retryRes.data;
     }
     throw err;

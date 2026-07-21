@@ -1,4 +1,7 @@
 import { createHash } from 'crypto';
+import { createLogger } from './logger.js';
+const log = createLogger('VerifiableExec');
+
 
 const MINIMUM_TRANSFER_MOTES = '10000000000'; // 10 CSPR - minimum for testnet self-transfer
 const DEPLOY_PAYMENT_MOTES = 100_000_000;      // 0.1 CSPR - standard deploy cost
@@ -50,7 +53,7 @@ export async function storeCommitmentOnCasper(
   commitment: ExecutionCommitment,
   contractHash: string
 ) {
-  console.log(`  🔗 [HashCommitment] Anchoring commitment ${commitment.commitment.slice(0, 16)}... to Casper`);
+  log.info(`🔗 [HashCommitment] Anchoring commitment ${commitment.commitment.slice(0, 16)}... to Casper`);
   
   try {
     // Import casper-js-sdk v5.x APIs
@@ -78,7 +81,7 @@ export async function storeCommitmentOnCasper(
     }
     const stat = fs.statSync(absoluteKeyPath);
     if (stat.mode & 0o077) {
-      console.warn(`  ⚠️ Key file has overly permissive permissions (${stat.mode.toString(8)}). Consider: chmod 600 ${absoluteKeyPath}`);
+      log.warn(`Key file has overly permissive permissions (${stat.mode.toString(8)}). Consider: chmod 600 ${absoluteKeyPath}`);
     }
     const pemContent = fs.readFileSync(absoluteKeyPath, 'utf8');
     const privateKey = PrivateKey.fromPem(pemContent, KeyAlgorithm.ED25519);
@@ -113,10 +116,10 @@ export async function storeCommitmentOnCasper(
         ? result.hash
         : 'unknown';
     
-    console.log(`  🔗 [HashCommitment] ✅ Commitment anchored! tx_hash: ${txHash}`);
+    log.info(`🔗 [HashCommitment] ✅ Commitment anchored! tx_hash: ${txHash}`);
     return txHash;
   } catch (err: any) {
-    console.error(`  🔗 [HashCommitment] ❌ On-chain commitment storage FAILED: ${err.message}`);
+    log.error(`🔗 [HashCommitment] ❌ On-chain commitment storage FAILED: ${err.message}`);
     throw new Error(`Hash commitment failed: ${err.message}`);
   }
 }

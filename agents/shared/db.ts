@@ -13,6 +13,9 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createLogger } from './logger.js';
+
+const log = createLogger('DB');
 
 // ─── Client Initialization ──────────────────────────────────────────────────
 
@@ -52,7 +55,7 @@ async function getClient(): Promise<SupabaseClient | null> {
     auth: { persistSession: false },
     realtime: realtimeOptions,
   });
-  console.log(`  [DB] ✅ Supabase client initialized (${SUPABASE_URL})`);
+  log.info(`Supabase client initialized (${SUPABASE_URL})`);
   return _client;
 }
 
@@ -67,10 +70,10 @@ async function upsert(table: string, row: Record<string, any>, onConflict?: stri
       .from(table)
       .upsert(row, { onConflict: onConflict || undefined });
     if (error) {
-      console.error(`  [DB] ❌ Upsert into ${table} failed:`, error.message);
+      log.error(`Upsert into ${table} failed: ${error.message}`);
     }
   } catch (err: any) {
-    console.error(`  [DB] ❌ Upsert into ${table} exception:`, err.message);
+    log.error(`Upsert into ${table} exception: ${err.message}`);
   }
 }
 
@@ -81,10 +84,10 @@ async function insert(table: string, row: Record<string, any>) {
   try {
     const { error } = await client.from(table).insert(row);
     if (error) {
-      console.error(`  [DB] ❌ Insert into ${table} failed:`, error.message);
+      log.error(`Insert into ${table} failed: ${error.message}`);
     }
   } catch (err: any) {
-    console.error(`  [DB] ❌ Insert into ${table} exception:`, err.message);
+    log.error(`Insert into ${table} exception: ${err.message}`);
   }
 }
 
@@ -102,12 +105,12 @@ async function select(table: string, filters: Record<string, any>, order?: { col
     }
     const { data, error } = await query;
     if (error) {
-      console.error(`  [DB] ❌ Select from ${table} failed:`, error.message);
+      log.error(`Select from ${table} failed: ${error.message}`);
       return null;
     }
     return data;
   } catch (err: any) {
-    console.error(`  [DB] ❌ Select from ${table} exception:`, err.message);
+    log.error(`Select from ${table} exception: ${err.message}`);
     return null;
   }
 }
@@ -457,7 +460,7 @@ export async function getTransactionsFromDb(limit = 200): Promise<DbTransaction[
       .order('timestamp', { ascending: false })
       .limit(limit);
     if (error) {
-      console.error('  [DB] ❌ Select transactions failed:', error.message);
+      log.error(`Select transactions failed: ${error.message}`);
       return [];
     }
     return (data || []).map(row => ({
@@ -465,7 +468,7 @@ export async function getTransactionsFromDb(limit = 200): Promise<DbTransaction[
       metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
     }));
   } catch (err: any) {
-    console.error('  [DB] ❌ Select transactions exception:', err.message);
+    log.error(`Select transactions exception: ${err.message}`);
     return [];
   }
 }
@@ -476,10 +479,10 @@ export async function deleteTransaction(id: string): Promise<void> {
   try {
     const { error } = await client.from('transactions').delete().eq('id', id);
     if (error) {
-      console.error(`  [DB] ❌ Delete transaction ${id} failed:`, error.message);
+      log.error(`Delete transaction ${id} failed: ${error.message}`);
     }
   } catch (err: any) {
-    console.error(`  [DB] ❌ Delete transaction ${id} exception:`, err.message);
+    log.error(`Delete transaction ${id} exception: ${err.message}`);
   }
 }
 
@@ -521,7 +524,7 @@ export async function getPredictionsFromDb(limit = 100): Promise<DbPrediction[]>
       .order('created_at', { ascending: false })
       .limit(limit);
     if (error) {
-      console.error('  [DB] ❌ Select predictions failed:', error.message);
+      log.error(`Select predictions failed: ${error.message}`);
       return [];
     }
     return (data || []).map(row => ({
@@ -530,7 +533,7 @@ export async function getPredictionsFromDb(limit = 100): Promise<DbPrediction[]>
       risk_factors: typeof row.risk_factors === 'string' ? JSON.parse(row.risk_factors) : row.risk_factors,
     }));
   } catch (err: any) {
-    console.error('  [DB] ❌ Select predictions exception:', err.message);
+    log.error(`Select predictions exception: ${err.message}`);
     return [];
   }
 }

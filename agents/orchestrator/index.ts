@@ -22,14 +22,14 @@ function validateEnv() {
   const missing = REQUIRED_ENV.filter(k => !process.env[k]);
   if (missing.length > 0) {
     console.error(`\n❌ Missing required environment variables:\n   ${missing.map(k => `  • ${k}`).join('\n')}\n`);
-    console.error('   Copy .env.example to .env and fill in the values.\n');
+    log.error('Copy .env.example to .env and fill in the values.\n');
     process.exit(1);
   }
   const optionalPresent = OPTIONAL_ENV.filter(k => process.env[k]);
   if (optionalPresent.length > 0) {
-    console.log(`✅ Optional env vars configured: ${optionalPresent.join(', ')}`);
+    log.info(`Optional env vars configured: ${optionalPresent.join(', ')}`);
   }
-  console.log('✅ All required environment variables present.\n');
+  log.info('All required environment variables present.\n');
 }
 validateEnv();
 
@@ -70,7 +70,7 @@ function saveTransaction(entry: ReturnType<typeof createTransactionEntry>) {
     explorer_url: entry.explorerUrl,
     on_chain: entry.onChain,
     metadata: entry.metadata,
-  }).catch(err => console.warn(`  [DB] ⚠️ Failed to save transaction to Supabase: ${err.message}`));
+  }).catch(err => log.warn(`⚠️ Failed to save transaction to Supabase: ${err.message}`));
 }
 
 /** Load transactions from both Supabase and file, merged and deduplicated by id */
@@ -111,6 +111,9 @@ async function loadTransactions() {
   return merged;
 }
 import type { AssetType } from '../shared/types.js';
+import { createLogger } from '../shared/logger.js';
+const log = createLogger('Orchestrator');
+
 
 // ─── Named constants ─────────────────────────────────────────────────────────
 const CSPR_CLOUD_URL = process.env.CSPRCLOUD_BASE_URL || 'https://api.testnet.cspr.cloud';
@@ -216,16 +219,16 @@ async function fetchOnChainReputation(agentId: string): Promise<number> {
       }) as any;
       const value = parseInt(res.content[0]?.text ?? '0', 10);
       if (!isNaN(value)) {
-        console.log(`  [ReputationRegistry] ✅ On-chain reputation for ${agentId}: ${value}`);
+        log.info(`[ReputationRegistry] ✅ On-chain reputation for ${agentId}: ${value}`);
         return value;
       }
     } catch (err: any) {
-      console.log(`  [ReputationRegistry] ⚠️ MCP query failed: ${err.message}`);
+      log.info(`[ReputationRegistry] ⚠️ MCP query failed: ${err.message}`);
     }
   }
 
   const fallback = parseInt(process.env[envKey] || '700', 10);
-  console.log(`  [ReputationRegistry] Using env fallback ${envKey}: ${fallback}`);
+  log.info(`[ReputationRegistry] Using env fallback ${envKey}: ${fallback}`);
   return fallback;
 }
 
@@ -241,7 +244,7 @@ function parseSseResponse(raw: string): any {
       try {
         return JSON.parse(payload);
       } catch {
-        console.warn(`  [SSE] Failed to parse data payload: ${payload.substring(0, 120)}...`);
+        log.warn(`[SSE] Failed to parse data payload: ${payload.substring(0, 120)}...`);
         return raw;
       }
     }
@@ -326,21 +329,21 @@ async function callMcpToolWithX402(port: number, agentLabel: string, toolName: s
   const url = new URL(`http://localhost:${port}/mcp`);
   const transport = new StreamableHTTPClientTransport(url, {
     fetch: async (input, init) => {
-      console.log(`  [x402] MCP Client calling ${url} (${toolName})`);
+      log.info(`[x402] MCP Client calling ${url} (${toolName})`);
       let res = await fetch(input, init);
       
       if (res.status === 402) {
         const errorData: any = await res.clone().json();
         const reqs = errorData.paymentRequirements || { maxAmountRequired: '2.5', payTo: 'fallback-address' };
-        console.log(`  [x402] 🛑 402 Payment Required from ${agentLabel}`);
-        console.log(`  [x402]    Fee: ${reqs.maxAmountRequired} CSPR - ${reqs.payTo.slice(0, 16)}...`);
+        log.info(`[x402] 🛑 402 Payment Required from ${agentLabel}`);
+        log.info(`[x402]    Fee: ${reqs.maxAmountRequired} CSPR - ${reqs.payTo.slice(0, 16)}...`);
 
         const transferId = Date.now() + Math.floor(Math.random() * 1000);
-        console.log(`  [x402] 💸 Executing CSPR transfer via CSPR.cloud...`);
+        log.info(`[x402] 💸 Executing CSPR transfer via CSPR.cloud...`);
 
         const amountMotes = Math.floor(parseFloat(reqs.maxAmountRequired) * 1e9);
         const deployHash = await executeCasperTransfer(reqs.payTo, amountMotes, transferId);
-        console.log(`  [x402] ✅ Transfer confirmed! deploy_hash: ${deployHash.slice(0, 16)}...`);
+        log.info(`[x402] ✅ Transfer confirmed! deploy_hash: ${deployHash.slice(0, 16)}...`);
 
         const x402Tx = createTransactionEntry(
           'x402 Payment',
@@ -361,7 +364,7 @@ async function callMcpToolWithX402(port: number, agentLabel: string, toolName: s
           network: 'casper-test',
         })).toString('base64');
 
-        console.log(`  [x402] 🔄 Retrying POST ${url} with payment proof...`);
+        log.info(`[x402] 🔄 Retrying POST ${url} with payment proof...`);
         const headers = new Headers(init?.headers);
         headers.set('x-payment-proof', proof);
         
@@ -391,7 +394,7 @@ interface McpToolResult {
 
 async function fetchCasperAccountInfo(publicKey: string) {
   if (!CSPR_CLOUD_KEY) {
-    console.log(`  [cspr.cloud] No API key configured, skipping`);
+    log.info(`[cspr.cloud] No API key configured, skipping`);
     return null;
   }
 
@@ -409,7 +412,7 @@ async function fetchCasperAccountInfo(publicKey: string) {
       });
       return res.data;
     } catch (e: any) {
-      console.log(`  [cspr.cloud] Account lookup failed: ${e.response?.status || e.message}`);
+      log.info(`[cspr.cloud] Account lookup failed: ${e.response?.status || e.message}`);
       return null;
     }
   }
@@ -433,7 +436,7 @@ async function fetchLatestBlock() {
       });
       return res.data?.data?.[0] || null;
     } catch (e: any) {
-      console.log(`  [cspr.cloud] Block fetch failed: ${e.response?.status || e.message}`);
+      log.info(`[cspr.cloud] Block fetch failed: ${e.response?.status || e.message}`);
       return null;
     }
   }
@@ -444,19 +447,19 @@ async function fetchLatestBlock() {
 export async function runAssessmentPipeline(assessmentId: string, assetId: string, location: string, spotCount: number) {
   emitEvent('assessment_started', { assessmentId, assetId, location, spotCount });
 
-  console.log(`\n${'='.repeat(60)}`);
-  console.log(`🔍 VERDICT: ASSESSMENT #${assessmentId}`);
-  console.log(`${'='.repeat(60)}`);
-  console.log(`Asset: ${assetId} | Location: ${location} | Spots: ${spotCount}\n`);
+  log.info(`\n${'='.repeat(60)}`);
+  log.info(`VERDICT: ASSESSMENT #${assessmentId}`);
+  log.info(`${'='.repeat(60)}`);
+  log.info(`Asset: ${assetId} | Location: ${location} | Spots: ${spotCount}\n`);
 
   // Step 0: Blockchain connectivity
-  console.log(`--- Step 0: Blockchain Connectivity Check ---`);
+  log.info(`--- Step 0: Blockchain Connectivity Check ---`);
   const block = await fetchLatestBlock();
   if (block) {
-    console.log(`  ✅ Connected to Casper Testnet via CSPR.cloud`);
-    console.log(`  📦 Latest block: #${block.block_height} (${block.timestamp})`);
+    log.info(`Connected to Casper Testnet via CSPR.cloud`);
+    log.info(`Latest block: #${block.block_height} (${block.timestamp})`);
   } else {
-    console.log(`  ⚠️  CSPR.cloud not available, proceeding with local simulation`);
+    log.info(`CSPR.cloud not available, proceeding with local simulation`);
   }
 
   const deployerKey = process.env.DEPLOYER_PUBLIC_KEY;
@@ -464,51 +467,51 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
     const account = await fetchCasperAccountInfo(deployerKey);
     if (account?.data) {
       const balance = account.data.balance;
-      console.log(`  💰 Deployer balance: ${(parseInt(balance) / 1e9).toFixed(2)} CSPR`);
+      log.info(`Deployer balance: ${(parseInt(balance) / 1e9).toFixed(2)} CSPR`);
     }
   }
 
   const mcpArgs = { asset_id: assetId, location, spot_count: spotCount };
 
-  console.log(`\n--- Step 1: Summoning Agent A (Comps Specialist) ---`);
+  log.info(`\n--- Step 1: Summoning Agent A (Comps Specialist) ---`);
   emitAgentThought('valuation-a', 'Comps Specialist', 'Starting comparable sales analysis...', 10, 'reasoning');
 
   let resultA: any;
   try {
     const res = await callMcpToolWithX402(3001, 'Agent-A', 'assess', mcpArgs);
     resultA = JSON.parse(res.content[0]?.text ?? '{}');
-    console.log(`  📊 Agent-A verdict: ${resultA.estimated_value.toLocaleString()} via ${resultA.method}`);
+    log.info(`Agent-A verdict: ${resultA.estimated_value.toLocaleString()} via ${resultA.method}`);
 
     emitAgentThought('valuation-a', 'Comps Specialist', `Found ${resultA.comparable_count || 3} comparable properties`, 85, 'decision');
     emitEvent('valuation_result', { agent: 'Agent-A', result: resultA });
   } catch (e: any) {
-    console.error(`  ❌ Agent-A failed: ${e.message}`);
+    log.error(`Agent-A failed: ${e.message}`);
     emitAgentThought('valuation-a', 'Comps Specialist', `Error: ${e.message}`, 0, 'validation');
   }
 
-  console.log(`\n--- Step 2: Summoning Agent B (DCF Specialist) ---`);
+  log.info(`\n--- Step 2: Summoning Agent B (DCF Specialist) ---`);
   emitAgentThought('valuation-b', 'DCF Specialist', 'Starting discounted cash flow analysis...', 10, 'reasoning');
 
   let resultB: any;
   try {
     const res = await callMcpToolWithX402(3002, 'Agent-B', 'assess', mcpArgs);
     resultB = JSON.parse(res.content[0]?.text ?? '{}');
-    console.log(`  📊 Agent-B verdict: ${resultB.estimated_value.toLocaleString()} via ${resultB.method}`);
+    log.info(`Agent-B verdict: ${resultB.estimated_value.toLocaleString()} via ${resultB.method}`);
 
     emitAgentThought('valuation-b', 'DCF Specialist', `Calculated NPV: ${resultB.estimated_value.toLocaleString()}`, 85, 'decision');
     emitEvent('valuation_result', { agent: 'Agent-B', result: resultB });
   } catch (e: any) {
-    console.error(`  ❌ Agent-B failed: ${e.message}`);
+    log.error(`Agent-B failed: ${e.message}`);
     emitAgentThought('valuation-b', 'DCF Specialist', `Error: ${e.message}`, 0, 'validation');
   }
 
   if (!resultA || !resultB) {
-    console.log(`\n❌ Cannot deliberate: missing agent verdicts.`);
+    log.info(`\n❌ Cannot deliberate: missing agent verdicts.`);
     return;
   }
 
   // Step 3: Juror deliberation - Round 1
-  console.log(`\n--- Step 3: Juror Deliberation (Round 1) ---`);
+  log.info(`\n--- Step 3: Juror Deliberation (Round 1) ---`);
 
   const jurorPorts = [
     { name: 'Evidence Analyst', port: 3003, rep: await fetchOnChainReputation('Agent-C'), pk: process.env.AGENT_C_PUBLIC_KEY || '0x' },
@@ -535,7 +538,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
       
       const res = await callMcpToolWithX402(juror.port, juror.name, 'deliberate', jurorArgs);
       const verdict = JSON.parse(res.content[0].text);
-      console.log(`  👨‍⚖️ ${juror.name} (Rep: ${juror.rep}): Voted ${verdict.vote} | ${verdict.reasoning}`);
+      log.info(`${juror.name} (Rep: ${juror.rep}): Voted ${verdict.vote} | ${verdict.reasoning}`);
 
       emitEvent('juror_vote', { juror: juror.name, round: 1, verdict, rep: juror.rep });
 
@@ -547,7 +550,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
 
       return { juror, verdict };
     } catch (e: any) {
-      console.error(`  ❌ ${juror.name} failed: ${e.message}`);
+      log.error(`${juror.name} failed: ${e.message}`);
       return null;
     }
   }));
@@ -556,7 +559,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
   const peerReasoning = validRound1.map(r => `${r!.juror.name} voted ${r!.verdict.vote} because: ${r!.verdict.reasoning}`);
 
   // Step 4: Round 2 - peer review
-  console.log(`\n--- Step 4: Juror Deliberation (Round 2 - Peer Review) ---`);
+  log.info(`\n--- Step 4: Juror Deliberation (Round 2 - Peer Review) ---`);
 
   const round2Args = { ...jurorArgs, peer_reasoning: peerReasoning };
 
@@ -567,7 +570,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
 
       const res = await callMcpToolWithX402(juror.port, juror.name, 'deliberate', round2Args);
       const verdict = JSON.parse(res.content[0].text);
-      console.log(`  👨‍⚖️ ${juror.name}: Final Vote ${verdict.vote} | ${verdict.reasoning}`);
+      log.info(`${juror.name}: Final Vote ${verdict.vote} | ${verdict.reasoning}`);
 
       emitAgentThought(jurorId, juror.name, `Final vote: ${verdict.vote} | Confidence: ${verdict.confidence || 82}%`, 95, 'validation');
       emitEvent('juror_vote', { juror: juror.name, round: 2, verdict, rep: juror.rep });
@@ -585,13 +588,13 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
       );
       receiptChain.push(receipt);
       previousReceiptId = receipt.receiptId;
-      console.log(`  📜 [Audit] Receipt: ${receipt.receiptId.slice(0, 8)}... - Hash: ${receipt.signature.slice(0, 16)}...`);
+      log.info(`📜 [Audit] Receipt: ${receipt.receiptId.slice(0, 8)}... - Hash: ${receipt.signature.slice(0, 16)}...`);
 
       emitEvent('receipt_created', { receipt, juror: juror.name, round: 2 });
 
       return { juror, verdict };
     } catch (e: any) {
-      console.error(`  ❌ ${juror.name} failed: ${e.message}`);
+      log.error(`${juror.name} failed: ${e.message}`);
       emitAgentThought(jurorId, juror.name, `Error in Round 2: ${e.message}`, 0, 'validation');
       return null;
     }
@@ -600,7 +603,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
   const validRound2 = round2Results.filter(r => r !== null);
 
   // Verify cryptographic chain
-  console.log(`\n  [Audit] Verifying Deliberation Cryptographic Chain...`);
+  log.info(`\n  [Audit] Verifying Deliberation Cryptographic Chain...`);
   const getJurorSecret = (jurorId: string) => process.env[`AGENT_${jurorKeySuffix(jurorId)}_PRIVATE_KEY`] || 'fallback-dev-secret';
   const isChainValid = receiptChain.length > 0 && verifyReceiptChain(receiptChain, getJurorSecret);
 
@@ -613,7 +616,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
       asset_id: assetId,
       receipt_chain: receiptChain,
       created_at: Date.now(),
-    }).catch(err => console.warn(`  [DB] ⚠️ Failed to save assessment: ${err.message}`));
+    }).catch(err => log.warn(`⚠️ Failed to save assessment: ${err.message}`));
 
     // ── Update per-agent stats ─────────────────────────────────────────────
     const now = Date.now();
@@ -644,7 +647,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
   }
 
   if (isChainValid) {
-    console.log(`  ✅ Chain Valid! ${receiptChain.length} cryptographic receipts secured.`);
+    log.info(`Chain Valid! ${receiptChain.length} cryptographic receipts secured.`);
 
     const receiptChainTx = createTransactionEntry(
       'HMAC Receipt Chain',
@@ -658,13 +661,13 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
     saveTransaction(receiptChainTx);
     emitEvent('transaction', receiptChainTx);
   } else if (receiptChain.length === 0) {
-    console.log(`  ⚠️  No receipts generated (jurors may have failed). Skipping audit trail.`);
+    log.info(`No receipts generated (jurors may have failed). Skipping audit trail.`);
   } else {
-    console.log(`  ❌ Chain Invalid! Tampering detected.`);
+    log.info(`Chain Invalid! Tampering detected.`);
   }
 
   // Step 5: Reputation-weighted vote tally
-  console.log(`\n--- Step 5: Reputation-Weighted Vote Tally ---`);
+  log.info(`\n--- Step 5: Reputation-Weighted Vote Tally ---`);
   let scoreA = 0;
   let scoreB = 0;
   let scoreSplit = 0;
@@ -684,23 +687,23 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
     finalVerdict = 'AgentAPreferred';
     verdictIndex = 0;
     finalValue = resultA.estimated_value;
-    console.log(`  📋 Verdict: AgentAPreferred (Favoring Comps/Agent A) | Weight: ${scoreA}`);
+    log.info(`Verdict: AgentAPreferred (Favoring Comps/Agent A) | Weight: ${scoreA}`);
   } else if (scoreB >= scoreA && scoreB >= scoreSplit) {
     finalVerdict = 'AgentBPreferred';
     verdictIndex = 2;
     finalValue = resultB.estimated_value;
-    console.log(`  📋 Verdict: AgentBPreferred (Favoring DCF/Agent B) | Weight: ${scoreB}`);
+    log.info(`Verdict: AgentBPreferred (Favoring DCF/Agent B) | Weight: ${scoreB}`);
   } else {
     finalVerdict = 'SplitFifty';
     verdictIndex = 1;
     finalValue = Math.round((resultA.estimated_value + resultB.estimated_value) / 2);
-    console.log(`  📋 Verdict: SplitFifty | Weight: ${scoreSplit}`);
+    log.info(`Verdict: SplitFifty | Weight: ${scoreSplit}`);
   }
 
-  console.log(`\n${'─'.repeat(60)}`);
-  console.log(`⚖️  VERDICT: ${finalVerdict}`);
-  console.log(`💵 Final Assessed Value: ${finalValue.toLocaleString()}`);
-  console.log(`${'─'.repeat(60)}`);
+  log.info(`\n${'─'.repeat(60)}`);
+  log.info(`VERDICT: ${finalVerdict}`);
+  log.info(`💵 Final Assessed Value: ${finalValue.toLocaleString()}`);
+  log.info(`${'─'.repeat(60)}`);
 
   emitEvent('final_verdict', { assessmentId, finalVerdict, finalValue, scoreA, scoreB, scoreSplit });
 
@@ -717,12 +720,12 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
   emitEvent('transaction', verdictTx);
 
   // Step 6: On-chain settlement
-  console.log(`\n--- Step 6: Casper Blockchain Settlement ---`);
+  log.info(`\n--- Step 6: Casper Blockchain Settlement ---`);
   const votingHash = process.env.VOTING_CONTRACT_HASH;
   const assessmentHash = process.env.ASSESSMENT_CONTRACT_HASH;
   const reputationHash = process.env.REPUTATION_CONTRACT_HASH;
 
-  console.log(`\n  [HashCommitment] Generating Verifiable Execution Commitment...`);
+  log.info(`\n  [HashCommitment] Generating Verifiable Execution Commitment...`);
   const executionCommitment = createExecutionCommitment(
     JSON.stringify({ assessmentId, assetId, location, spotCount }),
     { finalVerdict, finalValue, scoreA, scoreB, scoreSplit },
@@ -743,34 +746,34 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
   emitEvent('transaction', commitmentTx);
 
   if (votingHash) {
-    console.log(`  📝 VotingContract (${votingHash.slice(0, 16)}...): casting vote on-chain...`);
+    log.info(`VotingContract (${votingHash.slice(0, 16)}...): casting vote on-chain...`);
     try {
       const { castVoteOnChain } = await import('../shared/casper-contracts.js');
       const verdictName = finalVerdict === 'AgentAPreferred' ? 'AgentAPreferred' : finalVerdict === 'AgentBPreferred' ? 'AgentBPreferred' : 'SplitFifty';
       const voteResult = await castVoteOnChain(assessmentId, verdictName, `Weighted consensus: A=${scoreA} B=${scoreB} Split=${scoreSplit}`, Math.max(scoreA, scoreB, scoreSplit));
       if (voteResult.success) {
-        console.log(`  📝 VotingContract ✅ vote recorded on-chain: ${voteResult.txHash.slice(0, 16)}...`);
+        log.info(`VotingContract ✅ vote recorded on-chain: ${voteResult.txHash.slice(0, 16)}...`);
         const voteTx = createTransactionEntry('ContractCall', `VotingContract: cast_vote for ${assessmentId}`, voteResult.txHash, 'VotingContract', 'latest', { assessmentId, verdict: verdictName, weight: voteResult.weight }, true);
         saveTransaction(voteTx);
         emitEvent('transaction', voteTx);
       } else {
-        console.log(`  📝 VotingContract ⚠️ vote failed (no deployer key or contract error)`);
+        log.info(`VotingContract ⚠️ vote failed (no deployer key or contract error)`);
       }
     } catch (err: any) {
-      console.warn(`  📝 VotingContract ⚠️ on-chain call failed: ${err.message}`);
+      log.warn(`VotingContract ⚠️ on-chain call failed: ${err.message}`);
     }
   } else {
-    console.log(`  📝 VotingContract: [NO CONTRACT HASH] cast_vote skipped - set VOTING_CONTRACT_HASH in .env`);
+    log.info(`VotingContract: [NO CONTRACT HASH] cast_vote skipped - set VOTING_CONTRACT_HASH in .env`);
   }
 
   if (assessmentHash) {
-    console.log(`  💰 AssessmentContract (${assessmentHash.slice(0, 16)}...): record_assessment(${assessmentId})`);
+    log.info(`AssessmentContract (${assessmentHash.slice(0, 16)}...): record_assessment(${assessmentId})`);
   } else {
-    console.log(`  💰 AssessmentContract: [NO CONTRACT HASH] record_assessment skipped - set ASSESSMENT_CONTRACT_HASH in .env`);
+    log.info(`AssessmentContract: [NO CONTRACT HASH] record_assessment skipped - set ASSESSMENT_CONTRACT_HASH in .env`);
   }
 
   if (reputationHash) {
-    console.log(`  🏆 ReputationRegistry (${reputationHash.slice(0, 16)}...): recording verdict for retroactive settlement...`);
+    log.info(`ReputationRegistry (${reputationHash.slice(0, 16)}...): recording verdict for retroactive settlement...`);
     try {
       const { updateReputationOnChain } = await import('../shared/casper-contracts.js');
       // Record the verdict for retroactive settlement - agent closest to finalValue gains reputation
@@ -779,32 +782,32 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
         const agentToUpdate = finalVerdict === 'AgentAPreferred' ? 'valuation-agent-a' : 'valuation-agent-b';
         const repResult = await updateReputationOnChain(agentToUpdate, 'general', delta);
         if (repResult.success) {
-          console.log(`  🏆 ReputationRegistry ✅ score updated on-chain: ${repResult.txHash.slice(0, 16)}...`);
+          log.info(`ReputationRegistry ✅ score updated on-chain: ${repResult.txHash.slice(0, 16)}...`);
           const repTx = createTransactionEntry('ContractCall', `ReputationRegistry: update ${agentToUpdate} +${delta}`, repResult.txHash, 'ReputationRegistry', 'latest', { agentId: agentToUpdate, delta }, true);
           saveTransaction(repTx);
           emitEvent('transaction', repTx);
         }
       }
     } catch (err: any) {
-      console.warn(`  🏆 ReputationRegistry ⚠️ on-chain call failed: ${err.message}`);
+      log.warn(`ReputationRegistry ⚠️ on-chain call failed: ${err.message}`);
     }
   } else {
-    console.log(`  🏆 ReputationRegistry: [NO CONTRACT HASH] retroactive update skipped - set REPUTATION_CONTRACT_HASH in .env`);
+    log.info(`ReputationRegistry: [NO CONTRACT HASH] retroactive update skipped - set REPUTATION_CONTRACT_HASH in .env`);
   }
 
   // Step 7: Native transfer settlement
   const deployerKeyPath = process.env.DEPLOYER_PRIVATE_KEY;
   if (deployerKeyPath) {
-    console.log(`\n--- Step 7: Executing Real On-Chain Native Transfer ---`);
+    log.info(`\n--- Step 7: Executing Real On-Chain Native Transfer ---`);
     try {
       const targetPublicKeyHex = process.env.AGENT_A_PUBLIC_KEY || process.env.DEPLOYER_PUBLIC_KEY;
       const id = Date.now();
 
-      console.log(`  🔄 Broadcasting Native Transfer of 2.5 CSPR via CSPR.cloud API...`);
+      log.info(`Broadcasting Native Transfer of 2.5 CSPR via CSPR.cloud API...`);
 
       const deployHash = await executeCasperTransfer(targetPublicKeyHex as string, SETTLEMENT_AMOUNT_MOTES, id);
-      console.log(`  ✅ Successfully submitted Casper Transaction!`);
-      console.log(`  🔍 View on Explorer: https://testnet.cspr.live/deploy/${deployHash}`);
+      log.info(`Successfully submitted Casper Transaction!`);
+      log.info(`View on Explorer: https://testnet.cspr.live/deploy/${deployHash}`);
 
       const transferTx = createTransactionEntry(
         'Native Transfer',
@@ -818,12 +821,12 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
       saveTransaction(transferTx);
       emitEvent('transaction', transferTx);
     } catch (err: any) {
-      console.log(`  ❌ Failed to execute Native Transfer. Testnet node might be down.`);
-      if (err.message) console.log(`     Details: ${err.message.substring(0, 150)}...`);
+      log.info(`Failed to execute Native Transfer. Testnet node might be down.`);
+      if (err.message) log.info(`Details: ${err.message.substring(0, 150)}...`);
     }
   }
 
-  console.log(`\n✅ Assessment #${assessmentId} complete.\n`);
+  log.info(`\n✅ Assessment #${assessmentId} complete.\n`);
 
   return { verdict: finalVerdict, verdictIndex, finalValue, jurorCount: JUROR_IDS.length };
 }
@@ -951,15 +954,15 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       });
 
       if (rpcResponse.data.error) {
-        console.warn('[relay-deploy] RPC error:', rpcResponse.data.error.message || rpcResponse.data.error);
+        log.warn('[relay-deploy] RPC error:: ' + rpcResponse.data.error.message || rpcResponse.data.error);
         return res.json({ success: false, error: 'RPC rejected the deploy. Check your transaction and try again.' });
       }
 
       const deployHash = rpcResponse.data.result?.deploy_hash;
-      console.log(`[relay-deploy] ✅ Broadcast: ${deployHash?.substring(0, 16)}...`);
+      log.info(`[relay-deploy] ✅ Broadcast: ${deployHash?.substring(0, 16)}...`);
       return res.json({ success: true, deployHash });
     } catch (err: any) {
-      console.error('[relay-deploy] Failed:', err.message);
+      log.error('[relay-deploy] Failed:: ' + err.message);
       return res.status(500).json({ success: false, error: 'Deploy relay failed. Please try again.' });
     }
   });
@@ -985,7 +988,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const assessmentId = `ASSESS-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
       runAssessmentPipeline(assessmentId, assetId, location, spotCount).catch(err => {
-        console.error(`[Assessment ${assessmentId}] Unhandled error:`, err.message);
+        log.error(`[Assessment ${assessmentId}] Unhandled error:: ${err.message}`);
       });
 
       res.json({ success: true, assessmentId });
@@ -1057,7 +1060,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         // Keep on-chain transactions with valid-looking deploy hashes
         if (tx.explorerUrl && validHashRegex.test(tx.hash)) return true;
         // Remove everything else (broken links, mock hashes, etc.)
-        console.log(`  [Cleanup] Removing dead transaction: ${tx.type} | hash=${tx.hash.slice(0, 20)}...`);
+        log.info(`[Cleanup] Removing dead transaction: ${tx.type} | hash=${tx.hash.slice(0, 20)}...`);
         return false;
       });
 
@@ -1078,11 +1081,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           await db.deleteTransaction(tx.id);
         }
       } catch (dbErr: any) {
-        console.warn(`  [Cleanup] Supabase cleanup failed: ${dbErr.message}`);
+        log.warn(`[Cleanup] Supabase cleanup failed: ${dbErr.message}`);
       }
 
       const removed = transactions.length - cleaned.length;
-      console.log(`  [Cleanup] ✅ Removed ${removed} dead transactions, ${cleaned.length} remaining`);
+      log.info(`[Cleanup] ✅ Removed ${removed} dead transactions, ${cleaned.length} remaining`);
       res.json({ success: true, removed, remaining: cleaned.length });
     } catch (err: any) {
       res.status(500).json({ success: false, error: sanitizeError(err) });
@@ -1277,7 +1280,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
       const assetId = `${assetType.toUpperCase().slice(0, 2)}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
-      console.log(`\n📋 Assessment request: ${name} (${assetType}) | ${askingPrice.toLocaleString()}`);
+      log.info(`\n📋 Assessment request: ${name} (${assetType}) | ${askingPrice.toLocaleString()}`);
 
       // Step 1: Fetch market data
       let marketData: AssetData | null = null;
@@ -1290,7 +1293,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           marketData = await fetchAssetData({ id: assetId, type: assetType, name, description: description || '', askingPrice, weight: weightOz });
         }
       } catch (err: any) {
-        console.warn(`  ⚠️ Market data fetch failed: ${err.message}`);
+        log.warn(`Market data fetch failed: ${err.message}`);
       }
 
       // Step 2: Dual valuation
@@ -1310,9 +1313,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         ? Math.abs(((valuationA.estimated_value - valuationB.estimated_value) / minVal) * 100)
         : 0;
 
-      console.log(`  📊 Valuation A: ${valuationA.estimated_value.toLocaleString()} (${valuationA.method})`);
-      console.log(`  📊 Valuation B: ${valuationB.estimated_value.toLocaleString()} (${valuationB.method})`);
-      console.log(`  📊 Divergence: ${divergence.toFixed(1)}%`);
+      log.info(`Valuation A: ${valuationA.estimated_value.toLocaleString()} (${valuationA.method})`);
+      log.info(`Valuation B: ${valuationB.estimated_value.toLocaleString()} (${valuationB.method})`);
+      log.info(`Divergence: ${divergence.toFixed(1)}%`);
 
       // Step 3: If divergence > 15%, run juror deliberation
       let verdict: any = null;
@@ -1322,7 +1325,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           const result = await runAssessmentPipeline(assessmentId, assetId, location || 'Global', weightOz || sqft || 1);
           verdict = result;
         } catch (err: any) {
-          console.warn(`  ⚠️ Deliberation failed: ${err.message}`);
+          log.warn(`Deliberation failed: ${err.message}`);
         }
       }
 
@@ -1610,7 +1613,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           }
         }
       } catch (err: any) {
-        console.warn(`  ⚠️ HMAC receipt creation failed: ${err.message}`);
+        log.warn(`HMAC receipt creation failed: ${err.message}`);
       }
 
       // ── Hash Commitment (for every assessment) ──────────────
@@ -1635,7 +1638,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         saveTransaction(zkTx);
         emitEvent('transaction', zkTx);
       } catch (err: any) {
-        console.warn(`  ⚠️ Hash commitment failed: ${err.message}`);
+        log.warn(`Hash commitment failed: ${err.message}`);
       }
 
       // ── Store verdict on VerdictOracle ──────────────────────────────────────
@@ -1665,14 +1668,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           agentWeights,
           decision: verdict?.verdict || 'direct_consensus',
         });
-        console.log(`  📡 Verdict stored on oracle for ${assetId}`);
+        log.info(`Verdict stored on oracle for ${assetId}`);
       } catch (err: any) {
-        console.warn(`  ⚠️ Oracle store failed (non-critical): ${err.message}`);
+        log.warn(`Oracle store failed (non-critical): ${err.message}`);
       }
 
       res.json(response);
     } catch (err: any) {
-      console.error('[Assess] Error:', err.message);
+      log.error('[Assess] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -1688,7 +1691,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const reputations = await getReputationsOnChain();
       res.json({ success: true, reputations });
     } catch (err: any) {
-      console.error('[Reputation] Error:', err.message);
+      log.error('[Reputation] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -1707,7 +1710,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const stats = await getOracleStats();
       res.json({ success: true, verdicts, stats });
     } catch (err: any) {
-      console.error('[Oracle] Error:', err.message);
+      log.error('[Oracle] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -1729,7 +1732,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       }
       res.json({ success: true, verdict });
     } catch (err: any) {
-      console.error('[Oracle] Error:', err.message);
+      log.error('[Oracle] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -1744,7 +1747,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const stats = getOracleStats();
       res.json({ success: true, stats });
     } catch (err: any) {
-      console.error('[Oracle] Error:', err.message);
+      log.error('[Oracle] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -1809,10 +1812,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       emitEvent('transaction', disputeTx);
       emitEvent('dispute_filed', { disputeId: result.id, assetId, challengerKey });
 
-      console.log(`  ⚖️  Dispute filed: ${result.id} against ${assetId} (${DISPUTE_FEE_CSPR} CSPR stake)`);
+      log.info(`Dispute filed: ${result.id} against ${assetId} (${DISPUTE_FEE_CSPR} CSPR stake)`);
       res.json({ success: true, dispute: result });
     } catch (err: any) {
-      console.error('[Dispute] Error:', err.message);
+      log.error('[Dispute] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -1853,7 +1856,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
       res.json({ success: true, dispute: result });
     } catch (err: any) {
-      console.error('[Retrial] Error:', err.message);
+      log.error('[Retrial] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -1868,7 +1871,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const disputes = await getAllDisputes();
       res.json({ success: true, disputes });
     } catch (err: any) {
-      console.error('[Disputes] Error:', err.message);
+      log.error('[Disputes] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -1886,7 +1889,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       }
       res.json({ success: true, dispute });
     } catch (err: any) {
-      console.error('[Dispute] Error:', err.message);
+      log.error('[Dispute] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -1919,7 +1922,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         return res.status(400).json({ success: false, error: 'timeframe is required' });
       }
 
-      console.log(`\n🔮 Prediction request: "${question}" (${timeframe})`);
+      log.info(`\n🔮 Prediction request: "${question}" (${timeframe})`);
 
       // ── Fetch relevant market data based on asset type ─────────────────────
       let marketContext = '';
@@ -1936,7 +1939,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           }
         }
       } catch (err: any) {
-        console.warn(`  ⚠️ Market data fetch failed: ${err.message}`);
+        log.warn(`Market data fetch failed: ${err.message}`);
       }
 
       // ── Run 5-agent prediction ─────────────────────────────────────────────
@@ -1997,7 +2000,7 @@ Respond in JSON format:
               fallbackTriggered: response.fallbackTriggered || false,
             };
           } catch (err: any) {
-            console.warn(`  ⚠️ ${profile.name} failed: ${err.message}`);
+            log.warn(`${profile.name} failed: ${err.message}`);
             return {
               ...profile,
               probability: 0.5,
@@ -2081,12 +2084,12 @@ Respond in JSON format:
         })),
         risk_factors: riskFactors,
         created_at: Date.now(),
-      }).catch(err => console.warn(`  [DB] ⚠️ Failed to save prediction: ${err.message}`));
+      }).catch(err => log.warn(`⚠️ Failed to save prediction: ${err.message}`));
 
-      console.log(`  🎯 Consensus: ${(consensusProbability * 100).toFixed(1)}% (confidence: ${(avgConfidence * 100).toFixed(1)}%)`);
+      log.info(`Consensus: ${(consensusProbability * 100).toFixed(1)}% (confidence: ${(avgConfidence * 100).toFixed(1)}%)`);
       res.json(response);
     } catch (err: any) {
-      console.error('[Predict] Error:', err.message);
+      log.error('[Predict] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -2359,10 +2362,10 @@ Respond in JSON format:
       // assessedValue is in USD; the frontend sends a fixed 5 CSPR fee
       const platformFee = 5;
 
-      console.log(`\n💰 Loan request: ${assetName}`);
-      console.log(`   Assessed: ${assessedValue.toLocaleString()} | LTV: ${ltv}% (${tier})`);
-      console.log(`   Trust: confidence=${trustBreakdown.confidence}, valueRatio=${trustBreakdown.valueRatio}`);
-      console.log(`   Loan amount: ${loanAmount} CSPR | Platform fee: ${platformFee} CSPR`);
+      log.info(`\n💰 Loan request: ${assetName}`);
+      log.info(`Assessed: ${assessedValue.toLocaleString()} | LTV: ${ltv}% (${tier})`);
+      log.info(`Trust: confidence=${trustBreakdown.confidence}, valueRatio=${trustBreakdown.valueRatio}`);
+      log.info(`Loan amount: ${loanAmount} CSPR | Platform fee: ${platformFee} CSPR`);
 
 
       // ── Escrow Lock (honor-system label) ───────────────────────────────
@@ -2372,7 +2375,7 @@ Respond in JSON format:
       const escrowMotes = Math.floor(loanAmount * 1e9);
       const escrowTransferId = Date.now() + Math.floor(Math.random() * 1000);
       const lockHash = await executeCasperTransfer(borrowerPublicKey, escrowMotes, escrowTransferId);
-      console.log(`  🔒 Escrow locked! deploy_hash: ${lockHash.substring(0, 16)}...`);
+      log.info(`🔒 Escrow locked! deploy_hash: ${lockHash.substring(0, 16)}...`);
 
       const lockTx = createTransactionEntry(
         'Native Transfer',
@@ -2390,7 +2393,7 @@ Respond in JSON format:
       const loanAmountMotes = Math.floor(loanAmount * 1e9);
       const transferId = Date.now() + Math.floor(Math.random() * 1000);
       const disbursementHash = await executeCasperTransfer(borrowerPublicKey, loanAmountMotes, transferId);
-      console.log(`  ✅ Loan disbursed! deploy_hash: ${disbursementHash.substring(0, 16)}...`);
+      log.info(`Loan disbursed! deploy_hash: ${disbursementHash.substring(0, 16)}...`);
 
       // ── Store the loan ─────────────────────────────────────────────────
       const loanId = `LOAN-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -2444,7 +2447,7 @@ Respond in JSON format:
         revaluation_history: [],
         assessment_timestamp: assessmentTimestamp || Date.now(),
         divergence: typeof divergence === 'number' ? divergence : undefined,
-      }).catch(err => console.warn(`  [DB] ⚠️ Failed to save loan: ${err.message}`));
+      }).catch(err => log.warn(`⚠️ Failed to save loan: ${err.message}`));
 
       // Log disbursement as transaction
       const disbTx = createTransactionEntry(
@@ -2480,7 +2483,7 @@ Respond in JSON format:
         },
       });
     } catch (err: any) {
-      console.error('[Loan Create] Error:', err.message);
+      log.error('[Loan Create] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -2624,7 +2627,7 @@ Respond in JSON format:
           const status = verifyRes.data?.data?.status || verifyRes.data?.status;
           verified = status === 'processed';
         } catch {
-          console.warn(`[Loan Repay] Could not verify deploy ${txHash}`);
+          log.warn(`[Loan Repay] Could not verify deploy ${txHash}`);
         }
       }
 
@@ -2637,7 +2640,7 @@ Respond in JSON format:
 
       if (loan.repaidAmountCSPR >= loan.loanAmountCSPR) {
         loan.status = 'repaid';
-        console.log(`  ✅ Loan ${loan.loanId} fully repaid!`);
+        log.info(`Loan ${loan.loanId} fully repaid!`);
 
         // Verdict Point 2: Escrow release - return collateral to platform
         let escrowReleaseHash = `escrow-release-${Date.now()}`;
@@ -2647,7 +2650,7 @@ Respond in JSON format:
           const releaseHash = await executeCasperTransfer(PLATFORM_WALLET, releaseMotes, releaseTransferId);
           escrowReleaseHash = releaseHash;
           loan.escrowReleaseTxHash = releaseHash;
-          console.log(`  🔓 Escrow released! deploy_hash: ${releaseHash.substring(0, 16)}...`);
+          log.info(`🔓 Escrow released! deploy_hash: ${releaseHash.substring(0, 16)}...`);
 
           const releaseTx = createTransactionEntry(
             'Native Transfer',
@@ -2661,7 +2664,7 @@ Respond in JSON format:
           saveTransaction(releaseTx);
           emitEvent('transaction', releaseTx);
         } catch (err: any) {
-          console.warn(`  ⚠️ Escrow release failed: ${err.message}`);
+          log.warn(`Escrow release failed: ${err.message}`);
         }
       }
 
@@ -2701,7 +2704,7 @@ Respond in JSON format:
         escrow_lock_tx_hash: loan.escrowLockTxHash,
         escrow_release_tx_hash: loan.escrowReleaseTxHash,
         revaluation_history: loan.revaluationHistory,
-      }).catch(err => console.warn(`  [DB] ⚠️ Failed to update loan after repay: ${err.message}`));
+      }).catch(err => log.warn(`⚠️ Failed to update loan after repay: ${err.message}`));
 
       res.json({
         success: true,
@@ -2735,7 +2738,7 @@ Respond in JSON format:
         return res.status(400).json({ success: false, error: `Loan is ${loan.status} - no revaluation needed` });
       }
 
-      console.log(`\n🔄 Revaluing collateral for loan ${loan.loanId} (juror deliberation)...`);
+      log.info(`\n🔄 Revaluing collateral for loan ${loan.loanId} (juror deliberation)...`);
 
       // Run dual valuation - same pipeline as initial assessment
       const valuationReq: ValuationRequest = {
@@ -2798,7 +2801,7 @@ Respond in JSON format:
       try {
         commitmentTxHash = await storeCommitmentOnCasper(executionCommitment, reputationHash);
       } catch (err: any) {
-        console.warn(`  ⚠️ Could not store commitment on-chain: ${err.message}`);
+        log.warn(`Could not store commitment on-chain: ${err.message}`);
       }
 
       // Recalculate health ratio
@@ -2810,10 +2813,10 @@ Respond in JSON format:
       // Update status based on health
       if (loan.healthRatio < 50) {
         loan.status = 'liquidated';
-        console.log(`  🔴 Loan ${loan.loanId} LIQUIDATED - health dropped to ${loan.healthRatio}%`);
+        log.info(`🔴 Loan ${loan.loanId} LIQUIDATED - health dropped to ${loan.healthRatio}%`);
       } else if (loan.healthRatio < 80) {
         loan.status = 'warning';
-        console.log(`  🟡 Loan ${loan.loanId} WARNING - health at ${loan.healthRatio}%`);
+        log.info(`🟡 Loan ${loan.loanId} WARNING - health at ${loan.healthRatio}%`);
       } else {
         loan.status = 'healthy';
       }
@@ -2876,7 +2879,7 @@ Respond in JSON format:
         escrow_lock_tx_hash: loan.escrowLockTxHash,
         escrow_release_tx_hash: loan.escrowReleaseTxHash,
         revaluation_history: loan.revaluationHistory,
-      }).catch(err => console.warn(`  [DB] ⚠️ Failed to update loan after revalue: ${err.message}`));
+      }).catch(err => log.warn(`⚠️ Failed to update loan after revalue: ${err.message}`));
 
       res.json({
         success: true,
@@ -2907,7 +2910,7 @@ Respond in JSON format:
         },
       });
     } catch (err: any) {
-      console.error('[Loan Revalue] Error:', err.message);
+      log.error('[Loan Revalue] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -3052,9 +3055,9 @@ Respond in JSON format:
         calculateInsurance(assetType, assessedValue, confidence, askingPrice, coveragePercent);
       const platformFee = 3; // INSURANCE_FEE_CSPR
 
-      console.log(`\n🛡️ Insurance request: ${assetName}`);
-      console.log(`   Assessed: ${assessedValue.toLocaleString()} | Risk: ${riskScore}/100 (${tier})`);
-      console.log(`   Coverage: ${coverageAmount.toLocaleString()} (${coverage}%) | Premium: ${premiumCSPR} CSPR/mo`);
+      log.info(`\n🛡️ Insurance request: ${assetName}`);
+      log.info(`Assessed: ${assessedValue.toLocaleString()} | Risk: ${riskScore}/100 (${tier})`);
+      log.info(`Coverage: ${coverageAmount.toLocaleString()} (${coverage}%) | Premium: ${premiumCSPR} CSPR/mo`);
 
 
       // ── Store the policy ───────────────────────────────────────────────
@@ -3102,7 +3105,7 @@ Respond in JSON format:
         expires_at: now + 365 * 24 * 60 * 60 * 1000,
         created_at: now,
         claim_history: [],
-      }).catch(err => console.warn(`  [DB] ⚠️ Failed to save insurance: ${err.message}`));
+      }).catch(err => log.warn(`⚠️ Failed to save insurance: ${err.message}`));
 
       // Log as transaction
       const insTx = createTransactionEntry(
@@ -3117,7 +3120,7 @@ Respond in JSON format:
       saveTransaction(insTx);
       emitEvent('transaction', insTx);
 
-      console.log(`  ✅ Policy ${policyId} created (${tier}, risk ${riskScore}/100)`);
+      log.info(`Policy ${policyId} created (${tier}, risk ${riskScore}/100)`);
 
       res.json({
         success: true,
@@ -3141,7 +3144,7 @@ Respond in JSON format:
         },
       });
     } catch (err: any) {
-      console.error('[Insurance Create] Error:', err.message);
+      log.error('[Insurance Create] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -3304,9 +3307,9 @@ Respond in JSON format:
         return res.status(400).json({ success: false, error: `reason must be under ${MAX_DESCRIPTION_LENGTH} characters` });
       }
 
-      console.log(`\n📋 Insurance claim filed: ${policy.policyId}`);
-      console.log(`   Claimant: ${claimantKey.slice(0, 12)}...`);
-      console.log(`   Reason: ${reason}`);
+      log.info(`\n📋 Insurance claim filed: ${policy.policyId}`);
+      log.info(`Claimant: ${claimantKey.slice(0, 12)}...`);
+      log.info(`Reason: ${reason}`);
 
       // ── Revaluate the asset to determine current value ──
       let currentValue = policy.assessedValue;
@@ -3326,10 +3329,10 @@ Respond in JSON format:
         valuationAConfidence = valuationA.confidence;
         valuationBConfidence = valuationB.confidence;
 
-        console.log(`   Previous value: ${policy.assessedValue.toLocaleString()}`);
-        console.log(`   Current value:  ${currentValue.toLocaleString()}`);
-        console.log(`   Loss: ${lossPercent.toFixed(1)}%`);
-        console.log(`   Agent confidence: A=${valuationAConfidence.toFixed(2)}, B=${valuationBConfidence.toFixed(2)}`);
+        log.info(`Previous value: ${policy.assessedValue.toLocaleString()}`);
+        log.info(`Current value:  ${currentValue.toLocaleString()}`);
+        log.info(`Loss: ${lossPercent.toFixed(1)}%`);
+        log.info(`Agent confidence: A=${valuationAConfidence.toFixed(2)}, B=${valuationBConfidence.toFixed(2)}`);
 
         // ── Confidence threshold gating ──
         if (valuationAConfidence < MIN_CLAIM_CONFIDENCE || valuationBConfidence < MIN_CLAIM_CONFIDENCE) {
@@ -3343,14 +3346,14 @@ Respond in JSON format:
         const valueChangeA = (policy.assessedValue - valuationA.estimated_value) / policy.assessedValue;
         const valueChangeB = (policy.assessedValue - valuationB.estimated_value) / policy.assessedValue;
         if ((valueChangeA > 0 && valueChangeB < -0.02) || (valueChangeA < 0 && valueChangeB > 0.02) || (valueChangeA < -0.02 && valueChangeB > 0)) {
-          console.log(`   ⚠️ Split verdict: Agent A says ${valueChangeA > 0 ? 'loss' : 'gain'}, Agent B says ${valueChangeB > 0 ? 'loss' : 'gain'}`);
+          log.info(`Split verdict: Agent A says ${valueChangeA > 0 ? 'loss' : 'gain'}, Agent B says ${valueChangeB > 0 ? 'loss' : 'gain'}`);
           return res.status(400).json({
             success: false,
             error: 'The AI agents disagree on the direction of value change. This claim requires manual review. Our oracle jurors will evaluate the evidence and render a verdict within 48 hours.',
           });
         }
       } catch (err: any) {
-        console.log(`   ⚠️ Revaluation failed, using original value: ${err.message}`);
+        log.info(`Revaluation failed, using original value: ${err.message}`);
       }
 
       const claimId = `CLM-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -3361,7 +3364,7 @@ Respond in JSON format:
 
       if (lossPercent < policy.deductiblePercent) {
         claimStatus = 'denied';
-        console.log(`   ❌ Claim denied: loss ${lossPercent.toFixed(1)}% < deductible ${policy.deductiblePercent}%`);
+        log.info(`Claim denied: loss ${lossPercent.toFixed(1)}% < deductible ${policy.deductiblePercent}%`);
       } else {
         // Loss exceeds deductible - approve and calculate payout
         claimAmount = Math.min(
@@ -3378,12 +3381,12 @@ Respond in JSON format:
         const maxPayoutFromPool = capitalPoolCSPR * 0.5;
         if (claimAmount > maxPayoutFromPool && maxPayoutFromPool > 0) {
           claimAmount = Math.round(maxPayoutFromPool * 100) / 100;
-          console.log(`   ⚠️ Payout capped by capital pool: ${claimAmount.toLocaleString()} CSPR (pool: ${capitalPoolCSPR.toLocaleString()})`);
+          log.info(`Payout capped by capital pool: ${claimAmount.toLocaleString()} CSPR (pool: ${capitalPoolCSPR.toLocaleString()})`);
         }
 
         claimStatus = 'paid';
         capitalPoolCSPR -= claimAmount; // Deduct from pool
-        console.log(`   ✅ Claim approved: payout ${claimAmount.toLocaleString()} CSPR (pool remaining: ${capitalPoolCSPR.toLocaleString()})`);
+        log.info(`Claim approved: payout ${claimAmount.toLocaleString()} CSPR (pool remaining: ${capitalPoolCSPR.toLocaleString()})`);
 
         // Log payout transaction
         const payoutTx = createTransactionEntry(
@@ -3432,7 +3435,7 @@ Respond in JSON format:
         expires_at: policy.expiresAt,
         created_at: policy.createdAt,
         claim_history: policy.claimHistory,
-      }).catch(err => console.warn(`  [DB] ⚠️ Failed to update insurance after claim: ${err.message}`));
+      }).catch(err => log.warn(`⚠️ Failed to update insurance after claim: ${err.message}`));
 
       res.json({
         success: true,
@@ -3454,7 +3457,7 @@ Respond in JSON format:
         },
       });
     } catch (err: any) {
-      console.error('[Insurance Claim] Error:', err.message);
+      log.error('[Insurance Claim] Error:: ' + err.message);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     } finally {
       claimLocks.delete(policyId); // Always release lock
@@ -3501,7 +3504,7 @@ Respond in JSON format:
       return res.status(404).json({ error: 'Loan not found', loanId });
     }
 
-    console.log(`\n[Force-Revalue] Manual trigger for loan ${loanId}...`);
+    log.info(`\n[Force-Revalue] Manual trigger for loan ${loanId}...`);
 
     try {
       const [agentA, agentB] = await runDualValuation({
@@ -3529,7 +3532,7 @@ Respond in JSON format:
       loan.healthRatio = newHealthRatio;
       loan.status = newStatus;
 
-      console.log(`[Force-Revalue] ${loanId}: ${loan.assessedValue.toLocaleString()} - ${newValue.toLocaleString()} health=${newHealthRatio}`);
+      log.info(`[Force-Revalue] ${loanId}: ${loan.assessedValue.toLocaleString()} - ${newValue.toLocaleString()} health=${newHealthRatio}`);
 
       res.json({
         success: true,
@@ -3545,7 +3548,7 @@ Respond in JSON format:
         },
       });
     } catch (err: any) {
-      console.error(`[Force-Revalue] Failed for ${loanId}:`, err.message);
+      log.error(`[Force-Revalue] Failed for ${loanId}:: ${err.message}`);
       res.status(500).json({ success: false, error: sanitizeError(err) });
     }
   });
@@ -3581,7 +3584,7 @@ Respond in JSON format:
 
   // ─── Global error handler (catches unhandled async errors) ─────────────────
   app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    console.error('[Unhandled Error]', err.stack || err.message || err);
+    log.error('[Unhandled Error]: ' + err.stack || err.message || err);
     res.status(500).json({ success: false, error: 'Internal server error' });
   });
 
@@ -3593,7 +3596,7 @@ Respond in JSON format:
   attachWebSocket(server);
   
   server.listen(PORT, async () => {
-    console.log(`🚀 Orchestrator API running on http://localhost:${PORT}`);
+    log.info(`Orchestrator API running on http://localhost:${PORT}`);
 
     // ─── Load real oracle data from DB on startup ──────────────────────────────
     // Loads existing verdicts and disputes from Supabase into memory.
@@ -3602,7 +3605,7 @@ Respond in JSON format:
       await loadVerdictsFromDB();
       await loadDisputesFromDB();
     } catch (err: any) {
-      console.warn(`  ⚠️ Oracle DB load failed (non-critical): ${err.message}`);
+      log.warn(`Oracle DB load failed (non-critical): ${err.message}`);
     }
 
 
@@ -3610,7 +3613,7 @@ Respond in JSON format:
     // ─── Auto-revaluation monitor ───────────────────────────────────────────
     // Periodically checks active loans and triggers revaluation if stale.
     // DISABLED: User requested no automatic transactions. Current count is sufficient.
-    console.log(`[Auto-Revalue] Auto-revaluation DISABLED (user request)`);
+    log.info(`[Auto-Revalue] Auto-revaluation DISABLED (user request)`);
 
     // ─── Background Oracle Activity Generator ───────────────────────────────
     // Periodically runs real AI-powered oracle valuations for diverse asset types.
@@ -3639,7 +3642,7 @@ Respond in JSON format:
       const cycleId = `oracle-bg-${Date.now()}`;
 
       try {
-        console.log(`\n[OracleActivity] 🔄 Running background valuation: ${asset.name} (${asset.assetType})`);
+        log.info(`\n[OracleActivity] 🔄 Running background valuation: ${asset.name} (${asset.assetType})`);
 
         // Step 1: Dual-agent valuation (real AI calls)
         const [valA, valB] = await runDualValuation(asset);
@@ -3647,7 +3650,7 @@ Respond in JSON format:
         const confidence = Math.round(((valA.confidence || 0.75) + (valB.confidence || 0.75)) / 2 * 100);
         const divergence = Math.abs(valA.estimated_value - valB.estimated_value) / assessedValue;
 
-        console.log(`[OracleActivity] 💰 ${asset.name}: ${assessedValue.toLocaleString()} (confidence: ${confidence}%, divergence: ${(divergence * 100).toFixed(1)}%)`);
+        log.info(`[OracleActivity] 💰 ${asset.name}: ${assessedValue.toLocaleString()} (confidence: ${confidence}%, divergence: ${(divergence * 100).toFixed(1)}%)`);
 
         // Step 2: Store verdict on oracle (real on-chain or in-memory + Supabase)
         const { storeVerdictOnChain } = await import('../shared/casper-contracts.js');
@@ -3708,18 +3711,18 @@ Respond in JSON format:
           saveTransaction(zkTx);
           emitEvent('transaction', zkTx);
         } catch (err: any) {
-          console.warn(`[OracleActivity] ⚠️ ZK commitment failed: ${err.message}`);
+          log.warn(`[OracleActivity] ⚠️ ZK commitment failed: ${err.message}`);
         }
 
-        console.log(`[OracleActivity] ✅ ${asset.name} complete — verdict + commitment stored`);
+        log.info(`[OracleActivity] ✅ ${asset.name} complete — verdict + commitment stored`);
       } catch (err: any) {
-        console.error(`[OracleActivity] ❌ Failed for ${asset.name}: ${err.message}`);
+        log.error(`[OracleActivity] ❌ Failed for ${asset.name}: ${err.message}`);
       }
     }
 
     // ─── Background Oracle Activity Generator ───────────────────────────────
     // DISABLED: User requested no automatic transactions. Current count is sufficient.
     // To re-enable, uncomment the setInterval calls below.
-    console.log(`[OracleActivity] Background oracle valuations DISABLED (user request)`);
+    log.info(`[OracleActivity] Background oracle valuations DISABLED (user request)`);
   });
 }
