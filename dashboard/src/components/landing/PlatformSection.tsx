@@ -61,9 +61,9 @@ export const PlatformSection: React.FC = () => {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        console.log('IntersectionObserver fired! isIntersecting:', entry.isIntersecting);
+        console.debug('[PlatformSection] IntersectionObserver fired, isIntersecting:', entry.isIntersecting);
         if (entry.isIntersecting) {
-          console.log('Playing timeline!');
+          console.debug('[PlatformSection] Playing timeline');
           tl.play();
           observer.disconnect();
         }
