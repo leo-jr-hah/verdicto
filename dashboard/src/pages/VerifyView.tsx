@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Shield, ExternalLink, CheckCircle, XCircle, Clock, Hash, FileText, Copy, Check } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Shield, ExternalLink, XCircle, Hash, FileText, Copy, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { verifyById, type VerifyResult } from '../services/api';
 
