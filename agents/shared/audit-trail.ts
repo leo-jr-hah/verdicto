@@ -65,9 +65,11 @@ export function createDeliberationReceipt(
   };
 }
 
-export function verifyReceiptChain(receipts: DeliberationReceipt[], jurorSecret: string): boolean {
+export function verifyReceiptChain(
+  receipts: DeliberationReceipt[],
+  getSecretForJuror: (jurorId: string) => string
+): boolean {
   if (receipts.length === 0) return true;
-  const hmacKey = deriveHmacKey(jurorSecret);
 
   for (let i = 0; i < receipts.length; i++) {
     const r = receipts[i];
@@ -78,7 +80,8 @@ export function verifyReceiptChain(receipts: DeliberationReceipt[], jurorSecret:
       return false;
     }
 
-    // 2. Verify HMAC signature
+    // 2. Verify HMAC signature using per-juror secret
+    const hmacKey = deriveHmacKey(getSecretForJuror(r.jurorId));
     const receiptData = `${r.receiptId}|${r.assessmentId}|${r.jurorId}|${r.round}|${r.inputHash}|${r.outputHash}|${r.reasoningHash}|${r.timestamp}|${r.previousReceiptId}`;
     const expectedSignature = createHmac('sha256', hmacKey).update(receiptData).digest('hex');
 

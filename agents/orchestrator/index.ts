@@ -655,7 +655,8 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
 
   // Verify cryptographic chain
   console.log(`\n  [Audit] Verifying Deliberation Cryptographic Chain...`);
-  const isChainValid = receiptChain.length > 0 && verifyReceiptChain(receiptChain, 'juror-group');
+  const getJurorSecret = (jurorId: string) => process.env[`AGENT_${jurorKeySuffix(jurorId)}_PRIVATE_KEY`] || 'fallback-dev-secret';
+  const isChainValid = receiptChain.length > 0 && verifyReceiptChain(receiptChain, getJurorSecret);
 
   // Persist receipt chain for later API verification
   if (receiptChain.length > 0) {
@@ -878,7 +879,7 @@ export async function runAssessmentPipeline(assessmentId: string, assetId: strin
 
   console.log(`\n✅ Assessment #${assessmentId} complete.\n`);
 
-  return { verdict: finalVerdict, verdictIndex, finalValue };
+  return { verdict: finalVerdict, verdictIndex, finalValue, jurorCount: JUROR_IDS.length };
 }
 
 // ─── Express server ──────────────────────────────────────────────────────────
@@ -1198,7 +1199,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       }
 
       // Verify the full chain
-      const chainValid = verifyReceiptChain(chain, 'juror-group');
+      const getJurorSecret = (jurorId: string) => process.env[`AGENT_${jurorKeySuffix(jurorId)}_PRIVATE_KEY`] || 'fallback-dev-secret';
+      const chainValid = verifyReceiptChain(chain, getJurorSecret);
 
       // Build per-receipt detail
       const details = chain.map((r, i) => {
@@ -1232,105 +1234,15 @@ if (import.meta.url === `file://${process.argv[1]}`) {
    * Run a full RWA assessment: dual valuation + juror deliberation.
    * Returns the assessment result synchronously (waits for completion).
    */
-  app.post('/api/assess', async (req, res) => {
+  app.post('/api/assess',
+    casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(ASSESSMENT_FEE_CSPR) }),
+    async (req, res) => {
     try {
       const ip = req.ip || req.socket.remoteAddress || 'unknown';
       if (isRateLimited(ip)) {
         return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
       }
 
-      // ── x402 Payment Gate ──────────────────────────────────────────────────
-      // When X402_REQUIRE_PAYMENT=true, require a valid payment proof before
-      // running the assessment. This implements the x402 HTTP 402 protocol:
-      //   1. Client sends POST /api/assess (no proof)
-      //   2. Server responds 402 with payment requirements
-      //   3. Client signs payment via wallet, retries with x-payment-proof header
-      //   4. Server verifies payment on-chain, proceeds with assessment
-      const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
-      const paymentProof = req.headers['x-payment-proof'] as string | undefined;
-
-      if (requirePayment && !paymentProof) {
-        // Return 402 with x402 payment requirements
-        res.setHeader('payment-required', 'true');
-        return res.status(402).json({
-          success: false,
-          error: 'Payment Required',
-          x402Version: '2',
-          paymentRequirements: {
-            scheme: 'wallet-session',
-            supportedChains: ['casper:testnet'],
-            chainId: 'casper:testnet',
-            maxAmountRequired: String(ASSESSMENT_FEE_CSPR),
-            resource: '/api/assess',
-            description: 'Verdict assessment fee - dual AI valuation + juror deliberation',
-            mimeType: 'application/json',
-            payTo: PLATFORM_WALLET,
-            sessionEnabled: true,
-          },
-        });
-      }
-
-      if (requirePayment && paymentProof) {
-        // Verify the payment proof
-        try {
-          const decoded = JSON.parse(Buffer.from(paymentProof, 'base64').toString('utf-8'));
-
-          // Support both flat { payer, txHash, amount } and nested { payload: { payer, amount }, deployHash }
-          const payer = decoded.payer || decoded.payload?.payer;
-          const txHash = decoded.txHash || decoded.deployHash || decoded.payload?.deployHash;
-          const amount = decoded.amount || decoded.payload?.amount;
-
-          if (!payer || !txHash || !amount) {
-            console.error('[x402] Payment proof missing fields:', JSON.stringify({ hasPayer: !!payer, hasTxHash: !!txHash, hasAmount: !!amount }));
-            return res.status(402).json({ success: false, error: 'Invalid payment proof: missing fields' });
-          }
-
-          const requiredAmount = parseFloat(ASSESSMENT_FEE_CSPR.toString());
-          const paidAmount = parseFloat(amount);
-          if (isNaN(paidAmount) || paidAmount < requiredAmount * 0.99) {
-            return res.status(402).json({
-              success: false,
-              error: `Insufficient payment: required ${ASSESSMENT_FEE_CSPR} CSPR, got ${amount} CSPR`,
-            });
-          }
-
-          // Verify deploy exists on-chain via CSPR.cloud
-          if (CSPR_CLOUD_KEY) {
-            try {
-              const verifyRes = await axios.get(`${CSPR_CLOUD_URL}/deploys/${txHash}`, {
-                headers: { Authorization: CSPR_CLOUD_KEY, accept: 'application/json' },
-                timeout: 5_000,
-              });
-              const status = verifyRes.data?.data?.status || verifyRes.data?.status;
-              if (status !== 'processed') {
-                console.warn(`[x402] Deploy ${txHash} status: ${status}, proceeding with trust`);
-              } else {
-                console.log(`[x402] ✅ Payment verified on-chain: ${txHash.substring(0, 16)}...`);
-              }
-            } catch {
-              console.warn(`[x402] Could not verify deploy ${txHash} on-chain, proceeding with trust`);
-            }
-          }
-
-          // Log the payment as a transaction
-          const paymentTx = createTransactionEntry(
-            'x402 Payment',
-            `Assessment fee: ${amount} CSPR from ${payer.substring(0, 12)}...`,
-            txHash,
-            'Native Transfer',
-            'latest',
-            { payer, amount, fee: ASSESSMENT_FEE_CSPR },
-            true
-          );
-          saveTransaction(paymentTx);
-          emitEvent('transaction', paymentTx);
-
-          console.log(`[x402] ✅ Payment accepted: ${amount} CSPR from ${payer.substring(0, 16)}...`);
-        } catch (err: any) {
-          console.error(`[x402] Payment verification failed: ${err.message}`);
-          return res.status(402).json({ success: false, error: 'Invalid payment proof' });
-        }
-      }
 
       const { assetType, name, description, askingPrice, location, artistOrMedium, weightOz, sqft } = req.body;
 
@@ -1548,7 +1460,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           data: {
             decision: verdict.verdict,
             finalValue: verdict.finalValue,
-            jurors: verdict.votes?.length || 0,
+            jurors: verdict.jurorCount || 0,
           },
         });
       }
@@ -1743,16 +1655,15 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
         // Build agent weights string
         const agentWeights = [
-          `valuation-a:${valuationA.confidence || 75}`,
-          `valuation-b:${valuationB.confidence || 75}`,
-          ...(verdict?.votes || []).map((v: any) => `${v.juror}:${v.confidence || 75}`),
+          `valuation-a:${Math.round((valuationA.confidence || 0.75) * 100)}`,
+          `valuation-b:${Math.round((valuationB.confidence || 0.75) * 100)}`,
         ].join(',');
 
         await storeVerdictOnChain({
           assetId,
           value: assessedValue,
           confidence: jurorConfidence,
-          jurorCount: verdict?.votes?.length || 0,
+          jurorCount: verdict?.jurorCount || 2,
           receiptHash,
           timestamp: Date.now(),
           expiry: Date.now() + 86_400_000, // 24h
@@ -1812,88 +1723,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
    * x402-gated: requires 0.1 CSPR micropayment for cross-contract queries.
    * Dashboard reads (list/stats) are free; this is the agent-to-agent endpoint.
    */
-  app.get('/api/oracle/verdict/:assetId', async (req, res) => {
-    // ── x402 Payment Gate (0.1 CSPR per query) ──────────────────────────────
-    const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
-    const paymentProof = req.headers['x-payment-proof'] as string | undefined;
-
-    if (requirePayment && !paymentProof) {
-      res.setHeader('payment-required', 'true');
-      return res.status(402).json({
-        success: false,
-        error: 'Payment Required',
-        x402Version: '2',
-        paymentRequirements: {
-          scheme: 'wallet-session',
-          supportedChains: ['casper:testnet'],
-          chainId: 'casper:testnet',
-          maxAmountRequired: String(ORACLE_FEE_CSPR),
-          resource: `/api/oracle/verdict/${req.params.assetId}`,
-          description: `Oracle query fee for ${req.params.assetId}`,
-          mimeType: 'application/json',
-          payTo: PLATFORM_WALLET,
-          sessionEnabled: true,
-        },
-      });
-    }
-
-    if (requirePayment && paymentProof) {
-      // Verify the payment proof
-      try {
-        const decoded = JSON.parse(Buffer.from(paymentProof, 'base64').toString('utf-8'));
-        const payer = decoded.payer || decoded.payload?.payer;
-        const txHash = decoded.txHash || decoded.deployHash || decoded.payload?.deployHash;
-        const amount = decoded.amount || decoded.payload?.amount;
-
-        if (!payer || !txHash || !amount) {
-          return res.status(402).json({ success: false, error: 'Invalid payment proof: missing fields' });
-        }
-
-        const paidAmount = parseFloat(amount);
-        if (isNaN(paidAmount) || paidAmount < ORACLE_FEE_CSPR * 0.99) {
-          return res.status(402).json({
-            success: false,
-            error: `Insufficient payment: required ${ORACLE_FEE_CSPR} CSPR, got ${amount} CSPR`,
-          });
-        }
-
-        // Verify deploy on-chain
-        if (CSPR_CLOUD_KEY) {
-          try {
-            const verifyRes = await axios.get(`${CSPR_CLOUD_URL}/deploys/${txHash}`, {
-              headers: { Authorization: CSPR_CLOUD_KEY, accept: 'application/json' },
-              timeout: 5_000,
-            });
-            const status = verifyRes.data?.data?.status || verifyRes.data?.status;
-            if (status === 'processed') {
-              console.log(`[x402] ✅ Oracle query payment verified: ${txHash.substring(0, 16)}...`);
-            }
-          } catch {
-            console.warn(`[x402] Could not verify oracle query deploy, proceeding with trust`);
-          }
-        }
-
-        // Log the oracle query payment
-        const oracleTx = createTransactionEntry(
-          'x402 Payment',
-          `Oracle query: ${req.params.assetId}`,
-          txHash,
-          'VerdictOracle',
-          'latest',
-          { assetId: req.params.assetId, amount: ORACLE_FEE_CSPR, payer },
-          true,
-        );
-        saveTransaction(oracleTx);
-        emitEvent('transaction', oracleTx);
-      } catch (err: any) {
-        console.error('[x402] Oracle query payment verification failed:', err.message);
-        return res.status(402).json({ success: false, error: 'Payment verification failed' });
-      }
-    }
+  app.get('/api/oracle/verdict/:assetId', casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(ORACLE_FEE_CSPR) }),
+    async (req, res) => {
 
     try {
       const { getOracleVerdictOnChain } = await import('../shared/casper-contracts.js');
-      const verdict = await getOracleVerdictOnChain(req.params.assetId);
+      const verdict = await getOracleVerdictOnChain(req.params.assetId as string);
       if (!verdict) {
         return res.status(404).json({ success: false, error: 'Verdict not found' });
       }
@@ -1937,7 +1772,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
    * Body: { assetId, challengerKey, reason }
    * Requires 5 CSPR stake via x402.
    */
-  app.post('/api/oracle/dispute', async (req, res) => {
+  app.post('/api/oracle/dispute', casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(DISPUTE_FEE_CSPR) }),
+    async (req, res) => {
     try {
       const ip = req.ip || req.socket.remoteAddress || 'unknown';
       if (isRateLimited(ip)) {
@@ -1952,64 +1788,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         return res.status(400).json({ success: false, error: `reason is required (max ${MAX_DESCRIPTION_LENGTH} chars)` });
       }
 
-      // x402 payment gate (same inline pattern as assessment endpoint)
-      const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
-      const paymentProof = req.headers['x-payment-proof'] as string | undefined;
-
-      // Payment proof fields (extracted below, passed to createDispute)
-      let proofPayer: string | undefined;
-      let proofTxHash: string | undefined;
-
-      if (requirePayment && !paymentProof) {
-        res.setHeader('payment-required', 'true');
-        return res.status(402).json({
-          success: false,
-          error: 'Payment Required',
-          x402Version: '2',
-          paymentRequirements: {
-            scheme: 'wallet-session',
-            supportedChains: ['casper:testnet'],
-            chainId: 'casper:testnet',
-            maxAmountRequired: String(DISPUTE_FEE_CSPR),
-            resource: '/api/oracle/dispute',
-            description: 'Dispute filing stake - triggers independent re-trial',
-            mimeType: 'application/json',
-            payTo: PLATFORM_WALLET,
-            sessionEnabled: true,
-          },
-        });
-      }
-
-      if (requirePayment && paymentProof) {
-        // Verify the payment proof — same robust pattern as assessment endpoint
-        try {
-          const decoded = JSON.parse(Buffer.from(paymentProof, 'base64').toString('utf-8'));
-
-          // Support both flat { payer, txHash, amount } and nested { payload: { payer, amount }, deployHash }
-          proofPayer = decoded.payer || decoded.payload?.payer;
-          proofTxHash = decoded.txHash || decoded.deployHash || decoded.payload?.deployHash;
-          const amount = decoded.amount || decoded.payload?.amount;
-
-          if (!proofPayer || !proofTxHash || !amount) {
-            console.error('[x402] Dispute payment proof missing fields:', JSON.stringify({ hasPayer: !!proofPayer, hasTxHash: !!proofTxHash, hasAmount: !!amount }));
-            return res.status(402).json({ success: false, error: 'Invalid payment proof: missing fields' });
-          }
-
-          const requiredAmount = parseFloat(DISPUTE_FEE_CSPR.toString());
-          const paidAmount = parseFloat(amount);
-          if (isNaN(paidAmount) || paidAmount < requiredAmount * 0.99) {
-            return res.status(402).json({
-              success: false,
-              error: `Insufficient payment: expected ${DISPUTE_FEE_CSPR} CSPR, got ${amount} CSPR`,
-            });
-          }
-
-          console.log(`  ⚖️  [x402] Dispute payment proof accepted: ${amount} CSPR from ${proofPayer.slice(0, 12)}...`);
-        } catch (err: any) {
-          console.error('[x402] Dispute payment proof decode error:', err.message);
-          return res.status(402).json({ success: false, error: 'Invalid payment proof' });
-        }
-      }
+      // Extract payment info from shared middleware
+      const x402 = (req as any).x402Payment;
+      const proofPayer = x402?.payer;
+      const proofTxHash = x402?.deployHash;
 
       const { createDispute } = await import('../shared/casper-contracts.js');
       const result = createDispute(assetId, challengerKey, DISPUTE_FEE_CSPR, reason, proofTxHash, proofPayer);
@@ -2123,87 +1905,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
    * Run a 5-agent prediction analysis on a real-world question.
    * Each agent independently estimates probability, then produces a weighted consensus.
    */
-  app.post('/api/predict', async (req, res) => {
+  app.post('/api/predict', casperX402Middleware({ recipientAddress: PLATFORM_WALLET, amountCSPR: String(PREDICTION_FEE_CSPR) }),
+    async (req, res) => {
     try {
       const ip = req.ip || req.socket.remoteAddress || 'unknown';
       if (isRateLimited(ip)) {
         return res.status(429).json({ success: false, error: 'Too many requests. Try again in a minute.' });
       }
 
-      // ── x402 Payment Gate ──────────────────────────────────────────────────
-      const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
-      const paymentProof = req.headers['x-payment-proof'] as string | undefined;
-
-      if (requirePayment && !paymentProof) {
-        res.setHeader('payment-required', 'true');
-        return res.status(402).json({
-          success: false,
-          error: 'Payment Required',
-          x402Version: '2',
-          paymentRequirements: {
-            scheme: 'wallet-session',
-            supportedChains: ['casper:testnet'],
-            chainId: 'casper:testnet',
-            maxAmountRequired: String(PREDICTION_FEE_CSPR),
-            resource: '/api/predict',
-            description: 'Verdict prediction fee - 5-agent probability analysis',
-            mimeType: 'application/json',
-            payTo: PLATFORM_WALLET,
-            sessionEnabled: true,
-          },
-        });
-      }
-
-      if (requirePayment && paymentProof) {
-        try {
-          const decoded = JSON.parse(Buffer.from(paymentProof, 'base64').toString('utf-8'));
-          const payer = decoded.payer || decoded.payload?.payer;
-          const txHash = decoded.txHash || decoded.deployHash || decoded.payload?.deployHash;
-          const amount = decoded.amount || decoded.payload?.amount;
-
-          if (!payer || !txHash || !amount) {
-            return res.status(402).json({ success: false, error: 'Invalid payment proof: missing fields' });
-          }
-
-          const paidAmount = parseFloat(amount);
-          if (isNaN(paidAmount) || paidAmount < PREDICTION_FEE_CSPR * 0.99) {
-            return res.status(402).json({
-              success: false,
-              error: `Insufficient payment: required ${PREDICTION_FEE_CSPR} CSPR, got ${amount} CSPR`,
-            });
-          }
-
-          if (CSPR_CLOUD_KEY) {
-            try {
-              const verifyRes = await axios.get(`${CSPR_CLOUD_URL}/deploys/${txHash}`, {
-                headers: { Authorization: CSPR_CLOUD_KEY },
-                timeout: 5_000,
-              });
-              if (verifyRes.data?.data?.deploy?.header?.account) {
-                console.log(`[x402] ✅ Prediction payment verified on-chain: ${txHash}`);
-              }
-            } catch {
-              console.log(`[x402] ⚠️ Could not verify on-chain (proceeding with proof): ${txHash}`);
-            }
-          }
-
-          const paymentTx = createTransactionEntry(
-            'x402 Payment',
-            `Prediction fee: ${PREDICTION_FEE_CSPR} CSPR`,
-            txHash,
-            'Native Transfer',
-            'latest',
-            { amount: PREDICTION_FEE_CSPR, payTo: PLATFORM_WALLET },
-            true
-          );
-          saveTransaction(paymentTx);
-          emitEvent('transaction', paymentTx);
-          console.log(`[x402] ✅ Prediction payment accepted: ${PREDICTION_FEE_CSPR} CSPR`);
-        } catch (err: any) {
-          console.error(`[x402] Prediction payment verification failed: ${err.message}`);
-          return res.status(402).json({ success: false, error: 'Invalid payment proof' });
-        }
-      }
 
       const { question, timeframe, assetType } = req.body;
 
@@ -2660,80 +2369,11 @@ Respond in JSON format:
       console.log(`   Trust: confidence=${trustBreakdown.confidence}, valueRatio=${trustBreakdown.valueRatio}`);
       console.log(`   Loan amount: ${loanAmount} CSPR | Platform fee: ${platformFee} CSPR`);
 
-      // ── x402 Payment Gate for lending fee ──────────────────────────────
-      const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
-      const paymentProof = req.headers['x-payment-proof'] as string | undefined;
 
-      if (requirePayment && !paymentProof) {
-        res.setHeader('payment-required', 'true');
-        return res.status(402).json({
-          success: false,
-          error: 'Payment Required',
-          x402Version: '2',
-          paymentRequirements: {
-            scheme: 'wallet-session',
-            supportedChains: ['casper:testnet'],
-            chainId: 'casper:testnet',
-            maxAmountRequired: String(platformFee),
-            resource: '/api/loans/create',
-            description: `Verdict lending fee (1% of ${loanAmount} CSPR loan)`,
-            mimeType: 'application/json',
-            payTo: PLATFORM_WALLET,
-            sessionEnabled: true,
-          },
-        });
-      }
-
-      if (requirePayment && paymentProof) {
-        try {
-          const decoded = JSON.parse(Buffer.from(paymentProof, 'base64').toString('utf-8'));
-
-          // Support both flat { payer, txHash, amount } and nested { payload: { payer, amount }, deployHash }
-          const payer = decoded.payer || decoded.payload?.payer;
-          const txHash = decoded.txHash || decoded.deployHash || decoded.payload?.deployHash;
-          const amount = decoded.amount || decoded.payload?.amount;
-
-          if (!payer || !txHash || !amount) {
-            console.error('[x402 Loan] Payment proof missing fields:', JSON.stringify({ hasPayer: !!payer, hasTxHash: !!txHash, hasAmount: !!amount }));
-            return res.status(402).json({ success: false, error: 'Invalid payment proof: missing fields' });
-          }
-          const paidAmount = parseFloat(amount);
-          if (isNaN(paidAmount) || paidAmount < platformFee * 0.99) {
-            return res.status(402).json({ success: false, error: `Insufficient payment: required ${platformFee} CSPR, got ${amount} CSPR` });
-          }
-          // Verify on-chain
-          if (CSPR_CLOUD_KEY) {
-            try {
-              const verifyRes = await axios.get(`${CSPR_CLOUD_URL}/deploys/${txHash}`, {
-                headers: { Authorization: CSPR_CLOUD_KEY, accept: 'application/json' },
-                timeout: 5_000,
-              });
-              const status = verifyRes.data?.data?.status || verifyRes.data?.status;
-              if (status !== 'processed') {
-                console.warn(`[x402 Loan] Deploy ${txHash} status: ${status}, proceeding with trust`);
-              }
-            } catch {
-              console.warn(`[x402 Loan] Could not verify deploy ${txHash}, proceeding with trust`);
-            }
-          }
-          const paymentTx = createTransactionEntry(
-            'x402 Payment',
-            `Lending fee: ${amount} CSPR from ${payer.substring(0, 12)}...`,
-            txHash,
-            'Native Transfer',
-            'latest',
-            { payer, amount, fee: platformFee, purpose: 'loan_creation' },
-            true
-          );
-          saveTransaction(paymentTx);
-          emitEvent('transaction', paymentTx);
-          console.log(`[x402 Loan] ✅ Fee accepted: ${amount} CSPR`);
-        } catch (err: any) {
-          return res.status(402).json({ success: false, error: 'Invalid payment proof' });
-        }
-      }
-
-      // ── Escrow Lock: lock collateral value on-chain ────────────────────
+      // ── Escrow Lock (honor-system label) ───────────────────────────────
+      // NOTE: This is a platform→borrower transfer, not a real escrow smart contract.
+      // The "escrow lock" is a ledger entry only — collateral is the assessed asset
+      // itself, and repayment is honor-system. No on-chain lock exists.
       const escrowMotes = Math.floor(loanAmount * 1e9);
       const escrowTransferId = Date.now() + Math.floor(Math.random() * 1000);
       const lockHash = await executeCasperTransfer(borrowerPublicKey, escrowMotes, escrowTransferId);
@@ -2977,76 +2617,6 @@ Respond in JSON format:
       const remaining = loan.loanAmountCSPR - loan.repaidAmountCSPR;
       const repayAmount = Math.min(amount, remaining);
 
-      // ── x402 Payment Gate for repayment ────────────────────────────────
-      // Verdict Point 4: x402 on the actual money-moving part, not just the fee
-      const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
-      const paymentProof = req.headers['x-payment-proof'] as string | undefined;
-
-      if (requirePayment && !paymentProof) {
-        res.setHeader('payment-required', 'true');
-        return res.status(402).json({
-          success: false,
-          error: 'Payment Required',
-          x402Version: '2',
-          paymentRequirements: {
-            scheme: 'wallet-session',
-            supportedChains: ['casper:testnet'],
-            chainId: 'casper:testnet',
-            maxAmountRequired: String(repayAmount),
-            resource: `/api/loans/${req.params.loanId}/repay`,
-            description: `Loan repayment: ${repayAmount} CSPR for ${loan.loanId}`,
-            mimeType: 'application/json',
-            payTo: PLATFORM_WALLET,
-            sessionEnabled: true,
-          },
-        });
-      }
-
-      if (requirePayment && paymentProof) {
-        try {
-          const decoded = JSON.parse(Buffer.from(paymentProof, 'base64').toString('utf-8'));
-          const payer = decoded.payer || decoded.payload?.payer;
-          const proofTxHash = decoded.txHash || decoded.deployHash || decoded.payload?.deployHash;
-          const proofAmount = decoded.amount || decoded.payload?.amount;
-
-          if (!payer || !proofTxHash || !proofAmount) {
-            return res.status(402).json({ success: false, error: 'Invalid payment proof: missing fields' });
-          }
-          const paidAmount = parseFloat(proofAmount);
-          if (isNaN(paidAmount) || paidAmount < repayAmount * 0.99) {
-            return res.status(402).json({ success: false, error: `Insufficient payment: required ${repayAmount} CSPR, got ${proofAmount} CSPR` });
-          }
-          // Verify on-chain
-          if (CSPR_CLOUD_KEY) {
-            try {
-              const verifyRes = await axios.get(`${CSPR_CLOUD_URL}/deploys/${proofTxHash}`, {
-                headers: { Authorization: CSPR_CLOUD_KEY, accept: 'application/json' },
-                timeout: 5_000,
-              });
-              const status = verifyRes.data?.data?.status || verifyRes.data?.status;
-              if (status !== 'processed') {
-                console.warn(`[x402 Repay] Deploy ${proofTxHash} status: ${status}, proceeding with trust`);
-              }
-            } catch {
-              console.warn(`[x402 Repay] Could not verify deploy ${proofTxHash}, proceeding with trust`);
-            }
-          }
-          const repayPaymentTx = createTransactionEntry(
-            'x402 Payment',
-            `Loan repayment: ${proofAmount} CSPR for ${loan.loanId}`,
-            proofTxHash,
-            'Native Transfer',
-            'latest',
-            { loanId: loan.loanId, payer, amount: proofAmount, purpose: 'loan_repayment' },
-            true
-          );
-          saveTransaction(repayPaymentTx);
-          emitEvent('transaction', repayPaymentTx);
-          console.log(`[x402 Repay] ✅ Repayment accepted: ${proofAmount} CSPR`);
-        } catch (err: any) {
-          return res.status(402).json({ success: false, error: 'Invalid payment proof' });
-        }
-      }
 
       // Verify repayment on-chain if txHash provided
       let verified = false;
@@ -3491,29 +3061,6 @@ Respond in JSON format:
       console.log(`   Assessed: ${assessedValue.toLocaleString()} | Risk: ${riskScore}/100 (${tier})`);
       console.log(`   Coverage: ${coverageAmount.toLocaleString()} (${coverage}%) | Premium: ${premiumCSPR} CSPR/mo`);
 
-      // ── x402 Payment Gate for insurance fee ────────────────────────────
-      const requirePayment = process.env.X402_REQUIRE_PAYMENT === 'true';
-      const paymentProof = req.headers['x-payment-proof'] as string | undefined;
-
-      if (requirePayment && !paymentProof) {
-        res.setHeader('payment-required', 'true');
-        return res.status(402).json({
-          success: false,
-          error: 'Payment Required',
-          x402Version: '2',
-          paymentRequirements: {
-            scheme: 'wallet-session',
-            supportedChains: ['casper:testnet'],
-            chainId: 'casper:testnet',
-            maxAmountRequired: String(platformFee),
-            resource: '/api/insurance/create',
-            description: `Verdict insurance platform fee for ${assetName}`,
-            mimeType: 'application/json',
-            payTo: PLATFORM_WALLET,
-            sessionEnabled: true,
-          },
-        });
-      }
 
       // ── Store the policy ───────────────────────────────────────────────
       const policyId = `POL-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -4102,7 +3649,7 @@ Respond in JSON format:
         // Step 1: Dual-agent valuation (real AI calls)
         const [valA, valB] = await runDualValuation(asset);
         const assessedValue = Math.round((valA.estimated_value + valB.estimated_value) / 2);
-        const confidence = Math.round(((valA.confidence || 75) + (valB.confidence || 75)) / 2);
+        const confidence = Math.round(((valA.confidence || 0.75) + (valB.confidence || 0.75)) / 2 * 100);
         const divergence = Math.abs(valA.estimated_value - valB.estimated_value) / assessedValue;
 
         console.log(`[OracleActivity] 💰 ${asset.name}: ${assessedValue.toLocaleString()} (confidence: ${confidence}%, divergence: ${(divergence * 100).toFixed(1)}%)`);

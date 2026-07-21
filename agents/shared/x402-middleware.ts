@@ -74,6 +74,16 @@ function validatePaymentAmount(proofAmount: string | undefined, requiredAmount: 
   return proof >= required * 0.99;
 }
 
+// ─── Replay protection: consumed deploy hashes ──────────────────────────
+// In-memory set (fast path) — production should persist to Supabase/Redis.
+const consumedDeployHashes = new Set<string>();
+
+async function markDeployConsumed(deployHash: string): Promise<boolean> {
+  if (consumedDeployHashes.has(deployHash)) return false; // already used
+  consumedDeployHashes.add(deployHash);
+  return true;
+}
+
 export function casperX402Middleware(config: { recipientAddress: string; amountCSPR: string }) {
   return async (req: Request, res: Response, next: NextFunction) => {
     const paymentProof = req.headers['payment-signature'] || req.headers['x-payment-proof'];
@@ -170,6 +180,14 @@ export function casperX402Middleware(config: { recipientAddress: string; amountC
       }
 
       (req as any).x402Payment = { valid: true, payer: parsed.payer || 'unknown', deployHash };
+      // Replay protection: reject if this deploy hash was already consumed
+      if (!markDeployConsumed(deployHash)) {
+        return res.status(402).json({
+          error: 'Payment proof already used (replay detected)',
+          deployHash,
+          hint: 'This transaction has already been consumed. Each payment can only be used once.',
+        });
+      }
       return next();
     } catch {
       return res.status(402).json({
